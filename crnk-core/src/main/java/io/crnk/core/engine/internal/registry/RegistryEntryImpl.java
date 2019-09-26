@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.util.Map;
+
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -16,8 +18,6 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.ResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It
@@ -119,7 +119,9 @@ public class RegistryEntryImpl implements RegistryEntry {
         }
         ResourceInformation resourceInformation = getResourceInformation();
         String superResourceType = resourceInformation.getSuperResourceType();
-        if (superResourceType != null) {
+
+        // parent entry may not exists yet (during intialization) => consider improving this, not 100% clean
+        if (superResourceType != null && moduleRegistry.getResourceRegistry().hasEntry(superResourceType)) {
             ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
             return resourceRegistry.getEntry(superResourceType);
         }
