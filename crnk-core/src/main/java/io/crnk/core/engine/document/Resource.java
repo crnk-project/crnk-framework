@@ -20,16 +20,16 @@ import io.crnk.core.resource.meta.MetaContainer;
 public class Resource extends ResourceIdentifier implements MetaContainer, LinksContainer, ResourceTypeHolder {
 
 	@JsonInclude(Include.NON_EMPTY)
-	private Map<String, JsonNode> attributes = new HashMap<>();
-
-	@JsonInclude(Include.NON_EMPTY)
-	private Map<String, Relationship> relationships = new HashMap<>();
-
-	@JsonInclude(Include.NON_EMPTY)
 	private ObjectNode links;
 
 	@JsonInclude(Include.NON_EMPTY)
 	private ObjectNode meta;
+
+	@JsonInclude(Include.NON_EMPTY)
+	private Map<String, JsonNode> attributes = new HashMap<>();
+
+	@JsonInclude(Include.NON_EMPTY)
+	private Map<String, Relationship> relationships = new HashMap<>();
 
 	@Override
 	public ObjectNode getLinks() {
