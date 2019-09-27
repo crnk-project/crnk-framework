@@ -81,6 +81,7 @@ import io.crnk.core.repository.ManyRelationshipRepository;
 import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.repository.decorate.Wrapper;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.DefaultResourceList;
 
@@ -479,7 +480,7 @@ public class CrnkClient {
         ClassLoader classLoader = repositoryInterfaceClass.getClassLoader();
         InvocationHandler invocationHandler =
                 new ClientStubInvocationHandler(repositoryInterfaceClass, repositoryStub, actionStub);
-        return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, ResourceRepository.class},
+        return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, Wrapper.class, ResourceRepository.class},
                 invocationHandler);
     }
 
