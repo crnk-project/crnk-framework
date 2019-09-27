@@ -59,7 +59,7 @@ public class ResourcePatchController extends ResourceUpsert {
 
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, registryEntry);
-		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create();
+		DocumentMappingConfig mappingConfig = context.getMappingConfig();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository();
@@ -110,8 +110,8 @@ public class ResourcePatchController extends ResourceUpsert {
 			updatedResource = relationsResult.merge(it -> resourceRepository.update(entity, queryAdapter));
 		}
 
-		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create()
-				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
+		DocumentMappingConfig mappingConfig = context.getMappingConfig().clone();
+		mappingConfig.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		return updatedResource

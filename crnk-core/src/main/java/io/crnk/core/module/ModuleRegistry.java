@@ -34,6 +34,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
@@ -85,6 +86,8 @@ public class ModuleRegistry {
 
 	private DocumentMapper documentMapper;
 
+	private DocumentMappingConfig documentMappingConfig = DocumentMappingConfig.create();
+
 	public QueryAdapterBuilder getQueryAdapterBuilder() {
 		return queryAdapterBuilder;
 	}
@@ -109,6 +112,10 @@ public class ModuleRegistry {
 
 	public void setDocumentMapper(DocumentMapper documentMapper) {
 		this.documentMapper = documentMapper;
+	}
+
+	public DocumentMappingConfig getDocumentMappingConfig() {
+		return documentMappingConfig;
 	}
 
 	enum InitializedState {

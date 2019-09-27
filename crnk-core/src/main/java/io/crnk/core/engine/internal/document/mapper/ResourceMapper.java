@@ -189,8 +189,10 @@ public class ResourceMapper {
 			if (addRelationship) {
 				QueryContext queryContext = queryAdapter.getQueryContext();
 				ObjectNode relationshipLinks = objectMapper.createObjectNode();
-				String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false, queryContext);
-				serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+				if(mappingConfig.getSerializeSelfRelationshipLinks()) {
+					String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false, queryContext);
+					serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+				}
 				String relatedUrl = util.getRelationshipLink(resourceInformation, entity, field, true, queryContext);
 				serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
 				relationship.setLinks(relationshipLinks);
