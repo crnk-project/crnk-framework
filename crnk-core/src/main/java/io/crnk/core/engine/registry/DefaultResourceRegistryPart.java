@@ -9,6 +9,7 @@ import java.util.Set;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +100,9 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 	 */
 	public RegistryEntry getEntry(String resourceType) {
 		RegistryEntry entry = resourcesByType.get(resourceType);
-		PreconditionUtil.verify(entry != null, "resource of type `%s` not found", resourceType);
+		if (entry == null) {
+			throw new RepositoryNotFoundException(resourceType);
+		}
 		return entry;
 	}
 

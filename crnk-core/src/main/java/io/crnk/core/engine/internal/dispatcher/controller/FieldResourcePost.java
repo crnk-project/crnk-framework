@@ -73,6 +73,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		Object entity = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
 
 		setId(resourceBody, entity, relationshipResourceInformation);
+		setType(resourceBody, entity);
 		setAttributes(resourceBody, entity, relationshipResourceInformation, queryContext);
 		setMeta(resourceBody, entity, relationshipResourceInformation);
 		setLinks(resourceBody, entity, relationshipResourceInformation);

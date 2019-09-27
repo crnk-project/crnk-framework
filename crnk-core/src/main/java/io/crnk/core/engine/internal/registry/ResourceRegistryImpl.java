@@ -18,9 +18,9 @@ import io.crnk.core.engine.registry.ResourceRegistryPartBase;
 import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
 import io.crnk.core.engine.registry.ResourceRegistryPartListener;
 import io.crnk.core.engine.url.ServiceUrlProvider;
-import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.resource.ResourceTypeHolder;
 
 public class ResourceRegistryImpl extends ResourceRegistryPartBase implements ResourceRegistry {
 
@@ -48,7 +48,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	/**
 	 * Adds a new resource definition to a registry.
 	 *
-	 * @param resource      class of a resource
+	 * @param resource class of a resource
 	 * @param registryEntry resource information
 	 */
 	public RegistryEntry addEntry(Class<?> resource, RegistryEntry registryEntry) {
@@ -59,7 +59,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		Optional<Class<?>> resourceClazz = getResourceClass(clazz);
 		if (allowNull && !resourceClazz.isPresent()) {
 			return null;
-		} else if (!resourceClazz.isPresent()) {
+		}
+		else if (!resourceClazz.isPresent()) {
 			throw new RepositoryNotFoundException(clazz.getCanonicalName());
 		}
 		return rootPart.getEntry(resourceClazz.get());
@@ -74,6 +75,17 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	 */
 	public RegistryEntry findEntry(Class<?> clazz) {
 		return findEntry(clazz, false);
+	}
+
+	@Override
+	public RegistryEntry findEntry(Object resource) {
+		if (resource instanceof ResourceTypeHolder) {
+			String type = ((ResourceTypeHolder) resource).getType();
+			if(type != null) {
+				return getEntry(type);
+			}
+		}
+		return findEntry(resource.getClass(), false);
 	}
 
 	public Optional<Class<?>> getResourceClass(Class<?> resourceClass) {
@@ -128,10 +140,12 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		String resourcePath = resourceInformation.getResourcePath();
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
+
 	@Override
 	public String getResourceUrl(final Object resource) {
 		return getResourceUrl(null, resource);
 	}
+
 	@Override
 	public String getResourceUrl(final Class<?> clazz, final String id) {
 		RegistryEntry registryEntry = findEntry(clazz);
@@ -141,11 +155,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 
 	@Override
 	public String getResourceUrl(QueryContext queryContext, final Object resource) {
-		Optional<Class<?>> type = getResourceClass(resource);
-		if (!type.isPresent()) {
-			throw new InvalidResourceException("Not registered resource found: " + resource);
-		}
-		ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
+		RegistryEntry entry = findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
 		Object id = resourceInformation.getId(resource);
 		return getResourceUrl(queryContext, resourceInformation, id);
 	}
@@ -159,10 +170,11 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 			ResourceInformation parentInformation = parentEntry.getResourceInformation();
 			ResourceField childrenField = parentInformation.findRelationshipFieldByName(parentField.getOppositeName());
 
-			if(resourceInformation.isSingularNesting()){
+			if (resourceInformation.isSingularNesting()) {
 				String parentPath = getResourcePath(parentInformation, id);
 				return parentPath + "/" + childrenField.getJsonName();
-			}else{
+			}
+			else {
 				Object parentId = resourceInformation.getParentIdAccessor().getValue(id);
 				Object nestedId = resourceInformation.getChildIdAccessor().getValue(id);
 				PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
@@ -174,13 +186,13 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 			}
 		}
 
-		return resourceInformation.getResourcePath()+"/"+resourceInformation.toIdString(id);
+		return resourceInformation.getResourcePath() + "/" + resourceInformation.toIdString(id);
 
 	}
 
 	@Override
 	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id) {
-        String resourcePath = getResourcePath(resourceInformation, id);
+		String resourcePath = getResourcePath(resourceInformation, id);
 		String url = getBaseUrl(queryContext);
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}

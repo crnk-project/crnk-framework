@@ -1,5 +1,10 @@
 package io.crnk.core.module;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -16,6 +21,7 @@ import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.dispatcher.filter.TestFilter;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.CrnkExceptionMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
@@ -42,11 +48,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class SimpleModuleTest {
 
@@ -298,7 +299,12 @@ public class SimpleModuleTest {
             throw new UnsupportedOperationException();
         }
 
-        @Override
+		@Override
+		public DocumentMapper getDocumentMapper() {
+			return null;
+		}
+
+		@Override
         public void setResultFactory(ResultFactory resultFactory) {
         }
 

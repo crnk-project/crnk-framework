@@ -54,6 +54,7 @@ public class ResourcePostController extends ResourceUpsert {
 		else {
 			Object entity = newEntity(resourceInformation, requestResource);
 			setId(requestResource, entity, resourceInformation);
+			setType(requestResource, entity);
 			setAttributes(requestResource, entity, resourceInformation, queryContext);
 			setMeta(requestResource, entity, resourceInformation);
 			setLinks(requestResource, entity, resourceInformation);
