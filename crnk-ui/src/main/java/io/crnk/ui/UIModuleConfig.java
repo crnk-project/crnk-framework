@@ -11,9 +11,29 @@ public class UIModuleConfig {
 
 	private String path = "/browse/";
 
+	private boolean browserEnabled = true;
+
+	private boolean presentationModelEnabled = true;
+
 	private Supplier<List<PresentationService>> services;
 
 	private List<PresentationElementFactory> presentationElementFactories = new ArrayList<>();
+
+	public boolean isBrowserEnabled() {
+		return browserEnabled;
+	}
+
+	public void setBrowserEnabled(boolean browserEnabled) {
+		this.browserEnabled = browserEnabled;
+	}
+
+	public boolean isPresentationModelEnabled() {
+		return presentationModelEnabled;
+	}
+
+	public void setPresentationModelEnabled(boolean presentationModelEnabled) {
+		this.presentationModelEnabled = presentationModelEnabled;
+	}
 
 	public String getPath() {
 		return path;

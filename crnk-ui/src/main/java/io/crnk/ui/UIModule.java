@@ -99,10 +99,13 @@ public class UIModule implements Module {
 	@Override
 	public void setupModule(ModuleContext context) {
 		this.context = context;
-		context.addHttpRequestProcessor(new UIHttpRequestProcessor(config));
-		setupHomeExtension(context);
 
-		if (config != null) {
+		if(config.isBrowserEnabled()) {
+			context.addHttpRequestProcessor(new UIHttpRequestProcessor(config));
+			setupHomeExtension(context);
+		}
+
+		if (config != null && config.isPresentationModelEnabled()) {
 			Supplier<List<PresentationService>> servicesSupplier = config.getServices();
 			if (servicesSupplier == null) {
 				servicesSupplier = () -> Arrays.asList(new PresentationService("local", null, initMetaModule()));
@@ -115,12 +118,11 @@ public class UIModule implements Module {
 			context.addRepository(explorerRepository);
 			editorRepository = new EditorRepository(presentationManager);
 			context.addRepository(editorRepository);
-
-
-			MetaModuleExtension metaExtension = new MetaModuleExtension();
-			metaExtension.addProvider(presentationMetaProvider);
-			context.addExtension(metaExtension);
 		}
+
+		MetaModuleExtension metaExtension = new MetaModuleExtension();
+		metaExtension.addProvider(presentationMetaProvider);
+		context.addExtension(metaExtension);
 	}
 
 	public PresentationManager getPresentationManager() {

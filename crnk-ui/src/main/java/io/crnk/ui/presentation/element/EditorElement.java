@@ -5,10 +5,8 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.data.facet.annotation.Facet;
 
-import java.lang.reflect.InvocationTargetException;
 
-
-@JsonApiResource(type = "uiEditor", resourcePath = "ui/editor")
+@JsonApiResource(type = "uiEditor", resourcePath = "presentation/editor")
 public class EditorElement extends PresentationElement {
 
 	@Facet
