@@ -40,7 +40,7 @@ public class ResourceGetController extends ResourceIncludeField {
 		RegistryEntry rootEntry = jsonPath.getRootEntry();
 		ResourceRepositoryAdapter resourceRepository = rootEntry.getResourceRepository();
 
-		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create();
+		DocumentMappingConfig docummentMapperConfig = context.getMappingConfig();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		return resourceRepository.findOne(id, queryAdapter)

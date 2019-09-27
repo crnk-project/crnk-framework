@@ -66,7 +66,6 @@ public class FieldResourcePost extends ResourceUpsert {
 		String relationshipResourceType = relationshipField.getOppositeResourceType();
 		verifyTypes(HttpMethod.POST, relationshipRegistryEntry, bodyRegistryEntry);
 
-		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		QueryContext queryContext = queryAdapter.getQueryContext();
@@ -81,6 +80,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		Result<JsonApiResponse> createdResource = setRelationsAsync(entity, bodyRegistryEntry, resourceBody, queryAdapter, false)
 				.merge(it -> resourceRepository.create(entity, queryAdapter));
 
+		DocumentMappingConfig mappingConfig = context.getMappingConfig();
 		Result<Document> createdDocument = createdResource.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
 
 		if (relationshipResourceInformation.isNested()) {

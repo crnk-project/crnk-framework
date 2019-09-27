@@ -38,7 +38,7 @@ public class FieldResourceGetController extends ResourceIncludeField {
 		// TODO remove Class usage and replace by resourceId
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
 
-		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create();
+		DocumentMappingConfig mappingConfig = context.getMappingConfig();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField);
@@ -48,7 +48,7 @@ public class FieldResourceGetController extends ResourceIncludeField {
 		} else {
 			response = relationshipRepositoryForClass.findOneRelations(castedResourceId, relationshipField, queryAdapter);
 		}
-		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, docummentMapperConfig)).map(this::toResponse);
+		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig)).map(this::toResponse);
 	}
 
 

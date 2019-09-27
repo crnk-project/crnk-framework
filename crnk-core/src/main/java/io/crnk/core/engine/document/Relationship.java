@@ -1,5 +1,10 @@
 package io.crnk.core.engine.document;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -13,11 +18,6 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.utils.Nullable;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 public class Relationship implements MetaContainer, LinksContainer {
 
@@ -68,7 +68,8 @@ public class Relationship implements MetaContainer, LinksContainer {
 					PreconditionUtil.verify(object instanceof ResourceIdentifier, "relationship data must be an instanceof of ResourceIdentifier, got %s", object);
 					PreconditionUtil.verify(!(object instanceof Resource), "relationship data cannot be a Resource, must be a ResourceIdentifier");
 				}
-			} else {
+			}
+			else {
 				PreconditionUtil.verify(value == null || value
 						instanceof ResourceIdentifier, "value must be a ResourceIdentifier, null or collection, got %s", value);
 			}
