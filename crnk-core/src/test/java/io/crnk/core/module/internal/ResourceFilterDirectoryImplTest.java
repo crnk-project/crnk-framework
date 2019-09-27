@@ -1,5 +1,8 @@
 package io.crnk.core.module.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterContext;
@@ -20,9 +23,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ResourceFilterDirectoryImplTest {
 
@@ -207,6 +207,7 @@ public class ResourceFilterDirectoryImplTest {
         RegistryEntry projectsEntry = Mockito.mock(RegistryEntry.class);
         Mockito.when(projectsEntry.getResourceInformation()).thenReturn(projectsInformation);
         Mockito.when(resourceRegistry.getEntry(Mockito.eq("projects"))).thenReturn(projectsEntry);
+        Mockito.when(resourceRegistry.hasEntry(Mockito.eq("projects"))).thenReturn(true);
 
         // forbid related resource
         Mockito.when(filter.filterResource(Mockito.any(ResourceFilterContext.class), Mockito.eq(projectsInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);

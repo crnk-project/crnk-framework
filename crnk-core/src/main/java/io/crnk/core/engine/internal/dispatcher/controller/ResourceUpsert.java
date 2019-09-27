@@ -47,6 +47,7 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.meta.JsonLinksInformation;
 import io.crnk.core.resource.meta.JsonMetaInformation;
@@ -76,6 +77,12 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	protected Object newEntity(ResourceInformation resourceInformation, Resource dataBody) {
 		ResourceInstanceBuilder<?> builder = resourceInformation.getInstanceBuilder();
 		return builder.buildResource(dataBody);
+	}
+
+	protected void setType(Resource resource, Object object) {
+		if (object instanceof ResourceTypeHolder) {
+			((ResourceTypeHolder) object).setType(resource.getType());
+		}
 	}
 
 	protected void setId(Resource dataBody, Object instance, ResourceInformation resourceInformation) {

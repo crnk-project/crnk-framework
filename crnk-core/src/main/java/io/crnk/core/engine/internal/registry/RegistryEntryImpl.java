@@ -67,14 +67,18 @@ public class RegistryEntryImpl implements RegistryEntry {
         if (resourceRepositoryAdapter != null) {
             return resourceRepositoryAdapter;
         }
+		RegistryEntry parentRegistryEntry = getParentRegistryEntry();
         return parentRegistryEntry.getResourceRepository();
     }
 
     @Override
     public RelationshipRepositoryAdapter getRelationshipRepository(String fieldName) {
         ResourceField field = getResourceInformation().findFieldByUnderlyingName(fieldName);
-        if (field == null && parentRegistryEntry != null) {
-            return parentRegistryEntry.getRelationshipRepository(fieldName);
+        if (field == null){
+			RegistryEntry parentRegistryEntry = getParentRegistryEntry();
+			if(parentRegistryEntry != null) {
+				return parentRegistryEntry.getRelationshipRepository(fieldName);
+			}
         }
         if (field == null) {
             throw new ResourceFieldNotFoundException("name=" + fieldName);
@@ -85,8 +89,11 @@ public class RegistryEntryImpl implements RegistryEntry {
     @Override
     public RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field) {
         RelationshipRepositoryAdapter adapter = relationshipRepositoryAdapter.get(field);
-        if (adapter == null && parentRegistryEntry != null) {
-            return parentRegistryEntry.getRelationshipRepository(field);
+        if (adapter == null) {
+			RegistryEntry parentRegistryEntry = getParentRegistryEntry();
+			if(parentRegistryEntry != null) {
+				return parentRegistryEntry.getRelationshipRepository(field);
+			}
         }
         if (adapter == null) {
             throw new RelationshipRepositoryNotFoundException(field);
@@ -99,7 +106,8 @@ public class RegistryEntryImpl implements RegistryEntry {
     }
 
     public boolean hasRelationship(ResourceField field) {
-        return relationshipRepositoryAdapter.containsKey(field) || parentRegistryEntry != null && ((RegistryEntryImpl) parentRegistryEntry).hasRelationship(field);
+		RegistryEntry parentRegistryEntry = getParentRegistryEntry();
+		return relationshipRepositoryAdapter.containsKey(field) || parentRegistryEntry != null && ((RegistryEntryImpl) parentRegistryEntry).hasRelationship(field);
     }
 
     @Override

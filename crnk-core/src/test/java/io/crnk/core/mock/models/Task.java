@@ -7,6 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.annotations.JsonApiField;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
@@ -22,7 +23,7 @@ import io.crnk.core.resource.meta.MetaInformation;
 
 @JsonApiResource(type = "tasks")
 @JsonPropertyOrder(alphabetic = true)
-public class Task {
+public class Task implements ResourceTypeHolder {
 
 	@JsonApiId
 	private Long id;
@@ -75,6 +76,8 @@ public class Task {
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String writeOnlyValue;
+
+	private String type;
 
 	public boolean isCompleted() {
 		return completed;
@@ -225,5 +228,15 @@ public class Task {
 
 	public void setProjectsInit(List<Project> projectsInit) {
 		this.projectsInit = projectsInit;
+	}
+
+	@Override
+	public String getType() {
+		return type;
+	}
+
+	@Override
+	public void setType(String type) {
+		this.type = type;
 	}
 }

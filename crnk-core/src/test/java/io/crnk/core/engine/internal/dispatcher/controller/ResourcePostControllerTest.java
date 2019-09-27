@@ -20,8 +20,8 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
-import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ForbiddenException;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.RequestBodyNotFoundException;
 import io.crnk.core.exception.ResourceException;
@@ -377,8 +377,8 @@ public class ResourcePostControllerTest extends ControllerTestBase {
             sut.handle(taskPath, emptyUserQuery, newUserBody);
             Assert.fail("should not be allowed to create a relationship with an invalid resource");
 		}
-		catch (BadRequestException e) {
-            Assert.assertEquals("Invalid resource type: notAResource", e.getMessage());
+		catch (RepositoryNotFoundException e) {
+            Assert.assertEquals("Repository for a resource not found: notAResource", e.getMessage());
         }
     }
 
