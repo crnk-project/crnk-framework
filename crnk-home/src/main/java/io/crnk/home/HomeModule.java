@@ -1,16 +1,13 @@
 package io.crnk.home;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.engine.dispatcher.Response;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.DocumentFilterChain;
+import io.crnk.core.engine.filter.DocumentFilterContext;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
@@ -34,277 +31,322 @@ import io.crnk.core.utils.Prioritizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * Displays a list of available resources in the root directory.
  */
 public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtension> {
 
-	protected static Logger LOGGER = LoggerFactory.getLogger(HomeModule.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(HomeModule.class);
 
-	public static final String JSON_HOME_CONTENT_TYPE = "application/json-home";
+    public static final String JSON_HOME_CONTENT_TYPE = "application/json-home";
 
-	public static final String JSON_CONTENT_TYPE = "application/json";
+    public static final String JSON_CONTENT_TYPE = "application/json";
 
-	private List<HomeModuleExtension> extensions;
+    private List<HomeModuleExtension> extensions;
 
-	private HomeFormat defaultFormat;
+    private HomeFormat defaultFormat;
 
-	private ModuleContext moduleContext;
+    private ModuleContext moduleContext;
 
-	private HttpRequestProcessor requestProcessor;
+    private HttpRequestProcessor requestProcessor;
 
-	private boolean potentialFilterIssues = false;
+    private boolean potentialFilterIssues = false;
 
-	private List<Predicate<HttpRequestContext>> pathFilters = new ArrayList<>();
+    private List<Predicate<HttpRequestContext>> pathFilters = new ArrayList<>();
 
-	// protected for CDI
-	protected HomeModule() {
-	}
+    // protected for CDI
+    protected HomeModule() {
+    }
 
-	public static HomeModule create() {
-		return create(HomeFormat.JSON_API);
-	}
+    public static HomeModule create() {
+        return create(HomeFormat.JSON_API);
+    }
 
-	public static HomeModule create(HomeFormat defaultFormat) {
-		HomeModule module = new HomeModule();
-		module.defaultFormat = defaultFormat;
-		return module;
-	}
+    public static HomeModule create(HomeFormat defaultFormat) {
+        HomeModule module = new HomeModule();
+        module.defaultFormat = defaultFormat;
+        return module;
+    }
 
-	/**
-	 * Allows to customize to which request paths the Home module should trigger. Useful when letting the home module
-	 * work next to non-Crnk endpoints.
-	 */
-	public void addPathFilter(Predicate<HttpRequestContext> pathFilter) {
-		pathFilters.add(pathFilter);
-	}
+    /**
+     * Allows to customize to which request paths the Home module should trigger. Useful when letting the home module
+     * work next to non-Crnk endpoints.
+     */
+    public void addPathFilter(Predicate<HttpRequestContext> pathFilter) {
+        pathFilters.add(pathFilter);
+    }
 
-	protected HttpRequestProcessor getRequestProcessor() {
-		return requestProcessor;
-	}
+    protected HttpRequestProcessor getRequestProcessor() {
+        return requestProcessor;
+    }
 
-	@Override
-	public String getModuleName() {
-		return "home";
-	}
+    @Override
+    public String getModuleName() {
+        return "home";
+    }
 
-	@Override
-	public void setupModule(final ModuleContext context) {
-		this.moduleContext = context;
-		requestProcessor = new HomeHttpRequestProcessor();
-		context.addHttpRequestProcessor(requestProcessor);
-	}
+    @Override
+    public void setupModule(final ModuleContext context) {
+        this.moduleContext = context;
+        requestProcessor = new HomeHttpRequestProcessor();
+        context.addHttpRequestProcessor(requestProcessor);
+        context.addFilter(new HomeDocumentFilter());
+    }
 
-	class HomeHttpRequestProcessor implements HttpRequestProcessor, Prioritizable {
+    class HomeDocumentFilter implements DocumentFilter {
 
-		@Override
-		public boolean supportsAsync() {
-			return true;
-		}
+        @Override
+        public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
+            Response response = chain.doFilter(filterRequestContext);
+            QueryContext queryContext = filterRequestContext.getQueryAdapter().getQueryContext();
+            JsonPath jsonPath = filterRequestContext.getJsonPath();
+            if (jsonPath != null && jsonPath.isCollection() && queryContext != null) {
+                // provide listings within repositories for further sub-repositories, e.g.
+                // /api/tasks doing a listing for /api/tasks/history next to showing /api/tasks/{id}
 
-		@Override
-		public boolean accepts(HttpRequestContext requestContext) {
-			String path = requestContext.getPath();
-			if (!path.endsWith("/") || !requestContext.getMethod().equalsIgnoreCase(HttpMethod.GET.toString())) {
-				LOGGER.debug("accepts return false due to accept header mismatch");
-				return false;
-			}
+                String requestPath = queryContext.getRequestPath();
+                ObjectMapper objectMapper = moduleContext.getObjectMapper();
+                List<String> listings = list(requestPath, queryContext);
+                if (!listings.isEmpty()) {
+                    Document document = response.getDocument();
+                    ObjectNode links = document.getLinks();
+                    if (links == null) {
+                        links = objectMapper.createObjectNode();
+                        document.setLinks(links);
+                    }
+                    for (String listing : listings) {
+                        String listingPath = UrlUtils.removeTrailingSlash(requestPath) + "/" + listing;
+                        links.put(listing, listingPath);
+                    }
+                }
+            }
+            return response;
+        }
+    }
 
-			boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
-			boolean acceptsJsonApi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
-			boolean acceptsJson = requestContext.accepts(HttpHeaders.JSON_CONTENT_TYPE);
-			boolean acceptsAny = requestContext.acceptsAny();
-			if (!(acceptsHome || acceptsAny || acceptsJson || acceptsJsonApi)) {
-				LOGGER.debug("accepts return false due to accept header mismatch");
-				return false;
-			}
+    class HomeHttpRequestProcessor implements HttpRequestProcessor, Prioritizable {
 
-			for (Predicate<HttpRequestContext> pathFilter : pathFilters) {
-				if (!pathFilter.test(requestContext)) {
-					LOGGER.debug("accepts return false due to path filter: {}", pathFilter);
-					return false;
-				}
-			}
+        @Override
+        public boolean supportsAsync() {
+            return true;
+        }
 
-			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-			JsonPath jsonPath = new PathBuilder(resourceRegistry, moduleContext.getTypeParser()).build(path);
+        @Override
+        public boolean accepts(HttpRequestContext requestContext) {
+            String path = requestContext.getPath();
+            if (!path.endsWith("/") || !requestContext.getMethod().equalsIgnoreCase(HttpMethod.GET.toString())) {
+                LOGGER.debug("accepts return false due to accept header mismatch");
+                return false;
+            }
 
-			// check no repository with that path
-			if (jsonPath == null) {
-				// check there are children to display
-				QueryContext queryContext = requestContext.getQueryContext();
-				String requestPath = requestContext.getPath();
-				List<String> pathList = list(requestPath, queryContext);
-				return path.equals("/") || !pathList.isEmpty();
-			}
-			return false;
+            boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
+            boolean acceptsJsonApi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
+            boolean acceptsJson = requestContext.accepts(HttpHeaders.JSON_CONTENT_TYPE);
+            boolean acceptsAny = requestContext.acceptsAny();
+            if (!(acceptsHome || acceptsAny || acceptsJson || acceptsJsonApi)) {
+                LOGGER.debug("accepts return false due to accept header mismatch");
+                return false;
+            }
 
-		}
+            for (Predicate<HttpRequestContext> pathFilter : pathFilters) {
+                if (!pathFilter.test(requestContext)) {
+                    LOGGER.debug("accepts return false due to path filter: {}", pathFilter);
+                    return false;
+                }
+            }
 
-		@Override
-		public Result<HttpResponse> processAsync(HttpRequestContext requestContext) {
-			LOGGER.debug("processing request");
+            ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+            JsonPath jsonPath = new PathBuilder(resourceRegistry, moduleContext.getTypeParser()).build(path);
 
-			QueryContext queryContext = requestContext.getQueryContext();
-			String requestPath = requestContext.getPath();
-			List<String> pathList = list(requestPath, queryContext);
+            // check no repository with that path
+            if (jsonPath == null) {
+                // check there are children to display
+                QueryContext queryContext = requestContext.getQueryContext();
+                String requestPath = requestContext.getPath();
+                List<String> pathList = list(requestPath, queryContext);
+                return path.equals("/") || !pathList.isEmpty();
+            }
+            return false;
 
-			HttpResponse response;
-			if (defaultFormat == HomeFormat.JSON_HOME || requestContext.accepts(JSON_HOME_CONTENT_TYPE)) {
-				LOGGER.debug("using JSON home format");
-				boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
-				response = writeJsonHome(requestContext, pathList);
-				if (acceptsHome) {
-					response.setContentType(JSON_HOME_CONTENT_TYPE);
-				}
-				else {
-					response.setContentType(JSON_CONTENT_TYPE);
-				}
-			}
-			else {
-				boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
-				LOGGER.debug("using JSON API format");
-				response = getResponse(requestContext, pathList);
-				if (jsonapi) {
-					response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-				}
-				else {
-					response.setContentType(JSON_CONTENT_TYPE);
-				}
-			}
+        }
 
-			ResultFactory resultFactory = moduleContext.getResultFactory();
-			return resultFactory.just(response);
-		}
+        @Override
+        public Result<HttpResponse> processAsync(HttpRequestContext requestContext) {
+            LOGGER.debug("processing request");
 
-		@Override
-		public int getPriority() {
-			return 1000; // low prio to not override others like ui module
-		}
-	}
+            QueryContext queryContext = requestContext.getQueryContext();
+            String requestPath = requestContext.getPath();
+            List<String> pathList = list(requestPath, queryContext);
 
-	public List<String> list(String requestPath, QueryContext queryContext) {
-		Set<String> pathSet = new HashSet<>();
-		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		boolean hasEntries = false;
-		boolean hasUnfilteredEntries = false;
-		for (RegistryEntry resourceEntry : resourceRegistry.getEntries()) {
-			ResourceRepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
-			if (repositoryInformation == null || !repositoryInformation.isExposed()) {
-				continue;
-			}
-			hasEntries = true;
-			if (moduleContext.getResourceFilterDirectory()
-					.get(resourceEntry.getResourceInformation(), HttpMethod.GET, queryContext) == FilterBehavior.NONE) {
-				ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
-				String resourceType = resourceInformation.getResourcePath();
-				pathSet.add("/" + resourceType);
-				hasUnfilteredEntries = true;
-			}
-		}
+            HttpResponse response;
+            if (defaultFormat == HomeFormat.JSON_HOME || requestContext.accepts(JSON_HOME_CONTENT_TYPE)) {
+                LOGGER.debug("using JSON home format");
+                boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
+                response = writeJsonHome(requestContext, pathList);
+                if (acceptsHome) {
+                    response.setContentType(JSON_HOME_CONTENT_TYPE);
+                } else {
+                    response.setContentType(JSON_CONTENT_TYPE);
+                }
+            } else {
+                boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
+                LOGGER.debug("using JSON API format");
+                response = getResponse(requestContext, pathList);
+                if (jsonapi) {
+                    response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
+                } else {
+                    response.setContentType(JSON_CONTENT_TYPE);
+                }
+            }
 
-		if (hasEntries && !hasUnfilteredEntries) {
-			potentialFilterIssues = true;
-			LOGGER.warn(
-					"all resources have been filtered for current request/user. Make sure SecurityModule and related modules "
-							+ "are "
-							+ "properly configured."
-			);
-		}
+            ResultFactory resultFactory = moduleContext.getResultFactory();
+            return resultFactory.just(response);
+        }
 
-		if (extensions != null) {
-			for (HomeModuleExtension extension : extensions) {
-				pathSet.addAll(extension.getPaths());
-			}
-		}
+        @Override
+        public int getPriority() {
+            return 1000; // low prio to not override others like ui module
+        }
+    }
 
-		pathSet = pathSet.stream().map(it -> getChildName(requestPath, it))
-				.filter(it -> it != null).collect(Collectors.toSet());
+    public List<String> list(String requestPath, QueryContext queryContext) {
+        Set<String> pathSet = new HashSet<>();
+        ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+        boolean hasEntries = false;
+        boolean hasUnfilteredEntries = false;
+        for (RegistryEntry resourceEntry : resourceRegistry.getEntries()) {
+            ResourceRepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
+            if (repositoryInformation == null || !repositoryInformation.isExposed()) {
+                continue;
+            }
+            hasEntries = true;
+            if (moduleContext.getResourceFilterDirectory()
+                    .get(resourceEntry.getResourceInformation(), HttpMethod.GET, queryContext) == FilterBehavior.NONE) {
+                ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
+                String resourceType = resourceInformation.getResourcePath();
+                pathSet.add("/" + resourceType);
+                hasUnfilteredEntries = true;
+            }
+        }
 
-		List<String> pathList = new ArrayList<>(pathSet);
-		Collections.sort(pathList);
-		return pathList;
-	}
+        if (hasEntries && !hasUnfilteredEntries) {
+            potentialFilterIssues = true;
+            LOGGER.warn(
+                    "all resources have been filtered for current request/user. Make sure SecurityModule and related modules "
+                            + "are "
+                            + "properly configured."
+            );
+        }
 
-	public boolean hasPotentialFilterIssues() {
-		return potentialFilterIssues;
-	}
+        if (extensions != null) {
+            for (HomeModuleExtension extension : extensions) {
+                pathSet.addAll(extension.getPaths());
+            }
+        }
 
-	private String getChildName(String requestPath, String it) {
-		if (it.startsWith(requestPath)) {
-			String subPath = it.substring(requestPath.length());
-			int sep = subPath.indexOf('/');
-			return sep == -1 ? subPath : subPath.substring(0, sep + 1);
-		}
-		return null;
-	}
+        Set<String> filteredPathSet = pathSet.stream().map(it -> getChildName(requestPath, it))
+                .filter(it -> it != null)
+                .collect(Collectors.toSet());
 
-	private HttpResponse getResponse(HttpRequestContext requestContext, List<String> pathList) {
-		ObjectMapper objectMapper = moduleContext.getObjectMapper();
+        // favor repositories over children, e.g. list /tasks rather than /tasks/ for /tasks/history
+        List<String> pathList = new ArrayList<>();
+        filteredPathSet.stream()
+                .filter(it -> !it.endsWith("/") || !filteredPathSet.contains(UrlUtils.removeTrailingSlash(it)))
+                .forEach(pathList::add);
 
-		String baseUrl = UrlUtils.removeTrailingSlash(moduleContext.getResourceRegistry().getServiceUrlProvider().getUrl())
-				+ requestContext.getPath();
+        // sort for readability
+        Collections.sort(pathList);
+        return pathList;
+    }
 
-		ObjectNode node = objectMapper.createObjectNode();
-		ObjectNode links = node.putObject("links");
-		for (String path : pathList) {
-			String href = baseUrl + path;
-			String id = UrlUtils.removeTrailingSlash(path);
-			links.put(id, href);
-		}
+    public boolean hasPotentialFilterIssues() {
+        return potentialFilterIssues;
+    }
 
-		Map<String, String> serverInfo = moduleContext.getModuleRegistry().getServerInfo();
-		if (serverInfo != null && !serverInfo.isEmpty()) {
-			node.set("jsonapi", objectMapper.valueToTree(serverInfo));
-		}
+    private String getChildName(String requestPath, String it) {
+        // e.g. /tasks must provide listing for /tasks/history but non of /tasksXy
+        requestPath = UrlUtils.removeTrailingSlash(requestPath) + "/";
 
-		String json;
-		try {
-			json = objectMapper.writeValueAsString(node);
-		}
-		catch (JsonProcessingException e) {
-			throw new IllegalStateException(e);
-		}
+        if (it.startsWith(requestPath)) {
+            String subPath = it.substring(requestPath.length());
+            int sep = subPath.indexOf('/');
+            return sep == -1 ? subPath : subPath.substring(0, sep + 1);
+        }
+        return null;
+    }
 
-		HttpResponse response = new HttpResponse();
-		response.setStatusCode(200);
-		response.setBody(json);
-		return response;
-	}
+    private HttpResponse getResponse(HttpRequestContext requestContext, List<String> pathList) {
+        ObjectMapper objectMapper = moduleContext.getObjectMapper();
 
-	private HttpResponse writeJsonHome(HttpRequestContext requestContext, List<String> pathList) {
-		ObjectMapper objectMapper = moduleContext.getObjectMapper();
+        String baseUrl = UrlUtils.removeTrailingSlash(moduleContext.getResourceRegistry().getServiceUrlProvider().getUrl())
+                + requestContext.getPath();
 
-		ObjectNode node = objectMapper.createObjectNode();
-		ObjectNode resourcesNode = node.putObject("resources");
-		for (String path : pathList) {
-			String tag = "tag:" + UrlUtils.removeTrailingSlash(path);
-			String href = path;
-			ObjectNode resourceNode = resourcesNode.putObject(tag);
-			resourceNode.put("href", href);
-		}
-		String json;
-		try {
-			json = objectMapper.writeValueAsString(node);
-		}
-		catch (JsonProcessingException e) {
-			throw new IllegalStateException(e);
-		}
+        ObjectNode node = objectMapper.createObjectNode();
+        ObjectNode links = node.putObject("links");
+        for (String path : pathList) {
+            String href = baseUrl + path;
+            String id = UrlUtils.removeTrailingSlash(path);
+            links.put(id, href);
+        }
 
-		HttpResponse response = new HttpResponse();
-		response.setStatusCode(200);
-		response.setBody(json);
-		return response;
-	}
+        Map<String, String> serverInfo = moduleContext.getModuleRegistry().getServerInfo();
+        if (serverInfo != null && !serverInfo.isEmpty()) {
+            node.set("jsonapi", objectMapper.valueToTree(serverInfo));
+        }
+
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(node);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(200);
+        response.setBody(json);
+        return response;
+    }
+
+    private HttpResponse writeJsonHome(HttpRequestContext requestContext, List<String> pathList) {
+        ObjectMapper objectMapper = moduleContext.getObjectMapper();
+
+        ObjectNode node = objectMapper.createObjectNode();
+        ObjectNode resourcesNode = node.putObject("resources");
+        for (String path : pathList) {
+            String tag = "tag:" + UrlUtils.removeTrailingSlash(path);
+            String href = path;
+            ObjectNode resourceNode = resourcesNode.putObject(tag);
+            resourceNode.put("href", href);
+        }
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(node);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(200);
+        response.setBody(json);
+        return response;
+    }
 
 
-	@Override
-	public void setExtensions(List<HomeModuleExtension> extensions) {
-		this.extensions = extensions;
-	}
+    @Override
+    public void setExtensions(List<HomeModuleExtension> extensions) {
+        this.extensions = extensions;
+    }
 
-	@Override
-	public void init() {
+    @Override
+    public void init() {
 
-	}
+    }
 }

@@ -1,6 +1,7 @@
 package io.crnk.test.mock;
 
 import io.crnk.core.module.Module;
+import io.crnk.test.mock.repository.HistoricTaskRepository;
 import io.crnk.test.mock.repository.PrimitiveAttributeRepository;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.ProjectToTaskRepository;
@@ -55,6 +56,7 @@ public class TestModule implements Module {
         context.addRepository(new RenamedIdRepository());
         context.addRepository(new ScheduleStatusRepositoryImpl());
         context.addRepository(new ReadOnlyTaskRepository());
+        context.addRepository(new HistoricTaskRepository());
 
         context.addRepository(manyNestedRepository);
         context.addRepository(oneNestedRepository);

@@ -1,8 +1,10 @@
 package io.crnk.test.mock.reactive;
 
 import io.crnk.core.module.Module;
+import io.crnk.core.repository.InMemoryResourceRepository;
 import io.crnk.test.mock.TestExceptionMapper;
 import io.crnk.test.mock.TestModule;
+import io.crnk.test.mock.models.HistoricTask;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.RelationIdTestResource;
 import io.crnk.test.mock.models.Schedule;
@@ -35,6 +37,7 @@ public class ReactiveTestModule implements Module {
         context.addRepository(new ReactiveReadOnlyTaskRepository());
 
         context.addRepository(new TaskSubtypeRepository());
+        context.addRepository(new InMemoryResourceRepository(HistoricTask.class));
 
         context.addRepository(new ProjectToTaskRepository());
         context.addRepository(new TaskToProjectRepository());
