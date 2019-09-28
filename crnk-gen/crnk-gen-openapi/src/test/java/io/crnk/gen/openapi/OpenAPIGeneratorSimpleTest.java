@@ -78,18 +78,18 @@ public class OpenAPIGeneratorSimpleTest {
     Assert.assertEquals(openApiTemplate.getInfo(), openApi.getInfo());
     Assert.assertEquals(openApiTemplate.getServers(), openApi.getServers());
 
-    Operation templateGetTasks = openApiTemplate.getPaths().get("/tasks").getGet();
-    Operation generatedGetTasks = openApi.getPaths().get("/tasks").getGet();
+    Operation templateGetTasks = openApiTemplate.getPaths().get("/simpleTasks").getGet();
+    Operation generatedGetTasks = openApi.getPaths().get("/simpleTasks").getGet();
 
-    // Compare templated and generated GET /tasks
+    // Compare templated and generated GET /simpleTasks
     Assert.assertEquals(templateGetTasks.getSummary(), generatedGetTasks.getSummary());
     Assert.assertEquals(templateGetTasks.getDescription(), generatedGetTasks.getDescription());
     Assert.assertEquals(templateGetTasks.getOperationId(), generatedGetTasks.getOperationId());
     Assert.assertEquals(templateGetTasks.getExtensions(), generatedGetTasks.getExtensions());
 
-    // Compare templated and generated GET /tasks
-    Operation templateGetTaskById = openApiTemplate.getPaths().get("/tasks/{id}").getGet();
-    Operation generatedGetTaskById = openApi.getPaths().get("/tasks/{id}").getGet();
+    // Compare templated and generated GET /simpleTasks
+    Operation templateGetTaskById = openApiTemplate.getPaths().get("/simpleTasks/{id}").getGet();
+    Operation generatedGetTaskById = openApi.getPaths().get("/simpleTasks/{id}").getGet();
     Assert.assertEquals(templateGetTaskById.getExtensions(), generatedGetTaskById.getExtensions());
 
     // Ensure responses satisfy minimal requirements for JSON:API compliance

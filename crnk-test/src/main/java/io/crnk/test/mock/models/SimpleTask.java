@@ -9,7 +9,7 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
-@JsonApiResource(type = "tasks", pagingSpec = OffsetLimitPagingSpec.class)
+@JsonApiResource(type = "simpleTasks", pagingSpec = OffsetLimitPagingSpec.class)
 public class SimpleTask {
 
 	@JsonApiId
