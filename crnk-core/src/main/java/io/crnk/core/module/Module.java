@@ -12,6 +12,7 @@ import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.information.NamingStrategy;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -231,5 +232,9 @@ public interface Module {
 		ModuleRegistry getModuleRegistry();
 
 		void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior);
+
+		List<NamingStrategy> getNamingStrategies();
+
+		void addNamingStrategy(NamingStrategy namingStrategy);
 	}
 }

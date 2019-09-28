@@ -315,6 +315,10 @@ public class ResourceInformation {
 		}
 	}
 
+	public void setResourcePath(String resourcePath) {
+		this.resourcePath = resourcePath;
+	}
+
 	class NestedIdAccessor implements ResourceFieldAccessor {
 
 		private final BeanAttributeInformation nestedField;

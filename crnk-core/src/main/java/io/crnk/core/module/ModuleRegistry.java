@@ -24,6 +24,7 @@ import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpStatusBehavior;
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.NamingStrategy;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
@@ -61,6 +62,7 @@ import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
+import io.crnk.core.module.internal.ModuleUtils;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
@@ -116,6 +118,10 @@ public class ModuleRegistry {
 
 	public DocumentMappingConfig getDocumentMappingConfig() {
 		return documentMappingConfig;
+	}
+
+	public List<NamingStrategy> getNamingStrategies() {
+		return aggregatedModule.getNamingStrategies();
 	}
 
 	enum InitializedState {
@@ -595,6 +601,7 @@ public class ModuleRegistry {
 			PreconditionUtil.verify(resourceInformationProvider.accept(resourceClass),
 					"make sure resource type %s is a valid resource, e.g. annotated with @JsonApiResource", resourceClass);
 			ResourceInformation information = resourceInformationProvider.build(resourceClass);
+			ModuleUtils.adaptInformation(information, this);
 			PreconditionUtil.verify(parentEntry.getResourceInformation().getResourcePath().equals(information.getResourcePath()),
 					"resource type %s without repository implementation must specify a @JsonApiResource.resourcePath matching "
 							+ "one of its parent repositories",
@@ -623,6 +630,7 @@ public class ModuleRegistry {
 		entryBuilder.fromImplementation(repository);
 		RegistryEntry entry = entryBuilder.build();
 		if (entry != null) {
+			ModuleUtils.adaptInformation(entry.getResourceInformation(), this);
 			resourceRegistry.addEntry(entry);
 		}
 	}
@@ -1040,6 +1048,16 @@ public class ModuleRegistry {
 		public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
 			aggregatedModule.addHttpStatusBehavior(httpStatusBehavior);
+		}
+
+		@Override
+		public List<NamingStrategy> getNamingStrategies() {
+			return aggregatedModule.getNamingStrategies();
+		}
+
+		@Override
+		public void addNamingStrategy(NamingStrategy namingStrategy) {
+			aggregatedModule.addNamingStrategy(namingStrategy);
 		}
 
 		@Override

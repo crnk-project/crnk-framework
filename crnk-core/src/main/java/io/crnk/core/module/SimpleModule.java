@@ -16,6 +16,7 @@ import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.information.NamingStrategy;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -71,6 +72,8 @@ public class SimpleModule implements Module {
 
 	private List<RepositoryAdapterFactory> repositoryAdapterFactories = new ArrayList<>();
 
+	private List<NamingStrategy> namingStrategies = new ArrayList<>();
+
 	private String moduleName;
 
 	private ModuleContext context;
@@ -121,6 +124,9 @@ public class SimpleModule implements Module {
 		}
 		for (RepositoryAdapterFactory factory : repositoryAdapterFactories) {
 			context.addRepositoryAdapterFactory(factory);
+		}
+		for (NamingStrategy namingStrategy : namingStrategies) {
+			context.addNamingStrategy(namingStrategy);
 		}
 		for (Object repository : repositories) {
 			context.addRepository(repository);
@@ -365,6 +371,14 @@ public class SimpleModule implements Module {
 
 	public List<RepositoryAdapterFactory> getRepositoryAdapterFactories() {
 		return Collections.unmodifiableList(repositoryAdapterFactories);
+	}
+
+	public void addNamingStrategy(NamingStrategy namingStrategy) {
+		namingStrategies.add(namingStrategy);
+	}
+
+	public List<NamingStrategy> getNamingStrategies() {
+		return Collections.unmodifiableList(namingStrategies);
 	}
 
 	public void addRegistryPart(String prefix, ResourceRegistryPart part) {

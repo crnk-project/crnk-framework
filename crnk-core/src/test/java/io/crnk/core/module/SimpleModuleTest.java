@@ -16,6 +16,7 @@ import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.information.NamingStrategy;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -51,253 +52,268 @@ import org.mockito.Mockito;
 
 public class SimpleModuleTest {
 
-    private TestModuleContext context;
+	private TestModuleContext context;
 
-    private SimpleModule module;
+	private SimpleModule module;
 
-    @Before
-    public void setup() {
-        context = new TestModuleContext();
-        module = new SimpleModule("simple");
-    }
+	@Before
+	public void setup() {
+		context = new TestModuleContext();
+		module = new SimpleModule("simple");
+	}
 
-    @Test
-    public void testGetModuleName() {
-        Assert.assertEquals("simple", module.getModuleName());
-    }
+	@Test
+	public void testGetModuleName() {
+		Assert.assertEquals("simple", module.getModuleName());
+	}
 
-    @Test
-    public void testResourceInformationBuilder() {
-        module.addResourceInformationProvider(new TestResourceInformationProvider());
-        Assert.assertEquals(1, module.getResourceInformationProviders().size());
-        module.setupModule(context);
+	@Test
+	public void testResourceInformationBuilder() {
+		module.addResourceInformationProvider(new TestResourceInformationProvider());
+		Assert.assertEquals(1, module.getResourceInformationProviders().size());
+		module.setupModule(context);
 
-        Assert.assertEquals(1, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(0, context.numFilters);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-    }
+		Assert.assertEquals(1, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+	}
 
-    @Test
-    public void testRepositoryInformationBuilder() {
-        module.addRepositoryInformationBuilder(Mockito.mock(RepositoryInformationProvider.class));
-        Assert.assertEquals(1, module.getRepositoryInformationProviders().size());
-        module.setupModule(context);
+	@Test
+	public void testNamingStrategy() {
+		NamingStrategy namingStrategy = Mockito.mock(NamingStrategy.class);
+		module.addNamingStrategy(namingStrategy);
+		Assert.assertEquals(1, module.getNamingStrategies().size());
+		module.setupModule(context);
 
-        Assert.assertEquals(1, context.numRepositoryInformationBuilds);
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(0, context.numFilters);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-    }
+		Assert.assertEquals(1, context.numNamingStrategies++);
+		Assert.assertEquals(0, context.numRepositories);
+	}
 
-    @Test
-    public void testResourceLookup() {
-        module.addResourceLookup(new TestResourceLookup());
-        Assert.assertEquals(1, module.getResourceLookups().size());
-        module.setupModule(context);
 
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(1, context.numResourceLookups);
-        Assert.assertEquals(0, context.numFilters);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-    }
+	@Test
+	public void testRepositoryInformationBuilder() {
+		module.addRepositoryInformationBuilder(Mockito.mock(RepositoryInformationProvider.class));
+		Assert.assertEquals(1, module.getRepositoryInformationProviders().size());
+		module.setupModule(context);
 
-    @Test
-    public void testPagingBehaviorsBuilder() {
-        module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
-        Assert.assertEquals(1, module.getPagingBehaviors().size());
-        module.setupModule(context);
-        Assert.assertEquals(1, context.numPagingBehaviors);
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(0, context.numFilters);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-    }
+		Assert.assertEquals(1, context.numRepositoryInformationBuilds);
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+	}
 
-    @Test
-    public void testDuplicatePagingBehaviorRegistration() {
-        module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
+	@Test
+	public void testResourceLookup() {
+		module.addResourceLookup(new TestResourceLookup());
+		Assert.assertEquals(1, module.getResourceLookups().size());
+		module.setupModule(context);
 
-        // adding the same paging behavior a second time should cause an exception
-        try {
-            module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
-            Assert.fail("IllegalArgumentException expected, paging was added already");
-        } catch (IllegalArgumentException e) {
-        }
-    }
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(1, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+	}
 
-    @Test
-    public void testFilter() {
-        module.addFilter(new TestFilter());
-        Assert.assertEquals(1, module.getFilters().size());
-        module.setupModule(context);
+	@Test
+	public void testPagingBehaviorsBuilder() {
+		module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
+		Assert.assertEquals(1, module.getPagingBehaviors().size());
+		module.setupModule(context);
+		Assert.assertEquals(1, context.numPagingBehaviors);
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+	}
 
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(1, context.numFilters);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-    }
+	@Test
+	public void testDuplicatePagingBehaviorRegistration() {
+		module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
 
-    @Test
-    public void testRepositoryDecorator() {
-        module.addRepositoryDecoratorFactory(new TestRepositoryDecorator());
-        Assert.assertEquals(1, module.getRepositoryDecoratorFactories().size());
-        module.setupModule(context);
+		// adding the same paging behavior a second time should cause an exception
+		try {
+			module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
+			Assert.fail("IllegalArgumentException expected, paging was added already");
+		}
+		catch (IllegalArgumentException e) {
+		}
+	}
 
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(1, context.numDecorators);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-    }
+	@Test
+	public void testFilter() {
+		module.addFilter(new TestFilter());
+		Assert.assertEquals(1, module.getFilters().size());
+		module.setupModule(context);
 
-    @Test
-    public void testJacksonModule() {
-        module.addJacksonModule(new com.fasterxml.jackson.databind.module.SimpleModule() {
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(1, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+	}
 
-            private static final long serialVersionUID = 7829254359521781942L;
+	@Test
+	public void testRepositoryDecorator() {
+		module.addRepositoryDecoratorFactory(new TestRepositoryDecorator());
+		Assert.assertEquals(1, module.getRepositoryDecoratorFactories().size());
+		module.setupModule(context);
 
-            @Override
-            public String getModuleName() {
-                return "test";
-            }
-        });
-        Assert.assertEquals(1, module.getJacksonModules().size());
-        module.setupModule(context);
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(1, context.numDecorators);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+	}
 
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(0, context.numFilters);
-        Assert.assertEquals(1, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-    }
+	@Test
+	public void testJacksonModule() {
+		module.addJacksonModule(new com.fasterxml.jackson.databind.module.SimpleModule() {
 
-    @Test
-    public void testAddRepository() {
-        TestRelationshipRepository repository = new TestRelationshipRepository();
-        module.addRepository(repository);
-        Assert.assertEquals(1, module.getRepositories().size());
+			private static final long serialVersionUID = 7829254359521781942L;
 
-        module.setupModule(context);
+			@Override
+			public String getModuleName() {
+				return "test";
+			}
+		});
+		Assert.assertEquals(1, module.getJacksonModules().size());
+		module.setupModule(context);
 
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(0, context.numFilters);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(1, context.numRepositories);
-        Assert.assertEquals(0, context.numExceptionMapperLookup);
-    }
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(1, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+	}
 
-    @Test
-    public void testExceptionMapperLookup() {
-        module.addExceptionMapperLookup(new TestExceptionMapperLookup());
-        Assert.assertEquals(1, module.getExceptionMapperLookups().size());
-        module.setupModule(context);
+	@Test
+	public void testAddRepository() {
+		TestRelationshipRepository repository = new TestRelationshipRepository();
+		module.addRepository(repository);
+		Assert.assertEquals(1, module.getRepositories().size());
 
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(0, context.numFilters);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-        Assert.assertEquals(1, context.numExceptionMapperLookup);
-    }
+		module.setupModule(context);
 
-    @Test
-    public void testAddExceptionMapper() {
-        module.addExceptionMapper(new IllegalStateExceptionMapper());
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(1, context.numRepositories);
+		Assert.assertEquals(0, context.numExceptionMapperLookup);
+	}
 
-        Assert.assertEquals(1, module.getExceptionMapperLookups().size());
-        module.setupModule(context);
+	@Test
+	public void testExceptionMapperLookup() {
+		module.addExceptionMapperLookup(new TestExceptionMapperLookup());
+		Assert.assertEquals(1, module.getExceptionMapperLookups().size());
+		module.setupModule(context);
 
-        Assert.assertEquals(0, context.numResourceInformationBuilds);
-        Assert.assertEquals(0, context.numResourceLookups);
-        Assert.assertEquals(0, context.numFilters);
-        Assert.assertEquals(0, context.numJacksonModules);
-        Assert.assertEquals(0, context.numRepositories);
-        Assert.assertEquals(1, context.numExceptionMapperLookup);
-    }
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+		Assert.assertEquals(1, context.numExceptionMapperLookup);
+	}
 
-    class TestExceptionMapperLookup implements ExceptionMapperLookup {
+	@Test
+	public void testAddExceptionMapper() {
+		module.addExceptionMapper(new IllegalStateExceptionMapper());
 
-        @SuppressWarnings("rawtypes")
-        @Override
-        public Set<ExceptionMapper> getExceptionMappers() {
-            return new HashSet<ExceptionMapper>(Arrays.asList(new CrnkExceptionMapper()));
-        }
-    }
+		Assert.assertEquals(1, module.getExceptionMapperLookups().size());
+		module.setupModule(context);
 
-    class TestModuleContext implements ModuleContext {
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+		Assert.assertEquals(1, context.numExceptionMapperLookup);
+	}
 
-        private int numResourceInformationBuilds = 0;
+	class TestExceptionMapperLookup implements ExceptionMapperLookup {
 
-        private int numPagingBehaviors = 0;
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Set<ExceptionMapper> getExceptionMappers() {
+			return new HashSet<ExceptionMapper>(Arrays.asList(new CrnkExceptionMapper()));
+		}
+	}
 
-        private int numRepositoryInformationBuilds = 0;
+	class TestModuleContext implements ModuleContext {
 
-        private int numResourceLookups = 0;
+		private int numResourceInformationBuilds = 0;
 
-        private int numJacksonModules = 0;
+		private int numPagingBehaviors = 0;
 
-        private int numRepositories = 0;
+		private int numRepositoryInformationBuilds = 0;
 
-        private int numFilters = 0;
+		private int numResourceLookups = 0;
 
-        private int numExceptionMapperLookup = 0;
+		private int numJacksonModules = 0;
 
-        private int numSecurityProviders = 0;
+		private int numRepositories = 0;
 
-        private int numDecorators = 0;
+		private int numNamingStrategies = 0;
 
-        @Override
-        public void addResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
-            numResourceInformationBuilds++;
-        }
+		private int numFilters = 0;
 
-        @Override
-        public void addResourceLookup(ResourceLookup resourceLookup) {
-            numResourceLookups++;
-        }
+		private int numExceptionMapperLookup = 0;
 
-        @Override
-        public void addJacksonModule(Module module) {
-            numJacksonModules++;
-        }
+		private int numSecurityProviders = 0;
 
-        @Override
-        public void addFilter(DocumentFilter filter) {
-            numFilters++;
-        }
+		private int numDecorators = 0;
 
-        @Override
-        public ResourceRegistry getResourceRegistry() {
-            return new ResourceRegistryImpl(new DefaultResourceRegistryPart(), null);
-        }
+		@Override
+		public void addResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
+			numResourceInformationBuilds++;
+		}
 
-        @Override
-        public void addExceptionMapperLookup(ExceptionMapperLookup exceptionMapperLookup) {
-            numExceptionMapperLookup++;
-        }
+		@Override
+		public void addResourceLookup(ResourceLookup resourceLookup) {
+			numResourceLookups++;
+		}
 
-        @Override
-        public void addExceptionMapper(ExceptionMapper<?> exceptionMapper) {
-            numExceptionMapperLookup++;
-        }
+		@Override
+		public void addJacksonModule(Module module) {
+			numJacksonModules++;
+		}
 
-        @Override
-        public void addSecurityProvider(SecurityProvider securityProvider) {
-            numSecurityProviders++;
-        }
+		@Override
+		public void addFilter(DocumentFilter filter) {
+			numFilters++;
+		}
 
-        @Override
-        public SecurityProvider getSecurityProvider() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public ResourceRegistry getResourceRegistry() {
+			return new ResourceRegistryImpl(new DefaultResourceRegistryPart(), null);
+		}
+
+		@Override
+		public void addExceptionMapperLookup(ExceptionMapperLookup exceptionMapperLookup) {
+			numExceptionMapperLookup++;
+		}
+
+		@Override
+		public void addExceptionMapper(ExceptionMapper<?> exceptionMapper) {
+			numExceptionMapperLookup++;
+		}
+
+		@Override
+		public void addSecurityProvider(SecurityProvider securityProvider) {
+			numSecurityProviders++;
+		}
+
+		@Override
+		public SecurityProvider getSecurityProvider() {
+			throw new UnsupportedOperationException();
+		}
 
 		@Override
 		public DocumentMapper getDocumentMapper() {
@@ -305,140 +321,150 @@ public class SimpleModuleTest {
 		}
 
 		@Override
-        public void setResultFactory(ResultFactory resultFactory) {
-        }
+		public void setResultFactory(ResultFactory resultFactory) {
+		}
 
-        @Override
-        public void addExtension(ModuleExtension extension) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void addExtension(ModuleExtension extension) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void addHttpRequestProcessor(HttpRequestProcessor processor) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void addHttpRequestProcessor(HttpRequestProcessor processor) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public ObjectMapper getObjectMapper() {
-            return null;
-        }
+		@Override
+		public ObjectMapper getObjectMapper() {
+			return null;
+		}
 
-        @Override
-        public void addRegistryPart(String prefix, ResourceRegistryPart part) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void addRegistryPart(String prefix, ResourceRegistryPart part) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public ServiceDiscovery getServiceDiscovery() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public ServiceDiscovery getServiceDiscovery() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void addRepositoryFilter(RepositoryFilter filter) {
-            numFilters++;
-        }
+		@Override
+		public void addRepositoryFilter(RepositoryFilter filter) {
+			numFilters++;
+		}
 
-        @Override
-        public void addResourceFilter(ResourceFilter filter) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void addResourceFilter(ResourceFilter filter) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void addResourceFieldContributor(ResourceFieldContributor contributor) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void addResourceFieldContributor(ResourceFieldContributor contributor) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider) {
-            numRepositoryInformationBuilds++;
-        }
+		@Override
+		public void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider) {
+			numRepositoryInformationBuilds++;
+		}
 
-        @Override
-        public void addPagingBehavior(PagingBehavior pagingBehavior) {
-            numPagingBehaviors++;
-        }
+		@Override
+		public void addPagingBehavior(PagingBehavior pagingBehavior) {
+			numPagingBehaviors++;
+		}
 
-        @Override
-        public void addRepository(Object repository) {
-            numRepositories++;
-        }
+		@Override
+		public void addRepository(Object repository) {
+			numRepositories++;
+		}
 
-        @Override
-        public void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decorator) {
-            numDecorators++;
-        }
+		@Override
+		public void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decorator) {
+			numDecorators++;
+		}
 
-        @Override
-        public boolean isServer() {
-            return true;
-        }
+		@Override
+		public boolean isServer() {
+			return true;
+		}
 
-        @Override
-        public TypeParser getTypeParser() {
-            return null;
-        }
+		@Override
+		public TypeParser getTypeParser() {
+			return null;
+		}
 
-        @Override
-        public ResourceInformationProvider getResourceInformationBuilder() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public ResourceInformationProvider getResourceInformationBuilder() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public ExceptionMapperRegistry getExceptionMapperRegistry() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public ExceptionMapperRegistry getExceptionMapperRegistry() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public RequestDispatcher getRequestDispatcher() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public RequestDispatcher getRequestDispatcher() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public RegistryEntryBuilder newRegistryEntryBuilder() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public RegistryEntryBuilder newRegistryEntryBuilder() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void addRegistryEntry(RegistryEntry entry) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void addRegistryEntry(RegistryEntry entry) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public ResourceFilterDirectory getResourceFilterDirectory() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public ResourceFilterDirectory getResourceFilterDirectory() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void addResourceModificationFilter(ResourceModificationFilter filter) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void addResourceModificationFilter(ResourceModificationFilter filter) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public ResultFactory getResultFactory() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public ResultFactory getResultFactory() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public List<DocumentFilter> getDocumentFilters() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public List<DocumentFilter> getDocumentFilters() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void addRepositoryAdapterFactory(RepositoryAdapterFactory repositoryAdapterFactory) {
-        }
+		@Override
+		public void addRepositoryAdapterFactory(RepositoryAdapterFactory repositoryAdapterFactory) {
+		}
 
-        @Override
-        public ModuleRegistry getModuleRegistry() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public ModuleRegistry getModuleRegistry() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
-        }
+		@Override
+		public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
+		}
 
-        @Override
-        public PropertiesProvider getPropertiesProvider() {
-            return new NullPropertiesProvider();
-        }
-    }
+		@Override
+		public List<NamingStrategy> getNamingStrategies() {
+			return null;
+		}
+
+		@Override
+		public void addNamingStrategy(NamingStrategy namingStrategy) {
+			numNamingStrategies++;
+		}
+
+		@Override
+		public PropertiesProvider getPropertiesProvider() {
+			return new NullPropertiesProvider();
+		}
+	}
 }
