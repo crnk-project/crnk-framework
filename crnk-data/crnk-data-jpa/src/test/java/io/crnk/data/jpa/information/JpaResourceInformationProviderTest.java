@@ -25,6 +25,7 @@ import io.crnk.data.jpa.model.RenamedTestEntity;
 import io.crnk.data.jpa.model.TestEmbeddable;
 import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.model.TestMappedSuperclass;
+import io.crnk.data.jpa.model.TestSubclassWithSuperclassGenericsInterface;
 import io.crnk.data.jpa.model.VersionedEntity;
 import io.crnk.data.jpa.util.ResourceFieldComparator;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
@@ -232,6 +233,17 @@ public class JpaResourceInformationProviderTest {
         Assert.assertEquals("testEntity", field.getOppositeName());
         Assert.assertEquals(RelationshipRepositoryBehavior.FORWARD_OPPOSITE, field.getRelationshipRepositoryBehavior());
     }
+	
+	@Test
+	public void testManyToOneRelationWithSuperclassGenericsInterface() {
+		ResourceInformation info = builder.build(TestSubclassWithSuperclassGenericsInterface.class);
+		ResourceField field = info.findRelationshipFieldByName("generic");
+		Assert.assertEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType());
+		Assert.assertEquals("testSubclassWithSuperclassGenericsInterface", field.getOppositeResourceType());
+		Assert.assertEquals(SerializeType.LAZY, field.getSerializeType());
+		Assert.assertNull(field.getOppositeName());
+		Assert.assertEquals(RelationshipRepositoryBehavior.FORWARD_OWNER, field.getRelationshipRepositoryBehavior());
+	}
 
     @Test
     public void testAttributeAnnotations() throws SecurityException, IllegalArgumentException {
