@@ -52,7 +52,7 @@ public class OASResource {
 
   public static Operation addFilters(MetaResource metaResource, Operation operation) {
     // TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
-    operation.getParameters().add(new Filter().$ref());
+    operation.getParameters().add(new NestedFilter().$ref());
 
     // Add filter[<>] parameters
     // Only the most basic filters are documented

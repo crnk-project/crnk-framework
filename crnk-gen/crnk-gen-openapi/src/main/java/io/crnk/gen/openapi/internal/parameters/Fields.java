@@ -15,7 +15,7 @@ public class Fields extends AbstractParameterGenerator {
 
   public Parameter parameter() {
     return new Parameter()
-        .name("fields[" + metaResource.getResourceType() + "]")
+        .name("fields")
         .description(metaResource.getResourceType() + " fields to include (csv)")
         .in("query")
         .schema(new StringSchema()

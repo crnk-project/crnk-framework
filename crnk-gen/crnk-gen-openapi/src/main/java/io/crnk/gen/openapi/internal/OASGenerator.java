@@ -59,7 +59,7 @@ public class OASGenerator {
       openApi.getComponents().addParameters(new PageNumber().getName(), new PageSize().parameter());
     }
 //    openApi.getComponents().addParameters(new ContentType().getName(), ContentType.parameter());
-    openApi.getComponents().addParameters(new Filter().getName(), new Filter().parameter());
+    openApi.getComponents().addParameters(new NestedFilter().getName(), new NestedFilter().parameter());
     LOGGER.debug("Adding static responses");
     openApi.getComponents().responses(generateStandardApiResponses());
     registerMetaResources();
