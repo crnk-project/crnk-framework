@@ -174,7 +174,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 				fieldBuilder.setMappedBy(true);
 			}
 
-			fieldBuilder.oppositeResourceType(getResourceType(genericType, context));
+			fieldBuilder.oppositeResourceType(getResourceType(attributeDesc.getType(), context));
 			fieldBuilder.oppositeName(getOppositeName(attributeDesc));
 
 			Optional<JsonApiRelation> relationAnnotation = attributeDesc.getAnnotation(JsonApiRelation.class);
