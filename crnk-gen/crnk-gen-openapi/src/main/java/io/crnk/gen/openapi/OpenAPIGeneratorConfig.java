@@ -17,6 +17,12 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
 
   private String templateName = null;
 
+  private String projectName = null;
+
+  private String projectVersion = null;
+
+  private String projectDescription = null;
+
   private OpenAPI openAPI = null;
 
   /**
@@ -74,9 +80,9 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
 
       return new OpenAPI()
           .info(new Info()
-              .description("Generated Description")
-              .title("Generated Title")
-              .version("0.1.0")
+              .title(getProjectName() != null ? getProjectName() : "Generated Title")
+              .version(getProjectVersion() != null ? getProjectVersion() : "0.1.0")
+              .description(getProjectDescription() != null ? getProjectDescription() : "Generated Description")
           )
           .paths(new Paths())
           .components(new Components());
@@ -86,5 +92,29 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
 
   public void setOpenAPI(OpenAPI openAPI) {
     this.openAPI = openAPI;
+  }
+
+  public String getProjectName() {
+    return projectName;
+  }
+
+  public void setProjectName(String projectName) {
+    this.projectName = projectName;
+  }
+
+  public String getProjectVersion() {
+    return projectVersion;
+  }
+
+  public void setProjectVersion(String projectVersion) {
+    this.projectVersion = projectVersion;
+  }
+
+  public String getProjectDescription() {
+    return projectDescription;
+  }
+
+  public void setProjectDescription(String projectDescription) {
+    this.projectDescription = projectDescription;
   }
 }

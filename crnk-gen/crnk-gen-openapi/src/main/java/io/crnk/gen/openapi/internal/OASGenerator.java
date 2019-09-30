@@ -58,7 +58,6 @@ public class OASGenerator {
       openApi.getComponents().addParameters(new PageSize().getName(), new PageNumber().parameter());
       openApi.getComponents().addParameters(new PageNumber().getName(), new PageSize().parameter());
     }
-//    openApi.getComponents().addParameters(new ContentType().getName(), ContentType.parameter());
     openApi.getComponents().addParameters(new NestedFilter().getName(), new NestedFilter().parameter());
     LOGGER.debug("Adding static responses");
     openApi.getComponents().responses(generateStandardApiResponses());
@@ -87,8 +86,8 @@ public class OASGenerator {
       }
 
       // Relationships can be accessed in 2 ways:
-      //  1.	/api/A/1/b  								The full related resource
-      //  2.	/api/A/1/relationships/b		The "ids" as belong to the resource
+      //  1.	/api/A/1/b                The full related resource
+      //  2.	/api/A/1/relationships/b  The "ids" as belong to the resource
       // Generate GET Operations for /api/A/1/B relationship path
       for (MetaElement child : oasResource.getChildren()) {
         if (child == null) {
