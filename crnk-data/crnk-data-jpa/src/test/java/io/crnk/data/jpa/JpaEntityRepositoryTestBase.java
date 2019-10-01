@@ -1,19 +1,23 @@
-package io.crnk.data.jpa.repository;
+package io.crnk.data.jpa;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.PagedMetaInformation;
-import io.crnk.data.jpa.model.SequenceEntity;
-import io.crnk.data.jpa.JpaEntityRepository;
-import io.crnk.data.jpa.JpaRepositoryConfig;
 import io.crnk.data.jpa.internal.JpaRepositoryUtils;
 import io.crnk.data.jpa.model.FieldOnlyEntity;
 import io.crnk.data.jpa.model.JpaTransientTestEntity;
 import io.crnk.data.jpa.model.RelatedEntity;
+import io.crnk.data.jpa.model.RelationIdEntity;
+import io.crnk.data.jpa.model.SequenceEntity;
 import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.query.AbstractJpaTest;
 import org.hibernate.Hibernate;
@@ -22,10 +26,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 
 @Transactional
 public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
@@ -37,8 +37,8 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 	public void setup() {
 		super.setup();
 
-        JpaRepositoryConfig<TestEntity> config = JpaRepositoryConfig.create(TestEntity.class);
-        JpaRepositoryUtils.setDefaultConfig(module.getConfig(), config);
+		JpaRepositoryConfig<TestEntity> config = JpaRepositoryConfig.create(TestEntity.class);
+		JpaRepositoryUtils.setDefaultConfig(module.getConfig(), config);
 
 		repo = new JpaEntityRepository<>(config);
 		repo.setResourceRegistry(resourceRegistry);
@@ -112,7 +112,8 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 		for (int i = 0; i < numTestEntities; i++) {
 			if (asc) {
 				Assert.assertEquals(i, list.get(i).getLongValue());
-			} else {
+			}
+			else {
 				Assert.assertEquals(numTestEntities - 1 - i, list.get(i).getLongValue());
 			}
 		}
@@ -166,11 +167,22 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 	}
 
 	@Test
+	public void testOptimization() {
+		QuerySpec querySpec = new QuerySpec(RelationIdEntity.class);
+		querySpec.addFilter(PathSpec.of("oneRelatedValue", "id").filter(FilterOperator.EQ, 1L));
+		QuerySpec optimized = repo.optimizeQuerySpec(querySpec);
+
+		Assert.assertEquals(1, optimized.getFilters().size());
+		FilterSpec filterSpec = optimized.getFilters().get(0);
+		Assert.assertEquals(PathSpec.of("oneRelatedValueId"), filterSpec.getPath());
+	}
+
+	@Test
 	public void testJpaTransientFieldIgnored() {
 		QuerySpec querySpec = new QuerySpec(JpaTransientTestEntity.class);
 
-        JpaRepositoryConfig<JpaTransientTestEntity> config = JpaRepositoryConfig.create(JpaTransientTestEntity.class);
-        JpaRepositoryUtils.setDefaultConfig(module.getConfig(), config);
+		JpaRepositoryConfig<JpaTransientTestEntity> config = JpaRepositoryConfig.create(JpaTransientTestEntity.class);
+		JpaRepositoryUtils.setDefaultConfig(module.getConfig(), config);
 
 		JpaEntityRepository<JpaTransientTestEntity, Serializable> transientRepo = new JpaEntityRepository<>(config);
 		transientRepo.setResourceRegistry(resourceRegistry);
@@ -326,8 +338,9 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 		Assert.assertEquals(numTestEntities, list.size());
 		for (TestEntity entity : list) {
 			RelatedEntity relatedValue = entity.getOneRelatedValue();
-			if (relatedValue != null)
+			if (relatedValue != null) {
 				Assert.assertFalse(Hibernate.isInitialized(relatedValue));
+			}
 		}
 	}
 
@@ -347,8 +360,8 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 
 	@Test
 	public void testSequencePrimaryKey() {
-        JpaRepositoryConfig<SequenceEntity> config = JpaRepositoryConfig.create(SequenceEntity.class);
-        JpaRepositoryUtils.setDefaultConfig(module.getConfig(), config);
+		JpaRepositoryConfig<SequenceEntity> config = JpaRepositoryConfig.create(SequenceEntity.class);
+		JpaRepositoryUtils.setDefaultConfig(module.getConfig(), config);
 
 		JpaEntityRepository<SequenceEntity, Long> sequenceRepo = new JpaEntityRepository<>(config);
 		sequenceRepo.setResourceRegistry(resourceRegistry);
@@ -372,10 +385,10 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 	@Ignore // currently not supported
 	public void testFieldOnlyEntity() {
 		QuerySpec querySpec = new QuerySpec(FieldOnlyEntity.class);
-        JpaRepositoryConfig<FieldOnlyEntity> config = JpaRepositoryConfig.create(FieldOnlyEntity.class);
-        JpaRepositoryUtils.setDefaultConfig(module.getConfig(), config);
+		JpaRepositoryConfig<FieldOnlyEntity> config = JpaRepositoryConfig.create(FieldOnlyEntity.class);
+		JpaRepositoryUtils.setDefaultConfig(module.getConfig(), config);
 
-        JpaEntityRepository<FieldOnlyEntity, Long> fieldRepo = new JpaEntityRepository<>(config);
+		JpaEntityRepository<FieldOnlyEntity, Long> fieldRepo = new JpaEntityRepository<>(config);
 		List<FieldOnlyEntity> list = fieldRepo.findAll(querySpec);
 		Assert.assertEquals(0, list.size());
 
