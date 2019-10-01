@@ -6,11 +6,9 @@ import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.test.mock.SimpleTestModule;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
@@ -25,21 +23,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class OpenAPIGeneratorSimpleTest {
+public class OpenAPIGeneratorSimpleTest extends OpenAPIGeneratorTestBase {
 
   private CrnkBoot crnkBoot;
   private MetaModule metaModule;
   private OpenAPIGeneratorModule generatorModule;
-
-  private static void assertOperationResponseCodes(Operation operation, List<String> codes) {
-    if (operation == null) {
-      return;
-    }
-    ApiResponses responses = operation.getResponses();
-    for (String code : codes) {
-      Assert.assertTrue("Operation missing response code " + code, responses.containsKey(code));
-    }
-  }
 
   @Before
   public void setup() throws IOException {
@@ -71,7 +59,6 @@ public class OpenAPIGeneratorSimpleTest {
     generatorModule.generate(metaModule.getLookup());
     OpenAPI openApi = new OpenAPIV3Parser().read(outputPath);
     OpenAPI openApiTemplate = new OpenAPIV3Parser().read(templatePath);
-    Yaml.pretty(openApi);
 
     // Compare templated metadata and generated metadata
     Assert.assertEquals(openApiTemplate.getOpenapi(), openApi.getOpenapi());

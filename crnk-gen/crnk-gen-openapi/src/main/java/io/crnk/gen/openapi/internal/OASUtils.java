@@ -78,7 +78,7 @@ public class OASUtils {
         if (child instanceof MetaLiteral) {
           enumSchema.addEnumItemObject(child.getName());
         } else {
-          return new ObjectSchema();
+          return new ObjectSchema().additionalProperties(true);
         }
       }
       return enumSchema;

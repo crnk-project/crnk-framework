@@ -50,7 +50,7 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
   /**
    * @return the name of the template used as a base to merge generated openapi into.
    */
-  private String getTemplateName() {
+  protected String getTemplateName() {
     return templateName;
   }
 
