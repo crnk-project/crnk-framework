@@ -14,6 +14,7 @@ import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Task;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
   private MetaModule metaModule;
@@ -83,28 +85,9 @@ public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
     Assert.assertEquals("0.1.0", openApi.getInfo().getVersion());
 
     // Ensure responses satisfy minimal requirements for JSON:API compliance
-//    for (PathItem pathItem : openApi.getPaths().values()) {
-//
-//      // Ensure GET response json:api compliance
-//      assertOperationResponseCodes(pathItem.getGet(), Arrays.asList("200", "400"));
-//
-//      // Ensure POST response json:api compliance
-//      assertOperationResponseCodes(pathItem.getPost(), Arrays.asList("201", "202", "204", "403", "404", "409"));
-//
-//      // Ensure PATCH response json:api compliance
-//      assertOperationResponseCodes(pathItem.getPatch(), Arrays.asList("200", "202", "204", "403", "404", "409"));
-//
-//      // Ensure DELETE response json:api compliance
-//      assertOperationResponseCodes(pathItem.getDelete(), Arrays.asList("200", "202", "204", "404"));
-//
-//      for (Operation operation : pathItem.readOperationsMap().values()) {
-//
-//        // TODO: Ensure responses are sorted
-//        List<String> responses = new ArrayList<>(operation.getResponses().keySet());
-//        List<String> sorted = new ArrayList<>(responses);
-//        Collections.sort(sorted);
-//        Assert.assertEquals("Responses should be sorted.", sorted, responses);
-//      }
-//    }
+    for (Map.Entry<String, PathItem> entry : openApi.getPaths().entrySet()) {
+      assertJsonAPICompliantPath(entry.getKey(), entry.getValue());
+      assertResponsesSorted(entry.getValue());
+    }
   }
 }

@@ -18,10 +18,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
 public class OpenAPIGeneratorSimpleTest extends OpenAPIGeneratorTestBase {
 
@@ -80,29 +77,9 @@ public class OpenAPIGeneratorSimpleTest extends OpenAPIGeneratorTestBase {
     Assert.assertEquals(templateGetTaskById.getExtensions(), generatedGetTaskById.getExtensions());
 
     // Ensure responses satisfy minimal requirements for JSON:API compliance
-    for (PathItem pathItem : openApi.getPaths().values()) {
-
-      // Ensure GET response json:api compliance
-      assertOperationResponseCodes(pathItem.getGet(), Arrays.asList("200", "400"));
-
-      // Ensure POST response json:api compliance
-      assertOperationResponseCodes(pathItem.getPost(), Arrays.asList("201", "202", "204", "403", "404", "409"));
-
-      // Ensure PATCH response json:api compliance
-      assertOperationResponseCodes(pathItem.getPatch(), Arrays.asList("200", "202", "204", "403", "404", "409"));
-
-      // Ensure DELETE response json:api compliance
-      assertOperationResponseCodes(pathItem.getDelete(), Arrays.asList("200", "202", "204", "404"));
-
-      for (Operation operation : pathItem.readOperationsMap().values()) {
-
-        // TODO: Ensure responses are sorted
-        List<String> responses = new ArrayList<>(operation.getResponses().keySet());
-        List<String> sorted = new ArrayList<>(responses);
-        Collections.sort(sorted);
-        Assert.assertEquals("Responses should be sorted.", sorted, responses);
-
-      }
+    for (Map.Entry<String, PathItem> entry : openApi.getPaths().entrySet()) {
+      assertJsonAPICompliantPath(entry.getKey(), entry.getValue());
+      assertResponsesSorted(entry.getValue());
     }
   }
 }
