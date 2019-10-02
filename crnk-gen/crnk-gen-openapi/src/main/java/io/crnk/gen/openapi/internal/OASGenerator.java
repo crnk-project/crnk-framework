@@ -1,7 +1,11 @@
 package io.crnk.gen.openapi.internal;
 
 import io.crnk.gen.openapi.OpenAPIGeneratorConfig;
-import io.crnk.gen.openapi.internal.parameters.*;
+import io.crnk.gen.openapi.internal.parameters.NestedFilter;
+import io.crnk.gen.openapi.internal.parameters.PageLimit;
+import io.crnk.gen.openapi.internal.parameters.PageNumber;
+import io.crnk.gen.openapi.internal.parameters.PageOffset;
+import io.crnk.gen.openapi.internal.parameters.PageSize;
 import io.crnk.gen.openapi.internal.responses.Accepted;
 import io.crnk.gen.openapi.internal.responses.NoContent;
 import io.crnk.gen.openapi.internal.schemas.ApiError;
@@ -24,7 +28,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OASGenerator {
 

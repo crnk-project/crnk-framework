@@ -1,7 +1,11 @@
 package io.crnk.gen.openapi.internal.paths;
 
 import io.crnk.gen.openapi.internal.OASResource;
-import io.crnk.gen.openapi.internal.parameters.*;
+import io.crnk.gen.openapi.internal.parameters.Fields;
+import io.crnk.gen.openapi.internal.parameters.Include;
+import io.crnk.gen.openapi.internal.parameters.PageLimit;
+import io.crnk.gen.openapi.internal.parameters.PageOffset;
+import io.crnk.gen.openapi.internal.parameters.Sort;
 import io.crnk.gen.openapi.internal.responses.ResourcesResponse;
 import io.crnk.gen.openapi.internal.schemas.PostResource;
 import io.crnk.gen.openapi.internal.schemas.ResourceResponseSchema;
