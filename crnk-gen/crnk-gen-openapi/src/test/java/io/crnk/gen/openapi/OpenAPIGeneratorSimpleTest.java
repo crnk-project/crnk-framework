@@ -81,6 +81,6 @@ public class OpenAPIGeneratorSimpleTest extends OpenAPIGeneratorTestBase {
       assertJsonAPICompliantPath(entry.getKey(), entry.getValue());
       assertResponsesSorted(entry.getValue());
     }
-    compare("gold/simple.yaml", outputPath, false);
+    compare("gold/simple.yaml", outputPath, true);
   }
 }

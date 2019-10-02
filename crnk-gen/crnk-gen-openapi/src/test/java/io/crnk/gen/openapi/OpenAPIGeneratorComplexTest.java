@@ -89,6 +89,6 @@ public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
       assertJsonAPICompliantPath(entry.getKey(), entry.getValue());
       assertResponsesSorted(entry.getValue());
     }
-    compare("gold/complex.yaml", outputPath, false);
+    compare("gold/complex.yaml", outputPath, true);
   }
 }

@@ -51,6 +51,9 @@ class OpenAPIGeneratorTestBase {
     try (FileInputStream in = new FileInputStream(new File(actualSourcePath))) {
       actualSource = IOUtils.toString(in, utf8);
     }
+
+    expectedSource = expectedSource.replace("\r\n", "\n");
+
     if (verbose) {
       LoggerFactory.getLogger(getClass()).info(actualSource);
       System.err.println(actualSource);
