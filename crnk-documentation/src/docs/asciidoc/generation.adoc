@@ -38,6 +38,74 @@ More improvements to the generates types are thinkable in the future, such as li
 the set of fields depending on the use case (inclusions, field sets, sorting, filtering) depending on the
 capability of that particular field. Contributions welcomed.
 
+## OpenAPI
+
+WARNING: This generator is still experimental. Feedback welcomed.
+
+`crnk-gen-openapi` provides an way to generate OpenAPI files. The OpenAPI Specification,
+originally known as the Swagger Specification, is a specification for machine-readable interface
+files for describing, producing, consuming, and visualizing RESTful web services.
+
+The OpenAPI generator allows the generation of:
+
+- specifications of paths for resources and related objects (like nested objects and enumeration types).
+- specifications of result documents (i.e. resources and any linking and meta information).
+- specifications of links information.
+- specifications of meta information.
+- specifications of standard errors
+- specifications of standard parameters
+
+If a `templateName` file is provided, it will override the `projectName`, `projectVersion`, and
+`projectDescription` passed into the generate step. Similarly, descriptions of operations can be
+overridden within the provided OpenAPI template file.
+
+There is a Gradle plugin to run OpenAPI (and other) generation. The setup looks like:
+
+[source]
+----
+buildscript {
+	dependencies {
+		classpath "io.crnk:crnk-gen-gradle:${version}"
+	}
+}
+
+apply plugin: 'crnk-gen'
+crnkGen {
+    runtime {
+        configuration = 'openapiGenRuntime'
+    }
+
+    // fork generation into new process to have clean environment
+    forked = true
+
+    // specify the package to look for resources
+    resourcePackages = ['io.crnk.test']
+
+    openapi {
+        // enable OpenAPI generation within Gradle plugin
+        enabled = true
+
+				// specify name of openapi template in the build dir to merge onto
+				templateName = "openapi-template.yml"
+
+				// specify name of API to display in the generated OpenAPI file
+				projectName = "Generated Title"
+
+				// specify version of the API to display in the generated OpenAPI file
+				projectVersion = "0.1.0"
+
+				// specify name of openapi template in the build dir to merge onto
+				projectDescription = "A generated description of the API."
+
+        // specify location of generated sources
+        genDir = file('src/resources')
+    }
+}
+crnkGen.init()
+----
+
+Applying `crnk-gen` results in a new `generateOpenapi` task to perform the generation.
+
 ## Typescript
 
 The Typescript generator allows the generation of:
