@@ -54,6 +54,7 @@ public class ResourcePostController extends ResourceUpsert {
 		else {
 			Object entity = newEntity(resourceInformation, requestResource);
 			setId(requestResource, entity, resourceInformation);
+			setType(requestResource, entity);
 			setAttributes(requestResource, entity, resourceInformation, queryContext);
 			setMeta(requestResource, entity, resourceInformation);
 			setLinks(requestResource, entity, resourceInformation);
@@ -62,7 +63,7 @@ public class ResourcePostController extends ResourceUpsert {
 			response = zipped.merge(it -> resourceRepository.create(entity, queryAdapter));
 		}
 
-		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create()
+		DocumentMappingConfig mappingConfig = context.getMappingConfig().clone()
 				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
 		DocumentMapper documentMapper = this.context.getDocumentMapper();
 

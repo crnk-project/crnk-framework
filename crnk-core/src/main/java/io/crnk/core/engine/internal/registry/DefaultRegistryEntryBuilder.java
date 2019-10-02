@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
@@ -28,7 +33,6 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.repository.MatchedRelationshipRepository;
 import io.crnk.core.repository.RelationshipMatcher;
-import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.foward.ForwardingDirection;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
@@ -36,11 +40,6 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
@@ -278,11 +277,11 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
     private ResourceInformation buildResource() {
         ResourceInformation resourceInformation = resource.build();
-        contributeFields(resourceInformation);
+        contributeFields(moduleRegistry, resourceInformation);
         return resourceInformation;
     }
 
-    private void contributeFields(ResourceInformation resourceInformation) {
+    public static void contributeFields(ModuleRegistry moduleRegistry, ResourceInformation resourceInformation) {
         // TODO make service discovery the primary target to resolve all objects => wrapped it with module
         List<ResourceFieldContributor> contributors = new ArrayList<>();
         contributors.addAll(moduleRegistry.getResourceFieldContributors());

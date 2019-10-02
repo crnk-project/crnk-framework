@@ -6,11 +6,13 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.LazyTask;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
@@ -89,6 +91,31 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Project project = new Project();
 		project.setName("someProject");
 		project.setId(3L);
+		Task task = createTask(2, "sample task");
+		task.setProject(project);
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.includeRelation(Arrays.asList("project"));
+		QueryAdapter queryAdapter = toAdapter(querySpec);
+
+		DocumentMappingConfig config = mappingConfig.clone();
+		config.getResourceMapping().setSerializeSelfRelationshipLinks(false);
+
+		Document document = mapper.toDocument(toResponse(task), queryAdapter, config).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+
+		Relationship projectRel = resource.getRelationships().get("project");
+		ObjectNode links = projectRel.getLinks();
+		Assert.assertFalse(links.has("self"));
+		Assert.assertTrue(links.has("related"));
+	}
+
+	@Test
+	public void testOmitSelfRelatedLinks() {
+		Project project = new Project();
+		project.setName("someProject");
+		project.setId(3L);
 		LinksInformation links = new TaskLinks();
 		Task task = createTask(2, "sample task");
 		task.setLinksInformation(links);
@@ -99,7 +126,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
 		queryAdapter.setCompactMode(true);
 
-		Document document = mapper.toDocument(toResponse(task), queryAdapter, mappingConfig).get();
+		Document document = mapper.toDocument(toResponse(task), queryAdapter, mappingConfig.clone()).get();
 		Resource resource = document.getSingleData().get();
 		Assert.assertEquals("2", resource.getId());
 		Assert.assertEquals("tasks", resource.getType());

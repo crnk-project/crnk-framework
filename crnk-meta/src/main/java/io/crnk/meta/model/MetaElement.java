@@ -1,10 +1,6 @@
 package io.crnk.meta.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,7 +35,7 @@ public class MetaElement implements Cloneable {
 	/**
 	 * Additional feature flags for meta elements
 	 */
-	private Set<String> natures = new HashSet<>();
+	private Map<String, MetaNature> natures = new HashMap<>();
 
 	public MetaElement getParent() {
 		return parent;
@@ -61,11 +57,11 @@ public class MetaElement implements Cloneable {
 		children.add(child);
 	}
 
-	public Set<String> getNatures() {
+	public Map<String, MetaNature> getNatures() {
 		return natures;
 	}
 
-	public void setNatures(Set<String> natures) {
+	public void setNatures(Map<String, MetaNature> natures) {
 		this.natures = natures;
 	}
 

@@ -32,7 +32,7 @@ public class CollectionGetController extends ResourceIncludeField {
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestBody) {
 		RegistryEntry registryEntry = jsonPath.getRootEntry();
 
-		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create();
+		DocumentMappingConfig mappingConfig = context.getMappingConfig();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository();
@@ -46,7 +46,7 @@ public class CollectionGetController extends ResourceIncludeField {
 			response = resourceRepository.findAll(parsedIds, queryAdapter);
 		}
 
-		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, docummentMapperConfig)).map(this::toResponse);
+		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig)).map(this::toResponse);
 	}
 
 

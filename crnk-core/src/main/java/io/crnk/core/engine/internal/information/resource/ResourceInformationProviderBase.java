@@ -1,17 +1,6 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
@@ -24,11 +13,13 @@ import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
@@ -36,6 +27,19 @@ import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 
 public abstract class ResourceInformationProviderBase implements ResourceInformationProvider {
@@ -69,7 +73,26 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
     }
 
-    protected List<ResourceField> getResourceFields(Class<?> resourceClass) {
+    protected ResourceFieldAccess getResourceAccess(Class<?> resourceClass) {
+        boolean sortable = true;
+        boolean filterable = true;
+        boolean postable = true;
+        boolean deletable = true;
+        boolean patchable = true;
+        boolean readable = true;
+        JsonApiResource annotation = resourceClass.getAnnotation(JsonApiResource.class);
+        if (annotation != null) {
+            sortable = annotation.sortable();
+            filterable = annotation.filterable();
+            postable = annotation.postable();
+            deletable = annotation.deletable();
+            patchable = annotation.patchable();
+            readable = annotation.readable();
+        }
+        return new ResourceFieldAccess(readable, postable, patchable, deletable, sortable, filterable);
+    }
+
+    protected List<ResourceField> getResourceFields(Class<?> resourceClass, ResourceFieldAccess resourceAccess) {
         BeanInformation beanDesc = BeanInformation.get(resourceClass);
         List<String> attributeNames = beanDesc.getAttributeNames();
         List<ResourceField> fields = new ArrayList<>();
@@ -86,6 +109,19 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             }
         }
         verifyRelationIdFields(resourceClass, relationIdFields, fields);
+
+        for (ResourceField resourceField : fields) {
+            ResourceFieldImpl impl = (ResourceFieldImpl) resourceField;
+            impl.setAccess(impl.getAccess().and(resourceAccess));
+        }
+
+        Optional<JsonPropertyOrder> propertyOrder = ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class);
+        if (propertyOrder.isPresent()) {
+            JsonPropertyOrder propertyOrderAnnotation = propertyOrder.get();
+            Collections.sort(fields,
+                    new FieldOrderedComparator(propertyOrderAnnotation.value(), propertyOrderAnnotation.alphabetic()));
+        }
+
         return fields;
     }
 

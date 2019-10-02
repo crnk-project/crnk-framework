@@ -1,5 +1,9 @@
 package io.crnk.data.jpa.internal.query;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.criteria.JoinType;
+
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.data.jpa.internal.query.backend.JpaQueryBackend;
@@ -11,9 +15,6 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaMapType;
 import io.crnk.meta.model.MetaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class QuerySortBuilder<T, E, O> {
 
@@ -73,12 +74,12 @@ public class QuerySortBuilder<T, E, O> {
 			MetaDataObject anyMeta = valueType.asDataObject();
 			for (MetaAttribute anyAttr : anyMeta.getAttributes()) {
 				if (!anyAttr.isDerived()) {
-					E expr = backend.getAttribute(path.concat(anyAttr));
+					E expr = backend.getAttribute(path.concat(anyAttr), JoinType.LEFT);
 					orders.add(backend.newSort(expr, sortSpec.getDirection()));
 				}
 			}
 		} else {
-			E expr = backend.getAttribute(path);
+			E expr = backend.getAttribute(path, JoinType.LEFT);
 			orders.add(backend.newSort(expr, sortSpec.getDirection()));
 		}
 		return orders;

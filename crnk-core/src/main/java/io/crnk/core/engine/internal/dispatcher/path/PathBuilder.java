@@ -209,7 +209,7 @@ public class PathBuilder {
 	}
 
 	private RegistryEntry findSelfOrSubtypeByField(RegistryEntry entry, String fieldName) {
-		if(entry.getResourceInformation().findFieldByName(fieldName) == null) {
+		if (entry.getResourceInformation().findFieldByName(fieldName) == null) {
 			// consider introducing RegistyEntry.getSubTypes in the future
 			for (RegistryEntry someEntry : resourceRegistry.getEntries()) {
 				ResourceInformation resourceInformation = someEntry.getResourceInformation();
@@ -229,8 +229,12 @@ public class PathBuilder {
 	private boolean isNestedField(ResourceField field) {
 		if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
 			RegistryEntry oppositeType = resourceRegistry.getEntry(field.getOppositeResourceType());
+			String oppositeName = field.getOppositeName();
 			PreconditionUtil.verify(oppositeType != null, "opposite type %s not found for %s", field.getOppositeResourceType(), field.getUnderlyingName());
-			return oppositeType.getResourceInformation().isNested();
+			ResourceInformation oppositeResourceInformation = oppositeType.getResourceInformation();
+			if (oppositeName != null && oppositeResourceInformation.isNested()) {
+				return oppositeResourceInformation.getParentField().getUnderlyingName().equals(oppositeName);
+			}
 		}
 		return false;
 	}
@@ -245,28 +249,34 @@ public class PathBuilder {
 
 	private RegistryEntry getRootEntry(LinkedList<String> pathElements) {
 		StringBuilder potentialResourcePath = new StringBuilder(pathElements.pop());
-		while (true) {
-			RegistryEntry entry = getEntryByPath(potentialResourcePath.toString());
-			if (entry != null) {
-				LOGGER.debug("registry entry found for: {}", potentialResourcePath);
-				return entry;
-			}
 
-			LOGGER.debug("no registry entry found for: {}", potentialResourcePath);
+		RegistryEntry matchedEntry;
+		while (true) {
+			matchedEntry = getEntryByPath(potentialResourcePath.toString());
+
+			if (matchedEntry != null) {
+				LOGGER.debug("registry entry found for: {}", potentialResourcePath);
+			}
+			else {
+				LOGGER.debug("no registry entry found for: {}", potentialResourcePath);
+			}
 
 			if (pathElements.isEmpty() || pathElements.peek().equals(RELATIONSHIP_MARK)) {
-				break;
+				return matchedEntry; // maybe found or null
 			}
 
-			String pathElement = pathElements.pop();
-
+			// compute next potential path
+			String pathElement = pathElements.peek();
 			if (potentialResourcePath.length() > 0) {
 				potentialResourcePath.append("/");
 			}
 			potentialResourcePath.append(pathElement);
+			if (matchedEntry != null && getEntryByPath(potentialResourcePath.toString()) == null) {
+				// no more match, return found entry
+				return matchedEntry;
+			}
+			pathElements.poll();
 		}
-
-		return null;
 	}
 
 

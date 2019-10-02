@@ -1,5 +1,13 @@
 package io.crnk.core.boot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -64,14 +72,6 @@ import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
  * JAX-RS, etc.).
@@ -97,7 +97,7 @@ public class CrnkBoot {
 
 	private ServiceDiscoveryFactory serviceDiscoveryFactory = new DefaultServiceDiscoveryFactory();
 
-    private ServiceDiscovery serviceDiscovery = null;
+	private ServiceDiscovery serviceDiscovery = null;
 
 	private DocumentMapper documentMapper;
 
@@ -199,19 +199,21 @@ public class CrnkBoot {
 		setupRepositories(rootPart);
 
 		requestDispatcher = createRequestDispatcher(moduleRegistry.getExceptionMapperRegistry());
+		moduleRegistry.setDocumentMapper(documentMapper);
 
 		logInfo();
 	}
 
-    private void setupServiceDiscovery() {
-        if (serviceDiscovery == null) {
-            if (serviceDiscoveryFactory != null) {
-                setServiceDiscovery(serviceDiscoveryFactory.getInstance());
-            } else {
-                setServiceDiscovery(new EmptyServiceDiscovery());
-            }
-        }
-    }
+	private void setupServiceDiscovery() {
+		if (serviceDiscovery == null) {
+			if (serviceDiscoveryFactory != null) {
+				setServiceDiscovery(serviceDiscoveryFactory.getInstance());
+			}
+			else {
+				setServiceDiscovery(new EmptyServiceDiscovery());
+			}
+		}
+	}
 
 	private void logInfo() {
 		int numResources = resourceRegistry.getEntries().size();
@@ -229,10 +231,6 @@ public class CrnkBoot {
 						"urlMapper={}, serviceDiscovery={}", numResources, modules, securityProviders, pagingBehaviors,
 				urlMapper.getClass().getSimpleName(),
 				serviceDiscovery.getClass().getSimpleName());
-
-		if (numResources == 0) {
-			LOGGER.warn("no resources found");
-		}
 	}
 
 	private List<String> toSimpleNames(List<?> implementations) {

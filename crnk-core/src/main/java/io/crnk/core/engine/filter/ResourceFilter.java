@@ -5,7 +5,8 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 
 /**
- * Allows to limit access to resources and fields.
+ * Allows to limit access to resource types and fields for a given user. The interface operates on the model/type-level
+ * and is complemented by DataRoomFilter that further allows to limit visibility of individual resources.
  * <p>
  * Note that invocations to this methods are cached on a per-request basis.
  */

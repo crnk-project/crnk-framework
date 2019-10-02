@@ -1,5 +1,9 @@
 package io.crnk.client.suite;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterListener;
@@ -27,10 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class RepositoryAccessClientTest extends BasicRepositoryAccessTestBase {
 
@@ -76,7 +76,6 @@ public class RepositoryAccessClientTest extends BasicRepositoryAccessTestBase {
         Assert.assertNotNull(links);
         // end::interfaceAccess[]
     }
-
 
     @Test
     public void testCreate() {

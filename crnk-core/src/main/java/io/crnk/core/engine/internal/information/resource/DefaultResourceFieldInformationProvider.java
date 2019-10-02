@@ -10,6 +10,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.utils.StringUtils;
+import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.annotations.JsonApiField;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
@@ -113,6 +114,10 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
 
 	@Override
 	public Optional<Boolean> isIgnored(BeanAttributeInformation attributeDesc) {
+		if (attributeDesc.getName().equals(ResourceTypeHolder.TYPE_ATTRIBUTE) && ResourceTypeHolder.class.isAssignableFrom(attributeDesc.getBeanInformation().getImplementationClass())) {
+			return Optional.of(true);
+		}
+
 		Field field = attributeDesc.getField();
 		boolean isTransient = field != null && Modifier.isTransient(field.getModifiers());
 		boolean relationshipIdField = attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent();

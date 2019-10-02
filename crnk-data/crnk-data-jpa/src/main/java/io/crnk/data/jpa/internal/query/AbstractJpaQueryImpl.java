@@ -186,8 +186,11 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 		return includedFields;
 	}
 
-	public JoinType getJoinType(MetaAttributePath path) {
+	public JoinType getJoinType(MetaAttributePath path, JoinType customDefaultJoinType) {
 		JoinType joinType = joinTypes.get(path);
+		if (joinType == null) {
+			joinType = customDefaultJoinType;
+		}
 		if (joinType == null) {
 			joinType = defaultJoinType;
 		}
@@ -254,4 +257,7 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 		return parentMeta;
 	}
 
+	public JoinType getDefaultJoinType() {
+		return defaultJoinType;
+	}
 }

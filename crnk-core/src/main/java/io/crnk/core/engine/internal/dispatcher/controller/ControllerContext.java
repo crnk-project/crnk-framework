@@ -8,6 +8,7 @@ import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpStatusBehavior;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -61,5 +62,9 @@ public class ControllerContext {
 
 	public HttpStatusBehavior getHttpStatusBehavior() {
 		return moduleRegistry.getHttpStatusProvider();
+	}
+
+	public DocumentMappingConfig getMappingConfig() {
+		return moduleRegistry.getDocumentMappingConfig();
 	}
 }

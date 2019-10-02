@@ -109,6 +109,9 @@ use of per-request caching as the information may be accessed repeatedly for a r
 It can be obtained with `ModuleContext.getResourceFilterDirectory(...)` from the module API. For example, the `MetaModule` and
 `HomeModule` make use of `ResourceFilterDirectory` to only list authorized elements.
 
+Out of scope for `ResourceFilter` is the filtering based on data, this subject of the DataRoom Access Control
+of the next section.
+
 
 ## Dataroom Access Control
 

@@ -256,13 +256,13 @@ public class DefaultQuerySpecUrlMapper
 				resourceInformation = entry.getResourceInformation();
 			}
 			else {
-				RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceType());
-				if (entry == null) {
-					// model may not be available on client side in case of dynamic client with Resource.class
-					resourceInformation = null;
+				if (resourceRegistry.hasEntry(querySpec.getResourceType())) {
+					RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceType());
+					resourceInformation = entry.getResourceInformation();
 				}
 				else {
-					resourceInformation = entry.getResourceInformation();
+					// model may not be available on client side in case of dynamic client with Resource.class
+					resourceInformation = null;
 				}
 			}
 
@@ -677,7 +677,7 @@ public class DefaultQuerySpecUrlMapper
 
 	protected boolean isResourceType(String resourceType) {
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
-		return resourceRegistry.getEntry(resourceType) != null;
+		return resourceRegistry.hasEntry(resourceType);
 	}
 
 	protected FilterOperator findOperator(String lastElement) {
