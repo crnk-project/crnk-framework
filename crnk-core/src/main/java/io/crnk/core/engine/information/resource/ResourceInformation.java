@@ -584,13 +584,12 @@ public class ResourceInformation {
 		}
 		ResourceInformation that = (ResourceInformation) o;
 		return Objects.equals(implementationClass, that.implementationClass) && Objects.equals(resourceType, that.resourceType)
-				&& Objects
-				.equals(resourcePath, that.resourcePath);
+				&& Objects.equals(resourcePath, that.resourcePath);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(implementationClass, resourceType, resourcePath);
+		return Objects.hash(resourceType);
 	}
 
 	/**
