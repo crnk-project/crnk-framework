@@ -152,7 +152,9 @@ public class JpaEntityRepositoryBase<T, I> extends JpaRepositoryBase<T> implemen
 	 */
 	protected QuerySpec optimizeQuerySpec(QuerySpec filteredQuerySpec) {
 		QuerySpec clone = filteredQuerySpec.clone();
-		RegistryEntry entry = resourceRegistry.getEntry(filteredQuerySpec.getResourceClass());
+
+		String resourceType = filteredQuerySpec.getResourceType();
+		RegistryEntry entry = resourceType != null ? resourceRegistry.getEntry(resourceType) : resourceRegistry.getEntry(filteredQuerySpec.getResourceClass());
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		List<FilterSpec> filters = clone.getFilters();
 		for (FilterSpec filter : filters) {
