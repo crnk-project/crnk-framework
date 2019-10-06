@@ -525,7 +525,9 @@ Crnk comes with (partial) support for Jackson annotations. Currently supported a
 | Specifies whether an object can be read and/or written.
 
 | `@JsonAnyGetter` and `@JsonAnySetter`
-| To map dynamic data structures to JSON.
+| To map dynamic data structures to JSON. For an example have a look at
+  https://github.com/crnk-project/crnk-example/blob/master/crnk-example-service/src/main/java/io/crnk/example/service/model/PersonEntity.java[PersonEntity]
+  from the example application.
 
 |===
 
