@@ -394,7 +394,7 @@ public class ResourceInformation {
 				public Map<String, Object> getValues(Object resource) {
 					try {
 						Object o = jsonAnyGetter.invoke(resource);
-						return (HashMap<String, Object>) o;
+						return (Map<String, Object>) o;
 					}
 					catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
