@@ -1,6 +1,8 @@
 package io.crnk.gen.openapi.internal;
 
 import io.crnk.gen.openapi.OutputFormat;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.io.IOUtils;
@@ -10,6 +12,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -25,8 +28,23 @@ public class OASGeneratorTest {
     openApi = new OpenAPIV3Parser().read(templatePath);
   }
 
+  @Before
+  public void resetYamlSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+     Field instance = Yaml.class.getDeclaredField("mapper");
+     instance.setAccessible(true);
+     instance.set(null, null);
+  }
+
+  @Before
+  public void resetJsonSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+     Field instance = Json.class.getDeclaredField("mapper");
+     instance.setAccessible(true);
+     instance.set(null, null);
+  }
+
   @Test
   public void testGenerateOpenApiContentGeneratesYamlUnsorted() throws IOException {
+
     compare(
         "gold/unsorted.yaml",
         OASGenerator.generateOpenApiContent(openApi, OutputFormat.YAML, false));

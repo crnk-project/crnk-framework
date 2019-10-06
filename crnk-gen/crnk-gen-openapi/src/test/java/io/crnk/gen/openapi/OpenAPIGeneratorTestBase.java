@@ -1,15 +1,18 @@
 package io.crnk.gen.openapi;
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Before;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +20,13 @@ import java.util.Collections;
 import java.util.List;
 
 class OpenAPIGeneratorTestBase {
+  @Before
+  public void resetYamlSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+     Field instance = Yaml.class.getDeclaredField("mapper");
+     instance.setAccessible(true);
+     instance.set(null, null);
+  }
+
   static void assertJsonAPICompliantPath(String path, PathItem pathItem) {
     if (path.contains("}/relationships")) {
       assertJsonAPICompliantRelationshipsPath(pathItem);
