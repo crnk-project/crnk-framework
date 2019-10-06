@@ -38,6 +38,14 @@ public class OpenAPIGeneratorConfigTest {
     config.setProjectDescription("My custom description");
     Assert.assertEquals("My custom description", config.getProjectDescription());
 
+    Assert.assertEquals("Defaults to YAML", OutputFormat.YAML, config.getOutputFormat());
+    config.setOutputFormat(OutputFormat.JSON);
+    Assert.assertEquals(OutputFormat.JSON, config.getOutputFormat());
+
+    Assert.assertFalse("Defaults to false", config.getOutputSorted());
+    config.setOutputSorted(true);
+    Assert.assertTrue(config.getOutputSorted());
+
     openApi = config.getOpenAPI();
     Assert.assertSame("My custom title", openApi.getInfo().getTitle());
     Assert.assertSame("7.7.7", openApi.getInfo().getVersion());

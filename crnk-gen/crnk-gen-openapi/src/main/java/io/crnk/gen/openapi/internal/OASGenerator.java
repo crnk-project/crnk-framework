@@ -1,6 +1,12 @@
 package io.crnk.gen.openapi.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import io.crnk.gen.openapi.OpenAPIGeneratorConfig;
+import io.crnk.gen.openapi.OutputFormat;
 import io.crnk.gen.openapi.internal.parameters.NestedFilter;
 import io.crnk.gen.openapi.internal.parameters.PageLimit;
 import io.crnk.gen.openapi.internal.parameters.PageNumber;
@@ -16,7 +22,6 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimaryKey;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -134,9 +139,26 @@ public class OASGenerator {
     return openApi;
   }
 
+  @VisibleForTesting
+  static String generateOpenApiContent(OpenAPI openApi, OutputFormat outputFormat, Boolean sort) {
+    if (sort) {
+      ObjectMapper objectMapper = outputFormat.mapper();
+      objectMapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+      try {
+        return objectMapper.writer(new DefaultPrettyPrinter()).writeValueAsString(openApi);
+      } catch (JsonProcessingException e){
+        LOGGER.error("Sorting failed!");
+        return outputFormat.pretty(openApi);
+      }
+    } else {
+      return outputFormat.pretty(openApi);
+    }
+  }
+
   private void writeSources() throws IOException {
-    File file = new File(outputDir, "openapi.yaml");
-    write(file, Yaml.pretty(openApi));
+    OutputFormat outputFormat = config.getOutputFormat();
+    File file = new File(outputDir, "openapi." + outputFormat.extension());
+    write(file, generateOpenApiContent(openApi, outputFormat, config.getOutputSorted()));
   }
 
   private static void write(File file, String source) throws IOException {
