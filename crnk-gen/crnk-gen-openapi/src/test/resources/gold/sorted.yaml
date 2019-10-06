@@ -22,7 +22,7 @@ paths:
       x-amazon-apigateway-integration:
         httpMethod: GET
         passthroughBehavior: when_no_match
-        type: http
         requestParameters:
           integration.request.path.TaskId: method.request.path.TaskId
+        type: http
         uri: /api/public/todo/simpleTasks/{TaskId}

@@ -2,8 +2,8 @@ package io.crnk.gen.openapi.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.annotations.VisibleForTesting;
 import io.crnk.gen.openapi.OpenAPIGeneratorConfig;
 import io.crnk.gen.openapi.OutputFormat;
@@ -143,7 +143,7 @@ public class OASGenerator {
   static String generateOpenApiContent(OpenAPI openApi, OutputFormat outputFormat, Boolean sort) {
     if (sort) {
       ObjectMapper objectMapper = outputFormat.mapper();
-      objectMapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+      objectMapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
       try {
         return objectMapper.writer(new DefaultPrettyPrinter()).writeValueAsString(openApi);
       } catch (JsonProcessingException e){
