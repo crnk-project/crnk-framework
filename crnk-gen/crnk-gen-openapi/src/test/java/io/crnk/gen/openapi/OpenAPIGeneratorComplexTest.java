@@ -74,6 +74,7 @@ public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
     generatorModule = new OpenAPIGeneratorModule();
     generatorModule.getConfig().setBuildDir(buildDir);
     generatorModule.initDefaults(buildDir);
+    generatorModule.getConfig().setOutputSorted(true);  // Ensures deterministic output
     generatorModule.generate(metaModule.getLookup());
     // Parsable
     new OpenAPIV3Parser().read(outputPath);

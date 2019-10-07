@@ -1,19 +1,32 @@
 package io.crnk.gen.openapi;
 
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import io.swagger.v3.parser.OpenAPIV3Parser;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Before;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 class OpenAPIGeneratorTestBase {
+  @Before
+  public void resetYamlSingleton() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+     Field instance = Yaml.class.getDeclaredField("mapper");
+     instance.setAccessible(true);
+     instance.set(null, null);
+  }
+
   static void assertJsonAPICompliantPath(String path, PathItem pathItem) {
     if (path.contains("}/relationships")) {
       assertJsonAPICompliantRelationshipsPath(pathItem);
@@ -36,9 +49,26 @@ class OpenAPIGeneratorTestBase {
   }
 
   void compare(String expectedSourceFileName, String actualSourcePath) throws IOException {
-    OpenAPI actualOpenApi = new OpenAPIV3Parser().read(expectedSourceFileName);
-    OpenAPI expectedOpenApi = new OpenAPIV3Parser().read(actualSourcePath);
-    Assert.assertEquals(expectedOpenApi, actualOpenApi);
+    Charset utf8 = Charset.forName("UTF8");
+
+    String expectedSource;
+    try (InputStream in = getClass().getClassLoader().getResourceAsStream(expectedSourceFileName)) {
+      expectedSource = IOUtils.toString(in, utf8);
+    }
+
+    String actualSource;
+    try (FileInputStream in = new FileInputStream(new File(actualSourcePath))) {
+      actualSource = IOUtils.toString(in, utf8);
+    }
+
+    expectedSource = expectedSource.replace("\r\n", "\n");
+
+    String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
+    String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
+    for (int i = 0; i < expectedLines.length; i++) {
+      Assert.assertEquals("line: " + i + ", " + expectedLines[i], expectedLines[i], actualLines[i]);
+    }
+    Assert.assertEquals(expectedLines.length, actualLines.length);
   }
 
   private static void assertOperationResponseCodes(Operation operation, List<String> codes) {

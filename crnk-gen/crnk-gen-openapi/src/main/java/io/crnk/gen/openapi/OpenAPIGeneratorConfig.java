@@ -23,6 +23,10 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
 
   private String projectDescription = null;
 
+  private OutputFormat outputFormat;
+
+  private Boolean outputSorted;
+
   private OpenAPI openAPI = null;
 
   /**
@@ -116,5 +120,27 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
 
   public void setProjectDescription(String projectDescription) {
     this.projectDescription = projectDescription;
+  }
+
+  public OutputFormat getOutputFormat() {
+    if (outputFormat == null) {
+      return OutputFormat.YAML;
+    }
+    return outputFormat;
+  }
+
+  public void setOutputFormat(OutputFormat outputFormat) {
+    this.outputFormat = outputFormat;
+  }
+
+  public Boolean getOutputSorted() {
+    if (outputSorted == null) {
+      return false;
+    }
+    return outputSorted;
+  }
+
+  public void setOutputSorted(Boolean outputSorted) {
+    this.outputSorted = outputSorted;
   }
 }

@@ -52,6 +52,7 @@ public class OpenAPIGeneratorSimpleTest extends OpenAPIGeneratorTestBase {
     generatorModule = new OpenAPIGeneratorModule();
     generatorModule.getConfig().setBuildDir(buildDir);
     generatorModule.getConfig().setTemplateName("openapi-template.yml");
+    generatorModule.getConfig().setOutputSorted(true);  // Ensures deterministic output
     generatorModule.initDefaults(buildDir);
     generatorModule.generate(metaModule.getLookup());
     OpenAPI openApi = new OpenAPIV3Parser().read(outputPath);
