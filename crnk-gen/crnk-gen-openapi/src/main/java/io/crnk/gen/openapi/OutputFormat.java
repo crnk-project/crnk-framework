@@ -14,7 +14,7 @@ public enum OutputFormat {
 
     @Override
     public ObjectMapper mapper() {
-      return Json.mapper();
+      return jsonMapper;
     }
 
     @Override
@@ -30,7 +30,7 @@ public enum OutputFormat {
 
     @Override
     public ObjectMapper mapper() {
-      return Yaml.mapper();
+      return yamlMapper;
     }
 
     @Override
@@ -44,5 +44,9 @@ public enum OutputFormat {
   public abstract ObjectMapper mapper();
 
   public abstract String pretty(OpenAPI openAPI);
+
+  private static final ObjectMapper jsonMapper = Json.mapper().copy();
+
+  private static final ObjectMapper yamlMapper = Yaml.mapper().copy();
 
 }
