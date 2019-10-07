@@ -1,7 +1,7 @@
-package io.crnk.test.mock;
+package io.crnk.gen.openapi.mock;
 
 import io.crnk.core.module.Module;
-import io.crnk.test.mock.repository.SimpleTaskRepository;
+import io.crnk.test.mock.TestExceptionMapper;
 import io.crnk.test.mock.repository.TaskRepository;
 
 public class SimpleTestModule implements Module {
