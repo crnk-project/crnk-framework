@@ -1,11 +1,10 @@
-package io.crnk.test.mock.repository;
+package io.crnk.gen.openapi.mock;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.test.mock.models.SimpleTask;
 
 import java.util.Collection;
 import java.util.LinkedList;

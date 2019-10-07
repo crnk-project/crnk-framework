@@ -1,4 +1,4 @@
-package io.crnk.test.mock.models;
+package io.crnk.gen.openapi.mock;
 
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.annotations.JsonApiId;

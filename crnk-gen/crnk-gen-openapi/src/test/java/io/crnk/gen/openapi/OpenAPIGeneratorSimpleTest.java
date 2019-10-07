@@ -5,7 +5,7 @@ import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
-import io.crnk.test.mock.SimpleTestModule;
+import io.crnk.gen.openapi.mock.SimpleTestModule;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
