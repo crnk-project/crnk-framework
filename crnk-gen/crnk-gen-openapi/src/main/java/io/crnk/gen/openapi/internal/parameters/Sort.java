@@ -1,6 +1,6 @@
 package io.crnk.gen.openapi.internal.parameters;
 
-import io.crnk.meta.model.MetaAttribute;
+import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -21,10 +21,7 @@ public class Sort extends AbstractParameterGenerator {
         .in("query")
         .schema(new StringSchema()
             .example(
-                metaResource
-                    .getAttributes()
-                    .stream()
-                    .filter(MetaAttribute::isSortable)
+                OASUtils.sortAttributes(metaResource, true)
                     .map(MetaElement::getName)
                     .collect(joining(","))));
   }

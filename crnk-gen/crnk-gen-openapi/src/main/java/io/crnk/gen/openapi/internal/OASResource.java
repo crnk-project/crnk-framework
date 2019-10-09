@@ -14,8 +14,10 @@ import io.crnk.gen.openapi.internal.responses.ResourceReferenceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourcesResponse;
+import io.crnk.gen.openapi.internal.schemas.PostResourceReference;
 import io.crnk.gen.openapi.internal.schemas.PatchResource;
 import io.crnk.gen.openapi.internal.schemas.PostResource;
+import io.crnk.gen.openapi.internal.schemas.ResourceAttribute;
 import io.crnk.gen.openapi.internal.schemas.ResourceAttributes;
 import io.crnk.gen.openapi.internal.schemas.ResourcePatchAttributes;
 import io.crnk.gen.openapi.internal.schemas.ResourcePostAttributes;
@@ -27,7 +29,6 @@ import io.crnk.gen.openapi.internal.schemas.ResourceSchema;
 import io.crnk.gen.openapi.internal.schemas.ResourcesResponseSchema;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimaryKey;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.Operation;
@@ -38,6 +39,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class OASResource {
 
@@ -59,7 +61,6 @@ public class OASResource {
     this.metaResource = metaResource;
     resourceName = metaResource.getName();
     resourceType = metaResource.getResourceType();
-    initializeAttributes();
     initializeComponentParameters();
     initializeComponentSchemas();
     initializeComponentResponses();
@@ -67,42 +68,15 @@ public class OASResource {
 
   public static Operation addFilters(MetaResource metaResource, Operation operation) {
     // TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
-    operation.getParameters().add(new NestedFilter().$ref());
+    List<Parameter> parameters = operation.getParameters();
+
+    parameters.add(new NestedFilter().$ref());
 
     // Add filter[<>] parameters
     // Only the most basic filters are documented
-    for (MetaElement child : metaResource.getChildren()) {
-      if (child instanceof MetaResourceField) {
-        MetaResourceField metaResourceField = (MetaResourceField) child;
-        if (metaResourceField.isFilterable()) {
-          if (metaResourceField.isLinks() || metaResourceField.isMeta()) {
-            continue;
-          }
-          operation.getParameters().add(new FieldFilter(metaResourceField).parameter());
-        }
-      }
-    }
+    OASUtils.filterAttributes(metaResource, true)
+        .forEach(e -> parameters.add(new FieldFilter(e).parameter()));
     return operation;
-  }
-
-  private void initializeAttributes() {
-    attributes = new HashMap<>();
-    for (MetaElement child : metaResource.getChildren()) {
-      if (child == null) {
-        continue;
-      }
-      if (child instanceof MetaPrimaryKey) {
-        continue;
-      }
-      if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
-        continue;
-      }
-
-      MetaResourceField mrf = (MetaResourceField) child;
-      Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
-      attributeSchema.nullable(mrf.isNullable());
-      attributes.put(mrf.getName(), attributeSchema);
-    }
   }
 
   private void initializeComponentParameters() {
@@ -114,7 +88,11 @@ public class OASResource {
   }
 
   private void initializeComponentSchemas() {
-    componentSchemas = new HashMap<>();
+    componentSchemas = OASUtils.attributes(metaResource, true)
+        .map(e -> new ResourceAttribute(metaResource, e))
+        .collect(Collectors.toMap(ResourceAttribute::getName, ResourceAttribute::schema));
+
+    componentSchemas.put(new PostResourceReference(metaResource).getName(), new PostResourceReference(metaResource).schema());
     componentSchemas.put(new ResourceReference(metaResource).getName(), new ResourceReference(metaResource).schema());
     componentSchemas.put(new ResourceAttributes(metaResource).getName(), new ResourceAttributes(metaResource).schema());
     componentSchemas.put(new ResourcePostAttributes(metaResource).getName(), new ResourcePostAttributes(metaResource).schema());
@@ -134,10 +112,6 @@ public class OASResource {
     componentResponses.put(new ResourcesResponse(metaResource).getName(), new ResourcesResponse(metaResource).response());
     componentResponses.put(new ResourceReferenceResponse(metaResource).getName(), new ResourceReferenceResponse(metaResource).response());
     componentResponses.put(new ResourceReferencesResponse(metaResource).getName(), new ResourceReferencesResponse(metaResource).response());
-  }
-
-  Map<String, Schema> getAttributes() {
-    return attributes;
   }
 
   Map<String, Parameter> getComponentParameters() {

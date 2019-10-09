@@ -36,7 +36,7 @@ components:
       in: query
       name: fields
       schema:
-        default: id,value,post,related,links
+        default: id,value,post,related
         type: string
     commentInclude:
       description: comment relationships to include (csv)
@@ -50,25 +50,20 @@ components:
       name: id
       required: true
       schema:
-        properties:
-          id:
-            type: string
-          postId:
-            type: string
-        type: object
+        $ref: '#/components/schemas/commentidResourceAttribute'
     commentSort:
       description: comment sort order (csv)
       in: query
       name: sort
       schema:
-        example: id,value,post,related,links
+        example: id,value,post,related
         type: string
     headerFields:
       description: header fields to include (csv)
       in: query
       name: fields
       schema:
-        default: id,value,post,related,links
+        default: id,value,post,related
         type: string
     headerInclude:
       description: header relationships to include (csv)
@@ -82,13 +77,13 @@ components:
       name: id
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/headeridResourceAttribute'
     headerSort:
       description: header sort order (csv)
       in: query
       name: sort
       schema:
-        example: id,value,post,related,links
+        example: id,value,post,related
         type: string
     historicTasksFields:
       description: historicTasks fields to include (csv)
@@ -109,8 +104,7 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/historicTasksidResourceAttribute'
     historicTasksSort:
       description: historicTasks sort order (csv)
       in: query
@@ -137,7 +131,7 @@ components:
       name: id
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/nestedRelatedidResourceAttribute'
     nestedRelatedSort:
       description: nestedRelated sort order (csv)
       in: query
@@ -164,7 +158,7 @@ components:
       name: id
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/postidResourceAttribute'
     postSort:
       description: post sort order (csv)
       in: query
@@ -191,8 +185,7 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/primitiveAttributeidResourceAttribute'
     primitiveAttributeSort:
       description: primitiveAttribute sort order (csv)
       in: query
@@ -205,7 +198,7 @@ components:
       in: query
       name: fields
       schema:
-        default: id,name,description,data,tasks,task,links,meta
+        default: id,name,description,data,tasks,task
         type: string
     projectsInclude:
       description: projects relationships to include (csv)
@@ -219,14 +212,13 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/projectsidResourceAttribute'
     projectsSort:
       description: projects sort order (csv)
       in: query
       name: sort
       schema:
-        example: id,name,description,data,tasks,task,links,meta
+        example: id,name,description,data,tasks,task
         type: string
     readOnlyTaskFields:
       description: readOnlyTask fields to include (csv)
@@ -247,8 +239,7 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/readOnlyTaskidResourceAttribute'
     readOnlyTaskSort:
       description: readOnlyTask sort order (csv)
       in: query
@@ -275,8 +266,7 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/relationIdTestidResourceAttribute'
     relationIdTestSort:
       description: relationIdTest sort order (csv)
       in: query
@@ -303,8 +293,7 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/relocatedTaskidResourceAttribute'
     relocatedTaskSort:
       description: relocatedTask sort order (csv)
       in: query
@@ -331,7 +320,7 @@ components:
       name: id
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/renamedIdidResourceAttribute'
     renamedIdSort:
       description: renamedId sort order (csv)
       in: query
@@ -358,8 +347,7 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/scheduleidResourceAttribute'
     scheduleSort:
       description: schedule sort order (csv)
       in: query
@@ -386,8 +374,7 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/scheduleStatusidResourceAttribute'
     scheduleStatusSort:
       description: scheduleStatus sort order (csv)
       in: query
@@ -400,7 +387,7 @@ components:
       in: query
       name: fields
       schema:
-        default: id,name,project,schedule,projects,includedProject,includedProjects,metaInformation,linksInformation,otherTasks,status
+        default: id,name,project,schedule,projects,includedProject,includedProjects,otherTasks,status
         type: string
     tasksInclude:
       description: tasks relationships to include (csv)
@@ -414,14 +401,13 @@ components:
       name: id
       required: true
       schema:
-        format: int64
-        type: integer
+        $ref: '#/components/schemas/tasksidResourceAttribute'
     tasksSort:
       description: tasks sort order (csv)
       in: query
       name: sort
       schema:
-        example: id,name,project,schedule,projects,includedProject,includedProjects,metaInformation,linksInformation,otherTasks,status
+        example: id,name,project,schedule,projects,includedProject,includedProjects,otherTasks,status
         type: string
   responses:
     400:
@@ -983,70 +969,60 @@ components:
       - $ref: '#/components/schemas/commentResourcePatchAttributes'
     commentPostResource:
       allOf:
-      - $ref: '#/components/schemas/commentResourceReference'
+      - $ref: '#/components/schemas/commentPostResourceReference'
       - $ref: '#/components/schemas/commentResourcePostAttributes'
+    commentPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/commentidResourceAttribute'
+        type:
+          description: The JSON:API resource type (Comment)
+          enum:
+          - Comment
+          type: string
+      required:
+      - type
+      type: object
     commentResourceAttributes:
       properties:
         attributes:
           properties:
-            links:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
             post:
-              $ref: '#/components/schemas/postResourceReference'
+              $ref: '#/components/schemas/commentpostResourceAttribute'
             related:
-              $ref: '#/components/schemas/nestedRelatedResourceReference'
+              $ref: '#/components/schemas/commentrelatedResourceAttribute'
             value:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/commentvalueResourceAttribute'
           type: object
       type: object
     commentResourcePatchAttributes:
       properties:
         attributes:
           properties:
-            links:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
             post:
-              $ref: '#/components/schemas/postResourceReference'
+              $ref: '#/components/schemas/commentpostResourceAttribute'
             related:
-              $ref: '#/components/schemas/nestedRelatedResourceReference'
+              $ref: '#/components/schemas/commentrelatedResourceAttribute'
             value:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/commentvalueResourceAttribute'
           type: object
       type: object
     commentResourcePostAttributes:
       properties:
         attributes:
           properties:
-            links:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
             post:
-              $ref: '#/components/schemas/postResourceReference'
+              $ref: '#/components/schemas/commentpostResourceAttribute'
             related:
-              $ref: '#/components/schemas/nestedRelatedResourceReference'
+              $ref: '#/components/schemas/commentrelatedResourceAttribute'
             value:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/commentvalueResourceAttribute'
           type: object
       type: object
     commentResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/commentidResourceAttribute'
         type:
           description: The JSON:API resource type (Comment)
           enum:
@@ -1100,76 +1076,82 @@ components:
             type: array
         required:
         - data
+    commentidResourceAttribute:
+      description: The JSON:API resource ID
+      nullable: false
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+      type: object
+    commentpostResourceAttribute:
+      $ref: '#/components/schemas/postResourceReference'
+    commentrelatedResourceAttribute:
+      $ref: '#/components/schemas/nestedRelatedResourceReference'
+    commentvalueResourceAttribute:
+      nullable: true
+      type: string
     headerPatchResource:
       allOf:
       - $ref: '#/components/schemas/headerResourceReference'
       - $ref: '#/components/schemas/headerResourcePatchAttributes'
     headerPostResource:
       allOf:
-      - $ref: '#/components/schemas/headerResourceReference'
+      - $ref: '#/components/schemas/headerPostResourceReference'
       - $ref: '#/components/schemas/headerResourcePostAttributes'
+    headerPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/headeridResourceAttribute'
+        type:
+          description: The JSON:API resource type (Header)
+          enum:
+          - Header
+          type: string
+      required:
+      - type
+      type: object
     headerResourceAttributes:
       properties:
         attributes:
           properties:
-            links:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
             post:
-              $ref: '#/components/schemas/postResourceReference'
+              $ref: '#/components/schemas/headerpostResourceAttribute'
             related:
-              $ref: '#/components/schemas/nestedRelatedResourceReference'
+              $ref: '#/components/schemas/headerrelatedResourceAttribute'
             value:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/headervalueResourceAttribute'
           type: object
       type: object
     headerResourcePatchAttributes:
       properties:
         attributes:
           properties:
-            links:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
             post:
-              $ref: '#/components/schemas/postResourceReference'
+              $ref: '#/components/schemas/headerpostResourceAttribute'
             related:
-              $ref: '#/components/schemas/nestedRelatedResourceReference'
+              $ref: '#/components/schemas/headerrelatedResourceAttribute'
             value:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/headervalueResourceAttribute'
           type: object
       type: object
     headerResourcePostAttributes:
       properties:
         attributes:
           properties:
-            links:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
             post:
-              $ref: '#/components/schemas/postResourceReference'
+              $ref: '#/components/schemas/headerpostResourceAttribute'
             related:
-              $ref: '#/components/schemas/nestedRelatedResourceReference'
+              $ref: '#/components/schemas/headerrelatedResourceAttribute'
             value:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/headervalueResourceAttribute'
           type: object
       type: object
     headerResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/headeridResourceAttribute'
         type:
           description: The JSON:API resource type (Header)
           enum:
@@ -1223,21 +1205,43 @@ components:
             type: array
         required:
         - data
+    headeridResourceAttribute:
+      description: The JSON:API resource ID
+      nullable: false
+      type: string
+    headerpostResourceAttribute:
+      $ref: '#/components/schemas/postResourceReference'
+    headerrelatedResourceAttribute:
+      $ref: '#/components/schemas/nestedRelatedResourceReference'
+    headervalueResourceAttribute:
+      nullable: true
+      type: string
     historicTasksPatchResource:
       allOf:
       - $ref: '#/components/schemas/historicTasksResourceReference'
       - $ref: '#/components/schemas/historicTasksResourcePatchAttributes'
     historicTasksPostResource:
       allOf:
-      - $ref: '#/components/schemas/historicTasksResourceReference'
+      - $ref: '#/components/schemas/historicTasksPostResourceReference'
       - $ref: '#/components/schemas/historicTasksResourcePostAttributes'
+    historicTasksPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/historicTasksidResourceAttribute'
+        type:
+          description: The JSON:API resource type (HistoricTasks)
+          enum:
+          - HistoricTasks
+          type: string
+      required:
+      - type
+      type: object
     historicTasksResourceAttributes:
       properties:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/historicTasksnameResourceAttribute'
           type: object
       type: object
     historicTasksResourcePatchAttributes:
@@ -1245,8 +1249,7 @@ components:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/historicTasksnameResourceAttribute'
           type: object
       type: object
     historicTasksResourcePostAttributes:
@@ -1254,15 +1257,13 @@ components:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/historicTasksnameResourceAttribute'
           type: object
       type: object
     historicTasksResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/historicTasksidResourceAttribute'
         type:
           description: The JSON:API resource type (HistoricTasks)
           enum:
@@ -1316,14 +1317,34 @@ components:
             type: array
         required:
         - data
+    historicTasksidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    historicTasksnameResourceAttribute:
+      nullable: true
+      type: string
     nestedRelatedPatchResource:
       allOf:
       - $ref: '#/components/schemas/nestedRelatedResourceReference'
       - $ref: '#/components/schemas/nestedRelatedResourcePatchAttributes'
     nestedRelatedPostResource:
       allOf:
-      - $ref: '#/components/schemas/nestedRelatedResourceReference'
+      - $ref: '#/components/schemas/nestedRelatedPostResourceReference'
       - $ref: '#/components/schemas/nestedRelatedResourcePostAttributes'
+    nestedRelatedPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/nestedRelatedidResourceAttribute'
+        type:
+          description: The JSON:API resource type (NestedRelated)
+          enum:
+          - NestedRelated
+          type: string
+      required:
+      - type
+      type: object
     nestedRelatedResourceAttributes:
       properties:
         attributes:
@@ -1345,8 +1366,7 @@ components:
     nestedRelatedResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/nestedRelatedidResourceAttribute'
         type:
           description: The JSON:API resource type (NestedRelated)
           enum:
@@ -1400,26 +1420,38 @@ components:
             type: array
         required:
         - data
+    nestedRelatedidResourceAttribute:
+      description: The JSON:API resource ID
+      nullable: false
+      type: string
     postPatchResource:
       allOf:
       - $ref: '#/components/schemas/postResourceReference'
       - $ref: '#/components/schemas/postResourcePatchAttributes'
     postPostResource:
       allOf:
-      - $ref: '#/components/schemas/postResourceReference'
+      - $ref: '#/components/schemas/postPostResourceReference'
       - $ref: '#/components/schemas/postResourcePostAttributes'
+    postPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/postidResourceAttribute'
+        type:
+          description: The JSON:API resource type (Post)
+          enum:
+          - Post
+          type: string
+      required:
+      - type
+      type: object
     postResourceAttributes:
       properties:
         attributes:
           properties:
             comments:
-              items:
-                $ref: '#/components/schemas/commentResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/postcommentsResourceAttribute'
             header:
-              $ref: '#/components/schemas/headerResourceReference'
+              $ref: '#/components/schemas/postheaderResourceAttribute'
           type: object
       type: object
     postResourcePatchAttributes:
@@ -1427,13 +1459,9 @@ components:
         attributes:
           properties:
             comments:
-              items:
-                $ref: '#/components/schemas/commentResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/postcommentsResourceAttribute'
             header:
-              $ref: '#/components/schemas/headerResourceReference'
+              $ref: '#/components/schemas/postheaderResourceAttribute'
           type: object
       type: object
     postResourcePostAttributes:
@@ -1441,20 +1469,15 @@ components:
         attributes:
           properties:
             comments:
-              items:
-                $ref: '#/components/schemas/commentResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/postcommentsResourceAttribute'
             header:
-              $ref: '#/components/schemas/headerResourceReference'
+              $ref: '#/components/schemas/postheaderResourceAttribute'
           type: object
       type: object
     postResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/postidResourceAttribute'
         type:
           description: The JSON:API resource type (Post)
           enum:
@@ -1508,111 +1531,88 @@ components:
             type: array
         required:
         - data
+    postcommentsResourceAttribute:
+      items:
+        $ref: '#/components/schemas/commentResourceReference'
+      nullable: true
+      type: array
+      uniqueItems: false
+    postheaderResourceAttribute:
+      $ref: '#/components/schemas/headerResourceReference'
+    postidResourceAttribute:
+      description: The JSON:API resource ID
+      nullable: false
+      type: string
     primitiveAttributePatchResource:
       allOf:
       - $ref: '#/components/schemas/primitiveAttributeResourceReference'
       - $ref: '#/components/schemas/primitiveAttributeResourcePatchAttributes'
     primitiveAttributePostResource:
       allOf:
-      - $ref: '#/components/schemas/primitiveAttributeResourceReference'
+      - $ref: '#/components/schemas/primitiveAttributePostResourceReference'
       - $ref: '#/components/schemas/primitiveAttributeResourcePostAttributes'
+    primitiveAttributePostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/primitiveAttributeidResourceAttribute'
+        type:
+          description: The JSON:API resource type (PrimitiveAttribute)
+          enum:
+          - PrimitiveAttribute
+          type: string
+      required:
+      - type
+      type: object
     primitiveAttributeResourceAttributes:
       properties:
         attributes:
           properties:
             arrayNodeValue:
-              items: {}
-              nullable: true
-              type: array
+              $ref: '#/components/schemas/primitiveAttributearrayNodeValueResourceAttribute'
             booleanValue:
-              nullable: false
-              type: boolean
+              $ref: '#/components/schemas/primitiveAttributebooleanValueResourceAttribute'
             dateValue:
-              format: date
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributedateValueResourceAttribute'
             doubleValue:
-              format: double
-              nullable: false
-              type: number
+              $ref: '#/components/schemas/primitiveAttributedoubleValueResourceAttribute'
             floatValue:
-              format: float
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributefloatValueResourceAttribute'
             intValue:
-              format: int32
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributeintValueResourceAttribute'
             jsonNodeValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributejsonNodeValueResourceAttribute'
             longValue:
-              format: int64
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributelongValueResourceAttribute'
             mapValueWithEnumKey:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributemapValueWithEnumKeyResourceAttribute'
             mapValueWithListValue:
-              items:
-                type: string
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/primitiveAttributemapValueWithListValueResourceAttribute'
             mapValueWithSetValue:
-              items:
-                type: string
-              nullable: true
-              type: array
-              uniqueItems: true
+              $ref: '#/components/schemas/primitiveAttributemapValueWithSetValueResourceAttribute'
             nullableBooleanValue:
-              nullable: true
-              type: boolean
+              $ref: '#/components/schemas/primitiveAttributenullableBooleanValueResourceAttribute'
             nullableByteValue:
-              format: byte
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributenullableByteValueResourceAttribute'
             nullableDoubleValue:
-              format: double
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributenullableDoubleValueResourceAttribute'
             nullableFloatValue:
-              format: float
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributenullableFloatValueResourceAttribute'
             nullableIntegerValue:
-              format: int32
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableIntegerValueResourceAttribute'
             nullableLongValue:
-              format: int64
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableLongValueResourceAttribute'
             nullableShortValue:
-              format: int32
-              maximum: 32767
-              minimum: -32768
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableShortValueResourceAttribute'
             objectNodeValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributeobjectNodeValueResourceAttribute'
             objectValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributeobjectValueResourceAttribute'
             shortValue:
-              format: int32
-              maximum: 32767
-              minimum: -32768
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributeshortValueResourceAttribute'
             stringValue:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributestringValueResourceAttribute'
             uuidValue:
-              format: uuid
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributeuuidValueResourceAttribute'
           type: object
       type: object
     primitiveAttributeResourcePatchAttributes:
@@ -1620,98 +1620,51 @@ components:
         attributes:
           properties:
             arrayNodeValue:
-              items: {}
-              nullable: true
-              type: array
+              $ref: '#/components/schemas/primitiveAttributearrayNodeValueResourceAttribute'
             booleanValue:
-              nullable: false
-              type: boolean
+              $ref: '#/components/schemas/primitiveAttributebooleanValueResourceAttribute'
             dateValue:
-              format: date
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributedateValueResourceAttribute'
             doubleValue:
-              format: double
-              nullable: false
-              type: number
+              $ref: '#/components/schemas/primitiveAttributedoubleValueResourceAttribute'
             floatValue:
-              format: float
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributefloatValueResourceAttribute'
             intValue:
-              format: int32
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributeintValueResourceAttribute'
             jsonNodeValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributejsonNodeValueResourceAttribute'
             longValue:
-              format: int64
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributelongValueResourceAttribute'
             mapValueWithEnumKey:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributemapValueWithEnumKeyResourceAttribute'
             mapValueWithListValue:
-              items:
-                type: string
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/primitiveAttributemapValueWithListValueResourceAttribute'
             mapValueWithSetValue:
-              items:
-                type: string
-              nullable: true
-              type: array
-              uniqueItems: true
+              $ref: '#/components/schemas/primitiveAttributemapValueWithSetValueResourceAttribute'
             nullableBooleanValue:
-              nullable: true
-              type: boolean
+              $ref: '#/components/schemas/primitiveAttributenullableBooleanValueResourceAttribute'
             nullableByteValue:
-              format: byte
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributenullableByteValueResourceAttribute'
             nullableDoubleValue:
-              format: double
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributenullableDoubleValueResourceAttribute'
             nullableFloatValue:
-              format: float
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributenullableFloatValueResourceAttribute'
             nullableIntegerValue:
-              format: int32
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableIntegerValueResourceAttribute'
             nullableLongValue:
-              format: int64
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableLongValueResourceAttribute'
             nullableShortValue:
-              format: int32
-              maximum: 32767
-              minimum: -32768
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableShortValueResourceAttribute'
             objectNodeValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributeobjectNodeValueResourceAttribute'
             objectValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributeobjectValueResourceAttribute'
             shortValue:
-              format: int32
-              maximum: 32767
-              minimum: -32768
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributeshortValueResourceAttribute'
             stringValue:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributestringValueResourceAttribute'
             uuidValue:
-              format: uuid
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributeuuidValueResourceAttribute'
           type: object
       type: object
     primitiveAttributeResourcePostAttributes:
@@ -1719,105 +1672,57 @@ components:
         attributes:
           properties:
             arrayNodeValue:
-              items: {}
-              nullable: true
-              type: array
+              $ref: '#/components/schemas/primitiveAttributearrayNodeValueResourceAttribute'
             booleanValue:
-              nullable: false
-              type: boolean
+              $ref: '#/components/schemas/primitiveAttributebooleanValueResourceAttribute'
             dateValue:
-              format: date
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributedateValueResourceAttribute'
             doubleValue:
-              format: double
-              nullable: false
-              type: number
+              $ref: '#/components/schemas/primitiveAttributedoubleValueResourceAttribute'
             floatValue:
-              format: float
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributefloatValueResourceAttribute'
             intValue:
-              format: int32
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributeintValueResourceAttribute'
             jsonNodeValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributejsonNodeValueResourceAttribute'
             longValue:
-              format: int64
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributelongValueResourceAttribute'
             mapValueWithEnumKey:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributemapValueWithEnumKeyResourceAttribute'
             mapValueWithListValue:
-              items:
-                type: string
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/primitiveAttributemapValueWithListValueResourceAttribute'
             mapValueWithSetValue:
-              items:
-                type: string
-              nullable: true
-              type: array
-              uniqueItems: true
+              $ref: '#/components/schemas/primitiveAttributemapValueWithSetValueResourceAttribute'
             nullableBooleanValue:
-              nullable: true
-              type: boolean
+              $ref: '#/components/schemas/primitiveAttributenullableBooleanValueResourceAttribute'
             nullableByteValue:
-              format: byte
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributenullableByteValueResourceAttribute'
             nullableDoubleValue:
-              format: double
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributenullableDoubleValueResourceAttribute'
             nullableFloatValue:
-              format: float
-              nullable: true
-              type: number
+              $ref: '#/components/schemas/primitiveAttributenullableFloatValueResourceAttribute'
             nullableIntegerValue:
-              format: int32
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableIntegerValueResourceAttribute'
             nullableLongValue:
-              format: int64
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableLongValueResourceAttribute'
             nullableShortValue:
-              format: int32
-              maximum: 32767
-              minimum: -32768
-              nullable: true
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributenullableShortValueResourceAttribute'
             objectNodeValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributeobjectNodeValueResourceAttribute'
             objectValue:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/primitiveAttributeobjectValueResourceAttribute'
             shortValue:
-              format: int32
-              maximum: 32767
-              minimum: -32768
-              nullable: false
-              type: integer
+              $ref: '#/components/schemas/primitiveAttributeshortValueResourceAttribute'
             stringValue:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributestringValueResourceAttribute'
             uuidValue:
-              format: uuid
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/primitiveAttributeuuidValueResourceAttribute'
           type: object
       type: object
     primitiveAttributeResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/primitiveAttributeidResourceAttribute'
         type:
           description: The JSON:API resource type (PrimitiveAttribute)
           enum:
@@ -1871,60 +1776,138 @@ components:
             type: array
         required:
         - data
+    primitiveAttributearrayNodeValueResourceAttribute:
+      items: {}
+      nullable: true
+      type: array
+    primitiveAttributebooleanValueResourceAttribute:
+      nullable: false
+      type: boolean
+    primitiveAttributedateValueResourceAttribute:
+      format: date
+      nullable: true
+      type: string
+    primitiveAttributedoubleValueResourceAttribute:
+      format: double
+      nullable: false
+      type: number
+    primitiveAttributefloatValueResourceAttribute:
+      format: float
+      nullable: true
+      type: number
+    primitiveAttributeidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    primitiveAttributeintValueResourceAttribute:
+      format: int32
+      nullable: false
+      type: integer
+    primitiveAttributejsonNodeValueResourceAttribute:
+      nullable: true
+      type: object
+    primitiveAttributelongValueResourceAttribute:
+      format: int64
+      nullable: false
+      type: integer
+    primitiveAttributemapValueWithEnumKeyResourceAttribute:
+      nullable: true
+      type: string
+    primitiveAttributemapValueWithListValueResourceAttribute:
+      items:
+        type: string
+      nullable: true
+      type: array
+      uniqueItems: false
+    primitiveAttributemapValueWithSetValueResourceAttribute:
+      items:
+        type: string
+      nullable: true
+      type: array
+      uniqueItems: true
+    primitiveAttributenullableBooleanValueResourceAttribute:
+      nullable: true
+      type: boolean
+    primitiveAttributenullableByteValueResourceAttribute:
+      format: byte
+      nullable: true
+      type: string
+    primitiveAttributenullableDoubleValueResourceAttribute:
+      format: double
+      nullable: true
+      type: number
+    primitiveAttributenullableFloatValueResourceAttribute:
+      format: float
+      nullable: true
+      type: number
+    primitiveAttributenullableIntegerValueResourceAttribute:
+      format: int32
+      nullable: true
+      type: integer
+    primitiveAttributenullableLongValueResourceAttribute:
+      format: int64
+      nullable: true
+      type: integer
+    primitiveAttributenullableShortValueResourceAttribute:
+      format: int32
+      maximum: 32767
+      minimum: -32768
+      nullable: true
+      type: integer
+    primitiveAttributeobjectNodeValueResourceAttribute:
+      nullable: true
+      type: object
+    primitiveAttributeobjectValueResourceAttribute:
+      nullable: true
+      type: object
+    primitiveAttributeshortValueResourceAttribute:
+      format: int32
+      maximum: 32767
+      minimum: -32768
+      nullable: false
+      type: integer
+    primitiveAttributestringValueResourceAttribute:
+      nullable: true
+      type: string
+    primitiveAttributeuuidValueResourceAttribute:
+      format: uuid
+      nullable: true
+      type: string
     projectsPatchResource:
       allOf:
       - $ref: '#/components/schemas/projectsResourceReference'
       - $ref: '#/components/schemas/projectsResourcePatchAttributes'
     projectsPostResource:
       allOf:
-      - $ref: '#/components/schemas/projectsResourceReference'
+      - $ref: '#/components/schemas/projectsPostResourceReference'
       - $ref: '#/components/schemas/projectsResourcePostAttributes'
+    projectsPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/projectsidResourceAttribute'
+        type:
+          description: The JSON:API resource type (Projects)
+          enum:
+          - Projects
+          type: string
+      required:
+      - type
+      type: object
     projectsResourceAttributes:
       properties:
         attributes:
           properties:
             data:
-              nullable: true
-              properties:
-                customData:
-                  type: string
-                data:
-                  type: string
-                due:
-                  format: date-time
-                  type: string
-                keywords:
-                  items:
-                    type: string
-                  type: array
-                  uniqueItems: false
-              type: object
+              $ref: '#/components/schemas/projectsdataResourceAttribute'
             description:
-              nullable: true
-              type: string
-            links:
-              nullable: true
-              properties:
-                value:
-                  type: string
-              type: object
-            meta:
-              nullable: true
-              properties:
-                value:
-                  type: string
-              type: object
+              $ref: '#/components/schemas/projectsdescriptionResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/projectsnameResourceAttribute'
             task:
-              $ref: '#/components/schemas/tasksResourceReference'
+              $ref: '#/components/schemas/projectstaskResourceAttribute'
             tasks:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/projectstasksResourceAttribute'
           type: object
       type: object
     projectsResourcePatchAttributes:
@@ -1932,47 +1915,15 @@ components:
         attributes:
           properties:
             data:
-              nullable: true
-              properties:
-                customData:
-                  type: string
-                data:
-                  type: string
-                due:
-                  format: date-time
-                  type: string
-                keywords:
-                  items:
-                    type: string
-                  type: array
-                  uniqueItems: false
-              type: object
+              $ref: '#/components/schemas/projectsdataResourceAttribute'
             description:
-              nullable: true
-              type: string
-            links:
-              nullable: true
-              properties:
-                value:
-                  type: string
-              type: object
-            meta:
-              nullable: true
-              properties:
-                value:
-                  type: string
-              type: object
+              $ref: '#/components/schemas/projectsdescriptionResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/projectsnameResourceAttribute'
             task:
-              $ref: '#/components/schemas/tasksResourceReference'
+              $ref: '#/components/schemas/projectstaskResourceAttribute'
             tasks:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/projectstasksResourceAttribute'
           type: object
       type: object
     projectsResourcePostAttributes:
@@ -1980,54 +1931,21 @@ components:
         attributes:
           properties:
             data:
-              nullable: true
-              properties:
-                customData:
-                  type: string
-                data:
-                  type: string
-                due:
-                  format: date-time
-                  type: string
-                keywords:
-                  items:
-                    type: string
-                  type: array
-                  uniqueItems: false
-              type: object
+              $ref: '#/components/schemas/projectsdataResourceAttribute'
             description:
-              nullable: true
-              type: string
-            links:
-              nullable: true
-              properties:
-                value:
-                  type: string
-              type: object
-            meta:
-              nullable: true
-              properties:
-                value:
-                  type: string
-              type: object
+              $ref: '#/components/schemas/projectsdescriptionResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/projectsnameResourceAttribute'
             task:
-              $ref: '#/components/schemas/tasksResourceReference'
+              $ref: '#/components/schemas/projectstaskResourceAttribute'
             tasks:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/projectstasksResourceAttribute'
           type: object
       type: object
     projectsResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/projectsidResourceAttribute'
         type:
           description: The JSON:API resource type (Projects)
           enum:
@@ -2081,21 +1999,67 @@ components:
             type: array
         required:
         - data
+    projectsdataResourceAttribute:
+      nullable: true
+      properties:
+        customData:
+          type: string
+        data:
+          type: string
+        due:
+          format: date-time
+          type: string
+        keywords:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
+    projectsdescriptionResourceAttribute:
+      nullable: true
+      type: string
+    projectsidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    projectsnameResourceAttribute:
+      nullable: true
+      type: string
+    projectstaskResourceAttribute:
+      $ref: '#/components/schemas/tasksResourceReference'
+    projectstasksResourceAttribute:
+      items:
+        $ref: '#/components/schemas/tasksResourceReference'
+      nullable: true
+      type: array
+      uniqueItems: false
     readOnlyTaskPatchResource:
       allOf:
       - $ref: '#/components/schemas/readOnlyTaskResourceReference'
       - $ref: '#/components/schemas/readOnlyTaskResourcePatchAttributes'
     readOnlyTaskPostResource:
       allOf:
-      - $ref: '#/components/schemas/readOnlyTaskResourceReference'
+      - $ref: '#/components/schemas/readOnlyTaskPostResourceReference'
       - $ref: '#/components/schemas/readOnlyTaskResourcePostAttributes'
+    readOnlyTaskPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/readOnlyTaskidResourceAttribute'
+        type:
+          description: The JSON:API resource type (ReadOnlyTask)
+          enum:
+          - ReadOnlyTask
+          type: string
+      required:
+      - type
+      type: object
     readOnlyTaskResourceAttributes:
       properties:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/readOnlyTasknameResourceAttribute'
           type: object
       type: object
     readOnlyTaskResourcePatchAttributes:
@@ -2113,8 +2077,7 @@ components:
     readOnlyTaskResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/readOnlyTaskidResourceAttribute'
         type:
           description: The JSON:API resource type (ReadOnlyTask)
           enum:
@@ -2168,41 +2131,56 @@ components:
             type: array
         required:
         - data
+    readOnlyTaskidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    readOnlyTasknameResourceAttribute:
+      nullable: true
+      type: string
     relationIdTestPatchResource:
       allOf:
       - $ref: '#/components/schemas/relationIdTestResourceReference'
       - $ref: '#/components/schemas/relationIdTestResourcePatchAttributes'
     relationIdTestPostResource:
       allOf:
-      - $ref: '#/components/schemas/relationIdTestResourceReference'
+      - $ref: '#/components/schemas/relationIdTestPostResourceReference'
       - $ref: '#/components/schemas/relationIdTestResourcePostAttributes'
+    relationIdTestPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/relationIdTestidResourceAttribute'
+        type:
+          description: The JSON:API resource type (RelationIdTest)
+          enum:
+          - RelationIdTest
+          type: string
+      required:
+      - type
+      type: object
     relationIdTestResourceAttributes:
       properties:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/relationIdTestnameResourceAttribute'
             testLookupAlways:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupAlwaysResourceAttribute'
             testLookupNone:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupNoneResourceAttribute'
             testLookupWhenNull:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupWhenNullResourceAttribute'
             testMultipleValues:
-              items:
-                $ref: '#/components/schemas/scheduleResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/relationIdTesttestMultipleValuesResourceAttribute'
             testNested:
-              $ref: '#/components/schemas/relationIdTestResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestNestedResourceAttribute'
             testResourceIdRef:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestResourceIdRefResourceAttribute'
             testSerializeEager:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestSerializeEagerResourceAttribute'
             testSerializeOnlyId:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestSerializeOnlyIdResourceAttribute'
           type: object
       type: object
     relationIdTestResourcePatchAttributes:
@@ -2210,28 +2188,23 @@ components:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/relationIdTestnameResourceAttribute'
             testLookupAlways:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupAlwaysResourceAttribute'
             testLookupNone:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupNoneResourceAttribute'
             testLookupWhenNull:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupWhenNullResourceAttribute'
             testMultipleValues:
-              items:
-                $ref: '#/components/schemas/scheduleResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/relationIdTesttestMultipleValuesResourceAttribute'
             testNested:
-              $ref: '#/components/schemas/relationIdTestResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestNestedResourceAttribute'
             testResourceIdRef:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestResourceIdRefResourceAttribute'
             testSerializeEager:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestSerializeEagerResourceAttribute'
             testSerializeOnlyId:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestSerializeOnlyIdResourceAttribute'
           type: object
       type: object
     relationIdTestResourcePostAttributes:
@@ -2239,35 +2212,29 @@ components:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/relationIdTestnameResourceAttribute'
             testLookupAlways:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupAlwaysResourceAttribute'
             testLookupNone:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupNoneResourceAttribute'
             testLookupWhenNull:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestLookupWhenNullResourceAttribute'
             testMultipleValues:
-              items:
-                $ref: '#/components/schemas/scheduleResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/relationIdTesttestMultipleValuesResourceAttribute'
             testNested:
-              $ref: '#/components/schemas/relationIdTestResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestNestedResourceAttribute'
             testResourceIdRef:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestResourceIdRefResourceAttribute'
             testSerializeEager:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestSerializeEagerResourceAttribute'
             testSerializeOnlyId:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/relationIdTesttestSerializeOnlyIdResourceAttribute'
           type: object
       type: object
     relationIdTestResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/relationIdTestidResourceAttribute'
         type:
           description: The JSON:API resource type (RelationIdTest)
           enum:
@@ -2321,21 +2288,60 @@ components:
             type: array
         required:
         - data
+    relationIdTestidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    relationIdTestnameResourceAttribute:
+      nullable: true
+      type: string
+    relationIdTesttestLookupAlwaysResourceAttribute:
+      $ref: '#/components/schemas/scheduleResourceReference'
+    relationIdTesttestLookupNoneResourceAttribute:
+      $ref: '#/components/schemas/scheduleResourceReference'
+    relationIdTesttestLookupWhenNullResourceAttribute:
+      $ref: '#/components/schemas/scheduleResourceReference'
+    relationIdTesttestMultipleValuesResourceAttribute:
+      items:
+        $ref: '#/components/schemas/scheduleResourceReference'
+      nullable: true
+      type: array
+      uniqueItems: false
+    relationIdTesttestNestedResourceAttribute:
+      $ref: '#/components/schemas/relationIdTestResourceReference'
+    relationIdTesttestResourceIdRefResourceAttribute:
+      $ref: '#/components/schemas/scheduleResourceReference'
+    relationIdTesttestSerializeEagerResourceAttribute:
+      $ref: '#/components/schemas/scheduleResourceReference'
+    relationIdTesttestSerializeOnlyIdResourceAttribute:
+      $ref: '#/components/schemas/scheduleResourceReference'
     relocatedTaskPatchResource:
       allOf:
       - $ref: '#/components/schemas/relocatedTaskResourceReference'
       - $ref: '#/components/schemas/relocatedTaskResourcePatchAttributes'
     relocatedTaskPostResource:
       allOf:
-      - $ref: '#/components/schemas/relocatedTaskResourceReference'
+      - $ref: '#/components/schemas/relocatedTaskPostResourceReference'
       - $ref: '#/components/schemas/relocatedTaskResourcePostAttributes'
+    relocatedTaskPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/relocatedTaskidResourceAttribute'
+        type:
+          description: The JSON:API resource type (RelocatedTask)
+          enum:
+          - RelocatedTask
+          type: string
+      required:
+      - type
+      type: object
     relocatedTaskResourceAttributes:
       properties:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/relocatedTasknameResourceAttribute'
           type: object
       type: object
     relocatedTaskResourcePatchAttributes:
@@ -2343,8 +2349,7 @@ components:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/relocatedTasknameResourceAttribute'
           type: object
       type: object
     relocatedTaskResourcePostAttributes:
@@ -2352,15 +2357,13 @@ components:
         attributes:
           properties:
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/relocatedTasknameResourceAttribute'
           type: object
       type: object
     relocatedTaskResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/relocatedTaskidResourceAttribute'
         type:
           description: The JSON:API resource type (RelocatedTask)
           enum:
@@ -2414,14 +2417,34 @@ components:
             type: array
         required:
         - data
+    relocatedTaskidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    relocatedTasknameResourceAttribute:
+      nullable: true
+      type: string
     renamedIdPatchResource:
       allOf:
       - $ref: '#/components/schemas/renamedIdResourceReference'
       - $ref: '#/components/schemas/renamedIdResourcePatchAttributes'
     renamedIdPostResource:
       allOf:
-      - $ref: '#/components/schemas/renamedIdResourceReference'
+      - $ref: '#/components/schemas/renamedIdPostResourceReference'
       - $ref: '#/components/schemas/renamedIdResourcePostAttributes'
+    renamedIdPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/renamedIdidResourceAttribute'
+        type:
+          description: The JSON:API resource type (RenamedId)
+          enum:
+          - RenamedId
+          type: string
+      required:
+      - type
+      type: object
     renamedIdResourceAttributes:
       properties:
         attributes:
@@ -2443,8 +2466,7 @@ components:
     renamedIdResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/renamedIdidResourceAttribute'
         type:
           description: The JSON:API resource type (RenamedId)
           enum:
@@ -2498,46 +2520,50 @@ components:
             type: array
         required:
         - data
+    renamedIdidResourceAttribute:
+      description: The JSON:API resource ID
+      nullable: false
+      type: string
     schedulePatchResource:
       allOf:
       - $ref: '#/components/schemas/scheduleResourceReference'
       - $ref: '#/components/schemas/scheduleResourcePatchAttributes'
     schedulePostResource:
       allOf:
-      - $ref: '#/components/schemas/scheduleResourceReference'
+      - $ref: '#/components/schemas/schedulePostResourceReference'
       - $ref: '#/components/schemas/scheduleResourcePostAttributes'
+    schedulePostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/scheduleidResourceAttribute'
+        type:
+          description: The JSON:API resource type (Schedule)
+          enum:
+          - Schedule
+          type: string
+      required:
+      - type
+      type: object
     scheduleResourceAttributes:
       properties:
         attributes:
           properties:
             customData:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/schedulecustomDataResourceAttribute'
             delayed:
-              nullable: false
-              type: boolean
+              $ref: '#/components/schemas/scheduledelayedResourceAttribute'
             description:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/scheduledescriptionResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/schedulenameResourceAttribute'
             project:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/scheduleprojectResourceAttribute'
             projects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/scheduleprojectsResourceAttribute'
             status:
-              $ref: '#/components/schemas/scheduleStatusResourceReference'
+              $ref: '#/components/schemas/schedulestatusResourceAttribute'
             taskSet:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: true
+              $ref: '#/components/schemas/scheduletaskSetResourceAttribute'
           type: object
       type: object
     scheduleResourcePatchAttributes:
@@ -2545,33 +2571,21 @@ components:
         attributes:
           properties:
             customData:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/schedulecustomDataResourceAttribute'
             delayed:
-              nullable: false
-              type: boolean
+              $ref: '#/components/schemas/scheduledelayedResourceAttribute'
             description:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/scheduledescriptionResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/schedulenameResourceAttribute'
             project:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/scheduleprojectResourceAttribute'
             projects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/scheduleprojectsResourceAttribute'
             status:
-              $ref: '#/components/schemas/scheduleStatusResourceReference'
+              $ref: '#/components/schemas/schedulestatusResourceAttribute'
             taskSet:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: true
+              $ref: '#/components/schemas/scheduletaskSetResourceAttribute'
           type: object
       type: object
     scheduleResourcePostAttributes:
@@ -2579,40 +2593,27 @@ components:
         attributes:
           properties:
             customData:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/schedulecustomDataResourceAttribute'
             delayed:
-              nullable: false
-              type: boolean
+              $ref: '#/components/schemas/scheduledelayedResourceAttribute'
             description:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/scheduledescriptionResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/schedulenameResourceAttribute'
             project:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/scheduleprojectResourceAttribute'
             projects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/scheduleprojectsResourceAttribute'
             status:
-              $ref: '#/components/schemas/scheduleStatusResourceReference'
+              $ref: '#/components/schemas/schedulestatusResourceAttribute'
             taskSet:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: true
+              $ref: '#/components/schemas/scheduletaskSetResourceAttribute'
           type: object
       type: object
     scheduleResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/scheduleidResourceAttribute'
         type:
           description: The JSON:API resource type (Schedule)
           enum:
@@ -2672,15 +2673,26 @@ components:
       - $ref: '#/components/schemas/scheduleStatusResourcePatchAttributes'
     scheduleStatusPostResource:
       allOf:
-      - $ref: '#/components/schemas/scheduleStatusResourceReference'
+      - $ref: '#/components/schemas/scheduleStatusPostResourceReference'
       - $ref: '#/components/schemas/scheduleStatusResourcePostAttributes'
+    scheduleStatusPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/scheduleStatusidResourceAttribute'
+        type:
+          description: The JSON:API resource type (ScheduleStatus)
+          enum:
+          - ScheduleStatus
+          type: string
+      required:
+      - type
+      type: object
     scheduleStatusResourceAttributes:
       properties:
         attributes:
           properties:
             description:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/scheduleStatusdescriptionResourceAttribute'
           type: object
       type: object
     scheduleStatusResourcePatchAttributes:
@@ -2688,8 +2700,7 @@ components:
         attributes:
           properties:
             description:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/scheduleStatusdescriptionResourceAttribute'
           type: object
       type: object
     scheduleStatusResourcePostAttributes:
@@ -2697,15 +2708,13 @@ components:
         attributes:
           properties:
             description:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/scheduleStatusdescriptionResourceAttribute'
           type: object
       type: object
     scheduleStatusResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/scheduleStatusidResourceAttribute'
         type:
           description: The JSON:API resource type (ScheduleStatus)
           enum:
@@ -2759,61 +2768,87 @@ components:
             type: array
         required:
         - data
+    scheduleStatusdescriptionResourceAttribute:
+      nullable: true
+      type: string
+    scheduleStatusidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    schedulecustomDataResourceAttribute:
+      nullable: true
+      type: string
+    scheduledelayedResourceAttribute:
+      nullable: false
+      type: boolean
+    scheduledescriptionResourceAttribute:
+      nullable: true
+      type: string
+    scheduleidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    schedulenameResourceAttribute:
+      nullable: true
+      type: string
+    scheduleprojectResourceAttribute:
+      $ref: '#/components/schemas/projectsResourceReference'
+    scheduleprojectsResourceAttribute:
+      items:
+        $ref: '#/components/schemas/projectsResourceReference'
+      nullable: true
+      type: array
+      uniqueItems: false
+    schedulestatusResourceAttribute:
+      $ref: '#/components/schemas/scheduleStatusResourceReference'
+    scheduletaskSetResourceAttribute:
+      items:
+        $ref: '#/components/schemas/tasksResourceReference'
+      nullable: true
+      type: array
+      uniqueItems: true
     tasksPatchResource:
       allOf:
       - $ref: '#/components/schemas/tasksResourceReference'
       - $ref: '#/components/schemas/tasksResourcePatchAttributes'
     tasksPostResource:
       allOf:
-      - $ref: '#/components/schemas/tasksResourceReference'
+      - $ref: '#/components/schemas/tasksPostResourceReference'
       - $ref: '#/components/schemas/tasksResourcePostAttributes'
+    tasksPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/tasksidResourceAttribute'
+        type:
+          description: The JSON:API resource type (Tasks)
+          enum:
+          - Tasks
+          type: string
+      required:
+      - type
+      type: object
     tasksResourceAttributes:
       properties:
         attributes:
           properties:
             includedProject:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/tasksincludedProjectResourceAttribute'
             includedProjects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
-            linksInformation:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
-            metaInformation:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/tasksincludedProjectsResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/tasksnameResourceAttribute'
             otherTasks:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/tasksotherTasksResourceAttribute'
             project:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/tasksprojectResourceAttribute'
             projects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/tasksprojectsResourceAttribute'
             schedule:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/tasksscheduleResourceAttribute'
             status:
-              enum:
-              - OPEN
-              - INPROGRESS
-              - CLOSED
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/tasksstatusResourceAttribute'
           type: object
       type: object
     tasksResourcePatchAttributes:
@@ -2821,48 +2856,21 @@ components:
         attributes:
           properties:
             includedProject:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/tasksincludedProjectResourceAttribute'
             includedProjects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
-            linksInformation:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
-            metaInformation:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/tasksincludedProjectsResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/tasksnameResourceAttribute'
             otherTasks:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/tasksotherTasksResourceAttribute'
             project:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/tasksprojectResourceAttribute'
             projects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/tasksprojectsResourceAttribute'
             schedule:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/tasksscheduleResourceAttribute'
             status:
-              enum:
-              - OPEN
-              - INPROGRESS
-              - CLOSED
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/tasksstatusResourceAttribute'
           type: object
       type: object
     tasksResourcePostAttributes:
@@ -2870,55 +2878,27 @@ components:
         attributes:
           properties:
             includedProject:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/tasksincludedProjectResourceAttribute'
             includedProjects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
-            linksInformation:
-              nullable: true
-              properties:
-                self:
-                  type: string
-              type: object
-            metaInformation:
-              nullable: true
-              type: object
+              $ref: '#/components/schemas/tasksincludedProjectsResourceAttribute'
             name:
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/tasksnameResourceAttribute'
             otherTasks:
-              items:
-                $ref: '#/components/schemas/tasksResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/tasksotherTasksResourceAttribute'
             project:
-              $ref: '#/components/schemas/projectsResourceReference'
+              $ref: '#/components/schemas/tasksprojectResourceAttribute'
             projects:
-              items:
-                $ref: '#/components/schemas/projectsResourceReference'
-              nullable: true
-              type: array
-              uniqueItems: false
+              $ref: '#/components/schemas/tasksprojectsResourceAttribute'
             schedule:
-              $ref: '#/components/schemas/scheduleResourceReference'
+              $ref: '#/components/schemas/tasksscheduleResourceAttribute'
             status:
-              enum:
-              - OPEN
-              - INPROGRESS
-              - CLOSED
-              nullable: true
-              type: string
+              $ref: '#/components/schemas/tasksstatusResourceAttribute'
           type: object
       type: object
     tasksResourceReference:
       properties:
         id:
-          description: The JSON:API resource ID
-          type: string
+          $ref: '#/components/schemas/tasksidResourceAttribute'
         type:
           description: The JSON:API resource type (Tasks)
           enum:
@@ -2972,6 +2952,45 @@ components:
             type: array
         required:
         - data
+    tasksidResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    tasksincludedProjectResourceAttribute:
+      $ref: '#/components/schemas/projectsResourceReference'
+    tasksincludedProjectsResourceAttribute:
+      items:
+        $ref: '#/components/schemas/projectsResourceReference'
+      nullable: true
+      type: array
+      uniqueItems: false
+    tasksnameResourceAttribute:
+      nullable: true
+      type: string
+    tasksotherTasksResourceAttribute:
+      items:
+        $ref: '#/components/schemas/tasksResourceReference'
+      nullable: true
+      type: array
+      uniqueItems: false
+    tasksprojectResourceAttribute:
+      $ref: '#/components/schemas/projectsResourceReference'
+    tasksprojectsResourceAttribute:
+      items:
+        $ref: '#/components/schemas/projectsResourceReference'
+      nullable: true
+      type: array
+      uniqueItems: false
+    tasksscheduleResourceAttribute:
+      $ref: '#/components/schemas/scheduleResourceReference'
+    tasksstatusResourceAttribute:
+      enum:
+      - OPEN
+      - INPROGRESS
+      - CLOSED
+      nullable: true
+      type: string
 info:
   description: Generated Description
   title: Generated Title

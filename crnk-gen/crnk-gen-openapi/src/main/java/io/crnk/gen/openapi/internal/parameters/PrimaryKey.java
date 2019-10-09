@@ -1,6 +1,6 @@
 package io.crnk.gen.openapi.internal.parameters;
 
-import io.crnk.gen.openapi.internal.OASUtils;
+import io.crnk.gen.openapi.internal.schemas.ResourceAttribute;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
@@ -21,7 +21,7 @@ public class PrimaryKey extends AbstractParameterGenerator {
           parameter = parameter
               .name(metaElement.getName())
               .in("path")
-              .schema(OASUtils.transformMetaResourceField(((MetaAttribute) metaElement).getType()));
+              .schema(new ResourceAttribute(metaResource, metaAttribute).$ref());
         }
       }
     }
