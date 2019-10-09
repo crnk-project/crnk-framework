@@ -1,5 +1,6 @@
 package io.crnk.gen.openapi.internal.parameters;
 
+import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -20,9 +21,7 @@ public class Fields extends AbstractParameterGenerator {
         .in("query")
         .schema(new StringSchema()
             ._default(
-                metaResource
-                    .getAttributes()
-                    .stream()
+                OASUtils.attributes(metaResource, true)
                     .map(MetaElement::getName)
                     .collect(joining(","))));
   }

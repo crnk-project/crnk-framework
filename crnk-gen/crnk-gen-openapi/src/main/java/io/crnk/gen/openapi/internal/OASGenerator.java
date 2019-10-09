@@ -26,7 +26,6 @@ import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,9 +115,6 @@ public class OASGenerator {
         }
 
         MetaResourceField mrf = (MetaResourceField) child;
-        Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
-        attributeSchema.nullable(mrf.isNullable());
-        oasResource.getAttributes().put(mrf.getName(), attributeSchema);
         if (mrf.isAssociation()) {
           MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
           OASResource relatedOasResource = oasResources.get(relatedMetaResource.getName());

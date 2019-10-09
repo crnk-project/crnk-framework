@@ -16,7 +16,7 @@ public class PostResource extends AbstractSchemaGenerator {
     return new ComposedSchema()
         .allOf(
             Arrays.asList(
-                new ResourceReference(metaResource).$ref(),
+                new PostResourceReference(metaResource).$ref(),
                 new ResourcePostAttributes(metaResource).$ref()));
   }
 }

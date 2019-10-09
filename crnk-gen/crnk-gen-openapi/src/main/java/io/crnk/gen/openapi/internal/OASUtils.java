@@ -8,6 +8,7 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaEnumType;
 import io.crnk.meta.model.MetaLiteral;
 import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimaryKey;
 import io.crnk.meta.model.MetaSetType;
 import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaJsonObject;
@@ -30,8 +31,45 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class OASUtils {
+
+  public static Stream<MetaResourceField> attributes(MetaResource metaResource, boolean includePrimaryKey) {
+    return metaResource.getChildren().stream()
+        .filter(not(MetaPrimaryKey.class::isInstance))
+        .map(MetaResourceField.class::cast)
+        .filter(not(MetaResourceField::isLinks))
+        .filter(not(MetaResourceField::isMeta))
+        .filter(e -> !e.isPrimaryKeyAttribute() || includePrimaryKey);
+  }
+
+  public static Stream<MetaResourceField> postAttributes(MetaResource metaResource, boolean includePrimaryKey) {
+    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isInsertable);
+  }
+
+  public static Stream<MetaResourceField> patchAttributes(MetaResource metaResource, boolean includePrimaryKey) {
+    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isUpdatable);
+  }
+
+  public static Stream<MetaResourceField> filterAttributes(MetaResource metaResource, boolean includePrimaryKey) {
+    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isFilterable);
+  }
+
+  public static Stream<MetaResourceField> sortAttributes(MetaResource metaResource, boolean includePrimaryKey) {
+    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isSortable);
+  }
+
+  public static MetaResourceField getPrimaryKeyMetaResourceField(MetaResource metaResource) {
+    return metaResource.getChildren().stream()
+        .filter(MetaResourceField.class::isInstance)
+        .filter(e -> ((MetaResourceField) e).isPrimaryKeyAttribute())
+        .map(MetaResourceField.class::cast)
+        .findFirst().get();
+  }
+
+  public static <T> Predicate<T> not(Predicate<T> p) { return o -> !p.test(o); }
 
   public static Schema transformMetaResourceField(MetaType metaType) {
     if (metaType instanceof MetaResource) {
@@ -113,7 +151,6 @@ public class OASUtils {
     }
     return merged;
   }
-
 
   static Operation mergeOperations(Operation newOperation, Operation existingOperation) {
     if (existingOperation == null) {
