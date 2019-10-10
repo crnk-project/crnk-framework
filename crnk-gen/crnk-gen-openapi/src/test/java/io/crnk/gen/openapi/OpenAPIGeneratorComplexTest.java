@@ -1,5 +1,9 @@
 package io.crnk.gen.openapi;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.inmemory.InMemoryHttpAdapter;
 import io.crnk.core.boot.CrnkBoot;
@@ -19,10 +23,6 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
 
 public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
   private MetaModule metaModule;
@@ -61,7 +61,7 @@ public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
 
     CrnkBoot boot = new CrnkBoot();
     boot.setServiceDiscovery(new EmptyServiceDiscovery());
-    boot.addModule(new TestModule());
+    boot.addModule(new TestModule().setBulk(false));
     boot.addModule(metaModule);
     boot.boot();
     return boot;

@@ -391,8 +391,9 @@ public class CrnkClient {
 		DefaultRegistryEntryBuilder.contributeFields(moduleRegistry, resourceInformation);
 		ModuleUtils.adaptInformation(resourceInformation, moduleRegistry);
 
-		final ResourceRepository repositoryStub = (ResourceRepository)
-				decorate(new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder));
+		final ResourceRepository repositoryStub = (ResourceRepository) decorate(
+				new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder)
+		);
 
 		// create interface for it!
 		ResourceRepositoryInformation repositoryInformation =
@@ -470,11 +471,10 @@ public class CrnkClient {
 	public <R extends ResourceRepository<?, ?>> R getRepositoryForInterface(Class<R> repositoryInterfaceClass) {
 		init();
 		RepositoryInformationProvider informationBuilder = moduleRegistry.getRepositoryInformationBuilder();
-		PreconditionUtil.verify(informationBuilder.accept(repositoryInterfaceClass), "%s is not a valid repository interface",
-				repositoryInterfaceClass);
-		ResourceRepositoryInformation repositoryInformation = (ResourceRepositoryInformation) informationBuilder
-				.build(repositoryInterfaceClass, new DefaultRepositoryInformationProviderContext(moduleRegistry));
-		Class<?> resourceClass = repositoryInformation.getResourceInformation().get().getResourceClass();
+		PreconditionUtil.verify(informationBuilder.accept(repositoryInterfaceClass), "%s is not a valid repository interface", repositoryInterfaceClass);
+		ResourceRepositoryInformation repositoryInformation =
+				(ResourceRepositoryInformation) informationBuilder.build(repositoryInterfaceClass, new DefaultRepositoryInformationProviderContext(moduleRegistry));
+		Class<?> resourceClass = repositoryInformation.getResource().getResourceClass();
 
 		Object actionStub = actionStubFactory != null ? actionStubFactory.createStub(repositoryInterfaceClass) : null;
 		ResourceRepository<?, Serializable> repositoryStub = getRepositoryForType(resourceClass);

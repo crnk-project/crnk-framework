@@ -1,5 +1,10 @@
 package io.crnk.gen.openapi.internal;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Objects;
+
 import io.crnk.gen.openapi.OutputFormat;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -7,11 +12,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Objects;
 
 public class OASGeneratorTest {
 
@@ -22,6 +22,7 @@ public class OASGeneratorTest {
     String templatePath = Objects.requireNonNull(
         getClass().getClassLoader().getResource("openapi-template.yml")
     ).getPath();
+    templatePath = templatePath.replace("/C:/", "C:/"); // windows fix
     openApi = new OpenAPIV3Parser().read(templatePath);
   }
 
@@ -63,6 +64,7 @@ public class OASGeneratorTest {
     }
 
     expectedSource = expectedSource.replace("\r\n", "\n");
+	actualSource = actualSource.replace("\r\n", "\n"); // TODO maybe update the generator part?
 
     String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
     String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');

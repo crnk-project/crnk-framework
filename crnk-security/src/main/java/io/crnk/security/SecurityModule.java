@@ -8,11 +8,13 @@ import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.security.SecurityProviderContext;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.Module;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.ManyRelationshipRepository;
 import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.utils.Supplier;
+import io.crnk.security.internal.DataRoomBulkResourceFilter;
 import io.crnk.security.internal.DataRoomMatcher;
 import io.crnk.security.internal.DataRoomRelationshipFilter;
 import io.crnk.security.internal.DataRoomResourceFilter;
@@ -199,6 +201,9 @@ public class SecurityModule implements Module {
                 matcher = new DataRoomMatcher(() -> config.getDataRoomFilter(), callerSecurityProvider);
                 LOGGER.debug("registering dataroom filter {}", config.getDataRoomFilter());
                 context.addRepositoryDecoratorFactory(repository -> {
+                    if (repository instanceof BulkResourceRepository) {
+                        return new DataRoomBulkResourceFilter((BulkResourceRepository) repository, matcher);
+                    }
                     if (repository instanceof ResourceRepository) {
                         return new DataRoomResourceFilter((ResourceRepository) repository, matcher);
                     }
