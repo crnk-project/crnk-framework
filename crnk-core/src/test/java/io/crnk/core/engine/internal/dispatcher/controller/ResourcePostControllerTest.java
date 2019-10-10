@@ -20,9 +20,9 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.RequestBodyNotFoundException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.mock.models.Pojo;
@@ -99,7 +99,7 @@ public class ResourcePostControllerTest extends ControllerTestBase {
         sut.init(controllerContext);
 
         // THEN
-        expectedException.expect(RequestBodyException.class);
+        expectedException.expect(BadRequestException.class);
 
         // WHEN
         sut.handle(projectPath, emptyTaskQuery, newProjectBody);

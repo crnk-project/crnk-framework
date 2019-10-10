@@ -1,6 +1,7 @@
 package io.crnk.client.internal;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,14 +19,14 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.resource.list.DefaultResourceList;
 
 @JsonApiExposed(false)
 public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
-		implements ResourceRepository<T, I> {
+		implements BulkResourceRepository<T, I> {
 
 	protected ResourceInformation resourceInformation;
 
@@ -36,7 +37,28 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 		this.resourceInformation = resourceInformation;
 	}
 
-	private Object executeUpdate(String requestUrl, T resource, boolean create) {
+	@Override
+	public <S extends T> List<S> save(List<S> resources) {
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+
+	@Override
+	public <S extends T> List<S> create(List<S> resources) {
+		return bulkModify(resources, true);
+	}
+
+	@Override
+	public void delete(List<I> id) {
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <S extends T> List<S> bulkModify(List<S> entities, boolean create) {
+		String url = urlBuilder.buildUrl(resourceInformation, null, (QuerySpec) null);
+		return (List<S>) executeUpdate(url, entities, create);
+	}
+
+	protected Object executeUpdate(String requestUrl, Object resource, boolean create) {
 		JsonApiResponse response = new JsonApiResponse();
 		response.setEntity(resource);
 
@@ -63,6 +85,10 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 		return execute(requestUrl, ResponseType.RESOURCE, method, requestBodyValue);
 	}
 
+	@Override
+	public <S extends T> S create(S entity) {
+		return modify(entity, true);
+	}
 
 	@Override
 	public <S extends T> S save(S entity) {
@@ -70,7 +96,7 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 	}
 
 	@SuppressWarnings("unchecked")
-	private <S extends T> S modify(S entity, boolean create) {
+	protected <S extends T> S modify(S entity, boolean create) {
 		Object id = getId(entity);
 
 		if (create && !resourceInformation.isNested()) {
@@ -86,11 +112,6 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 			url = url.substring(0, url.lastIndexOf('/'));
 		}
 		return (S) executeUpdate(url, entity, create);
-	}
-
-	@Override
-	public <S extends T> S create(S entity) {
-		return modify(entity, true);
 	}
 
 	private <S extends T> Object getId(S entity) {

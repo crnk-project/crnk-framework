@@ -1,10 +1,10 @@
 package io.crnk.core.repository;
 
+import java.util.Collection;
+
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
-
-import java.util.Collection;
 
 /**
  * Base repository which is used to operate on the resources. Each resource should have a corresponding resource
@@ -68,7 +68,7 @@ public interface ResourceRepository<T, I> extends Repository {
     <S extends T> S create(S resource);
 
     /**
-     * Removes a resource identified by id legacy.
+     * Removes a resource identified by id.
      *
      * @param id identified of the resource to be removed
      */

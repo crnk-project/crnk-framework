@@ -50,7 +50,7 @@ public class PlainJsonRequestProcessor extends JsonApiRequestProcessor implement
 	@Override
 	public boolean accepts(HttpRequestContext context) {
 		if (isPlainJsonRequest(context, isAcceptingPlainJson())) {
-			JsonPath jsonPath = getJsonPath(context);
+			JsonPath jsonPath = helper.getJsonPath(context);
 			LOGGER.debug("resource path: {}", jsonPath);
 			return jsonPath != null;
 		}

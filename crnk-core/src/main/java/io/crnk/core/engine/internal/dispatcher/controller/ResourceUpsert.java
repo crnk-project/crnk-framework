@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -55,23 +56,56 @@ import io.crnk.core.resource.meta.JsonMetaInformation;
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
-		String resourceType = path.getRootEntry().getResourceInformation().getResourcePath();
+		String resourcePath = path.getRootEntry().getResourceInformation().getResourcePath();
 
-		assertRequestDocument(requestDocument, method, resourceType);
+		assertRequestDocument(requestDocument, method, resourcePath);
 
 		if (!requestDocument.getData().isPresent() || requestDocument.getData().get() == null) {
-			throw new RequestBodyException(method, resourceType, "No data field in the body.");
+			throw new RequestBodyException(method, resourcePath, "No data field in the body.");
 		}
 		if (requestDocument.getData().get() instanceof Collection) {
-			throw new RequestBodyException(method, resourceType, "Multiple data in body");
+			throw new RequestBodyException(method, resourcePath, "Multiple data in body");
 		}
 
 		Resource resourceBody = (Resource) requestDocument.getData().get();
-		RegistryEntry bodyRegistryEntry = context.getResourceRegistry().getEntry(resourceBody.getType());
-		if (bodyRegistryEntry == null) {
-			throw new RepositoryNotFoundException(resourceBody.getType());
-		}
+		verifyResourceBody(resourceBody, path);
 		return resourceBody;
+	}
+
+	protected List<Resource> getRequestBodys(Document requestDocument, JsonPath path, HttpMethod method) {
+		String resourcePath = path.getRootEntry().getResourceInformation().getResourcePath();
+
+		assertRequestDocument(requestDocument, method, resourcePath);
+
+		if (!requestDocument.getData().isPresent() || requestDocument.getData().get() == null) {
+			throw new RequestBodyException(method, resourcePath, "No data field in the body.");
+		}
+
+		Object data = requestDocument.getData().get();
+		List<Resource> resourceBodies = data instanceof List ? (List<Resource>) data : Arrays.asList((Resource) data);
+		for (Resource resourceBody : resourceBodies) {
+			verifyResourceBody(resourceBody, path);
+		}
+		return resourceBodies;
+	}
+
+	protected void verifyResourceBody(Resource resourceBody, JsonPath path) {
+		assignDefaultType(resourceBody, path);
+		String resourceType = resourceBody.getType();
+		RegistryEntry bodyRegistryEntry = context.getResourceRegistry().getEntry(resourceType);
+		if (bodyRegistryEntry == null) {
+			throw new RepositoryNotFoundException(resourceType);
+		}
+	}
+
+	private void assignDefaultType(Resource resourceBody, JsonPath path) {
+		String type = resourceBody.getType();
+		if (type == null && path.getParentField() != null) {
+			resourceBody.setType(path.getParentField().getOppositeResourceType());
+		}
+		else if (type == null) {
+			resourceBody.setType(path.getRootEntry().getResourceInformation().getResourceType());
+		}
 	}
 
 	protected Object newEntity(ResourceInformation resourceInformation, Resource dataBody) {

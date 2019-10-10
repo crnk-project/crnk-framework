@@ -9,6 +9,7 @@ import java.util.Map;
 
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.Wrapper;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -46,7 +47,7 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 			if(method.getDeclaringClass().isAssignableFrom(Wrapper.class) && method.getName().equals("getWrappedObject")){
 				return repositoryStub;
 			}
-			if (method.getDeclaringClass().isAssignableFrom(ResourceRepository.class)) {
+			if (method.getDeclaringClass().isAssignableFrom(ResourceRepository.class) || method.getDeclaringClass().isAssignableFrom(BulkResourceRepository.class)) {
 				// execute document method
 				return method.invoke(repositoryStub, args);
 			} else if (interfaceStubMethodMap.containsKey(method)) {

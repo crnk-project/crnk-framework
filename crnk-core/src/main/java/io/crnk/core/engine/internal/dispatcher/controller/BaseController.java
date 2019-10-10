@@ -15,7 +15,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.RequestBodyException;
-import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,13 +81,13 @@ public abstract class BaseController implements Controller {
 		Integer httpStatus = response.getHttpStatus();
 		Document document = response.getDocument();
 		if (httpStatus == HttpStatus.CREATED_201) {
-			Nullable<Resource> singleData = document.getSingleData();
-			if (!singleData.isPresent()) {
+			if (!document.getData().isPresent()) {
 				throw new IllegalStateException("upon POST with status 201 a resource must be returned");
 			}
-			Resource resource = singleData.get();
-			if (resource.getId() == null) {
-				throw new IllegalStateException("upon POST with status 201 the resource must have an ID, consider 202 otherwise");
+			for (Resource resource : document.getCollectionData().get()) {
+				if (resource.getId() == null) {
+					throw new IllegalStateException("upon POST with status 201 the resource must have an ID, consider 202 otherwise");
+				}
 			}
 		}
 	}

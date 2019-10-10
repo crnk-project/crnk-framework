@@ -1,4 +1,6 @@
 
+anchor:operations[]
+
 # Bulk Updates with Operations Module
 
 By its nature RESTful applications are limited to the insertion, update and deletion of single resources. As such, developers
@@ -172,5 +174,8 @@ The current limitations of the implementation are:
 
 With support for `POST`, `PATCH` and `DELETE` operations the most important building blocks should be in place.
 The limitations are expected to be addressed at some point as well, contributions welcomed.
+
+There is experimental support for <<resource_bulk_repository,BulkResourceRepository>>. If multiple changes to the
+same repository are detected, it can make use of the appropriate bulk methods.
 
 

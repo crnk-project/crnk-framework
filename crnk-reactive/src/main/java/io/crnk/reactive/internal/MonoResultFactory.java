@@ -1,13 +1,13 @@
 package io.crnk.reactive.internal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Implementation based on Reactor library. Attempts to pass along request context in subscriber context using {@value SUBSCRIBER_CONTEXT_KEY}.
@@ -68,6 +68,14 @@ public class MonoResultFactory implements ResultFactory {
 	public <T> Result<T> attachContext(Result<T> result, Object context) {
 		MonoResult monoResult = (MonoResult) result;
 		return new MonoResult<>(monoResult.getMono().subscriberContext(Context.of(SUBSCRIBER_CONTEXT_KEY, context)));
+	}
+
+	@Override
+	public <T> Result<List<T>> all(List<Result<T>> results) {
+		if (results.size() == 1) {
+			return results.get(0).map(it -> Arrays.asList(it));
+		}
+		throw new UnsupportedOperationException("bulk support not yet implemented");
 	}
 
 	@Override
