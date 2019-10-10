@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.util.Map;
+
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -16,8 +18,6 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.ResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It
@@ -67,14 +67,18 @@ public class RegistryEntryImpl implements RegistryEntry {
         if (resourceRepositoryAdapter != null) {
             return resourceRepositoryAdapter;
         }
+		RegistryEntry parentRegistryEntry = getParentRegistryEntry();
         return parentRegistryEntry.getResourceRepository();
     }
 
     @Override
     public RelationshipRepositoryAdapter getRelationshipRepository(String fieldName) {
         ResourceField field = getResourceInformation().findFieldByUnderlyingName(fieldName);
-        if (field == null && parentRegistryEntry != null) {
-            return parentRegistryEntry.getRelationshipRepository(fieldName);
+        if (field == null){
+			RegistryEntry parentRegistryEntry = getParentRegistryEntry();
+			if(parentRegistryEntry != null) {
+				return parentRegistryEntry.getRelationshipRepository(fieldName);
+			}
         }
         if (field == null) {
             throw new ResourceFieldNotFoundException("name=" + fieldName);
@@ -85,8 +89,11 @@ public class RegistryEntryImpl implements RegistryEntry {
     @Override
     public RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field) {
         RelationshipRepositoryAdapter adapter = relationshipRepositoryAdapter.get(field);
-        if (adapter == null && parentRegistryEntry != null) {
-            return parentRegistryEntry.getRelationshipRepository(field);
+        if (adapter == null) {
+			RegistryEntry parentRegistryEntry = getParentRegistryEntry();
+			if(parentRegistryEntry != null) {
+				return parentRegistryEntry.getRelationshipRepository(field);
+			}
         }
         if (adapter == null) {
             throw new RelationshipRepositoryNotFoundException(field);
@@ -99,7 +106,8 @@ public class RegistryEntryImpl implements RegistryEntry {
     }
 
     public boolean hasRelationship(ResourceField field) {
-        return relationshipRepositoryAdapter.containsKey(field) || parentRegistryEntry != null && ((RegistryEntryImpl) parentRegistryEntry).hasRelationship(field);
+		RegistryEntry parentRegistryEntry = getParentRegistryEntry();
+		return relationshipRepositoryAdapter.containsKey(field) || parentRegistryEntry != null && ((RegistryEntryImpl) parentRegistryEntry).hasRelationship(field);
     }
 
     @Override
@@ -119,7 +127,9 @@ public class RegistryEntryImpl implements RegistryEntry {
         }
         ResourceInformation resourceInformation = getResourceInformation();
         String superResourceType = resourceInformation.getSuperResourceType();
-        if (superResourceType != null) {
+
+        // parent entry may not exists yet (during intialization) => consider improving this, not 100% clean
+        if (superResourceType != null && moduleRegistry.getResourceRegistry().hasEntry(superResourceType)) {
             ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
             return resourceRegistry.getEntry(superResourceType);
         }

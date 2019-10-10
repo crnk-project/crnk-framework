@@ -50,7 +50,7 @@ public class DataRoomMatcher {
 	public void verifyMatch(Object resource, HttpMethod method, SecurityProvider securityProvider) {
 		boolean match = checkMatch(resource, method, securityProvider);
 		if (!match) {
-			LOGGER.error("dataroom prevented access to {} for {}", resource, method);
+			LOGGER.warn("dataroom prevented access to {} for {}", resource, method);
 			throw new ForbiddenException("not allowed to access resource");
 		}
 	}

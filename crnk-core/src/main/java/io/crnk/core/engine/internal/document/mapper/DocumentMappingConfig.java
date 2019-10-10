@@ -30,4 +30,11 @@ public class DocumentMappingConfig {
 		this.resourceMapping = resourceMapping;
 		return this;
 	}
+
+	public DocumentMappingConfig clone() {
+		DocumentMappingConfig config = new DocumentMappingConfig();
+		config.setFieldsWithEnforcedIdSerialization(new HashSet<>(fieldsWithEnforceIdSerialization));
+		config.setResourceMapping(resourceMapping.clone());
+		return config;
+	}
 }

@@ -27,8 +27,6 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.exception.InvalidResourceException;
-import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
-import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
@@ -123,7 +121,7 @@ public class ResourceInformation {
 	private StringMapper idStringMapper = new StringMapper() {
 		@Override
 		public String toString(Object input) {
-			return input.toString();
+			return parser.toString(input);
 		}
 
 		@Override
@@ -317,6 +315,10 @@ public class ResourceInformation {
 		}
 	}
 
+	public void setResourcePath(String resourcePath) {
+		this.resourcePath = resourcePath;
+	}
+
 	class NestedIdAccessor implements ResourceFieldAccessor {
 
 		private final BeanAttributeInformation nestedField;
@@ -388,14 +390,15 @@ public class ResourceInformation {
 			anyFieldAccessor = new AnyResourceFieldAccessor() {
 
 				@Override
-                @SuppressWarnings("unchecked")
-                public Map<String, Object> getValues(Object resource) {
+				@SuppressWarnings("unchecked")
+				public Map<String, Object> getValues(Object resource) {
 					try {
-                        Object o = jsonAnyGetter.invoke(resource);
-                        return (HashMap<String, Object>)o;
-                    } catch (IllegalAccessException | InvocationTargetException e) {
+						Object o = jsonAnyGetter.invoke(resource);
+						return (Map<String, Object>) o;
+					}
+					catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
-                                String.format("Exception while reading %s due to %s", resource, e.getMessage()), e);
+								String.format("Exception while reading %s due to %s", resource, e.getMessage()), e);
 					}
 				}
 
@@ -437,8 +440,8 @@ public class ResourceInformation {
 			this.attributeFields = ResourceFieldType.ATTRIBUTE.filter(fields);
 			this.relationshipFields = ResourceFieldType.RELATIONSHIP.filter(fields);
 
-			this.metaField = getMetaField(implementationClass, fields);
-			this.linksField = getLinksField(implementationClass, fields);
+			this.metaField = getField(implementationClass, ResourceFieldType.META_INFORMATION, fields);
+			this.linksField = getField(implementationClass, ResourceFieldType.LINKS_INFORMATION, fields);
 
 			for (ResourceField resourceField : fields) {
 				resourceField.setResourceInformation(this);
@@ -480,38 +483,21 @@ public class ResourceInformation {
 		return fieldAccessors.get(name);
 	}
 
-	private static <T> ResourceField getMetaField(Class<T> resourceClass, Collection<ResourceField> classFields) {
-		List<ResourceField> metaFields = new ArrayList<>(1);
+	private static <T> ResourceField getField(Class<T> resourceClass, ResourceFieldType type, Collection<ResourceField> classFields) {
+		List<ResourceField> matches = new ArrayList<>(1);
 		for (ResourceField field : classFields) {
-			if (field.getResourceFieldType() == ResourceFieldType.META_INFORMATION) {
-				metaFields.add(field);
+			if (field.getResourceFieldType() == type) {
+				matches.add(field);
 			}
 		}
 
-		if (metaFields.isEmpty()) {
+		if (matches.isEmpty()) {
 			return null;
 		}
-		else if (metaFields.size() > 1) {
-			throw new MultipleJsonApiMetaInformationException(resourceClass.getCanonicalName());
+		else if (matches.size() > 1) {
+			throw new IllegalStateException("multiple " + type + " fields for + " + resourceClass.getCanonicalName());
 		}
-		return metaFields.get(0);
-	}
-
-	private static <T> ResourceField getLinksField(Class<T> resourceClass, Collection<ResourceField> classFields) {
-		List<ResourceField> linksFields = new ArrayList<>(1);
-		for (ResourceField field : classFields) {
-			if (field.getResourceFieldType() == ResourceFieldType.LINKS_INFORMATION) {
-				linksFields.add(field);
-			}
-		}
-
-		if (linksFields.isEmpty()) {
-			return null;
-		}
-		else if (linksFields.size() > 1) {
-			throw new MultipleJsonApiLinksInformationException(resourceClass.getCanonicalName());
-		}
-		return linksFields.get(0);
+		return matches.get(0);
 	}
 
 	public String getResourceType() {
@@ -598,13 +584,12 @@ public class ResourceInformation {
 		}
 		ResourceInformation that = (ResourceInformation) o;
 		return Objects.equals(implementationClass, that.implementationClass) && Objects.equals(resourceType, that.resourceType)
-				&& Objects
-				.equals(resourcePath, that.resourcePath);
+				&& Objects.equals(resourcePath, that.resourcePath);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(implementationClass, resourceType, resourcePath);
+		return Objects.hash(resourceType);
 	}
 
 	/**

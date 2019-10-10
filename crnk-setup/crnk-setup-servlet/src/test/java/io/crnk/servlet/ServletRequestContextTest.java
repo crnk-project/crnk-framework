@@ -136,7 +136,6 @@ public class ServletRequestContextTest {
     @Test
     public void checkCompletedOnSuccessStatus() throws IOException {
         ServletRequestContext context = new ServletRequestContext(servletContext, servletRequest, servletResponse, "/api/");
-
         HttpResponse response = context.getResponse();
         response.setBody("test");
         response.setStatusCode(200);

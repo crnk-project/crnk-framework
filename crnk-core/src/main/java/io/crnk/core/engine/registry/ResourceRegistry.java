@@ -10,79 +10,91 @@ import io.crnk.core.engine.url.ServiceUrlProvider;
  */
 public interface ResourceRegistry extends ResourceRegistryPart {
 
-    RegistryEntry findEntry(Class<?> resourceClass);
+	RegistryEntry findEntry(Class<?> resourceClass);
 
-    /**
-     * @param resourceInformation
-     * @return url for the given resourceInformation. Depending on the ServiceUrlProvider setup, a request must be active
-     * to invoke this method (to obtain domain/host information).
-     */
-    String getResourceUrl(ResourceInformation resourceInformation);
+	/**
+	 * @return entry matching the given resource, accoutring for the {@link Class}, {@link io.crnk.core.resource.annotations.JsonApiId},
+	 * {@link io.crnk.core.engine.document.Resource}.
+	 */
+	RegistryEntry findEntry(Object resource);
 
-    /**
-     * Retrieves the url of the resource
-     *
-     * @param resource Resource
-     * @return Url of provided resource in case it's a registered resource
-     */
-    String getResourceUrl(Object resource);
+	/**
+	 * @return url for the given resourceInformation. Depending on the ServiceUrlProvider setup, a request must be active
+	 * to invoke this method (to obtain domain/host information).
+	 */
+	String getResourceUrl(ResourceInformation resourceInformation);
 
-    /**
-     * Retrieves the url of the type
-     *
-     * @param clazz Type
-     * @return Url of provided resource in case it's a registered resource
-     */
-    String getResourceUrl(Class<?> clazz);
+	/**
+	 * Retrieves the url of the resource
+	 *
+	 * @param resource Resource
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(Object resource);
 
-    /**
-     * Retrieves the url of the type and identifier
-     *
-     * @param clazz Type
-     * @param id    Identifier
-     * @return Url of provided resource in case it's a registered resource
-     */
-    String getResourceUrl(Class<?> clazz, String id);
+	/**
+	 * Retrieves the url of the type
+	 *
+	 * @param clazz Type
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(Class<?> clazz);
+
+	/**
+	 * Retrieves the url of the type and identifier
+	 *
+	 * @param clazz Type
+	 * @param id Identifier
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(Class<?> clazz, String id);
 
 
-    /**
-     * @param resourceInformation
-     * @return url for the given resourceInformation. Depending on the ServiceUrlProvider setup, a request must be active
-     * to invoke this method (to obtain domain/host information).
-     */
-    String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation);
+	/**
+	 * Retrieves the path of the type and identifier
+	 *
+	 * @param id Identifier
+	 * @return complete path of provided resource in case it's a registered resource
+	 */
+	String getResourcePath(ResourceInformation resourceInformation, Object id);
 
-    String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id);
+	/**
+	 * @return url for the given resourceInformation. Depending on the ServiceUrlProvider setup, a request must be active
+	 * to invoke this method (to obtain domain/host information).
+	 */
+	String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation);
 
-    /**
-     * Retrieves the url of the resource
-     *
-     * @param resource Resource
-     * @return Url of provided resource in case it's a registered resource
-     */
-    String getResourceUrl(QueryContext queryContext, Object resource);
+	String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id);
 
-    /**
-     * Retrieves the url of the type
-     *
-     * @param clazz Type
-     * @return Url of provided resource in case it's a registered resource
-     */
-    String getResourceUrl(QueryContext queryContext, Class<?> clazz);
+	/**
+	 * Retrieves the url of the resource
+	 *
+	 * @param resource Resource
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(QueryContext queryContext, Object resource);
 
-    /**
-     * Retrieves the url of the type and identifier
-     *
-     * @param clazz Type
-     * @param id    Identifier
-     * @return Url of provided resource in case it's a registered resource
-     */
-    String getResourceUrl(QueryContext queryContext, Class<?> clazz, String id);
+	/**
+	 * Retrieves the url of the type
+	 *
+	 * @param clazz Type
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(QueryContext queryContext, Class<?> clazz);
 
-    /**
-     * @return ResourceInformation of the the top most super type of the provided resource.
-     */
-    ResourceInformation getBaseResourceInformation(String resourceType);
+	/**
+	 * Retrieves the url of the type and identifier
+	 *
+	 * @param clazz Type
+	 * @param id Identifier
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(QueryContext queryContext, Class<?> clazz, String id);
 
-    ServiceUrlProvider getServiceUrlProvider();
+	/**
+	 * @return ResourceInformation of the the top most super type of the provided resource.
+	 */
+	ResourceInformation getBaseResourceInformation(String resourceType);
+
+	ServiceUrlProvider getServiceUrlProvider();
 }

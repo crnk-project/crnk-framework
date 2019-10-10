@@ -1,5 +1,9 @@
 package io.crnk.core.module.internal;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterContext;
@@ -17,10 +21,6 @@ import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
@@ -90,8 +90,9 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
         if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
             // for relationships opposite site must also be accessible (at least with GET)
             String oppositeResourceType = field.getOppositeResourceType();
-            RegistryEntry oppositeRegistryEntry = resourceRegistry.getEntry(oppositeResourceType);
-            if (oppositeRegistryEntry != null) {
+
+            if (oppositeResourceType != null && resourceRegistry.hasEntry(oppositeResourceType)) {
+				RegistryEntry oppositeRegistryEntry = resourceRegistry.getEntry(oppositeResourceType);
                 ResourceInformation oppositeResourceInformation = oppositeRegistryEntry.getResourceInformation();
 
                 // consider checking more than GET? intersection/union of multiple?

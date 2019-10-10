@@ -3,9 +3,8 @@ package io.crnk.core.engine.internal.document.mapper;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,11 +47,6 @@ public class ResourceMapper {
 		this.resourceFilterDirectory = resourceFilterDirectory;
 	}
 
-	public Resource toData(Object entity, QueryAdapter queryAdapter) {
-		ResourceMappingConfig mappingConfig = new ResourceMappingConfig();
-		return toData(entity, queryAdapter, mappingConfig);
-	}
-
 	public Resource toData(Object entity, QueryAdapter queryAdapter, ResourceMappingConfig mappingConfig) {
 		if (entity instanceof Resource) {
 			// Resource and ResourceId
@@ -60,11 +54,9 @@ public class ResourceMapper {
 		}
 		else {
 			// map resource objects
-			Class<?> dataClass = entity.getClass();
-
 			QueryContext queryContext = queryAdapter.getQueryContext();
 
-			ResourceInformation resourceInformation = util.getResourceInformation(dataClass);
+			ResourceInformation resourceInformation = util.getResourceInformation(entity);
 
 			Resource resource = new Resource();
 			setId(resource, entity, resourceInformation);
@@ -165,8 +157,8 @@ public class ResourceMapper {
 	}
 
 	protected void setAnyAttribute(Resource resource, String field, Object value) {
-			JsonNode valueNode = objectMapper.valueToTree(value);
-			resource.getAttributes().put(field, valueNode);
+		JsonNode valueNode = objectMapper.valueToTree(value);
+		resource.getAttributes().put(field, valueNode);
 	}
 
 	private boolean isIncluded(ResourceField field, Object value) {
@@ -197,8 +189,10 @@ public class ResourceMapper {
 			if (addRelationship) {
 				QueryContext queryContext = queryAdapter.getQueryContext();
 				ObjectNode relationshipLinks = objectMapper.createObjectNode();
-				String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false, queryContext);
-				serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+				if(mappingConfig.getSerializeSelfRelationshipLinks()) {
+					String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false, queryContext);
+					serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+				}
 				String relatedUrl = util.getRelationshipLink(resourceInformation, entity, field, true, queryContext);
 				serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
 				relationship.setLinks(relationshipLinks);

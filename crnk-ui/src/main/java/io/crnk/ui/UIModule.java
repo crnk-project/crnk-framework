@@ -20,6 +20,7 @@ import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.MetaModuleExtension;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaNature;
 import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaFilterBase;
 import io.crnk.meta.provider.MetaProviderBase;
@@ -42,6 +43,8 @@ public class UIModule implements Module {
 	private EditorRepository editorRepository;
 
 	private ModuleContext context;
+
+	private PresentationManager presentationManager;
 
 	// protected for CDI
 	protected UIModule() {
@@ -96,26 +99,34 @@ public class UIModule implements Module {
 	@Override
 	public void setupModule(ModuleContext context) {
 		this.context = context;
-		context.addHttpRequestProcessor(new UIHttpRequestProcessor(config));
-		setupHomeExtension(context);
 
-		if (config != null) {
+		if(config.isBrowserEnabled()) {
+			context.addHttpRequestProcessor(new UIHttpRequestProcessor(config));
+			setupHomeExtension(context);
+		}
+
+		if (config != null && config.isPresentationModelEnabled()) {
 			Supplier<List<PresentationService>> servicesSupplier = config.getServices();
 			if (servicesSupplier == null) {
 				servicesSupplier = () -> Arrays.asList(new PresentationService("local", null, initMetaModule()));
 			}
 
-			PresentationManager manager = new PresentationManager(servicesSupplier);
-			explorerRepository = new ExplorerRepository(manager);
+			presentationManager = new PresentationManager(servicesSupplier);
+			config.getPresentationElementFactories().forEach(it -> presentationManager.registerFactory(it));
+
+			explorerRepository = new ExplorerRepository(presentationManager);
 			context.addRepository(explorerRepository);
-			editorRepository = new EditorRepository(manager);
+			editorRepository = new EditorRepository(presentationManager);
 			context.addRepository(editorRepository);
-
-
-			MetaModuleExtension metaExtension = new MetaModuleExtension();
-			metaExtension.addProvider(presentationMetaProvider);
-			context.addExtension(metaExtension);
 		}
+
+		MetaModuleExtension metaExtension = new MetaModuleExtension();
+		metaExtension.addProvider(presentationMetaProvider);
+		context.addExtension(metaExtension);
+	}
+
+	public PresentationManager getPresentationManager() {
+		return presentationManager;
 	}
 
 	class PresentationMetaFilter extends MetaFilterBase {
@@ -126,11 +137,11 @@ public class UIModule implements Module {
 				MetaAttribute attribute = (MetaAttribute) element;
 				PresentationFullTextSearchable annotation = attribute.getAnnotation(PresentationFullTextSearchable.class);
 				if (annotation != null) {
-					attribute.getNatures().add(PresentationFullTextSearchable.META_ELEMENT_NATURE);
+					attribute.getNatures().put(PresentationFullTextSearchable.META_ELEMENT_NATURE, new MetaNature());
 				}
 				PresentationLabel labelAnnotation = attribute.getAnnotation(PresentationLabel.class);
 				if (labelAnnotation != null) {
-					attribute.getNatures().add(PresentationLabel.META_ELEMENT_NATURE);
+					attribute.getNatures().put(PresentationLabel.META_ELEMENT_NATURE, new MetaNature());
 				}
 			}
 		}

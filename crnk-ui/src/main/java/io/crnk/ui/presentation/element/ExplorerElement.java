@@ -7,7 +7,7 @@ import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.data.facet.annotation.Facet;
 
-@JsonApiResource(type = "uiExplorer", resourcePath = "ui/explorer")
+@JsonApiResource(type = "uiExplorer", resourcePath = "presentation/explorer")
 public class ExplorerElement extends PresentationElement {
 
 	@Facet

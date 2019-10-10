@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -22,12 +28,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class RelationshipsResourceGetController extends ResourceIncludeField {
 
 	@Override
@@ -43,7 +43,7 @@ public class RelationshipsResourceGetController extends ResourceIncludeField {
 		Serializable id = jsonPath.getId();
 		ResourceField relationshipField = relationshipsPath.getRelationship();
 
-		DocumentMappingConfig documentMapperConfig = DocumentMappingConfig.create();
+		DocumentMappingConfig mappingConfig = context.getMappingConfig();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		// only the IDs necssary, update QuerySpec accordingly
@@ -66,7 +66,7 @@ public class RelationshipsResourceGetController extends ResourceIncludeField {
 		} else {
 			response = relationshipRepositoryForClass.findOneRelations(id, relationshipField, queryAdapter);
 		}
-		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, documentMapperConfig)).map(it -> toResponse(it, relatedResourceInformation));
+		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig)).map(it -> toResponse(it, relatedResourceInformation));
 	}
 
 

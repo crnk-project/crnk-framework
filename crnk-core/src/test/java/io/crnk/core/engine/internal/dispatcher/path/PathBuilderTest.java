@@ -8,6 +8,7 @@ import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.internal.resource.NestedResourceTest;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Task;
@@ -34,6 +35,11 @@ public class PathBuilderTest {
 	public void prepare() {
 		SimpleModule notExposedModule = new SimpleModule("notExposed");
 		notExposedModule.addRepository(new NotExposedRepository());
+		notExposedModule.addRepository(new NestedResourceTest.TestRepository());
+		notExposedModule.addRepository(new NestedResourceTest.OneNestedRepository());
+		notExposedModule.addRepository(new NestedResourceTest.ManyNestedRepository());
+		notExposedModule.addRepository(new NestedResourceTest.OneGrandchildRepository());
+		notExposedModule.addRepository(new NestedResourceTest.ManyGrandchildrenRepository());
 
 		CoreTestContainer container = new CoreTestContainer();
 		container.addModule(new CoreTestModule());
@@ -245,6 +251,52 @@ public class PathBuilderTest {
 
 		// WHEN
 		pathBuilder.build(path);
+	}
+
+
+	@Test
+	public void singularSingularNestedRelationshipPath() {
+		// GIVEN
+		String path = "/test/1/oneNested/";
+
+		// WHEN
+		ResourcePath jsonPath = (ResourcePath) pathBuilder.build(path);
+
+		// THEN
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("oneNested");
+		Assert.assertEquals("1", jsonPath.getId());
+		Assert.assertEquals("oneNested", jsonPath.getParentField().getUnderlyingName());
+		assertThat(jsonPath.toGroupPath()).isEqualTo("test/{id}/oneNested");
+	}
+
+	@Test
+	public void checkMultivaluedRelationshipPath() {
+		// GIVEN
+		String path = "/test/1/manyNested/";
+
+		// WHEN
+		FieldPath jsonPath = (FieldPath) pathBuilder.build(path);
+
+		// THEN
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("test");
+		Assert.assertEquals("1", jsonPath.getId());
+		Assert.assertEquals("manyNested", jsonPath.getField().getUnderlyingName());
+		assertThat(jsonPath.toGroupPath()).isEqualTo("test/{id}/manyNested");
+	}
+
+	@Test
+	public void checkMultivaluedRelationshipIdPath() {
+		// GIVEN
+		String path = "/test/1/manyNested/2";
+
+		// WHEN
+		ResourcePath jsonPath = (ResourcePath) pathBuilder.build(path);
+
+		// THEN
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("manyNested");
+		Assert.assertEquals("1-2", jsonPath.getId().toString());
+		Assert.assertEquals("manyNested", jsonPath.getParentField().getUnderlyingName());
+		assertThat(jsonPath.toGroupPath()).isEqualTo("test/{id}/manyNested/{id}");
 	}
 
 	@Test

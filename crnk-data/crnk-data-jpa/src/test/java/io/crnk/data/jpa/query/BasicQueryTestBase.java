@@ -15,10 +15,11 @@ import javax.persistence.criteria.JoinType;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
-import io.crnk.data.jpa.model.TestSubclassWithSuperclassPk;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.data.jpa.model.CollectionAttributesTestEntity;
 import io.crnk.data.jpa.model.RelatedEntity;
 import io.crnk.data.jpa.model.TestEntity;
+import io.crnk.data.jpa.model.TestSubclassWithSuperclassPk;
 import io.crnk.data.jpa.model.UuidTestEntity;
 import org.hibernate.Hibernate;
 import org.junit.Assert;
@@ -325,23 +326,28 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 
 	@Test
 	public void testOneRelatedEntityOrder() {
-		assertEquals(5, builder().setDefaultJoinType(JoinType.LEFT)
+		// per default will do left join
+		assertEquals(5, builder()
 				.addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.DESC).buildExecutor().getResultList()
 				.size());
+
 		assertEquals((Long) 0L,
-				builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.ASC).buildExecutor()
+				builder().setJoinType(Arrays.asList(TestEntity.ATTR_oneRelatedValue), JoinType.INNER)
+						.addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.ASC).buildExecutor()
 						.getResultList()
 						.get(0).getId());
 		assertEquals((Long) 3L,
-				builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.DESC).buildExecutor()
+				builder()
+						.setJoinType(Arrays.asList(TestEntity.ATTR_oneRelatedValue), JoinType.INNER)
+						.addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.DESC).buildExecutor()
 						.getResultList().get(0).getId());
 	}
 
 	@Test
 	public void testOneRelatedAttributeOrder() {
 		assertEquals((Long) 0L,
-				builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_stringValue), Direction
-						.ASC)
+				builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_stringValue), Direction.ASC)
+						.addFilter(PathSpec.of(TestEntity.ATTR_oneRelatedValue).filter(FilterOperator.NEQ, null))
 						.buildExecutor().getResultList().get(0).getId());
 		assertEquals((Long) 3L, builder()
 				.addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_stringValue), Direction.DESC)
@@ -518,12 +524,6 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	@Test
 	public void testJoinType() {
 		// note one entity has no relation
-		assertEquals(4, builder().setDefaultJoinType(JoinType.INNER)
-				.addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_id), Direction.ASC).buildExecutor()
-				.getResultList().size());
-		assertEquals(5, builder().setDefaultJoinType(JoinType.LEFT)
-				.addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_id), Direction.ASC).buildExecutor()
-				.getResultList().size());
 		assertEquals(4, builder().setJoinType(Arrays.asList(TestEntity.ATTR_oneRelatedValue), JoinType.INNER)
 				.addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_id), Direction.ASC)
 				.buildExecutor().getResultList().size());

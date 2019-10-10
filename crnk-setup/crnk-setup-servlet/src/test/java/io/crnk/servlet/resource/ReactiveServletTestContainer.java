@@ -10,56 +10,58 @@ import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.reactive.ReactiveTestModule;
 import io.crnk.test.suite.TestContainer;
 
-import java.io.Serializable;
-
 public class ReactiveServletTestContainer implements TestContainer {
 
-    private final ReactiveTestModule testModule;
-    private Supplier<CrnkClient> client;
+	private final ReactiveTestModule testModule;
 
-    public ReactiveServletTestContainer(ReactiveTestModule testModule, Supplier<CrnkClient> client) {
-        this.client = client;
-        this.testModule = testModule;
-    }
+	private final CrnkBoot boot;
 
-    @Override
-    public void start() {
-        testModule.clear();
-    }
+	private Supplier<CrnkClient> client;
 
-    @Override
-    public void stop() {
-        testModule.clear();
-    }
+	public ReactiveServletTestContainer(ReactiveTestModule testModule, Supplier<CrnkClient> client, CrnkBoot boot) {
+		this.client = client;
+		this.testModule = testModule;
+		this.boot = boot;
+	}
 
-    @Override
-    public <T, I > ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
-        return client.get().getRepositoryForType(resourceClass);
-    }
+	@Override
+	public void start() {
+		testModule.clear();
+	}
 
-    @Override
-    public <T, I , D, J > RelationshipRepository<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
-        return client.get().getRepositoryForType(sourceClass, targetClass);
-    }
+	@Override
+	public void stop() {
+		testModule.clear();
+	}
 
-    @Override
-    public <T> T getTestData(Class<T> clazz, Object id) {
-        if (clazz == Schedule.class) {
-            return (T) testModule.getScheduleRepository().getMap().get(id);
-        }
-        if (clazz == RelationIdTestResource.class) {
-            return (T) testModule.getRelationIdTestRepository().getMap().get(id);
-        }
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public <T, I> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
+		return client.get().getRepositoryForType(resourceClass);
+	}
 
-    @Override
-    public String getBaseUrl() {
-        return client.get().getServiceUrlProvider().getUrl();
-    }
+	@Override
+	public <T, I, D, J> RelationshipRepository<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
+		return client.get().getRepositoryForType(sourceClass, targetClass);
+	}
 
-    @Override
-    public CrnkBoot getBoot() {
-        throw new UnsupportedOperationException("not implemented");
-    }
+	@Override
+	public <T> T getTestData(Class<T> clazz, Object id) {
+		if (clazz == Schedule.class) {
+			return (T) testModule.getScheduleRepository().getMap().get(id);
+		}
+		if (clazz == RelationIdTestResource.class) {
+			return (T) testModule.getRelationIdTestRepository().getMap().get(id);
+		}
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getBaseUrl() {
+		return client.get().getServiceUrlProvider().getUrl();
+	}
+
+	@Override
+	public CrnkBoot getBoot() {
+		return boot;
+	}
 }

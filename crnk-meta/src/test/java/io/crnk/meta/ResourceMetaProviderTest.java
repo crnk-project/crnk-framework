@@ -32,6 +32,7 @@ import io.crnk.test.mock.models.types.ProjectData;
 import io.crnk.test.mock.repository.ScheduleRepository;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -459,6 +460,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
     }
 
     @Test
+	@Ignore
     public void testMultiValuedListRelation() {
         MetaResource meta = resourceProvider.getMeta(Task.class);
 

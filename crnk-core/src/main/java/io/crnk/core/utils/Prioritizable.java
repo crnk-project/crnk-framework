@@ -22,9 +22,9 @@ public interface Prioritizable {
 
 	static <T> List<T> prioritze(List<T> list) {
 		Map<Object, Integer> indexMap = new HashMap<>();
-		int index = 0;
+		int index = -list.size() + 1;
 		for (T item : list) {
-			indexMap.put(item, index--);
+			indexMap.put(item, index++);
 		}
 
 		ArrayList<T> results = new ArrayList<>(list);

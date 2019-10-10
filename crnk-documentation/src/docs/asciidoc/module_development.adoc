@@ -163,15 +163,21 @@ NOTE: this feature is in incubation, more refinements are expected in upcoming r
 
 ### Implementing repositories dynamically at runtime
 
-There are different possibilities to implement a repository at runtime:
+There are different possibilities to implement resources and repositories at runtime:
 
-- Create a matching resource class at runtime with a library like http://bytebuddy.net/#/ to follow the same
+1. `JsonAnyGetter` and `JsonAnySetter` annotations from Jackson allow to dynamically add properties to a resource.
+  Further implementing `ResourceTypeHolder` interface allows to also customize the type of a resource. Together it
+   allows the implementation of arbitrarily custom resources. Note that when manipulating with `ResourceTypeHolder`
+   it may also become necessary to register the resource with the `ResourceRegistry` as outlined in the
+   similar `Resourrce`example below.
+2. Create a matching resource class at runtime with a library like http://bytebuddy.net/#/ to follow the same
   pattern as for any compile-time repository.
-- Make use of the `Resource` class. It is the generic JSON:API resource presentation within the Crnk engine.
-- Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
+3. Make use of the `Resource` class. It is the generic JSON:API resource presentation within the Crnk engine.
+4. Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
   each `ResourceField` to specify how to read and write attributes (see below for `ResourceField` examples).
 
-In the following example we make use of the second option:
+The use of `JsonAnyGetter` and `JsonAnySetter` is simplest and recommended for most use case.
+Nevertheless the direct use of `Resource` opens up the possibility for more deeper control of everything:
 
 [source]
 .DynamicResourceRepository.java

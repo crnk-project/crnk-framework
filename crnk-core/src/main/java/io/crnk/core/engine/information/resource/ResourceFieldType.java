@@ -6,6 +6,10 @@ import java.util.List;
 public enum ResourceFieldType {
 	ID, ATTRIBUTE, RELATIONSHIP, META_INFORMATION, LINKS_INFORMATION;
 
+	/**
+	 * no replacement, of no use...
+	 */
+	@Deprecated
 	public static ResourceFieldType get(boolean id, boolean linksInfo, boolean metaInfo, boolean association) {
 		if (id) {
 			return ResourceFieldType.ID;

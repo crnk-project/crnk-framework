@@ -8,6 +8,7 @@ public class ClientTestModule extends SimpleModule {
 		super("test");
 
 		addExceptionMapper(new TestExceptionMapper());
+		addNamingStrategy(new TestNamingStrategy());
 	}
 
 }
