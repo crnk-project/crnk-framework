@@ -2,6 +2,7 @@ package io.crnk.gen.openapi.internal.responses;
 
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import org.apache.commons.lang3.StringUtils;
 
 
 abstract class AbstractResponseGenerator {
@@ -17,7 +18,7 @@ abstract class AbstractResponseGenerator {
 
   AbstractResponseGenerator(MetaResource metaResource) {
     this.metaResource = metaResource;
-    prefix = metaResource.getResourceType();
+    prefix = StringUtils.capitalize(metaResource.getResourceType());
   }
 
   public String getName() {
