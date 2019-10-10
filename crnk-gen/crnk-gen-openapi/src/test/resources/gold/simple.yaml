@@ -31,27 +31,27 @@ components:
         default: 0
         format: int64
         type: integer
-    simpleTasksFields:
+    SimpleTasksFields:
       description: simpleTasks fields to include (csv)
       in: query
       name: fields
       schema:
         default: id,name
         type: string
-    simpleTasksInclude:
+    SimpleTasksInclude:
       description: simpleTasks relationships to include (csv)
       in: query
       name: include
       schema:
         default: ""
         type: string
-    simpleTasksPrimaryKey:
+    SimpleTasksPrimaryKey:
       in: path
       name: id
       required: true
       schema:
-        $ref: '#/components/schemas/simpleTasksidResourceAttribute'
-    simpleTasksSort:
+        $ref: '#/components/schemas/SimpleTasksIdResourceAttribute'
+    SimpleTasksSort:
       description: simpleTasks sort order (csv)
       in: query
       name: sort
@@ -161,29 +161,29 @@ components:
       description: Accepted
     NoContent:
       description: No Content
-    simpleTasksResourceReferenceResponse:
+    SimpleTasksResourceReferenceResponse:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/simpleTasksResourceReferenceResponseSchema'
+            $ref: '#/components/schemas/SimpleTasksResourceReferenceResponseSchema'
       description: OK
-    simpleTasksResourceReferencesResponse:
+    SimpleTasksResourceReferencesResponse:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/simpleTasksResourceReferencesResponseSchema'
+            $ref: '#/components/schemas/SimpleTasksResourceReferencesResponseSchema'
       description: OK
-    simpleTasksResourceResponse:
+    SimpleTasksResourceResponse:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/simpleTasksResourceResponseSchema'
+            $ref: '#/components/schemas/SimpleTasksResourceResponseSchema'
       description: OK
-    simpleTasksResourcesResponse:
+    SimpleTasksResourcesResponse:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/simpleTasksResourcesResponseSchema'
+            $ref: '#/components/schemas/SimpleTasksResourcesResponseSchema'
       description: OK
   schemas:
     ApiError:
@@ -300,18 +300,26 @@ components:
               description: the link that generated the current response document
               type: string
       type: object
-    simpleTasksPatchResource:
+    SimpleTasksIdResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    SimpleTasksNameResourceAttribute:
+      nullable: true
+      type: string
+    SimpleTasksPatchResource:
       allOf:
-      - $ref: '#/components/schemas/simpleTasksResourceReference'
-      - $ref: '#/components/schemas/simpleTasksResourcePatchAttributes'
-    simpleTasksPostResource:
+      - $ref: '#/components/schemas/SimpleTasksResourceReference'
+      - $ref: '#/components/schemas/SimpleTasksResourcePatchAttributes'
+    SimpleTasksPostResource:
       allOf:
-      - $ref: '#/components/schemas/simpleTasksPostResourceReference'
-      - $ref: '#/components/schemas/simpleTasksResourcePostAttributes'
-    simpleTasksPostResourceReference:
+      - $ref: '#/components/schemas/SimpleTasksPostResourceReference'
+      - $ref: '#/components/schemas/SimpleTasksResourcePostAttributes'
+    SimpleTasksPostResourceReference:
       properties:
         id:
-          $ref: '#/components/schemas/simpleTasksidResourceAttribute'
+          $ref: '#/components/schemas/SimpleTasksIdResourceAttribute'
         type:
           description: The JSON:API resource type (SimpleTasks)
           enum:
@@ -320,34 +328,34 @@ components:
       required:
       - type
       type: object
-    simpleTasksResourceAttributes:
+    SimpleTasksResourceAttributes:
       properties:
         attributes:
           properties:
             name:
-              $ref: '#/components/schemas/simpleTasksnameResourceAttribute'
+              $ref: '#/components/schemas/SimpleTasksNameResourceAttribute'
           type: object
       type: object
-    simpleTasksResourcePatchAttributes:
+    SimpleTasksResourcePatchAttributes:
       properties:
         attributes:
           properties:
             name:
-              $ref: '#/components/schemas/simpleTasksnameResourceAttribute'
+              $ref: '#/components/schemas/SimpleTasksNameResourceAttribute'
           type: object
       type: object
-    simpleTasksResourcePostAttributes:
+    SimpleTasksResourcePostAttributes:
       properties:
         attributes:
           properties:
             name:
-              $ref: '#/components/schemas/simpleTasksnameResourceAttribute'
+              $ref: '#/components/schemas/SimpleTasksNameResourceAttribute'
           type: object
       type: object
-    simpleTasksResourceReference:
+    SimpleTasksResourceReference:
       properties:
         id:
-          $ref: '#/components/schemas/simpleTasksidResourceAttribute'
+          $ref: '#/components/schemas/SimpleTasksIdResourceAttribute'
         type:
           description: The JSON:API resource type (SimpleTasks)
           enum:
@@ -357,32 +365,32 @@ components:
       - id
       - type
       type: object
-    simpleTasksResourceReferenceResponseSchema:
+    SimpleTasksResourceReferenceResponseSchema:
       properties:
         data:
-          $ref: '#/components/schemas/simpleTasksResourceReference'
+          $ref: '#/components/schemas/SimpleTasksResourceReference'
       type: object
-    simpleTasksResourceReferencesResponseSchema:
+    SimpleTasksResourceReferencesResponseSchema:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/simpleTasksResourceReference'
+            $ref: '#/components/schemas/SimpleTasksResourceReference'
           type: array
       type: object
-    simpleTasksResourceResponseSchema:
+    SimpleTasksResourceResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
             items:
-              $ref: '#/components/schemas/simpleTasksResourceSchema'
+              $ref: '#/components/schemas/SimpleTasksResourceSchema'
             type: array
         required:
         - data
-    simpleTasksResourceSchema:
+    SimpleTasksResourceSchema:
       allOf:
-      - $ref: '#/components/schemas/simpleTasksResourceReference'
-      - $ref: '#/components/schemas/simpleTasksResourceAttributes'
+      - $ref: '#/components/schemas/SimpleTasksResourceReference'
+      - $ref: '#/components/schemas/SimpleTasksResourceAttributes'
       - properties:
           links:
             type: object
@@ -391,24 +399,16 @@ components:
         required:
         - attributes
         type: object
-    simpleTasksResourcesResponseSchema:
+    SimpleTasksResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
       - properties:
           data:
             items:
-              $ref: '#/components/schemas/simpleTasksResourceSchema'
+              $ref: '#/components/schemas/SimpleTasksResourceSchema'
             type: array
         required:
         - data
-    simpleTasksidResourceAttribute:
-      description: The JSON:API resource ID
-      format: int64
-      nullable: false
-      type: integer
-    simpleTasksnameResourceAttribute:
-      nullable: true
-      type: string
 info:
   description: OpenAPI document with autogenerated paths, components, responses, etc.
   title: Title From Template
@@ -440,14 +440,14 @@ paths:
         name: filter[name]
         schema:
           type: string
-      - $ref: '#/components/parameters/simpleTasksFields'
-      - $ref: '#/components/parameters/simpleTasksInclude'
-      - $ref: '#/components/parameters/simpleTasksSort'
+      - $ref: '#/components/parameters/SimpleTasksFields'
+      - $ref: '#/components/parameters/SimpleTasksInclude'
+      - $ref: '#/components/parameters/SimpleTasksSort'
       - $ref: '#/components/parameters/PageLimit'
       - $ref: '#/components/parameters/PageOffset'
       responses:
         200:
-          $ref: '#/components/responses/simpleTasksResourcesResponse'
+          $ref: '#/components/responses/SimpleTasksResourcesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -505,13 +505,13 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/simpleTasksPostResource'
+              $ref: '#/components/schemas/SimpleTasksPostResource'
       responses:
         201:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/simpleTasksResourceResponseSchema'
+                $ref: '#/components/schemas/SimpleTasksResourceResponseSchema'
           description: Created
         202:
           $ref: '#/components/responses/Accepted'
@@ -560,7 +560,7 @@ paths:
           - application/vnd.api+json
           - application/json
           type: string
-      - $ref: '#/components/parameters/simpleTasksPrimaryKey'
+      - $ref: '#/components/parameters/SimpleTasksPrimaryKey'
       responses:
         200:
           description: OK
@@ -610,12 +610,12 @@ paths:
           - application/vnd.api+json
           - application/json
           type: string
-      - $ref: '#/components/parameters/simpleTasksPrimaryKey'
-      - $ref: '#/components/parameters/simpleTasksFields'
-      - $ref: '#/components/parameters/simpleTasksInclude'
+      - $ref: '#/components/parameters/SimpleTasksPrimaryKey'
+      - $ref: '#/components/parameters/SimpleTasksFields'
+      - $ref: '#/components/parameters/SimpleTasksInclude'
       responses:
         200:
-          $ref: '#/components/responses/simpleTasksResourceResponse'
+          $ref: '#/components/responses/SimpleTasksResourceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -669,18 +669,18 @@ paths:
           - application/vnd.api+json
           - application/json
           type: string
-      - $ref: '#/components/parameters/simpleTasksPrimaryKey'
+      - $ref: '#/components/parameters/SimpleTasksPrimaryKey'
       requestBody:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/simpleTasksPatchResource'
+              $ref: '#/components/schemas/SimpleTasksPatchResource'
       responses:
         200:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/simpleTasksResourceResponseSchema'
+                $ref: '#/components/schemas/SimpleTasksResourceResponseSchema'
           description: OK
         202:
           $ref: '#/components/responses/Accepted'

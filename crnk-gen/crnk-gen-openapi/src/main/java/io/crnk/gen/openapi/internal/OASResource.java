@@ -75,7 +75,7 @@ public class OASResource {
     // Add filter[<>] parameters
     // Only the most basic filters are documented
     OASUtils.filterAttributes(metaResource, true)
-        .forEach(e -> parameters.add(new FieldFilter(e).parameter()));
+        .forEach(e -> parameters.add(new FieldFilter(metaResource, e).parameter()));
     return operation;
   }
 

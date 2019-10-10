@@ -3,6 +3,7 @@ package io.crnk.gen.openapi.internal.schemas;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
 
 
 abstract class AbstractSchemaGenerator {
@@ -22,13 +23,13 @@ abstract class AbstractSchemaGenerator {
   protected AbstractSchemaGenerator(MetaResource metaResource) {
     this.metaResource = metaResource;
     this.metaAttribute = null;
-    prefix = metaResource.getResourceType();
+    prefix = StringUtils.capitalize(metaResource.getResourceType());
   }
 
   protected AbstractSchemaGenerator(MetaResource metaResource, MetaAttribute metaAttribute) {
     this.metaResource = metaResource;
     this.metaAttribute = metaAttribute;
-    prefix = metaResource.getResourceType() + metaAttribute.getName();
+    prefix = StringUtils.capitalize(metaResource.getResourceType()) + StringUtils.capitalize(metaAttribute.getName());
   }
 
   public String getName() {

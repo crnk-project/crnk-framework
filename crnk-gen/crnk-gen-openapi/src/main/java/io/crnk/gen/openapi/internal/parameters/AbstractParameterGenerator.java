@@ -3,6 +3,7 @@ package io.crnk.gen.openapi.internal.parameters;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.apache.commons.lang3.StringUtils;
 
 
 abstract class AbstractParameterGenerator {
@@ -21,14 +22,14 @@ abstract class AbstractParameterGenerator {
 
   protected AbstractParameterGenerator(MetaResource metaResource) {
     this.metaResource = metaResource;
-    prefix = metaResource.getResourceType();
+    prefix = StringUtils.capitalize(metaResource.getResourceType());
     metaResourceField = null;
   }
 
-  protected AbstractParameterGenerator(MetaResourceField metaResourceField) {
+  protected AbstractParameterGenerator(MetaResource metaResource, MetaResourceField metaResourceField) {
     this.metaResourceField = metaResourceField;
-    prefix = metaResourceField.getName();
-    metaResource = null;
+    this.metaResource = metaResource;
+    prefix = StringUtils.capitalize(metaResource.getResourceType()) + StringUtils.capitalize(metaResourceField.getName());
   }
 
   public String getName() {
