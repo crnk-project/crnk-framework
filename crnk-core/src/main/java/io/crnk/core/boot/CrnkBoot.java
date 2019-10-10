@@ -256,7 +256,9 @@ public class CrnkBoot {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
 			}
 			if (!registryParts.containsKey("")) {
-				moduleRegistry.getContext().addRegistryPart("", new DefaultResourceRegistryPart());
+                ResourceRegistryPart defaultResourceRegistryPart = new DefaultResourceRegistryPart();
+                hierarchialPart.putPart("", defaultResourceRegistryPart);
+				moduleRegistry.getContext().addRegistryPart("", defaultResourceRegistryPart);
 			}
 			rootPart = hierarchialPart;
 		}
