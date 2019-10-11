@@ -5,6 +5,8 @@ import io.crnk.gen.asciidoc.AsciidocGeneratorConfig;
 import io.crnk.gen.asciidoc.internal.AsciidocGeneratorModule;
 import io.crnk.gen.base.GeneratorConfig;
 import io.crnk.gen.base.RuntimeConfiguration;
+import io.crnk.gen.openapi.OpenAPIGeneratorConfig;
+import io.crnk.gen.openapi.OpenAPIGeneratorModule;
 import io.crnk.gen.typescript.TSGeneratorConfig;
 import io.crnk.gen.typescript.TSGeneratorModule;
 import org.gradle.api.Project;
@@ -46,5 +48,13 @@ public class GeneratorExtension extends GeneratorConfig {
 
     public AsciidocGeneratorConfig asciidoc(Closure<AsciidocGeneratorConfig> closure) {
         return (AsciidocGeneratorConfig) project.configure(getAsciidoc(), closure);
+    }
+
+    public OpenAPIGeneratorConfig getOpenapi() {
+        return (OpenAPIGeneratorConfig) getModuleConfig(OpenAPIGeneratorModule.NAME);
+    }
+
+    public OpenAPIGeneratorConfig openapi(Closure<OpenAPIGeneratorConfig> closure) {
+        return (OpenAPIGeneratorConfig) project.configure(getOpenapi(), closure);
     }
 }

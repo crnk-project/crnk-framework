@@ -13,7 +13,7 @@ import java.util.Collections;
 
 public class OpenAPIGeneratorModule implements GeneratorModule {
 
-  private static final String NAME = "openapi";
+  public static final String NAME = "openapi";
 
   private OpenAPIGeneratorConfig config = new OpenAPIGeneratorConfig();
 

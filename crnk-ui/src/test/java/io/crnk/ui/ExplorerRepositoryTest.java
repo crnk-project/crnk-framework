@@ -52,7 +52,7 @@ public class ExplorerRepositoryTest {
 	@Test
 	public void checkFindOne() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
-		ExplorerElement explorer = repository.findOne("local-resources.tasks", new QuerySpec(ExplorerElement.class));
+		ExplorerElement explorer = repository.findOne("local-tasks", new QuerySpec(ExplorerElement.class));
 		Assert.assertNotNull(explorer);
 
 		Assert.assertEquals("tasks", explorer.getBaseQuery().getResourceType());
@@ -74,7 +74,7 @@ public class ExplorerRepositoryTest {
 	@Test
 	public void checkFullTextSearch() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
-		ExplorerElement explorer = repository.findOne("local-resources.presentationTask", new QuerySpec(ExplorerElement.class));
+		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
 
 		List<PathSpec> fullTextSearchPaths = explorer.getFullTextSearchPaths();
 		Assert.assertEquals(1, fullTextSearchPaths.size());
@@ -84,7 +84,7 @@ public class ExplorerRepositoryTest {
 	@Test
 	public void checkLabels() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
-		ExplorerElement explorer = repository.findOne("local-resources.presentationTask", new QuerySpec(ExplorerElement.class));
+		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
 
 		TableColumnElement projectColumn = explorer.getTable().getColumns().getElements().get("project");
 		LabelElement element = (LabelElement) projectColumn.getComponent();
@@ -97,7 +97,7 @@ public class ExplorerRepositoryTest {
 	@Test
 	public void checkNumberColumn() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
-		ExplorerElement explorer = repository.findOne("local-resources.presentationTask", new QuerySpec(ExplorerElement.class));
+		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
 
 		TableColumnElement projectColumn = explorer.getTable().getColumns().getElements().get("priority");
 		PlainTextElement element = (PlainTextElement) projectColumn.getComponent();
