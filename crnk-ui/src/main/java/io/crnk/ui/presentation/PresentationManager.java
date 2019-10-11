@@ -75,7 +75,7 @@ public class PresentationManager {
 	private ResourceRef findResourceRef(String id) {
 		int index = id.lastIndexOf("-");
 		String serviceName = id.substring(0, index);
-		String resourceMetaId = id.substring(index + 1);
+		String resourceMetaId = "resources." + id.substring(index + 1);
 
 		Optional<PresentationService> optService = services.get().stream().filter(it -> it.getServiceName().equals(serviceName)).findFirst();
 		if (!optService.isPresent()) {

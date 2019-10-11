@@ -58,7 +58,7 @@ public class EditorRepositoryTest {
 	@Test
 	public void checkFindOne() {
 		EditorRepository repository = uiModule.getEditorRepository();
-		EditorElement editor = repository.findOne("local-resources.tasks", new QuerySpec(EditorElement.class));
+		EditorElement editor = repository.findOne("local-tasks", new QuerySpec(EditorElement.class));
 		Assert.assertNotNull(editor);
 
 		Assert.assertEquals("tasks", editor.getBaseQuery().getResourceType());
@@ -81,7 +81,7 @@ public class EditorRepositoryTest {
 	@Test
 	public void checkNestedExplorerForManyRelationship() {
 		EditorRepository repository = uiModule.getEditorRepository();
-		EditorElement editor = repository.findOne("local-resources.presentationProject", new QuerySpec(EditorElement.class));
+		EditorElement editor = repository.findOne("local-presentationProject", new QuerySpec(EditorElement.class));
 
 		FormElement formElement = editor.getForm().getElements().getElements().get("tasks");
 		ExplorerElement explorer = (ExplorerElement) formElement.getComponent();
