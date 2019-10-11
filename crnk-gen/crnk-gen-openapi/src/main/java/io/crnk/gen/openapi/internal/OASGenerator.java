@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.annotations.VisibleForTesting;
 import io.crnk.gen.openapi.OpenAPIGeneratorConfig;
 import io.crnk.gen.openapi.OutputFormat;
+import io.crnk.gen.openapi.internal.operations.OASOperation;
 import io.crnk.gen.openapi.internal.parameters.NestedFilter;
 import io.crnk.gen.openapi.internal.parameters.PageLimit;
 import io.crnk.gen.openapi.internal.parameters.PageNumber;
@@ -19,12 +20,8 @@ import io.crnk.gen.openapi.internal.schemas.ApiError;
 import io.crnk.gen.openapi.internal.schemas.ListResponseMixin;
 import io.crnk.gen.openapi.internal.schemas.ResponseMixin;
 import io.crnk.meta.MetaLookup;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimaryKey;
 import io.crnk.meta.model.resource.MetaResource;
-import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.slf4j.Logger;
@@ -84,53 +81,10 @@ public class OASGenerator {
   }
 
   private OpenAPI buildPaths() {
-
     for (OASResource oasResource : oasResources.values()) {
-
-      LOGGER.debug("Adding resource list paths for {}", oasResource.getResourceName());
-      PathItem resourcesPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcesPath(), new PathItem());
-      for (Map.Entry<OperationType, Operation> entry : oasResource.generateResourcesOperations().entrySet()) {
-        openApi.getPaths().addPathItem(oasResource.getResourcesPath(), entry.getKey().merge(resourcesPathItem, entry.getValue()));
-      }
-
-      LOGGER.debug("Adding resource paths for {}", oasResource.getResourceName());
-      PathItem resourcePathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath(), new PathItem());
-      for (Map.Entry<OperationType, Operation> entry : oasResource.generateResourceOperations().entrySet()) {
-        openApi.getPaths().addPathItem(oasResource.getResourcePath(), entry.getKey().merge(resourcePathItem, entry.getValue()));
-      }
-
-      // Relationships can be accessed in 2 ways:
-      //  1.	/api/A/1/b                The full related resource
-      //  2.	/api/A/1/relationships/b  The "ids" as belong to the resource
-      // Generate GET Operations for /api/A/1/B relationship path
-      for (MetaElement child : oasResource.getChildren()) {
-        if (child == null) {
-          continue;
-        }
-        if (child instanceof MetaPrimaryKey) {
-          continue;
-        }
-        if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
-          continue;
-        }
-
-        MetaResourceField mrf = (MetaResourceField) child;
-        if (mrf.isAssociation()) {
-          MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
-          OASResource relatedOasResource = oasResources.get(relatedMetaResource.getName());
-
-          LOGGER.debug("Adding field path /{} of type {} for {}", mrf.getName(), relatedMetaResource.getResourceType(), oasResource.getResourceName());
-          PathItem fieldPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + oasResource.getResourcesPath(), new PathItem());
-          for (Map.Entry<OperationType, Operation> entry : oasResource.generateFieldOperationsForField(relatedMetaResource, mrf).entrySet()) {
-            openApi.getPaths().addPathItem(oasResource.getFieldPath(relatedOasResource), entry.getKey().merge(fieldPathItem, entry.getValue()));
-          }
-
-          LOGGER.debug("Adding field path relationships/{} of type {} for {}", mrf.getName(), relatedMetaResource.getResourceType(), oasResource.getResourceName());
-          PathItem relationshipPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), new PathItem());
-          for (Map.Entry<OperationType, Operation> entry : oasResource.generateRelationshipsOperationsForField(relatedMetaResource, mrf).entrySet()) {
-            openApi.getPaths().addPathItem(oasResource.getRelationshipsPath(relatedOasResource), entry.getKey().merge(relationshipPathItem, entry.getValue()));
-          }
-        }
+      for (OASOperation oasOperation : oasResource.getOperations()) {
+        PathItem resourcesPathItem = openApi.getPaths().getOrDefault(oasOperation.path(), new PathItem());
+        openApi.getPaths().addPathItem(oasOperation.path(), oasOperation.operationType().merge(resourcesPathItem, oasOperation.operation()));
       }
     }
     return openApi;
@@ -144,7 +98,7 @@ public class OASGenerator {
       objectMapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
       try {
         return objectMapper.writer(new DefaultPrettyPrinter()).writeValueAsString(openApi);
-      } catch (JsonProcessingException e){
+      } catch (JsonProcessingException e) {
         LOGGER.error("Sorting failed!");
         return outputFormat.pretty(openApi);
       }
@@ -204,7 +158,7 @@ public class OASGenerator {
   // RESPONSES
 
   private Map<String, ApiResponse> generateStandardApiResponses() {
-    return OASUtils.mergeApiResponses(generateStandardApiSuccessResponses(), OASErrors.generateStandardApiErrorResponses());
+    return OASMergeUtil.mergeApiResponses(generateStandardApiSuccessResponses(), OASErrors.generateStandardApiErrorResponses());
   }
 
   private Map<String, ApiResponse> generateStandardApiSuccessResponses() {

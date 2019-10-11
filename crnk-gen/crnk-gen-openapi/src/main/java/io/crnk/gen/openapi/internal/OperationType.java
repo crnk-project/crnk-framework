@@ -8,49 +8,49 @@ public enum OperationType {
   GET {
     @Override
     public PathItem merge(PathItem pathItem, Operation operation) {
-      pathItem.setGet(OASUtils.mergeOperations(operation, pathItem.getGet()));
+      pathItem.setGet(OASMergeUtil.mergeOperations(operation, pathItem.getGet()));
       return pathItem;
     }
   },
   DELETE {
     @Override
     public PathItem merge(PathItem pathItem, Operation operation) {
-      pathItem.setDelete(OASUtils.mergeOperations(operation, pathItem.getDelete()));
+      pathItem.setDelete(OASMergeUtil.mergeOperations(operation, pathItem.getDelete()));
       return pathItem;
     }
   },
   HEAD {
     @Override
     public PathItem merge(PathItem pathItem, Operation operation) {
-      pathItem.setHead(OASUtils.mergeOperations(operation, pathItem.getHead()));
+      pathItem.setHead(OASMergeUtil.mergeOperations(operation, pathItem.getHead()));
       return pathItem;
     }
   },
   OPTIONS {
     @Override
     public PathItem merge(PathItem pathItem, Operation operation) {
-      pathItem.setOptions(OASUtils.mergeOperations(operation, pathItem.getOptions()));
+      pathItem.setOptions(OASMergeUtil.mergeOperations(operation, pathItem.getOptions()));
       return pathItem;
     }
   },
   PATCH {
     @Override
     public PathItem merge(PathItem pathItem, Operation operation) {
-      pathItem.setPatch(OASUtils.mergeOperations(operation, pathItem.getPatch()));
+      pathItem.setPatch(OASMergeUtil.mergeOperations(operation, pathItem.getPatch()));
       return pathItem;
     }
   },
   POST {
     @Override
     public PathItem merge(PathItem pathItem, Operation operation) {
-      pathItem.setPost(OASUtils.mergeOperations(operation, pathItem.getPost()));
+      pathItem.setPost(OASMergeUtil.mergeOperations(operation, pathItem.getPost()));
       return pathItem;
     }
   },
   PUT {
     @Override
     public PathItem merge(PathItem pathItem, Operation operation) {
-      pathItem.setPut(OASUtils.mergeOperations(operation, pathItem.getPut()));
+      pathItem.setPut(OASMergeUtil.mergeOperations(operation, pathItem.getPut()));
       return pathItem;
     }
   };

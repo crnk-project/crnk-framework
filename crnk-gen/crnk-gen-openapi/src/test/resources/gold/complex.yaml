@@ -1549,20 +1549,26 @@ components:
       nullable: false
       type: integer
     PrimitiveAttributeMapValueWithEnumKeyResourceAttribute:
+      additionalProperties:
+        type: string
       nullable: true
-      type: string
+      type: object
     PrimitiveAttributeMapValueWithListValueResourceAttribute:
-      items:
-        type: string
+      additionalProperties:
+        items:
+          type: string
+        type: array
+        uniqueItems: false
       nullable: true
-      type: array
-      uniqueItems: false
+      type: object
     PrimitiveAttributeMapValueWithSetValueResourceAttribute:
-      items:
-        type: string
+      additionalProperties:
+        items:
+          type: string
+        type: array
+        uniqueItems: true
       nullable: true
-      type: array
-      uniqueItems: true
+      type: object
     PrimitiveAttributeNullableBooleanValueResourceAttribute:
       nullable: true
       type: boolean
@@ -1848,7 +1854,9 @@ components:
       nullable: true
       properties:
         customData:
-          type: string
+          additionalProperties:
+            type: string
+          type: object
         data:
           type: string
         due:
@@ -2525,8 +2533,10 @@ components:
               type: string
       type: object
     ScheduleCustomDataResourceAttribute:
+      additionalProperties:
+        type: string
       nullable: true
-      type: string
+      type: object
     ScheduleDelayedResourceAttribute:
       nullable: false
       type: boolean
@@ -7477,7 +7487,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7527,9 +7537,54 @@ paths:
       - $ref: '#/components/parameters/ProjectsPrimaryKey'
       - $ref: '#/components/parameters/TasksFields'
       - $ref: '#/components/parameters/TasksInclude'
+      - description: Filter by id (csv)
+        in: query
+        name: filter[id]
+        schema:
+          type: string
+      - description: Filter by name (csv)
+        in: query
+        name: filter[name]
+        schema:
+          type: string
+      - description: Filter by project (csv)
+        in: query
+        name: filter[project]
+        schema:
+          type: string
+      - description: Filter by schedule (csv)
+        in: query
+        name: filter[schedule]
+        schema:
+          type: string
+      - description: Filter by projects (csv)
+        in: query
+        name: filter[projects]
+        schema:
+          type: string
+      - description: Filter by includedProject (csv)
+        in: query
+        name: filter[includedProject]
+        schema:
+          type: string
+      - description: Filter by includedProjects (csv)
+        in: query
+        name: filter[includedProjects]
+        schema:
+          type: string
+      - description: Filter by otherTasks (csv)
+        in: query
+        name: filter[otherTasks]
+        schema:
+          type: string
+      - description: Filter by status (csv)
+        in: query
+        name: filter[status]
+        schema:
+          type: string
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7581,10 +7636,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/TasksResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/TasksResourceReferencesResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7636,10 +7691,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/TasksResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/TasksResourceReferencesResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7690,7 +7745,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7740,9 +7795,54 @@ paths:
       - $ref: '#/components/parameters/ProjectsPrimaryKey'
       - $ref: '#/components/parameters/TasksFields'
       - $ref: '#/components/parameters/TasksInclude'
+      - description: Filter by id (csv)
+        in: query
+        name: filter[id]
+        schema:
+          type: string
+      - description: Filter by name (csv)
+        in: query
+        name: filter[name]
+        schema:
+          type: string
+      - description: Filter by project (csv)
+        in: query
+        name: filter[project]
+        schema:
+          type: string
+      - description: Filter by schedule (csv)
+        in: query
+        name: filter[schedule]
+        schema:
+          type: string
+      - description: Filter by projects (csv)
+        in: query
+        name: filter[projects]
+        schema:
+          type: string
+      - description: Filter by includedProject (csv)
+        in: query
+        name: filter[includedProject]
+        schema:
+          type: string
+      - description: Filter by includedProjects (csv)
+        in: query
+        name: filter[includedProjects]
+        schema:
+          type: string
+      - description: Filter by otherTasks (csv)
+        in: query
+        name: filter[otherTasks]
+        schema:
+          type: string
+      - description: Filter by status (csv)
+        in: query
+        name: filter[status]
+        schema:
+          type: string
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceResponse'
+          $ref: '#/components/responses/TasksResourcesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7794,10 +7894,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/TasksResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/TasksResourceReferencesResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7849,10 +7949,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/TasksResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/TasksResourceReferencesResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8515,7 +8615,7 @@ paths:
       - $ref: '#/components/parameters/RelationIdTestPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ScheduleResourceReferenceResponse'
+          $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8563,11 +8663,11 @@ paths:
           - application/json
           type: string
       - $ref: '#/components/parameters/RelationIdTestPrimaryKey'
-      - $ref: '#/components/parameters/ScheduleFields'
-      - $ref: '#/components/parameters/ScheduleInclude'
+      - $ref: '#/components/parameters/RelationIdTestFields'
+      - $ref: '#/components/parameters/RelationIdTestInclude'
       responses:
         200:
-          $ref: '#/components/responses/ScheduleResourceResponse'
+          $ref: '#/components/responses/RelationIdTestResourceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8619,10 +8719,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ScheduleResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/RelationIdTestResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ScheduleResourceReferenceResponse'
+          $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8674,10 +8774,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ScheduleResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/RelationIdTestResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ScheduleResourceReferenceResponse'
+          $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8992,6 +9092,51 @@ paths:
       - $ref: '#/components/parameters/RelationIdTestPrimaryKey'
       - $ref: '#/components/parameters/ScheduleFields'
       - $ref: '#/components/parameters/ScheduleInclude'
+      - description: Filter by id (csv)
+        in: query
+        name: filter[id]
+        schema:
+          type: string
+      - description: Filter by name (csv)
+        in: query
+        name: filter[name]
+        schema:
+          type: string
+      - description: Filter by description (csv)
+        in: query
+        name: filter[description]
+        schema:
+          type: string
+      - description: Filter by taskSet (csv)
+        in: query
+        name: filter[taskSet]
+        schema:
+          type: string
+      - description: Filter by project (csv)
+        in: query
+        name: filter[project]
+        schema:
+          type: string
+      - description: Filter by projects (csv)
+        in: query
+        name: filter[projects]
+        schema:
+          type: string
+      - description: Filter by status (csv)
+        in: query
+        name: filter[status]
+        schema:
+          type: string
+      - description: Filter by delayed (csv)
+        in: query
+        name: filter[delayed]
+        schema:
+          type: string
+      - description: Filter by customData (csv)
+        in: query
+        name: filter[customData]
+        schema:
+          type: string
       responses:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
@@ -9141,7 +9286,7 @@ paths:
           $ref: '#/components/responses/505'
   /relationIdTest/{id}/schedules:
     delete:
-      description: Delete relationIdTest relationship to a relationIdTest resource
+      description: Delete relationIdTest relationship to a schedule resource
       parameters:
       - in: header
         name: Content-Type
@@ -9191,7 +9336,7 @@ paths:
         505:
           $ref: '#/components/responses/505'
     get:
-      description: Retrieve relationIdTest related to a relationIdTest resource
+      description: Retrieve schedule related to a relationIdTest resource
       parameters:
       - in: header
         name: Content-Type
@@ -9205,6 +9350,51 @@ paths:
       - $ref: '#/components/parameters/RelationIdTestPrimaryKey'
       - $ref: '#/components/parameters/ScheduleFields'
       - $ref: '#/components/parameters/ScheduleInclude'
+      - description: Filter by id (csv)
+        in: query
+        name: filter[id]
+        schema:
+          type: string
+      - description: Filter by name (csv)
+        in: query
+        name: filter[name]
+        schema:
+          type: string
+      - description: Filter by description (csv)
+        in: query
+        name: filter[description]
+        schema:
+          type: string
+      - description: Filter by taskSet (csv)
+        in: query
+        name: filter[taskSet]
+        schema:
+          type: string
+      - description: Filter by project (csv)
+        in: query
+        name: filter[project]
+        schema:
+          type: string
+      - description: Filter by projects (csv)
+        in: query
+        name: filter[projects]
+        schema:
+          type: string
+      - description: Filter by status (csv)
+        in: query
+        name: filter[status]
+        schema:
+          type: string
+      - description: Filter by delayed (csv)
+        in: query
+        name: filter[delayed]
+        schema:
+          type: string
+      - description: Filter by customData (csv)
+        in: query
+        name: filter[customData]
+        schema:
+          type: string
       responses:
         200:
           $ref: '#/components/responses/ScheduleResourceResponse'
@@ -9243,7 +9433,7 @@ paths:
         505:
           $ref: '#/components/responses/505'
     patch:
-      description: Update relationIdTest relationship to a relationIdTest resource
+      description: Update relationIdTest relationship to a schedule resource
       parameters:
       - in: header
         name: Content-Type
@@ -9298,7 +9488,7 @@ paths:
         505:
           $ref: '#/components/responses/505'
     post:
-      description: Create relationIdTest relationship to a relationIdTest resource
+      description: Create relationIdTest relationship to a schedule resource
       parameters:
       - in: header
         name: Content-Type
@@ -10256,7 +10446,7 @@ paths:
       - $ref: '#/components/parameters/SchedulePrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10339,7 +10529,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsInclude'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourcesResponse'
+          $ref: '#/components/responses/ProjectsResourceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10391,10 +10581,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10446,10 +10636,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10500,7 +10690,7 @@ paths:
       - $ref: '#/components/parameters/SchedulePrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10583,7 +10773,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsInclude'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10635,10 +10825,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10690,10 +10880,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12581,7 +12771,7 @@ paths:
       - $ref: '#/components/parameters/TasksPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12664,7 +12854,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsInclude'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourcesResponse'
+          $ref: '#/components/responses/ProjectsResourceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12716,10 +12906,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12771,10 +12961,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12825,7 +13015,7 @@ paths:
       - $ref: '#/components/parameters/TasksPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12908,7 +13098,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsInclude'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12960,10 +13150,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -13015,10 +13205,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
