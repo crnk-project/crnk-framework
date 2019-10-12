@@ -1,10 +1,14 @@
 package io.crnk.gen.openapi.internal.annotations;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.gen.openapi.internal.OASGenerator;
 import io.crnk.gen.openapi.internal.OASMergeUtil;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.media.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +31,20 @@ public class OASAnnotations {
   private OASAnnotations() {
     cache = new HashMap<>();
     failed = new HashSet<>();
+    // Hack to support ObjectNode: When an Object has two setters with the same number
+    // of parameters the parser blows up.
+    ObjectMapper mapper = Json.mapper();
+    mapper.addMixIn(ObjectNode.class, IgnoreObjectNodeSetAllIntMixIn.class);
   }
 
   private static class SingletonHelper {
     private static final OASAnnotations INSTANCE = new OASAnnotations();
+  }
+
+  abstract static class IgnoreObjectNodeSetAllIntMixIn
+  {
+    @JsonIgnore
+    public abstract void setAll(ObjectNode other);
   }
 
   public static OASAnnotations getInstance() {

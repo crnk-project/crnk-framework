@@ -1521,7 +1521,7 @@ components:
       nullable: false
       type: boolean
     PrimitiveAttributeDateValueResourceAttribute:
-      format: date
+      format: date-time
       nullable: true
       type: string
     PrimitiveAttributeDoubleValueResourceAttribute:
