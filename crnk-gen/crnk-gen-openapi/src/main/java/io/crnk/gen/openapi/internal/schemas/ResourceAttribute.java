@@ -18,7 +18,7 @@ public class ResourceAttribute extends AbstractSchemaGenerator {
       schema.setDescription("The JSON:API resource ID");
     }
     schema.nullable(metaAttribute.isNullable());
-    OASAnnotations.applyFromModel(schema, metaResource, metaAttribute);
+    OASAnnotations.getInstance().applyFromModel(schema, metaResource, metaAttribute);
     return schema;
   }
 }
