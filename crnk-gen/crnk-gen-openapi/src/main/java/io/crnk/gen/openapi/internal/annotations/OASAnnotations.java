@@ -17,19 +17,19 @@ public class OASAnnotations {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OASGenerator.class);
 
-  public static Schema applyFromModel(Schema schema, MetaResource metaResource, MetaAttribute metaAttribute) {
+  public static void applyFromModel(Schema schema, MetaResource metaResource, MetaAttribute metaAttribute) {
     Map<String, Schema> model;
 
     try {
       model = ModelConverters.getInstance().read(metaResource.getImplementationType());
     } catch (Exception e) {
       LOGGER.error("Unable to parse model" + metaResource.getName(), e);
-      return schema;
+      return;
     }
 
     String[] words = metaResource.getImplementationClassName().split(Pattern.quote("."));
     Schema derivedSchema = model.get(words[words.length - 1]);
     derivedSchema = (Schema) derivedSchema.getProperties().get(metaAttribute.getUnderlyingName());
-    return OASMergeUtil.mergeSchema(schema, derivedSchema);
+    OASMergeUtil.mergeSchema(schema, derivedSchema);
   }
 }

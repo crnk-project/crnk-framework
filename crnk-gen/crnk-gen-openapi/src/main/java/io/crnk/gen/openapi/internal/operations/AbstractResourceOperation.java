@@ -19,5 +19,4 @@ abstract class AbstractResourceOperation extends AbstractOperation  {
     prefix = "";
     responses = defaultResponsesMap();
   }
-
 }

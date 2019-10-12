@@ -14,8 +14,7 @@ import io.crnk.gen.openapi.internal.parameters.PageLimit;
 import io.crnk.gen.openapi.internal.parameters.PageNumber;
 import io.crnk.gen.openapi.internal.parameters.PageOffset;
 import io.crnk.gen.openapi.internal.parameters.PageSize;
-import io.crnk.gen.openapi.internal.responses.Accepted;
-import io.crnk.gen.openapi.internal.responses.NoContent;
+import io.crnk.gen.openapi.internal.responses.StaticResponses;
 import io.crnk.gen.openapi.internal.schemas.ApiError;
 import io.crnk.gen.openapi.internal.schemas.ListResponseMixin;
 import io.crnk.gen.openapi.internal.schemas.ResponseMixin;
@@ -23,7 +22,6 @@ import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +68,7 @@ public class OASGenerator {
     }
     openApi.getComponents().addParameters(new NestedFilter().getName(), new NestedFilter().parameter());
     LOGGER.debug("Adding static responses");
-    openApi.getComponents().responses(generateStandardApiResponses());
+    openApi.getComponents().responses(StaticResponses.generateStandardApiResponses());
     registerMetaResources();
   }
 
@@ -153,19 +150,5 @@ public class OASGenerator {
         && !metaResource.getResourceType().startsWith("meta/")
         && metaResource.getRepository() != null
         && metaResource.getRepository().isExposed();
-  }
-
-  // RESPONSES
-
-  private Map<String, ApiResponse> generateStandardApiResponses() {
-    return OASMergeUtil.mergeApiResponses(generateStandardApiSuccessResponses(), OASErrors.generateStandardApiErrorResponses());
-  }
-
-  private Map<String, ApiResponse> generateStandardApiSuccessResponses() {
-    Map<String, ApiResponse> responses = new LinkedHashMap<>();
-    responses.put(new Accepted().getName(), new Accepted().response());
-    responses.put(new NoContent().getName(), new NoContent().response());
-
-    return responses;
   }
 }

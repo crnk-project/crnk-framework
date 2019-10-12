@@ -1,6 +1,5 @@
 package io.crnk.gen.openapi.internal.operations;
 
-import io.crnk.gen.openapi.internal.OASResource;
 import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.gen.openapi.internal.OperationType;
 import io.crnk.gen.openapi.internal.parameters.Fields;
@@ -39,7 +38,7 @@ public class ResourcesGet extends AbstractResourceOperation implements OASOperat
   public Operation operation() {
     Operation operation = super.operation();
     // Add filters for resource
-    OASResource.addFilters(metaResource, operation);
+    addFilters(metaResource, operation);
 
     // Add fields[resource] parameter
     operation.addParametersItem(new Fields(metaResource).$ref());

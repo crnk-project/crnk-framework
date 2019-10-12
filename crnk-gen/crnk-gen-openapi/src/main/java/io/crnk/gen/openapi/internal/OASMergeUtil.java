@@ -12,8 +12,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OASMergeUtil {
+
   @SafeVarargs
-  static Map<String, ApiResponse> mergeApiResponses(Map<String, ApiResponse>... maps) {
+  public static Map<String, ApiResponse> mergeApiResponses(Map<String, ApiResponse>... maps) {
     Map<String, ApiResponse> merged = new TreeMap<>();
     for (Map<String, ApiResponse> map : maps) {
       merged.putAll(map);

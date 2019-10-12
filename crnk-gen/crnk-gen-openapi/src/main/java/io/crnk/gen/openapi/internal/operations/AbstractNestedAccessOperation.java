@@ -1,6 +1,5 @@
 package io.crnk.gen.openapi.internal.operations;
 
-import io.crnk.gen.openapi.internal.OASResource;
 import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.gen.openapi.internal.OperationType;
 import io.crnk.gen.openapi.internal.parameters.Fields;
@@ -35,7 +34,7 @@ abstract class AbstractNestedAccessOperation extends AbstractNestedOperation {
     // Add filter[<>] parameters
     // Only the most basic filters are documented
     if (OASUtils.oneToMany(metaResourceField)) {
-      OASResource.addFilters(relatedMetaResource, operation);
+      addFilters(relatedMetaResource, operation);
     }
     // Add fields[resource] parameter
     operation.getParameters().add(new Fields(relatedMetaResource).$ref());

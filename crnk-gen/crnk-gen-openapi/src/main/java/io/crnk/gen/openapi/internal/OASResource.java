@@ -14,10 +14,8 @@ import io.crnk.gen.openapi.internal.operations.ResourceGet;
 import io.crnk.gen.openapi.internal.operations.ResourcePatch;
 import io.crnk.gen.openapi.internal.operations.ResourcesGet;
 import io.crnk.gen.openapi.internal.operations.ResourcesPost;
-import io.crnk.gen.openapi.internal.parameters.FieldFilter;
 import io.crnk.gen.openapi.internal.parameters.Fields;
 import io.crnk.gen.openapi.internal.parameters.Include;
-import io.crnk.gen.openapi.internal.parameters.NestedFilter;
 import io.crnk.gen.openapi.internal.parameters.PrimaryKey;
 import io.crnk.gen.openapi.internal.parameters.Sort;
 import io.crnk.gen.openapi.internal.responses.ResourceReferenceResponse;
@@ -39,7 +37,6 @@ import io.crnk.gen.openapi.internal.schemas.ResourceSchema;
 import io.crnk.gen.openapi.internal.schemas.ResourcesResponseSchema;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -174,18 +171,6 @@ public class OASResource {
       operations.add(new RelationshipPost(metaResource, metaResourceField, relatedMetaResource));
     }
     return operations;
-  }
-
-  public static Operation addFilters(MetaResource metaResource, Operation operation) {
-    // TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
-    List<Parameter> parameters = operation.getParameters();
-    parameters.add(new NestedFilter().$ref());
-
-    // Add filter[<>] parameters
-    // Only the most basic filters are documented
-    OASUtils.filterAttributes(metaResource, true)
-        .forEach(e -> parameters.add(new FieldFilter(metaResource, e).parameter()));
-    return operation;
   }
 
   Map<String, Parameter> getComponentParameters() {

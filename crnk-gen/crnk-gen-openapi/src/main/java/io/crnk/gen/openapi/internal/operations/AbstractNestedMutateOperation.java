@@ -30,7 +30,6 @@ abstract class AbstractNestedMutateOperation extends AbstractNestedOperation {
     responses = defaultResponsesMap();
   }
 
-
   Operation operation() {
     Operation operation = super.operation();
     operation.getParameters().add(new PrimaryKey(this.metaResource).$ref());

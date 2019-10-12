@@ -45,7 +45,7 @@ public class OASUtils {
     return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isAssociation);
   }
 
-  static Stream<MetaResourceField> filterAttributes(MetaResource metaResource, boolean includePrimaryKey) {
+  public static Stream<MetaResourceField> filterAttributes(MetaResource metaResource, boolean includePrimaryKey) {
     return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isFilterable);
   }
 
