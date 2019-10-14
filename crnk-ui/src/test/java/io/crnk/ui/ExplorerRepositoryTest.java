@@ -82,6 +82,13 @@ public class ExplorerRepositoryTest {
 	}
 
 	@Test
+	public void checkId() {
+		ExplorerRepository repository = uiModule.getExplorerRepository();
+		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
+		Assert.assertEquals("local-presentationTask", explorer.getId());
+	}
+
+	@Test
 	public void checkLabels() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
 		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
