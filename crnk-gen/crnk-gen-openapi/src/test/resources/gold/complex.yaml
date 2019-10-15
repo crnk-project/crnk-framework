@@ -993,9 +993,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/CommentResourceSchema'
-            type: array
+            $ref: '#/components/schemas/CommentResourceSchema'
         required:
         - data
     CommentResourceSchema:
@@ -1007,9 +1005,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     CommentResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1117,9 +1115,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/HeaderResourceSchema'
-            type: array
+            $ref: '#/components/schemas/HeaderResourceSchema'
         required:
         - data
     HeaderResourceSchema:
@@ -1131,9 +1127,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     HeaderResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1229,9 +1225,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/HistoricTasksResourceSchema'
-            type: array
+            $ref: '#/components/schemas/HistoricTasksResourceSchema'
         required:
         - data
     HistoricTasksResourceSchema:
@@ -1243,9 +1237,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     HistoricTasksResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1367,9 +1361,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/NestedRelatedResourceSchema'
-            type: array
+            $ref: '#/components/schemas/NestedRelatedResourceSchema'
         required:
         - data
     NestedRelatedResourceSchema:
@@ -1381,9 +1373,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     NestedRelatedResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1486,9 +1478,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/PostResourceSchema'
-            type: array
+            $ref: '#/components/schemas/PostResourceSchema'
         required:
         - data
     PostResourceSchema:
@@ -1500,9 +1490,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     PostResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1810,9 +1800,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/PrimitiveAttributeResourceSchema'
-            type: array
+            $ref: '#/components/schemas/PrimitiveAttributeResourceSchema'
         required:
         - data
     PrimitiveAttributeResourceSchema:
@@ -1824,9 +1812,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     PrimitiveAttributeResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1977,9 +1965,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/ProjectsResourceSchema'
-            type: array
+            $ref: '#/components/schemas/ProjectsResourceSchema'
         required:
         - data
     ProjectsResourceSchema:
@@ -1991,9 +1977,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     ProjectsResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2090,9 +2076,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/ReadOnlyTaskResourceSchema'
-            type: array
+            $ref: '#/components/schemas/ReadOnlyTaskResourceSchema'
         required:
         - data
     ReadOnlyTaskResourceSchema:
@@ -2104,9 +2088,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     ReadOnlyTaskResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2247,9 +2231,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/RelationIdTestResourceSchema'
-            type: array
+            $ref: '#/components/schemas/RelationIdTestResourceSchema'
         required:
         - data
     RelationIdTestResourceSchema:
@@ -2261,9 +2243,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     RelationIdTestResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2376,9 +2358,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/RelocatedTaskResourceSchema'
-            type: array
+            $ref: '#/components/schemas/RelocatedTaskResourceSchema'
         required:
         - data
     RelocatedTaskResourceSchema:
@@ -2390,9 +2370,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     RelocatedTaskResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2475,9 +2455,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/RenamedIdResourceSchema'
-            type: array
+            $ref: '#/components/schemas/RenamedIdResourceSchema'
         required:
         - data
     RenamedIdResourceSchema:
@@ -2489,9 +2467,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     RenamedIdResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2675,9 +2653,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/ScheduleResourceSchema'
-            type: array
+            $ref: '#/components/schemas/ScheduleResourceSchema'
         required:
         - data
     ScheduleResourceSchema:
@@ -2689,9 +2665,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     ScheduleResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2786,9 +2762,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/ScheduleStatusResourceSchema'
-            type: array
+            $ref: '#/components/schemas/ScheduleStatusResourceSchema'
         required:
         - data
     ScheduleStatusResourceSchema:
@@ -2800,9 +2774,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     ScheduleStatusResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2965,9 +2939,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/TasksResourceSchema'
-            type: array
+            $ref: '#/components/schemas/TasksResourceSchema'
         required:
         - data
     TasksResourceSchema:
@@ -2979,9 +2951,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     TasksResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'

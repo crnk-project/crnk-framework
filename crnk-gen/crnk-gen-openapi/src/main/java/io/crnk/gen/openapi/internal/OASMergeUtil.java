@@ -1,5 +1,6 @@
 package io.crnk.gen.openapi.internal;
 
+import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -74,6 +75,26 @@ public class OASMergeUtil {
       thisOperation.setExtensions(thatOperation.getExtensions());
     }
     return thisOperation;
+  }
+
+  static ExternalDocumentation mergeExternalDocumentation(ExternalDocumentation thisExternalDocumentation,
+                                                          ExternalDocumentation thatExternalDocumentation) {
+    if (thatExternalDocumentation == null) {
+      return thisExternalDocumentation;
+    }
+    if (thisExternalDocumentation == null) {
+      return thatExternalDocumentation;
+    }
+    if (thatExternalDocumentation.getDescription() != null) {
+      thisExternalDocumentation.setDescription(thatExternalDocumentation.getDescription());
+    }
+    if (thatExternalDocumentation.getUrl() != null) {
+      thisExternalDocumentation.setUrl(thatExternalDocumentation.getUrl());
+    }
+    if (thatExternalDocumentation.getExtensions() != null) {
+      thisExternalDocumentation.setExtensions(thatExternalDocumentation.getExtensions());
+    }
+    return thisExternalDocumentation;
   }
 
   static List<String> mergeTags(List<String> thisTags, List<String> thatTags) {

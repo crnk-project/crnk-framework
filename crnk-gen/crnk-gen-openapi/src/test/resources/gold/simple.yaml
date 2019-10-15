@@ -382,9 +382,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/SimpleTasksResourceSchema'
-            type: array
+            $ref: '#/components/schemas/SimpleTasksResourceSchema'
         required:
         - data
     SimpleTasksResourceSchema:
@@ -396,9 +394,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     SimpleTasksResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
