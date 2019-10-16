@@ -34,7 +34,9 @@ public class OASMergeUtil {
       );
     }
     if (thatOperation.getExternalDocs() != null) {
-      thisOperation.setExternalDocs(thatOperation.getExternalDocs());
+      thisOperation.setExternalDocs(
+        mergeExternalDocumentation(thisOperation.getExternalDocs(), thatOperation.getExternalDocs())
+      );
     }
     if (thatOperation.getParameters() != null) {
       thisOperation.setParameters(
