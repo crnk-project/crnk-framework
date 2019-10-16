@@ -1,5 +1,6 @@
 package io.crnk.gen.openapi.internal.schemas;
 
+import io.crnk.gen.openapi.internal.MetaResourceBaseTest;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-class ResourceSchemaTest extends SchemaBaseTest {
+class ResourceSchemaTest extends MetaResourceBaseTest {
 
   @Test
   void schema() {

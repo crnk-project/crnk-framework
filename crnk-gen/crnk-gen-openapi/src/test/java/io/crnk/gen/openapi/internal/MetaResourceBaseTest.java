@@ -1,4 +1,4 @@
-package io.crnk.gen.openapi.internal.schemas;
+package io.crnk.gen.openapi.internal;
 
 import io.crnk.meta.model.MetaPrimaryKey;
 import io.crnk.meta.model.MetaPrimitiveType;
@@ -8,13 +8,13 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Collections;
 
-public class SchemaBaseTest {
+public class MetaResourceBaseTest {
 
-  MetaResource metaResource;
+  public MetaResource metaResource;
 
-  MetaResourceField metaResourceField;
+  public MetaResourceField metaResourceField;
 
-  MetaResourceField additionalMetaResourceField;
+  public MetaResourceField additionalMetaResourceField;
 
   MetaPrimaryKey metaPrimaryKey;
 

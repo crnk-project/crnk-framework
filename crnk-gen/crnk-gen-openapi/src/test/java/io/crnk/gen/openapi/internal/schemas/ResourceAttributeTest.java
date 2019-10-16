@@ -1,11 +1,12 @@
 package io.crnk.gen.openapi.internal.schemas;
 
+import io.crnk.gen.openapi.internal.MetaResourceBaseTest;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-class ResourceAttributeTest extends SchemaBaseTest {
+class ResourceAttributeTest extends MetaResourceBaseTest {
 
   @Test
   void schemaPrimaryKey() {
