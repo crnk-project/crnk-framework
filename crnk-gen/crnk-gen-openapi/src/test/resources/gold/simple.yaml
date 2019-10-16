@@ -271,7 +271,7 @@ components:
           type: object
       type: object
     ResponseMixin:
-      description: A JSON-API document with a single resource
+      description: A JSON:API document with a single resource
       properties:
         errors:
           items:
