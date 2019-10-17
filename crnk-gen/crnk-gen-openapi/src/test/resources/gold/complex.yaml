@@ -89,10 +89,16 @@ components:
         additionalProperties: true
         properties:
           AND:
+            additionalProperties: true
+            nullable: true
             type: object
           NOT:
+            additionalProperties: true
+            nullable: true
             type: object
           OR:
+            additionalProperties: true
+            nullable: true
             type: object
         type: object
     NestedRelatedFields:
