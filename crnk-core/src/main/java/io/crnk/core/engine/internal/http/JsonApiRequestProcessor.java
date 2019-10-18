@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
@@ -16,21 +15,17 @@ import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.controller.Controller;
 import io.crnk.core.engine.internal.dispatcher.path.ActionPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
-import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.module.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase implements HttpRequestProcessor {
@@ -192,21 +187,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
     }
 
     private Response toErrorResponse(Throwable e) {
-        ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
-        Optional<ExceptionMapper> exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
-        if (!exceptionMapper.isPresent()) {
-            LOGGER.error("failed to process request, unknown exception thrown", e);
-
-            // we do not propagate causes because we do not know the nature of the error.
-            // one could consider hiding the message as well
-            e = new InternalServerErrorException(e.getMessage());
-            exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
-            PreconditionUtil
-                    .assertTrue("no exception mapper for InternalServerErrorException found", exceptionMapper.isPresent());
-        } else {
-            LOGGER.debug("dispatching exception to mapper", e);
-        }
-        return exceptionMapper.get().toErrorResponse(e).toResponse();
+        return moduleContext.getExceptionMapperRegistry().toErrorResponse(e);
     }
 
     protected DocumentFilterChain getFilterChain(JsonPath jsonPath, String method) {

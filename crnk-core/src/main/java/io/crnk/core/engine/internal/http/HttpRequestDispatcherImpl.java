@@ -3,6 +3,7 @@ package io.crnk.core.engine.internal.http;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
@@ -19,6 +20,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.module.ModuleRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +36,6 @@ import java.util.Set;
  * and crnk-servlet for usage.
  */
 public class HttpRequestDispatcherImpl implements RequestDispatcher {
-
 
     private final ExceptionMapperRegistry exceptionMapperRegistry;
 
@@ -127,7 +128,6 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
         DocumentFilterContextImpl context = new DocumentFilterContextImpl(jsonPath, null, null, method);
         chain.doFilter(context);
     }
-
 
     class ActionFilterChain implements DocumentFilterChain {
 
