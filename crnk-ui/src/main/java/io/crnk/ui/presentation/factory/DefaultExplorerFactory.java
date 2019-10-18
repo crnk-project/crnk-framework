@@ -84,7 +84,7 @@ public class DefaultExplorerFactory implements PresentationElementFactory {
 	}
 
 	private String toId(PresentationService service, MetaResource resource) {
-		return service.getServiceName() + "-" + resource.getId();
+		return service.getServiceName() + "-" + resource.getResourceType();
 	}
 
 
