@@ -14,7 +14,6 @@ import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ByteArraySchema;
@@ -26,11 +25,8 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.media.UUIDSchema;
-import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -45,16 +41,20 @@ public class OASUtils {
         .filter(e -> !e.isPrimaryKeyAttribute() || includePrimaryKey);
   }
 
-  public static Stream<MetaResourceField> postAttributes(MetaResource metaResource, boolean includePrimaryKey) {
-    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isInsertable);
+  static Stream<MetaResourceField> associationAttributes(MetaResource metaResource, boolean includePrimaryKey) {
+    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isAssociation);
+  }
+
+  public static Stream<MetaResourceField> filterAttributes(MetaResource metaResource, boolean includePrimaryKey) {
+    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isFilterable);
   }
 
   public static Stream<MetaResourceField> patchAttributes(MetaResource metaResource, boolean includePrimaryKey) {
     return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isUpdatable);
   }
 
-  public static Stream<MetaResourceField> filterAttributes(MetaResource metaResource, boolean includePrimaryKey) {
-    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isFilterable);
+  public static Stream<MetaResourceField> postAttributes(MetaResource metaResource, boolean includePrimaryKey) {
+    return attributes(metaResource, includePrimaryKey).filter(MetaAttribute::isInsertable);
   }
 
   public static Stream<MetaResourceField> sortAttributes(MetaResource metaResource, boolean includePrimaryKey) {
@@ -126,8 +126,7 @@ public class OASUtils {
     } else if (metaType.getName().equals("uuid")) {
       return new UUIDSchema();
     } else if (metaType instanceof MetaMapType) {
-
-      return transformMetaResourceField(metaType.getElementType());
+      return new ObjectSchema().additionalProperties(transformMetaResourceField(metaType.getElementType()));
     } else if (metaType instanceof MetaEnumType) {
       Schema enumSchema = new StringSchema();
       for (MetaElement child : metaType.getChildren()) {
@@ -143,40 +142,33 @@ public class OASUtils {
     }
   }
 
-  @SafeVarargs
-  static Map<String, ApiResponse> mergeApiResponses(Map<String, ApiResponse>... maps) {
-    Map<String, ApiResponse> merged = new TreeMap<>();
-    for (Map<String, ApiResponse> map : maps) {
-      merged.putAll(map);
-    }
-    return merged;
-  }
-
-  static Operation mergeOperations(Operation newOperation, Operation existingOperation) {
-    if (existingOperation == null) {
-      return newOperation;
-    }
-
-    if (existingOperation.getOperationId() != null) {
-      newOperation.setOperationId(existingOperation.getOperationId());
-    }
-
-    if (existingOperation.getSummary() != null) {
-      newOperation.setSummary(existingOperation.getSummary());
-    }
-
-    if (existingOperation.getDescription() != null) {
-      newOperation.setDescription(existingOperation.getDescription());
-    }
-
-    if (existingOperation.getExtensions() != null) {
-      newOperation.setExtensions(existingOperation.getExtensions());
-    }
-
-    return newOperation;
-  }
-
   public static boolean oneToMany(MetaResourceField metaResourceField) {
     return metaResourceField.getType().isCollection() || metaResourceField.getType().isMap();
+  }
+
+  public static String getResourcesPath(MetaResource metaResource) {
+    //
+    // TODO: Requires access to CrnkBoot.getWebPathPrefix() and anything that might modify a path
+    // TODO: alternatively, have a config setting for this generator that essentially duplicates the above
+    //
+    return "/" + metaResource.getResourcePath();
+  }
+
+  public static String getResourcePath(MetaResource metaResource) {
+    StringBuilder keyPath = new StringBuilder(getResourcesPath(metaResource) + "/");
+    for (MetaAttribute metaAttribute : metaResource.getPrimaryKey().getElements()) {
+      keyPath.append("{");
+      keyPath.append(metaAttribute.getName());
+      keyPath.append("}");
+    }
+    return keyPath.toString();
+  }
+
+  public static String getNestedPath(MetaResource metaResource, MetaResource relatedMetaResource) {
+    return getResourcePath(metaResource) + getResourcesPath(relatedMetaResource);
+  }
+
+  public static String getRelationshipsPath(MetaResource metaResource, MetaResource relatedMetaResource) {
+    return getResourcePath(metaResource) + "/relationships" + getResourcesPath(relatedMetaResource);
   }
 }

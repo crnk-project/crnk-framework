@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 public class ResponseMixin extends AbstractSchemaGenerator {
   public Schema schema() {
     return new ObjectSchema()
-        .description("A JSON-API document with a single resource")
+        .description("A JSON:API document with a single resource")
         .addProperties(
             "errors",
             new ArraySchema().items(new ApiError().$ref()))

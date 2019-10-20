@@ -1,22 +1,30 @@
 package io.crnk.gen.openapi.internal;
 
-import io.crnk.gen.openapi.internal.parameters.FieldFilter;
+import io.crnk.gen.openapi.internal.operations.NestedDelete;
+import io.crnk.gen.openapi.internal.operations.NestedGet;
+import io.crnk.gen.openapi.internal.operations.NestedPatch;
+import io.crnk.gen.openapi.internal.operations.NestedPost;
+import io.crnk.gen.openapi.internal.operations.OASOperation;
+import io.crnk.gen.openapi.internal.operations.RelationshipDelete;
+import io.crnk.gen.openapi.internal.operations.RelationshipGet;
+import io.crnk.gen.openapi.internal.operations.RelationshipPatch;
+import io.crnk.gen.openapi.internal.operations.RelationshipPost;
+import io.crnk.gen.openapi.internal.operations.ResourceDelete;
+import io.crnk.gen.openapi.internal.operations.ResourceGet;
+import io.crnk.gen.openapi.internal.operations.ResourcePatch;
+import io.crnk.gen.openapi.internal.operations.ResourcesGet;
+import io.crnk.gen.openapi.internal.operations.ResourcesPost;
 import io.crnk.gen.openapi.internal.parameters.Fields;
 import io.crnk.gen.openapi.internal.parameters.Include;
-import io.crnk.gen.openapi.internal.parameters.NestedFilter;
 import io.crnk.gen.openapi.internal.parameters.PrimaryKey;
 import io.crnk.gen.openapi.internal.parameters.Sort;
-import io.crnk.gen.openapi.internal.paths.Field;
-import io.crnk.gen.openapi.internal.paths.Relationship;
-import io.crnk.gen.openapi.internal.paths.Resource;
-import io.crnk.gen.openapi.internal.paths.Resources;
 import io.crnk.gen.openapi.internal.responses.ResourceReferenceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourcesResponse;
-import io.crnk.gen.openapi.internal.schemas.PostResourceReference;
 import io.crnk.gen.openapi.internal.schemas.PatchResource;
 import io.crnk.gen.openapi.internal.schemas.PostResource;
+import io.crnk.gen.openapi.internal.schemas.PostResourceReference;
 import io.crnk.gen.openapi.internal.schemas.ResourceAttribute;
 import io.crnk.gen.openapi.internal.schemas.ResourceAttributes;
 import io.crnk.gen.openapi.internal.schemas.ResourcePatchAttributes;
@@ -27,29 +35,22 @@ import io.crnk.gen.openapi.internal.schemas.ResourceReferencesResponseSchema;
 import io.crnk.gen.openapi.internal.schemas.ResourceResponseSchema;
 import io.crnk.gen.openapi.internal.schemas.ResourceSchema;
 import io.crnk.gen.openapi.internal.schemas.ResourcesResponseSchema;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OASResource {
 
-  private final String resourceName;
-
-  private final String resourceType;
-
   private MetaResource metaResource;
-
-  private Map<String, Schema> attributes;
 
   private Map<String, Parameter> componentParameters;
 
@@ -57,29 +58,20 @@ public class OASResource {
 
   private Map<String, ApiResponse> componentResponses;
 
+  private List<OASOperation> operations;
+
   OASResource(MetaResource metaResource) {
     this.metaResource = metaResource;
-    resourceName = metaResource.getName();
-    resourceType = metaResource.getResourceType();
     initializeComponentParameters();
     initializeComponentSchemas();
     initializeComponentResponses();
-  }
-
-  public static Operation addFilters(MetaResource metaResource, Operation operation) {
-    // TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
-    List<Parameter> parameters = operation.getParameters();
-
-    parameters.add(new NestedFilter().$ref());
-
-    // Add filter[<>] parameters
-    // Only the most basic filters are documented
-    OASUtils.filterAttributes(metaResource, true)
-        .forEach(e -> parameters.add(new FieldFilter(metaResource, e).parameter()));
-    return operation;
+    initializeOperations();
   }
 
   private void initializeComponentParameters() {
+    if (componentParameters != null) {
+      return;
+    }
     componentParameters = new HashMap<>();
     componentParameters.put(new PrimaryKey(metaResource).getName(), new PrimaryKey(metaResource).parameter());
     componentParameters.put(new Fields(metaResource).getName(), new Fields(metaResource).parameter());
@@ -88,6 +80,9 @@ public class OASResource {
   }
 
   private void initializeComponentSchemas() {
+    if (componentSchemas != null) {
+      return;
+    }
     componentSchemas = OASUtils.attributes(metaResource, true)
         .map(e -> new ResourceAttribute(metaResource, e))
         .collect(Collectors.toMap(ResourceAttribute::getName, ResourceAttribute::schema));
@@ -107,11 +102,75 @@ public class OASResource {
   }
 
   private void initializeComponentResponses() {
+    if (componentResponses != null) {
+      return;
+    }
     componentResponses = new HashMap<>();
     componentResponses.put(new ResourceResponse(metaResource).getName(), new ResourceResponse(metaResource).response());
     componentResponses.put(new ResourcesResponse(metaResource).getName(), new ResourcesResponse(metaResource).response());
     componentResponses.put(new ResourceReferenceResponse(metaResource).getName(), new ResourceReferenceResponse(metaResource).response());
     componentResponses.put(new ResourceReferencesResponse(metaResource).getName(), new ResourceReferencesResponse(metaResource).response());
+  }
+
+  private void initializeOperations() {
+    if (operations != null) {
+      return;
+    }
+    operations = Stream.of(
+        resourceOperations().stream(),
+        resourcesOperations().stream(),
+        nestedOperations().stream(),
+        relationshipsOperations().stream()
+    )
+        .reduce(Stream::concat)
+        .orElseGet(Stream::empty)
+        .filter(OASOperation::isEnabled)
+        .collect(Collectors.toList());
+  }
+
+  private List<OASOperation> resourceOperations() {
+    List<OASOperation> operations = new ArrayList<>();
+    operations.add(new ResourceGet(metaResource));
+    operations.add(new ResourcePatch(metaResource));
+    operations.add(new ResourceDelete(metaResource));
+    return operations;
+  }
+
+  private List<OASOperation> resourcesOperations() {
+    List<OASOperation> operations = new ArrayList<>();
+    operations.add(new ResourcesGet(metaResource));
+    operations.add(new ResourcesPost(metaResource));
+    return operations;
+  }
+
+  private List<OASOperation> nestedOperations() {
+    MetaResource relatedMetaResource;
+    List<OASOperation> operations = new ArrayList<>();
+    for (MetaResourceField metaResourceField :
+        OASUtils.associationAttributes(metaResource, false)
+            .collect(Collectors.toList())) {
+      relatedMetaResource = (MetaResource) metaResourceField.getType().getElementType();
+      operations.add(new NestedGet(metaResource, metaResourceField, relatedMetaResource));
+      operations.add(new NestedDelete(metaResource, metaResourceField, relatedMetaResource));
+      operations.add(new NestedPatch(metaResource, metaResourceField, relatedMetaResource));
+      operations.add(new NestedPost(metaResource, metaResourceField, relatedMetaResource));
+    }
+    return operations;
+  }
+
+  private List<OASOperation> relationshipsOperations() {
+    MetaResource relatedMetaResource;
+    List<OASOperation> operations = new ArrayList<>();
+    for (MetaResourceField metaResourceField :
+        OASUtils.associationAttributes(metaResource, false)
+            .collect(Collectors.toList())) {
+      relatedMetaResource = (MetaResource) metaResourceField.getType().getElementType();
+      operations.add(new RelationshipGet(metaResource, metaResourceField, relatedMetaResource));
+      operations.add(new RelationshipDelete(metaResource, metaResourceField, relatedMetaResource));
+      operations.add(new RelationshipPatch(metaResource, metaResourceField, relatedMetaResource));
+      operations.add(new RelationshipPost(metaResource, metaResourceField, relatedMetaResource));
+    }
+    return operations;
   }
 
   Map<String, Parameter> getComponentParameters() {
@@ -126,110 +185,15 @@ public class OASResource {
     return componentResponses;
   }
 
+  List<OASOperation> getOperations() {
+    return operations;
+  }
+
   String getResourceName() {
-    return resourceName;
+    return metaResource.getName();
   }
 
   public String getResourceType() {
-    return resourceType;
-  }
-
-  List<MetaElement> getChildren() {
-    return metaResource.getChildren();
-  }
-
-  String getResourcesPath() {
-    //
-    // TODO: Requires access to CrnkBoot.getWebPathPrefix() and anything that might modify a path
-    // TODO: alternatively, have a config setting for this generator that essentially duplicates the above
-    //
-    return "/" + metaResource.getResourcePath();
-  }
-
-  String getResourcePath() {
-    StringBuilder keyPath = new StringBuilder(getResourcesPath() + "/");
-    for (MetaAttribute metaAttribute : metaResource.getPrimaryKey().getElements()) {
-      keyPath.append("{");
-      keyPath.append(metaAttribute.getName());
-      keyPath.append("}");
-    }
-    return keyPath.toString();
-  }
-
-  String getFieldPath(OASResource relatedOasResource) {
-    return getResourcePath() + relatedOasResource.getResourcesPath();
-  }
-
-  // PARAMETERS
-
-  String getRelationshipsPath(OASResource relatedOasResource) {
-    return getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath();
-  }
-
-  // OPERATIONS
-
-  Map<OperationType, Operation> generateResourcesOperations() {
-    Map<OperationType, Operation> operations = new HashMap<>();
-    Resources resourcesPath = new Resources(this.metaResource);
-    if (metaResource.isReadable()) {
-      operations.put(OperationType.GET, resourcesPath.Get());
-    }
-    if (metaResource.isInsertable()) {
-      operations.put(OperationType.POST, resourcesPath.Post());
-    }
-    return operations;
-  }
-
-  Map<OperationType, Operation> generateResourceOperations() {
-    Map<OperationType, Operation> operations = new HashMap<>();
-    Resource resourcePath = new Resource(this.metaResource);
-    if (metaResource.isReadable()) {
-      operations.put(OperationType.GET, resourcePath.Get());
-    }
-    if (metaResource.isUpdatable()) {
-      operations.put(OperationType.PATCH, resourcePath.Patch());
-    }
-    if (metaResource.isDeletable()) {
-      operations.put(OperationType.DELETE, resourcePath.Delete());
-    }
-    return operations;
-  }
-
-  Map<OperationType, Operation> generateFieldOperationsForField(MetaResource relatedMetaResource, MetaResourceField mrf) {
-    Map<OperationType, Operation> operations = new HashMap<>();
-    Field fieldPath = new Field(this.metaResource, relatedMetaResource, mrf);
-    if (metaResource.isReadable() && mrf.isReadable()) {
-      operations.put(OperationType.GET, fieldPath.Get());
-    }
-    if (metaResource.isReadable() && mrf.isInsertable()) {
-      operations.put(OperationType.POST, fieldPath.Post());
-    }
-    if (metaResource.isReadable() && mrf.isUpdatable()) {
-      operations.put(OperationType.PATCH, fieldPath.Patch());
-    }
-    // If the relationship is updatable then we imply that it is deletable.
-    if (metaResource.isReadable() && mrf.isUpdatable()) {
-      operations.put(OperationType.DELETE, fieldPath.Delete());
-    }
-    return operations;
-  }
-
-  Map<OperationType, Operation> generateRelationshipsOperationsForField(MetaResource relatedMetaResource, MetaResourceField mrf) {
-    Map<OperationType, Operation> operations = new HashMap<>();
-    Relationship relationshipPath = new Relationship(this.metaResource, relatedMetaResource, mrf);
-    if (metaResource.isReadable() && mrf.isReadable()) {
-      operations.put(OperationType.GET, relationshipPath.Get());
-    }
-    if (metaResource.isReadable() && mrf.isInsertable()) {
-      operations.put(OperationType.POST, relationshipPath.Post());
-    }
-    if (metaResource.isReadable() && mrf.isUpdatable()) {
-      operations.put(OperationType.PATCH, relationshipPath.Patch());
-    }
-    // If the relationship is updatable then we imply that it is deletable.
-    if (metaResource.isReadable() && mrf.isUpdatable()) {
-      operations.put(OperationType.DELETE, relationshipPath.Delete());
-    }
-    return operations;
+    return metaResource.getResourceType();
   }
 }

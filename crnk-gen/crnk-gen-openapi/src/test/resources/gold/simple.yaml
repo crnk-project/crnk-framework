@@ -8,10 +8,16 @@ components:
         additionalProperties: true
         properties:
           AND:
+            additionalProperties: true
+            nullable: true
             type: object
           NOT:
+            additionalProperties: true
+            nullable: true
             type: object
           OR:
+            additionalProperties: true
+            nullable: true
             type: object
         type: object
     PageLimit:
@@ -271,7 +277,7 @@ components:
           type: object
       type: object
     ResponseMixin:
-      description: A JSON-API document with a single resource
+      description: A JSON:API document with a single resource
       properties:
         errors:
           items:
@@ -382,9 +388,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/SimpleTasksResourceSchema'
-            type: array
+            $ref: '#/components/schemas/SimpleTasksResourceSchema'
         required:
         - data
     SimpleTasksResourceSchema:
@@ -396,9 +400,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     SimpleTasksResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'

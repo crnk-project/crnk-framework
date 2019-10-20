@@ -89,10 +89,16 @@ components:
         additionalProperties: true
         properties:
           AND:
+            additionalProperties: true
+            nullable: true
             type: object
           NOT:
+            additionalProperties: true
+            nullable: true
             type: object
           OR:
+            additionalProperties: true
+            nullable: true
             type: object
         type: object
     NestedRelatedFields:
@@ -993,9 +999,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/CommentResourceSchema'
-            type: array
+            $ref: '#/components/schemas/CommentResourceSchema'
         required:
         - data
     CommentResourceSchema:
@@ -1007,9 +1011,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     CommentResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1117,9 +1121,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/HeaderResourceSchema'
-            type: array
+            $ref: '#/components/schemas/HeaderResourceSchema'
         required:
         - data
     HeaderResourceSchema:
@@ -1131,9 +1133,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     HeaderResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1229,9 +1231,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/HistoricTasksResourceSchema'
-            type: array
+            $ref: '#/components/schemas/HistoricTasksResourceSchema'
         required:
         - data
     HistoricTasksResourceSchema:
@@ -1243,9 +1243,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     HistoricTasksResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1367,9 +1367,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/NestedRelatedResourceSchema'
-            type: array
+            $ref: '#/components/schemas/NestedRelatedResourceSchema'
         required:
         - data
     NestedRelatedResourceSchema:
@@ -1381,9 +1379,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     NestedRelatedResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1486,9 +1484,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/PostResourceSchema'
-            type: array
+            $ref: '#/components/schemas/PostResourceSchema'
         required:
         - data
     PostResourceSchema:
@@ -1500,9 +1496,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     PostResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1521,7 +1517,7 @@ components:
       nullable: false
       type: boolean
     PrimitiveAttributeDateValueResourceAttribute:
-      format: date
+      format: date-time
       nullable: true
       type: string
     PrimitiveAttributeDoubleValueResourceAttribute:
@@ -1549,20 +1545,26 @@ components:
       nullable: false
       type: integer
     PrimitiveAttributeMapValueWithEnumKeyResourceAttribute:
+      additionalProperties:
+        type: string
       nullable: true
-      type: string
+      type: object
     PrimitiveAttributeMapValueWithListValueResourceAttribute:
-      items:
-        type: string
+      additionalProperties:
+        items:
+          type: string
+        type: array
+        uniqueItems: false
       nullable: true
-      type: array
-      uniqueItems: false
+      type: object
     PrimitiveAttributeMapValueWithSetValueResourceAttribute:
-      items:
-        type: string
+      additionalProperties:
+        items:
+          type: string
+        type: array
+        uniqueItems: true
       nullable: true
-      type: array
-      uniqueItems: true
+      type: object
     PrimitiveAttributeNullableBooleanValueResourceAttribute:
       nullable: true
       type: boolean
@@ -1804,9 +1806,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/PrimitiveAttributeResourceSchema'
-            type: array
+            $ref: '#/components/schemas/PrimitiveAttributeResourceSchema'
         required:
         - data
     PrimitiveAttributeResourceSchema:
@@ -1818,9 +1818,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     PrimitiveAttributeResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -1848,7 +1848,9 @@ components:
       nullable: true
       properties:
         customData:
-          type: string
+          additionalProperties:
+            type: string
+          type: object
         data:
           type: string
         due:
@@ -1969,9 +1971,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/ProjectsResourceSchema'
-            type: array
+            $ref: '#/components/schemas/ProjectsResourceSchema'
         required:
         - data
     ProjectsResourceSchema:
@@ -1983,9 +1983,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     ProjectsResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2082,9 +2082,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/ReadOnlyTaskResourceSchema'
-            type: array
+            $ref: '#/components/schemas/ReadOnlyTaskResourceSchema'
         required:
         - data
     ReadOnlyTaskResourceSchema:
@@ -2096,9 +2094,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     ReadOnlyTaskResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2239,9 +2237,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/RelationIdTestResourceSchema'
-            type: array
+            $ref: '#/components/schemas/RelationIdTestResourceSchema'
         required:
         - data
     RelationIdTestResourceSchema:
@@ -2253,9 +2249,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     RelationIdTestResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2368,9 +2364,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/RelocatedTaskResourceSchema'
-            type: array
+            $ref: '#/components/schemas/RelocatedTaskResourceSchema'
         required:
         - data
     RelocatedTaskResourceSchema:
@@ -2382,9 +2376,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     RelocatedTaskResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2467,9 +2461,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/RenamedIdResourceSchema'
-            type: array
+            $ref: '#/components/schemas/RenamedIdResourceSchema'
         required:
         - data
     RenamedIdResourceSchema:
@@ -2481,9 +2473,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     RenamedIdResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2495,7 +2487,7 @@ components:
         required:
         - data
     ResponseMixin:
-      description: A JSON-API document with a single resource
+      description: A JSON:API document with a single resource
       properties:
         errors:
           items:
@@ -2525,8 +2517,10 @@ components:
               type: string
       type: object
     ScheduleCustomDataResourceAttribute:
+      additionalProperties:
+        type: string
       nullable: true
-      type: string
+      type: object
     ScheduleDelayedResourceAttribute:
       nullable: false
       type: boolean
@@ -2665,9 +2659,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/ScheduleResourceSchema'
-            type: array
+            $ref: '#/components/schemas/ScheduleResourceSchema'
         required:
         - data
     ScheduleResourceSchema:
@@ -2679,9 +2671,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     ScheduleResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2776,9 +2768,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/ScheduleStatusResourceSchema'
-            type: array
+            $ref: '#/components/schemas/ScheduleStatusResourceSchema'
         required:
         - data
     ScheduleStatusResourceSchema:
@@ -2790,9 +2780,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     ScheduleStatusResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -2955,9 +2945,7 @@ components:
       - $ref: '#/components/schemas/ResponseMixin'
       - properties:
           data:
-            items:
-              $ref: '#/components/schemas/TasksResourceSchema'
-            type: array
+            $ref: '#/components/schemas/TasksResourceSchema'
         required:
         - data
     TasksResourceSchema:
@@ -2969,9 +2957,9 @@ components:
             type: object
           relationships:
             type: object
-        required:
-        - attributes
         type: object
+      required:
+      - attributes
     TasksResourcesResponseSchema:
       allOf:
       - $ref: '#/components/schemas/ListResponseMixin'
@@ -7477,7 +7465,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7527,9 +7515,54 @@ paths:
       - $ref: '#/components/parameters/ProjectsPrimaryKey'
       - $ref: '#/components/parameters/TasksFields'
       - $ref: '#/components/parameters/TasksInclude'
+      - description: Filter by id (csv)
+        in: query
+        name: filter[id]
+        schema:
+          type: string
+      - description: Filter by name (csv)
+        in: query
+        name: filter[name]
+        schema:
+          type: string
+      - description: Filter by project (csv)
+        in: query
+        name: filter[project]
+        schema:
+          type: string
+      - description: Filter by schedule (csv)
+        in: query
+        name: filter[schedule]
+        schema:
+          type: string
+      - description: Filter by projects (csv)
+        in: query
+        name: filter[projects]
+        schema:
+          type: string
+      - description: Filter by includedProject (csv)
+        in: query
+        name: filter[includedProject]
+        schema:
+          type: string
+      - description: Filter by includedProjects (csv)
+        in: query
+        name: filter[includedProjects]
+        schema:
+          type: string
+      - description: Filter by otherTasks (csv)
+        in: query
+        name: filter[otherTasks]
+        schema:
+          type: string
+      - description: Filter by status (csv)
+        in: query
+        name: filter[status]
+        schema:
+          type: string
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7581,10 +7614,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/TasksResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/TasksResourceReferencesResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7636,10 +7669,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/TasksResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/TasksResourceReferencesResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7690,7 +7723,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7740,9 +7773,54 @@ paths:
       - $ref: '#/components/parameters/ProjectsPrimaryKey'
       - $ref: '#/components/parameters/TasksFields'
       - $ref: '#/components/parameters/TasksInclude'
+      - description: Filter by id (csv)
+        in: query
+        name: filter[id]
+        schema:
+          type: string
+      - description: Filter by name (csv)
+        in: query
+        name: filter[name]
+        schema:
+          type: string
+      - description: Filter by project (csv)
+        in: query
+        name: filter[project]
+        schema:
+          type: string
+      - description: Filter by schedule (csv)
+        in: query
+        name: filter[schedule]
+        schema:
+          type: string
+      - description: Filter by projects (csv)
+        in: query
+        name: filter[projects]
+        schema:
+          type: string
+      - description: Filter by includedProject (csv)
+        in: query
+        name: filter[includedProject]
+        schema:
+          type: string
+      - description: Filter by includedProjects (csv)
+        in: query
+        name: filter[includedProjects]
+        schema:
+          type: string
+      - description: Filter by otherTasks (csv)
+        in: query
+        name: filter[otherTasks]
+        schema:
+          type: string
+      - description: Filter by status (csv)
+        in: query
+        name: filter[status]
+        schema:
+          type: string
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceResponse'
+          $ref: '#/components/responses/TasksResourcesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7794,10 +7872,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/TasksResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/TasksResourceReferencesResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -7849,10 +7927,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/TasksResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/TasksResourceReferencesResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/TasksResourceReferenceResponse'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8515,7 +8593,7 @@ paths:
       - $ref: '#/components/parameters/RelationIdTestPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ScheduleResourceReferenceResponse'
+          $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8563,11 +8641,11 @@ paths:
           - application/json
           type: string
       - $ref: '#/components/parameters/RelationIdTestPrimaryKey'
-      - $ref: '#/components/parameters/ScheduleFields'
-      - $ref: '#/components/parameters/ScheduleInclude'
+      - $ref: '#/components/parameters/RelationIdTestFields'
+      - $ref: '#/components/parameters/RelationIdTestInclude'
       responses:
         200:
-          $ref: '#/components/responses/ScheduleResourceResponse'
+          $ref: '#/components/responses/RelationIdTestResourceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8619,10 +8697,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ScheduleResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/RelationIdTestResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ScheduleResourceReferenceResponse'
+          $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8674,10 +8752,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ScheduleResourceReferenceResponseSchema'
+              $ref: '#/components/schemas/RelationIdTestResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ScheduleResourceReferenceResponse'
+          $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -8992,6 +9070,51 @@ paths:
       - $ref: '#/components/parameters/RelationIdTestPrimaryKey'
       - $ref: '#/components/parameters/ScheduleFields'
       - $ref: '#/components/parameters/ScheduleInclude'
+      - description: Filter by id (csv)
+        in: query
+        name: filter[id]
+        schema:
+          type: string
+      - description: Filter by name (csv)
+        in: query
+        name: filter[name]
+        schema:
+          type: string
+      - description: Filter by description (csv)
+        in: query
+        name: filter[description]
+        schema:
+          type: string
+      - description: Filter by taskSet (csv)
+        in: query
+        name: filter[taskSet]
+        schema:
+          type: string
+      - description: Filter by project (csv)
+        in: query
+        name: filter[project]
+        schema:
+          type: string
+      - description: Filter by projects (csv)
+        in: query
+        name: filter[projects]
+        schema:
+          type: string
+      - description: Filter by status (csv)
+        in: query
+        name: filter[status]
+        schema:
+          type: string
+      - description: Filter by delayed (csv)
+        in: query
+        name: filter[delayed]
+        schema:
+          type: string
+      - description: Filter by customData (csv)
+        in: query
+        name: filter[customData]
+        schema:
+          type: string
       responses:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
@@ -9141,7 +9264,7 @@ paths:
           $ref: '#/components/responses/505'
   /relationIdTest/{id}/schedules:
     delete:
-      description: Delete relationIdTest relationship to a relationIdTest resource
+      description: Delete relationIdTest relationship to a schedule resource
       parameters:
       - in: header
         name: Content-Type
@@ -9191,7 +9314,7 @@ paths:
         505:
           $ref: '#/components/responses/505'
     get:
-      description: Retrieve relationIdTest related to a relationIdTest resource
+      description: Retrieve schedule related to a relationIdTest resource
       parameters:
       - in: header
         name: Content-Type
@@ -9205,6 +9328,51 @@ paths:
       - $ref: '#/components/parameters/RelationIdTestPrimaryKey'
       - $ref: '#/components/parameters/ScheduleFields'
       - $ref: '#/components/parameters/ScheduleInclude'
+      - description: Filter by id (csv)
+        in: query
+        name: filter[id]
+        schema:
+          type: string
+      - description: Filter by name (csv)
+        in: query
+        name: filter[name]
+        schema:
+          type: string
+      - description: Filter by description (csv)
+        in: query
+        name: filter[description]
+        schema:
+          type: string
+      - description: Filter by taskSet (csv)
+        in: query
+        name: filter[taskSet]
+        schema:
+          type: string
+      - description: Filter by project (csv)
+        in: query
+        name: filter[project]
+        schema:
+          type: string
+      - description: Filter by projects (csv)
+        in: query
+        name: filter[projects]
+        schema:
+          type: string
+      - description: Filter by status (csv)
+        in: query
+        name: filter[status]
+        schema:
+          type: string
+      - description: Filter by delayed (csv)
+        in: query
+        name: filter[delayed]
+        schema:
+          type: string
+      - description: Filter by customData (csv)
+        in: query
+        name: filter[customData]
+        schema:
+          type: string
       responses:
         200:
           $ref: '#/components/responses/ScheduleResourceResponse'
@@ -9243,7 +9411,7 @@ paths:
         505:
           $ref: '#/components/responses/505'
     patch:
-      description: Update relationIdTest relationship to a relationIdTest resource
+      description: Update relationIdTest relationship to a schedule resource
       parameters:
       - in: header
         name: Content-Type
@@ -9298,7 +9466,7 @@ paths:
         505:
           $ref: '#/components/responses/505'
     post:
-      description: Create relationIdTest relationship to a relationIdTest resource
+      description: Create relationIdTest relationship to a schedule resource
       parameters:
       - in: header
         name: Content-Type
@@ -10256,7 +10424,7 @@ paths:
       - $ref: '#/components/parameters/SchedulePrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10339,7 +10507,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsInclude'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourcesResponse'
+          $ref: '#/components/responses/ProjectsResourceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10391,10 +10559,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10446,10 +10614,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10500,7 +10668,7 @@ paths:
       - $ref: '#/components/parameters/SchedulePrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10583,7 +10751,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsInclude'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10635,10 +10803,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -10690,10 +10858,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12581,7 +12749,7 @@ paths:
       - $ref: '#/components/parameters/TasksPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12664,7 +12832,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsInclude'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourcesResponse'
+          $ref: '#/components/responses/ProjectsResourceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12716,10 +12884,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12771,10 +12939,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12825,7 +12993,7 @@ paths:
       - $ref: '#/components/parameters/TasksPrimaryKey'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12908,7 +13076,7 @@ paths:
       - $ref: '#/components/parameters/ProjectsInclude'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -12960,10 +13128,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:
@@ -13015,10 +13183,10 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/ProjectsResourceReferencesResponseSchema'
+              $ref: '#/components/schemas/ProjectsResourceReferenceResponseSchema'
       responses:
         200:
-          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
+          $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
           $ref: '#/components/responses/Accepted'
         204:

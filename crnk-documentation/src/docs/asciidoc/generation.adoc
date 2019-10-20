@@ -42,7 +42,7 @@ capability of that particular field. Contributions welcomed.
 
 WARNING: This generator is still experimental. Feedback welcomed.
 
-`crnk-gen-openapi` provides an way to generate OpenAPI files. The OpenAPI Specification,
+`crnk-gen-openapi` provides a way to generate OpenAPI files. The OpenAPI Specification,
 originally known as the Swagger Specification, is a specification for machine-readable interface
 files for describing, producing, consuming, and visualizing RESTful web services.
 

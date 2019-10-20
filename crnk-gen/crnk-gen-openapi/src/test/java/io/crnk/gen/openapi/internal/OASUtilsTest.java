@@ -10,7 +10,6 @@ import io.crnk.meta.model.MetaPrimitiveType;
 import io.crnk.meta.model.MetaSetType;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ByteArraySchema;
@@ -27,9 +26,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class OASUtilsTest {
@@ -215,7 +212,7 @@ public class OASUtilsTest {
     type.setChildren(people);
     Schema schema = OASUtils.transformMetaResourceField(type);
     Assert.assertTrue(schema instanceof StringSchema);
-    for (int i=0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       Assert.assertEquals(names.get(i), schema.getEnum().get(i));
     }
   }
@@ -237,42 +234,6 @@ public class OASUtilsTest {
     Schema schema = OASUtils.transformMetaResourceField(type);
     Assert.assertTrue(schema instanceof ObjectSchema);
     Assert.assertEquals(true, schema.getAdditionalProperties());
-  }
-
-  @Test
-  public void testMergeOperations() {
-    Operation existingOperation = new Operation();
-
-    Operation newOperation = new Operation();
-    newOperation.setOperationId("new id");
-    newOperation.setSummary("new summary");
-    newOperation.setDescription("new description");
-
-    Map<String, Object> extensions = new HashMap<>();
-    extensions.put("new schema", new Schema());
-    newOperation.setExtensions(extensions);
-
-    Assert.assertSame(newOperation, OASUtils.mergeOperations(newOperation, null));
-
-    Operation afterMerge = OASUtils.mergeOperations(newOperation, existingOperation);
-    Assert.assertEquals("new id", afterMerge.getOperationId());
-    Assert.assertEquals("new summary", afterMerge.getSummary());
-    Assert.assertEquals("new description", afterMerge.getDescription());
-    Assert.assertSame(extensions, afterMerge.getExtensions());
-
-    existingOperation.setOperationId("existing id");
-    existingOperation.setSummary("existing summary");
-    existingOperation.setDescription("existing description");
-
-    Map<String, Object> existingExtensions = new HashMap<>();
-    extensions.put("existing schema", new Schema());
-    newOperation.setExtensions(extensions);
-
-    afterMerge = OASUtils.mergeOperations(newOperation, existingOperation);
-    Assert.assertEquals("existing id", afterMerge.getOperationId());
-    Assert.assertEquals("existing summary", afterMerge.getSummary());
-    Assert.assertEquals("existing description", afterMerge.getDescription());
-    Assert.assertSame(extensions, afterMerge.getExtensions());
   }
 
   @Test

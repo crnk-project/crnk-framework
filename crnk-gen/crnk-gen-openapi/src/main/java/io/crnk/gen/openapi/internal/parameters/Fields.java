@@ -21,7 +21,7 @@ public class Fields extends AbstractParameterGenerator {
         .in("query")
         .schema(new StringSchema()
             ._default(
-                OASUtils.attributes(metaResource, true)
+                OASUtils.attributes(metaResource, true)  // TODO: Should primary key field(s) be included?
                     .map(MetaElement::getName)
                     .collect(joining(","))));
   }

@@ -27,7 +27,7 @@ public class ResourceSchema extends AbstractSchemaGenerator {
                         new ObjectSchema())
                     .addProperties(
                         "links",
-                        new ObjectSchema())
-                    .required(Collections.singletonList("attributes"))));
+                        new ObjectSchema())))
+        .required(Collections.singletonList("attributes"));
   }
 }
