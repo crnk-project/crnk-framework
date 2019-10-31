@@ -1,7 +1,6 @@
 package io.crnk.core.engine.internal.http;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,9 +25,6 @@ import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.module.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.Set;
 
 public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase implements HttpRequestProcessor {
 
@@ -59,7 +55,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 		boolean acceptsAny = acceptsJsonApi || requestContext.acceptsAny();
 
 		boolean acceptsPlainJson = acceptsAny || (acceptPlainJson && requestContext.accepts("application/json"));
-		LOGGER.debug("accepting request as JSON-API: {}", acceptPlainJson);
+		LOGGER.debug("HTTP Accept header matches: {}", acceptPlainJson);
 		return acceptsPlainJson;
 	}
 
@@ -91,14 +87,14 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 			boolean contentTypeHeaderMatch = matchesContentTypeHeader(context, acceptingPlainJson);
 			JsonPath jsonPath = helper.getJsonPath(context);
 			if (jsonPath == null) {
-				LOGGER.debug("request not served since no matching repository defined for {}", context.getPath());
+				LOGGER.debug("not accepted since no matching repository defined for path={}", context.getPath());
 				return false;
 			}
 			if (!contentTypeHeaderMatch) {
-				LOGGER.warn("request not served due to content-type header mismatch, " + HttpHeaders.JSONAPI_CONTENT_TYPE + " missing?");
+				LOGGER.warn("not accepted due to content-type header mismatch, " + HttpHeaders.JSONAPI_CONTENT_TYPE + " missing?");
 				return false;
 			}
-			LOGGER.debug("request {} accepted", jsonPath);
+			LOGGER.debug("accepted to server request: path={}", jsonPath);
 			return true;
 		}
 		return false;

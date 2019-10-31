@@ -1,6 +1,15 @@
 package io.crnk.meta;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.list.ResourceList;
@@ -34,14 +43,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class ResourceMetaProviderTest extends AbstractMetaTest {
 
@@ -286,8 +287,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
         Assert.assertEquals("linksInformation", attr.getName());
         Assert.assertEquals("resources.tasks.linksInformation", attr.getId());
         Assert.assertFalse(attr.isLazy());
-        Assert.assertFalse(attr.isMeta());
-        Assert.assertTrue(attr.isLinks());
+        Assert.assertTrue(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
         Assert.assertNull(attr.getOppositeAttribute());
         Assert.assertEquals(Task.TaskLinks.class, attr.getType().getImplementationClass());
     }
@@ -300,8 +300,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
         Assert.assertEquals("metaInformation", attr.getName());
         Assert.assertEquals("resources.tasks.metaInformation", attr.getId());
         Assert.assertFalse(attr.isLazy());
-        Assert.assertTrue(attr.isMeta());
-        Assert.assertFalse(attr.isLinks());
+        Assert.assertTrue(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
         Assert.assertNull(attr.getOppositeAttribute());
         Assert.assertEquals(Task.TaskMeta.class, attr.getType().getImplementationClass());
     }
@@ -335,8 +334,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
         MetaResourceField attr = (MetaResourceField) meta.getAttribute("name");
         Assert.assertEquals("name", attr.getName());
         Assert.assertFalse(attr.isLazy());
-        Assert.assertFalse(attr.isMeta());
-        Assert.assertFalse(attr.isLinks());
+        Assert.assertFalse(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
+        Assert.assertFalse(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
         Assert.assertFalse(attr.isAssociation());
 
         Assert.assertTrue(attr.isSortable());
@@ -420,8 +419,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
         Assert.assertEquals("schedule", attr.getName());
         Assert.assertEquals("resources.tasks.schedule", attr.getId());
         Assert.assertFalse(attr.isLazy());
-        Assert.assertFalse(attr.isMeta());
-        Assert.assertFalse(attr.isLinks());
+        Assert.assertFalse(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
+        Assert.assertFalse(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
         Assert.assertTrue(attr.isAssociation());
         Assert.assertNotNull(attr.getOppositeAttribute());
         Assert.assertNotNull("tasks", attr.getOppositeAttribute().getName());
@@ -441,8 +440,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
         Assert.assertEquals("taskSet", attr.getName());
         Assert.assertEquals("resources.schedule.taskSet", attr.getId());
         Assert.assertTrue(attr.isLazy());
-        Assert.assertFalse(attr.isMeta());
-        Assert.assertFalse(attr.isLinks());
+        Assert.assertFalse(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
+        Assert.assertFalse(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
         Assert.assertTrue(attr.isAssociation());
         Assert.assertFalse(attr.isOwner());
         Assert.assertNotNull(attr.getOppositeAttribute());
@@ -465,8 +464,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
         MetaResource meta = resourceProvider.getMeta(Task.class);
 
         MetaResourceField attr = (MetaResourceField) meta.getAttribute("projects");
-        Assert.assertFalse(attr.isMeta());
-        Assert.assertFalse(attr.isLinks());
+        Assert.assertFalse(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
+        Assert.assertFalse(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
         Assert.assertTrue(attr.isAssociation());
         Assert.assertTrue(attr.isOwner());
         Assert.assertEquals(ResourceList.class, attr.getType().getImplementationClass());
