@@ -1,5 +1,10 @@
 package io.crnk.gen.openapi.internal;
 
+import java.math.BigDecimal;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.gen.openapi.internal.schemas.ResourceReference;
 import io.crnk.meta.model.MetaArrayType;
 import io.crnk.meta.model.MetaAttribute;
@@ -26,18 +31,13 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.media.UUIDSchema;
 
-import java.math.BigDecimal;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 public class OASUtils {
 
   public static Stream<MetaResourceField> attributes(MetaResource metaResource, boolean includePrimaryKey) {
     return metaResource.getChildren().stream()
         .filter(not(MetaPrimaryKey.class::isInstance))
         .map(MetaResourceField.class::cast)
-        .filter(not(MetaResourceField::isLinks))
-        .filter(not(MetaResourceField::isMeta))
+        .filter(it -> it.getFieldType() != ResourceFieldType.META_INFORMATION && it.getFieldType() != ResourceFieldType.LINKS_INFORMATION)
         .filter(e -> !e.isPrimaryKeyAttribute() || includePrimaryKey);
   }
 

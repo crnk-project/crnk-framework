@@ -1,5 +1,6 @@
 package io.crnk.meta.model.resource;
 
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.model.MetaAttribute;
 
@@ -9,24 +10,13 @@ import io.crnk.meta.model.MetaAttribute;
 @JsonApiResource(type = "meta/resourceField")
 public class MetaResourceField extends MetaAttribute {
 
-	private boolean meta;
+	private ResourceFieldType fieldType;
 
-	private boolean links;
-
-	public boolean isMeta() {
-		return meta;
+	public ResourceFieldType getFieldType() {
+		return fieldType;
 	}
 
-	public void setMeta(boolean meta) {
-		this.meta = meta;
+	public void setFieldType(ResourceFieldType fieldType) {
+		this.fieldType = fieldType;
 	}
-
-	public boolean isLinks() {
-		return links;
-	}
-
-	public void setLinks(boolean links) {
-		this.links = links;
-	}
-
 }

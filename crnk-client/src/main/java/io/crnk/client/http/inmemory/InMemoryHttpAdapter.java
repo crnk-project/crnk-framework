@@ -23,7 +23,6 @@ import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.UrlUtils;
 
 /**
  * Allows to connect a client to a server directly in memory without HTTP communication. Useful to write
@@ -144,7 +143,7 @@ public class InMemoryHttpAdapter implements HttpAdapter {
 			if (sep != -1) {
 				path = path.substring(0, sep);
 			}
-			return UrlUtils.removeLeadingSlash(path);
+			return path;
 		}
 
 		@Override

@@ -20,4 +20,14 @@ public class UrlUtils {
 			return url;
 		}
 	}
+
+	public static String concat(String baseUrl, String... paths) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(removeTrailingSlash(baseUrl));
+		for (String path : paths) {
+			builder.append('/');
+			builder.append(removeLeadingSlash(path));
+		}
+		return builder.toString();
+	}
 }
