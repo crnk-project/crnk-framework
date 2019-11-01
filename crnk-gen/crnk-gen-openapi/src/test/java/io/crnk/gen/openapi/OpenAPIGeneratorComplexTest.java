@@ -61,7 +61,7 @@ public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
 
     CrnkBoot boot = new CrnkBoot();
     boot.setServiceDiscovery(new EmptyServiceDiscovery());
-    boot.addModule(new TestModule().setBulk(false));
+    boot.addModule(new TestModule().setExtended(false));
     boot.addModule(metaModule);
     boot.boot();
     return boot;
