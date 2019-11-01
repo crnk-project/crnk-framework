@@ -1,5 +1,10 @@
 package io.crnk.security.repository;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextAware;
@@ -14,11 +19,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.security.SecurityModule;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class RolePermissionRepository extends ResourceRepositoryBase<RolePermission, UUID> implements
         HttpRequestContextAware, ResourceRegistryAware {
@@ -65,7 +65,7 @@ public class RolePermissionRepository extends ResourceRepositoryBase<RolePermiss
                     for (String role : roles) {
                         RolePermission rolePermission = new RolePermission();
                         rolePermission.setRole(role);
-                        rolePermission.setId(resourceType + "_" + role);
+                        rolePermission.setId(resourceType.replace("/", "_").toLowerCase() + "_" + role);
                         rolePermission.setResourceType(resourceType);
                         rolePermission.setPermission(module.getRolePermissions(queryContext, resourceType, role));
                         rolePermission.setDataRoomFilter(FilterSpec.and(filterQuerySpec.getFilters()));
