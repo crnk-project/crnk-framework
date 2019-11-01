@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -18,11 +17,12 @@ import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.internal.utils.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Performs a random walk across an API endpoint by following JSON:API links.
+ * Performs a bounded random walk across an API endpoint by following JSON:API links.
  */
 public class RandomWalkLinkChecker {
 
@@ -32,6 +32,8 @@ public class RandomWalkLinkChecker {
 
 	private int walkLength = 1000;
 
+	private Random random = new Random();
+
 	private Set<String> visited = new HashSet<>();
 
 	private List<String> upcoming = new ArrayList<>();
@@ -39,6 +41,12 @@ public class RandomWalkLinkChecker {
 	private ObjectMapper mapper = new ObjectMapper();
 
 	private String currentUrl;
+
+	private List<Predicate<String>> blackListPredicates = new ArrayList<>();
+
+	private List<String> previousVisits = new ArrayList<>();
+
+	private int maxPreviousVisitHistorySize = 30;
 
 	public RandomWalkLinkChecker(HttpAdapter httpAdapter) {
 		this.httpAdapter = httpAdapter;
@@ -56,25 +64,63 @@ public class RandomWalkLinkChecker {
 		return walkLength;
 	}
 
+	private String greatestCommonPrefix(String a, String b) {
+		int minLength = Math.min(a.length(), b.length());
+		for (int i = 0; i < minLength; i++) {
+			if (a.charAt(i) != b.charAt(i)) {
+				return a.substring(0, i);
+			}
+		}
+		return a.substring(0, minLength);
+	}
+
 	public Set<String> performCheck() {
-		Random random = new Random();
+
 
 		int index = 0;
 		while (index < walkLength && !upcoming.isEmpty()) {
 
-			int nextIndex = random.nextInt(upcoming.size());
+			int nextIndex = selectNext();
 
 			currentUrl = upcoming.remove(nextIndex);
 			if (!visited.contains(currentUrl)) {
 				visited.add(currentUrl);
 				index++;
 				visit(currentUrl);
+
+				previousVisits.add(currentUrl);
+				while (previousVisits.size() > maxPreviousVisitHistorySize) {
+					previousVisits.remove(0);
+				}
 			}
 		}
 		return visited;
 	}
 
-	private void visit(String url) {
+	/**
+	 * @return select next url to visit from the upcoming queue. We attempt to choose an url that is most different to any other previously visited urls.
+	 */
+	protected int selectNext() {
+		// consider moving to a prefix tree to better distribute testing evenly across all repositories
+		int numCandidates = 100;
+		int nextIndex = -1;
+		int nextPriority = Integer.MAX_VALUE;
+		for (int i = 0; i < numCandidates; i++) {
+			int candidateIndex = random.nextInt(upcoming.size());
+			String candidateUrl = upcoming.get(candidateIndex);
+			int candidatePriority = 0;
+			for (String previousVisit : previousVisits) {
+				candidatePriority += greatestCommonPrefix(previousVisit, candidateUrl).length();
+			}
+			if (candidatePriority < nextPriority) {
+				nextIndex = candidateIndex;
+				nextPriority = candidatePriority;
+			}
+		}
+		return nextIndex;
+	}
+
+	protected void visit(String url) {
 		try {
 			LOGGER.info("visiting {}", url);
 			HttpAdapterRequest request = httpAdapter.newRequest(url, HttpMethod.GET, null);
@@ -95,7 +141,7 @@ public class RandomWalkLinkChecker {
 		}
 	}
 
-	private void findLinks(JsonNode jsonNode) {
+	protected void findLinks(JsonNode jsonNode) {
 		if (jsonNode instanceof ArrayNode) {
 			ArrayNode arrayNode = (ArrayNode) jsonNode;
 			for (int i = 0; i < arrayNode.size(); i++) {
@@ -110,7 +156,7 @@ public class RandomWalkLinkChecker {
 				String name = entry.getKey();
 				if (name.equals("links")) {
 					JsonNode linksValue = entry.getValue();
-					if(!(linksValue instanceof  ObjectNode)){
+					if (!(linksValue instanceof ObjectNode)) {
 						throw new IllegalStateException("illegal use of links field in " + currentUrl + ": " + linksValue);
 					}
 					collectLinks((ObjectNode) linksValue);
@@ -121,23 +167,26 @@ public class RandomWalkLinkChecker {
 		}
 	}
 
-	private void collectLinks(ObjectNode linksNode) {
+	protected void collectLinks(ObjectNode linksNode) {
 		Iterator<Map.Entry<String, JsonNode>> iterator = linksNode.fields();
 		while (iterator.hasNext()) {
 			Map.Entry<String, JsonNode> entry = iterator.next();
 			JsonNode link = entry.getValue();
 			String url = link.asText();
-			if (url == null || !url.startsWith("http")) {
-				try {
-					String linkName = entry.getKey();
-					throw new IllegalStateException(
-							"expected link `" + linkName + "` from " + currentUrl + " to contain a valid link, got " + url + " from " + mapper.writer().writeValueAsString(linksNode));
-				} catch (JsonProcessingException e) {
-					throw new IllegalStateException(e);
-				}
-			} else if (!visited.contains(url)) {
-				upcoming.add(url);
+			if (url != null && url.startsWith("http") && !visited.contains(url)) {
+				queueLink(url);
 			}
+		}
+	}
+
+	public void addBlackListPredicate(Predicate<String> blackListPredicate) {
+		this.blackListPredicates.add(blackListPredicate);
+	}
+
+	protected void queueLink(String url) {
+		boolean blacklisted = blackListPredicates.stream().anyMatch(it -> it.test(url));
+		if (!blacklisted) {
+			upcoming.add(url);
 		}
 	}
 }
