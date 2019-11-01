@@ -4,7 +4,7 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.SerializeType;
 
-@JsonApiResource(type = "meta/mapType")
+@JsonApiResource(type = "metaMapType", resourcePath = "meta/mapType")
 public class MetaMapType extends MetaType {
 
 	@JsonApiRelation(serialize = SerializeType.LAZY)

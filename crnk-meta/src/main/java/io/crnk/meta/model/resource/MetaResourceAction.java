@@ -3,7 +3,7 @@ package io.crnk.meta.model.resource;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.model.MetaElement;
 
-@JsonApiResource(type = "meta/resourceAction")
+@JsonApiResource(type = "metaResourceAction", resourcePath = "meta/resourceAction")
 public class MetaResourceAction extends MetaElement {
 
 	private MetaRepositoryActionType actionType;
