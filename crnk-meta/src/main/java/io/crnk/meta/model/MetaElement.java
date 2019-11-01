@@ -18,7 +18,7 @@ import io.crnk.core.resource.annotations.SerializeType;
  * Relationships are defined with LookupIncludeBehavior.AUTOMATICALLY_ALWAYS to allow to customize the
  * meta model towards the request (hide elements, update mutation information, etc.)
  */
-@JsonApiResource(type = "meta/element")
+@JsonApiResource(type = "metaElement", resourcePath = "meta/element")
 public class MetaElement implements Cloneable {
 
 	@JsonApiId

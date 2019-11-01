@@ -6,7 +6,7 @@ import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 
-@JsonApiResource(type = "meta/resourceRepository")
+@JsonApiResource(type = "metaResourceRepository", resourcePath = "meta/resourceRepository")
 public class MetaResourceRepository extends MetaElement {
 
 	@JsonApiRelation(serialize = SerializeType.LAZY)
