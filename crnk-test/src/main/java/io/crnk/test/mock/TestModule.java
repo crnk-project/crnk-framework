@@ -4,6 +4,7 @@ import io.crnk.core.module.Module;
 import io.crnk.core.repository.InMemoryResourceRepository;
 import io.crnk.test.mock.models.BulkTask;
 import io.crnk.test.mock.models.RelocatedTask;
+import io.crnk.test.mock.models.ResourceIdentifierBasedRelationshipResource;
 import io.crnk.test.mock.repository.BulkInMemoryRepository;
 import io.crnk.test.mock.repository.HistoricTaskRepository;
 import io.crnk.test.mock.repository.PrimitiveAttributeRepository;
@@ -26,88 +27,92 @@ import io.crnk.test.mock.repository.nested.RelatedRepository;
 
 public class TestModule implements Module {
 
-    private static ManyNestedRepository manyNestedRepository = new ManyNestedRepository();
+	private static ManyNestedRepository manyNestedRepository = new ManyNestedRepository();
 
-    private static OneNestedRepository oneNestedRepository = new OneNestedRepository();
+	private static OneNestedRepository oneNestedRepository = new OneNestedRepository();
 
-    private static RelatedRepository relatedRepository = new RelatedRepository();
+	private static RelatedRepository relatedRepository = new RelatedRepository();
 
-    private static ParentRepository parentRepository = new ParentRepository();
+	private static ParentRepository parentRepository = new ParentRepository();
 
-    private static NestedManyRelationshipRepository nestedManyRelationshipRepository = new NestedManyRelationshipRepository();
+	private static NestedManyRelationshipRepository nestedManyRelationshipRepository = new NestedManyRelationshipRepository();
 
-    private static NestedOneRelationshipRepository nestedOneRelationshipRepository = new NestedOneRelationshipRepository();
+	private static NestedOneRelationshipRepository nestedOneRelationshipRepository = new NestedOneRelationshipRepository();
 
-    private ProjectRepository projects = new ProjectRepository();
+	private ProjectRepository projects = new ProjectRepository();
 
-    private TaskRepository tasks = new TaskRepository();
+	private TaskRepository tasks = new TaskRepository();
 
-    private boolean bulk = true;
+	private boolean extended = true;
 
-    private BulkInMemoryRepository<BulkTask, Object> bulkTasks = new BulkInMemoryRepository<>(BulkTask.class);
+	private BulkInMemoryRepository<BulkTask, Object> bulkTasks = new BulkInMemoryRepository<>(BulkTask.class);
 
-    @Override
-    public String getModuleName() {
-        return "test";
-    }
+	@Override
+	public String getModuleName() {
+		return "test";
+	}
 
-    @Override
-    public void setupModule(ModuleContext context) {
-        context.addRepository(tasks);
-        context.addRepository(projects);
-        context.addRepository(new ScheduleRepositoryImpl());
-        context.addRepository(new TaskSubtypeRepository());
-        context.addRepository(new ProjectToTaskRepository());
-        context.addRepository(new TaskToProjectRepository());
-        context.addRepository(new PrimitiveAttributeRepository());
-        context.addRepository(new RelationIdTestRepository());
-        context.addRepository(new RenamedIdRepository());
-        context.addRepository(new ScheduleStatusRepositoryImpl());
-        context.addRepository(new ReadOnlyTaskRepository());
-        context.addRepository(new HistoricTaskRepository());
-        context.addRepository(new InMemoryResourceRepository<>(RelocatedTask.class));
-        if (bulk) {
-            context.addRepository(bulkTasks);
-        }
+	@Override
+	public void setupModule(ModuleContext context) {
+		context.addRepository(tasks);
+		context.addRepository(projects);
+		context.addRepository(new ScheduleRepositoryImpl());
+		context.addRepository(new TaskSubtypeRepository());
+		context.addRepository(new ProjectToTaskRepository());
+		context.addRepository(new TaskToProjectRepository());
+		context.addRepository(new PrimitiveAttributeRepository());
+		context.addRepository(new RelationIdTestRepository());
+		context.addRepository(new RenamedIdRepository());
+		context.addRepository(new ScheduleStatusRepositoryImpl());
+		context.addRepository(new ReadOnlyTaskRepository());
+		context.addRepository(new HistoricTaskRepository());
+		context.addRepository(new InMemoryResourceRepository<>(RelocatedTask.class));
+		if (extended) {
+			context.addRepository(new InMemoryResourceRepository<>(ResourceIdentifierBasedRelationshipResource.class));
+			context.addRepository(bulkTasks);
+		}
 
-        context.addRepository(manyNestedRepository);
-        context.addRepository(oneNestedRepository);
-        context.addRepository(relatedRepository);
-        context.addRepository(parentRepository);
-        context.addRepository(nestedManyRelationshipRepository);
-        context.addRepository(nestedOneRelationshipRepository);
+		context.addRepository(manyNestedRepository);
+		context.addRepository(oneNestedRepository);
+		context.addRepository(relatedRepository);
+		context.addRepository(parentRepository);
+		context.addRepository(nestedManyRelationshipRepository);
+		context.addRepository(nestedOneRelationshipRepository);
 
-        context.addNamingStrategy(new TestNamingStrategy());
-        context.addExceptionMapper(new TestExceptionMapper());
-    }
+		context.addNamingStrategy(new TestNamingStrategy());
+		context.addExceptionMapper(new TestExceptionMapper());
+	}
 
-    public TestModule setBulk(boolean bulk) {
-        this.bulk = bulk;
-        return this;
-    }
+	/**
+	 * if true will expose the full set of repositories. Some omitted to not over complicate e.g. schema generation
+	 */
+	public TestModule setExtended(boolean extended) {
+		this.extended = extended;
+		return this;
+	}
 
-    public ProjectRepository getProjects() {
-        return projects;
-    }
+	public ProjectRepository getProjects() {
+		return projects;
+	}
 
-    public TaskRepository getTasks() {
-        return tasks;
-    }
+	public TaskRepository getTasks() {
+		return tasks;
+	}
 
-    public BulkInMemoryRepository<BulkTask, Object> getBulkTasks() {
-        return bulkTasks;
-    }
+	public BulkInMemoryRepository<BulkTask, Object> getBulkTasks() {
+		return bulkTasks;
+	}
 
-    public static void clear() {
-        TaskRepository.clear();
-        ProjectRepository.clear();
-        TaskToProjectRepository.clear();
-        ProjectToTaskRepository.clear();
-        ScheduleRepositoryImpl.clear();
-        RelationIdTestRepository.clear();
+	public static void clear() {
+		TaskRepository.clear();
+		ProjectRepository.clear();
+		TaskToProjectRepository.clear();
+		ProjectToTaskRepository.clear();
+		ScheduleRepositoryImpl.clear();
+		RelationIdTestRepository.clear();
 
-        manyNestedRepository.clear();
-        relatedRepository.clear();
-        parentRepository.clear();
-    }
+		manyNestedRepository.clear();
+		relatedRepository.clear();
+		parentRepository.clear();
+	}
 }

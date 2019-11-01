@@ -10,6 +10,7 @@ import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.ResourceUtils;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.engine.result.Result;
@@ -61,6 +62,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 		if (!resourceInformation.getAccess().isReadable()) {
 			throw new MethodNotAllowedException(HttpMethod.GET.toString());
 		}
+		id = ResourceUtils.toTypedId(resourceInformation, id);
 		RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
 			@SuppressWarnings("rawtypes")
@@ -106,6 +108,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 
 	@Override
 	public Result<JsonApiResponse> findAll(Collection ids, QueryAdapter queryAdapter) {
+		ids = ResourceUtils.toTypedIds(resourceInformation, ids);
 		if (!resourceInformation.getAccess().isReadable()) {
 			throw new MethodNotAllowedException(HttpMethod.GET.toString());
 		}
@@ -139,8 +142,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 	private Result<JsonApiResponse> save(Object entity, QueryAdapter queryAdapter, final HttpMethod method) {
 		if (method == HttpMethod.POST && !resourceInformation.getAccess().isPostable()) {
 			throw new MethodNotAllowedException(method.toString());
-		}
-		else if (method == HttpMethod.PATCH && !resourceInformation.getAccess().isPatchable()) {
+		} else if (method == HttpMethod.PATCH && !resourceInformation.getAccess().isPatchable()) {
 			throw new MethodNotAllowedException(method.toString());
 		}
 
@@ -159,19 +161,16 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 							throw new BadRequestException("no bulk operations implemented");
 						}
 						resource = ((BulkResourceRepository) resourceRepository).create((List) entity);
-					}
-					else {
+					} else {
 						resource = resourceRepository.create(entity);
 					}
-				}
-				else {
+				} else {
 					if (entity instanceof Collection) {
 						if (!(resourceRepository instanceof BulkResourceRepository)) {
 							throw new BadRequestException("no bulk operations implemented");
 						}
 						resource = ((BulkResourceRepository) resourceRepository).save((List) entity);
-					}
-					else {
+					} else {
 						resource = resourceRepository.save(entity);
 					}
 				}
@@ -186,6 +185,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 
 	@Override
 	public Result<JsonApiResponse> delete(Object id, QueryAdapter queryAdapter) {
+		id = ResourceUtils.toTypedId(resourceInformation, id);
 		if (!resourceInformation.getAccess().isDeletable()) {
 			throw new MethodNotAllowedException(HttpMethod.DELETE.toString());
 		}
@@ -196,7 +196,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
 				Serializable id = request.getId();
-				((ResourceRepository) resourceRepository).delete(id);
+				resourceRepository.delete(id);
 				return new JsonApiResponse();
 			}
 		};
@@ -204,6 +204,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				RepositoryRequestSpecImpl.forDelete(moduleRegistry, resourceInformation, queryAdapter, (Serializable) id);
 		return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
 	}
+
 
 	public Object getImplementation() {
 		return resourceRepository;
