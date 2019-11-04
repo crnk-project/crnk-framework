@@ -1,13 +1,5 @@
 package io.crnk.gen.openapi;
 
-import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Before;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,6 +10,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
+import org.junit.Before;
 
 class OpenAPIGeneratorTestBase {
   @Before
@@ -72,6 +72,9 @@ class OpenAPIGeneratorTestBase {
   }
 
   private static void assertOperationResponseCodes(Operation operation, List<String> codes) {
+  	if(operation == null){
+  		throw new IllegalStateException();
+	}
     ApiResponses responses = operation.getResponses();
     for (String code : codes) {
       Assert.assertTrue("Operation missing response code " + code, responses.containsKey(code));
