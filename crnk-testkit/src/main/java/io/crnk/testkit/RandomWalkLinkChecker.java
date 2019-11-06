@@ -55,6 +55,13 @@ public class RandomWalkLinkChecker {
 		this.httpAdapter = httpAdapter;
 	}
 
+	/**
+	 * @param seed for randomness to gain determinism.
+	 */
+	public void setSeed(long seed) {
+		random.setSeed(seed);
+	}
+
 	public void addStartUrl(String url) {
 		upcoming.add(url);
 	}
