@@ -2,6 +2,7 @@ package io.crnk.testkit;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,8 @@ public class RandomWalkLinkChecker {
 	private List<String> upcoming = new ArrayList<>();
 
 	private ObjectMapper mapper = new ObjectMapper();
+
+	private Map<String, String> urlToSourceMapping = new HashMap<>();
 
 	private String currentUrl;
 
@@ -127,17 +130,17 @@ public class RandomWalkLinkChecker {
 			HttpAdapterResponse response = request.execute();
 			int code = response.code();
 			if (code >= 300) {
-				throw new IllegalStateException("expected endpoint to return success status code, got " + code + " from " + url);
+				throw new IllegalStateException("expected endpoint to return success status code, got " + code + " from " + url + ", url obtained from " + urlToSourceMapping.get(url));
 			}
 			String body = response.body();
 			if (body == null) {
-				throw new IllegalStateException("expected a body to be returned from  " + url);
+				throw new IllegalStateException("expected a body to be returned from  " + url + ", url obtained from " + urlToSourceMapping.get(url));
 			}
 
 			JsonNode jsonNode = mapper.reader().readTree(body);
 			findLinks(jsonNode);
 		} catch (IOException e) {
-			throw new IllegalStateException("failed to visit " + url, e);
+			throw new IllegalStateException("failed to visit " + url + ", url obtained from " + urlToSourceMapping.get(url), e);
 		}
 	}
 
@@ -187,6 +190,9 @@ public class RandomWalkLinkChecker {
 		boolean blacklisted = blackListPredicates.stream().anyMatch(it -> it.test(url));
 		if (!blacklisted) {
 			upcoming.add(url);
+			if (!urlToSourceMapping.containsKey(url)) {
+				urlToSourceMapping.put(url, currentUrl);
+			}
 		}
 	}
 }
