@@ -1,6 +1,6 @@
 package io.crnk.gen.openapi.internal;
 
-import io.crnk.gen.openapi.internal.schemas.ApiError;
+import io.crnk.gen.openapi.internal.schemas.ResponseMixin;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.junit.Assert;
@@ -20,7 +20,7 @@ public class OASErrorsTest {
       Assert.assertNotNull(apiResponse.getDescription());
 
       Schema schema = apiResponse.getContent().get("application/vnd.api+json").getSchema();
-      Assert.assertEquals(new ApiError().$ref(), schema);
+      Assert.assertEquals(new ResponseMixin().$ref(), schema);
     }
   }
 }
