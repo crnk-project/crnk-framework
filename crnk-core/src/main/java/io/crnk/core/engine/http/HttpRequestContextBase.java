@@ -6,6 +6,8 @@ import java.util.Set;
 
 public interface HttpRequestContextBase {
 
+	Set<String> getRequestHeaderNames();
+
 	String getRequestHeader(String name);
 
 	Map<String, Set<String>> getRequestParameters();

@@ -33,6 +33,11 @@ public class VertxRequestContext extends DefaultHttpRequestContextBase {
 	}
 
 	@Override
+	public Set<String> getRequestHeaderNames() {
+		return serverRequest.headers().names();
+	}
+
+	@Override
 	public String getRequestHeader(String name) {
 		return serverRequest.getHeader(name);
 	}

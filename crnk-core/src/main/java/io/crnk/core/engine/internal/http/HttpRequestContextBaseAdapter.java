@@ -92,6 +92,11 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 	}
 
 	@Override
+	public Set<String> getRequestHeaderNames() {
+		return base.getRequestHeaderNames();
+	}
+
+	@Override
 	public String getRequestHeader(String name) {
 		return base.getRequestHeader(name);
 	}

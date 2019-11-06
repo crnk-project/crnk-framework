@@ -106,6 +106,11 @@ public class InMemoryHttpAdapter implements HttpAdapter {
 		}
 
 		@Override
+		public Set<String> getRequestHeaderNames() {
+			return request.getHeadersNames();
+		}
+
+		@Override
 		public String getRequestHeader(String name) {
 			return request.getHeaderValue(name);
 		}
@@ -128,8 +133,7 @@ public class InMemoryHttpAdapter implements HttpAdapter {
 					}
 				}
 				return parameters;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new IllegalStateException("failed to parse url: " + request.getUrl(), e);
 			}
 		}
