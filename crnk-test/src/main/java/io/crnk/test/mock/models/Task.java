@@ -40,10 +40,10 @@ public class Task implements ResourceTypeHolder {
 	private List<Project> includedProjects = new ArrayList<>();
 
 	@JsonApiMetaInformation
-	private TaskMeta metaInformation;
+	private TaskMeta metaInformation = new TaskMeta();
 
 	@JsonApiLinksInformation
-	private TaskLinks linksInformation;
+	private TaskLinks linksInformation = new TaskLinks();
 
 	private String type;
 

@@ -51,8 +51,7 @@ public class ResourceMapper {
 		if (entity instanceof Resource) {
 			// Resource and ResourceId
 			return (Resource) entity;
-		}
-		else {
+		} else {
 			// map resource objects
 			QueryContext queryContext = queryAdapter.getQueryContext();
 
@@ -90,8 +89,7 @@ public class ResourceMapper {
 		LinksInformation info;
 		if (resourceInformation.getLinksField() != null) {
 			info = (LinksInformation) resourceInformation.getLinksField().getAccessor().getValue(entity);
-		}
-		else {
+		} else {
 			info = new DocumentMapperUtil.DefaultSelfRelatedLinksInformation();
 		}
 		if (info instanceof SelfLinksInformation) {
@@ -187,15 +185,18 @@ public class ResourceMapper {
 			Relationship relationship = new Relationship();
 			boolean addRelationship = mappingConfig.getSerializeLinks() && (queryAdapter == null || !queryAdapter.getCompactMode());
 			if (addRelationship) {
-				QueryContext queryContext = queryAdapter.getQueryContext();
 				ObjectNode relationshipLinks = objectMapper.createObjectNode();
-				if(mappingConfig.getSerializeSelfRelationshipLinks()) {
-					String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false, queryContext);
-					serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+				if (mappingConfig.getSerializeSelfRelationshipLinks()) {
+					String selfUrl = util.getRelationshipLink(resource, field, false);
+					if (selfUrl != null) {
+						serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+					}
 				}
-				String relatedUrl = util.getRelationshipLink(resourceInformation, entity, field, true, queryContext);
-				serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
-				relationship.setLinks(relationshipLinks);
+				String relatedUrl = util.getRelationshipLink(resource, field, true);
+				if (relatedUrl != null) {
+					serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
+					relationship.setLinks(relationshipLinks);
+				}
 			}
 			resource.getRelationships().put(field.getJsonName(), relationship);
 		}

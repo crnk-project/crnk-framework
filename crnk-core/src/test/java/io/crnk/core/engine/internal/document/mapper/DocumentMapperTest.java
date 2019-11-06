@@ -19,6 +19,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.links.DefaultSelfLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.utils.Nullable;
@@ -140,6 +141,28 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Resource projectResource = document.getIncluded().get(0);
 		Assert.assertNull(projectResource.getRelationships().get("tasks"));
 	}
+
+
+	@Test
+	public void testCustomSelfLinks() {
+		TaskLinks links = new TaskLinks();
+		links.self = "http://something.else.net/api/tasks/3";
+		Task task = createTask(2, "sample task");
+		task.setLinksInformation(links);
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(task), queryAdapter, mappingConfig.clone()).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+		Assert.assertEquals("tasks", resource.getType());
+		Assert.assertEquals("http://something.else.net/api/tasks/3", getLinkText(resource.getLinks().get("self")));
+
+		Relationship projectRel = resource.getRelationships().get("project");
+		Assert.assertEquals("http://something.else.net/api/tasks/3/relationships/project", getLinkText(projectRel.getLinks().get("self")));
+	}
+
 
 	@Test
 	public void testJsonIncludeNonEmptyOnId() throws JsonProcessingException {
@@ -437,6 +460,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 		task1.setProject(project1);
 		task1.setProjectsInit(Arrays.asList(project2));
+		task1.setLinksInformation(new DefaultSelfLinksInformation());
 
 		// come back/converge to same task
 		project1.setTask(task2);
@@ -526,6 +550,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Task task = new Task();
 		task.setId(id);
 		task.setName(name);
+		task.setLinksInformation(new DefaultSelfLinksInformation());
 		return task;
 	}
 

@@ -133,6 +133,11 @@ public class CrnkClient {
 
 	public enum ClientType {
 		SIMPLE_lINKS,
+
+		/**
+		 * @deprecated currently barely used, speak up if still necessary
+		 */
+		@Deprecated
 		OBJECT_LINKS
 	}
 

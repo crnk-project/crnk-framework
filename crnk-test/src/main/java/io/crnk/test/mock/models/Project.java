@@ -8,7 +8,7 @@ import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.test.mock.models.types.ProjectData;
 
@@ -101,9 +101,11 @@ public class Project {
 		this.meta = meta;
 	}
 
-	public static class ProjectLinks implements LinksInformation {
+	public static class ProjectLinks implements SelfLinksInformation {
 
 		private String value;
+
+		private String self;
 
 		public String getValue() {
 			return value;
@@ -111,6 +113,16 @@ public class Project {
 
 		public void setValue(String value) {
 			this.value = value;
+		}
+
+		@Override
+		public String getSelf() {
+			return self;
+		}
+
+		@Override
+		public void setSelf(String self) {
+			this.self = self;
 		}
 	}
 

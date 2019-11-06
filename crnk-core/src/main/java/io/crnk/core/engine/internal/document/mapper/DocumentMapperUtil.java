@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -117,11 +118,12 @@ public class DocumentMapperUtil {
 		}
 	}
 
-	public String getRelationshipLink(ResourceInformation resourceInformation, Object entity, ResourceField field,
-			boolean related, QueryContext queryContext) {
-		String resourceUrl = resourceRegistry.getResourceUrl(queryContext, entity);
-		return resourceUrl + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field
-				.getJsonName();
+	public String getRelationshipLink(Resource resource, ResourceField field, boolean related) {
+		ObjectNode links = resource.getLinks();
+
+		// use self link from url, whatever it source might be
+		String resourceUrl = serializerUtil.getLinks(links, "self");
+		return resourceUrl + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field.getJsonName();
 	}
 
 	public List<ResourceIdentifier> toResourceIds(Collection<?> entities) {
