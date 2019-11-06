@@ -10,6 +10,7 @@ import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.ResourceUtils;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.ImmediateResult;
@@ -108,6 +109,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 
 	@Override
 	public Result<JsonApiResponse> findAll(Collection ids, QueryAdapter queryAdapter) {
+		PreconditionUtil.verify(!ids.isEmpty(), "empty set of IDs passed as argument");
 		ids = ResourceUtils.toTypedIds(resourceInformation, ids);
 		if (!resourceInformation.getAccess().isReadable()) {
 			throw new MethodNotAllowedException(HttpMethod.GET.toString());

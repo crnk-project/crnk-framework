@@ -40,6 +40,9 @@ public class GetFromOwnerStrategy<T, I, D, J> extends ForwardingStrategyBase
 			Set targetIds = new HashSet();
 			for (Object source : sources) {
 				Object targetId = field.getIdAccessor().getValue(source);
+				if(targetId == null){
+					continue; // null relationship
+				}
 				if (field.isCollection()) {
 					targetIds.addAll((Collection) targetId);
 				} else {
@@ -47,18 +50,16 @@ public class GetFromOwnerStrategy<T, I, D, J> extends ForwardingStrategyBase
 				}
 			}
 
-			ResourceRepositoryAdapter targetAdapter = targetEntry.getResourceRepository();
-			JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(querySpec, queryContext)).get();
-			targets = (List<D>) response.getEntity();
-			return toResult(field, targetInformation, sources, targets);
+			if(!targetIds.isEmpty()) {
+				ResourceRepositoryAdapter targetAdapter = targetEntry.getResourceRepository();
+				JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(querySpec, queryContext)).get();
+				targets = (List<D>) response.getEntity();
+				return toResult(field, targetInformation, sources, targets);
+			}else{
+				return newResultMap();
+			}
 		} else {
-			MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
-
-				@Override
-				protected List<D> newList() {
-					return new DefaultResourceList<>();
-				}
-			};
+			MultivaluedMap bulkResult = newResultMap();
 			for (Object source : sources) {
 				Object sourceId = sourceInformation.getId(source);
 
@@ -75,18 +76,21 @@ public class GetFromOwnerStrategy<T, I, D, J> extends ForwardingStrategyBase
 		}
 	}
 
-	private MultivaluedMap<I, D> toResult(ResourceField field, ResourceInformation targetInformation,
-			List sources,
-			List<D> targets) {
-
-		MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
+	private MultivaluedMap newResultMap() {
+		return new MultivaluedMap<I, D>() {
 
 			@Override
 			protected List<D> newList() {
 				return new DefaultResourceList<>();
 			}
 		};
+	}
 
+	private MultivaluedMap<I, D> toResult(ResourceField field, ResourceInformation targetInformation,
+			List sources,
+			List<D> targets) {
+
+		MultivaluedMap bulkResult = newResultMap();
 		Map targetMap = new HashMap();
 		for (D target : targets) {
 			Object targetId = targetInformation.getId(target);
