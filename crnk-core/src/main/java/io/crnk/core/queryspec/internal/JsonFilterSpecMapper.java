@@ -200,6 +200,7 @@ public class JsonFilterSpecMapper {
 
 	private Object deserializeJsonFilterValue(ResourceInformation resourceInformation, PathSpec attributePath, JsonNode jsonNode) {
 		QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath.getElements(), QueryPathResolver.NamingType.JSON, "filter");
+		resolvedPath.verifyFilterable();
 
 		Class valueType = ClassUtils.getRawType(resolvedPath.getValueType());
 		ObjectReader reader = context.getObjectMapper().readerFor(valueType);

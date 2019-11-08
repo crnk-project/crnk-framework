@@ -65,7 +65,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
     @Test
     public void testRelationship() {
         RelationshipRepository<Project, Serializable, Task, Serializable> relRepo = client.getRepositoryForType(Project.class, Task.class);
-        QuerySpec querySpec = new QuerySpec(Project.class);
+        QuerySpec querySpec = new QuerySpec(Task.class);
         ResourceList<Task> tasks = relRepo.findManyTargets(123L, "tasks", querySpec);
         Assert.assertEquals(1, tasks.size());
     }

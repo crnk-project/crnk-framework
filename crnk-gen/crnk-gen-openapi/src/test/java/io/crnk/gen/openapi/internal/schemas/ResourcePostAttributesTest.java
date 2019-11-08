@@ -1,6 +1,8 @@
 package io.crnk.gen.openapi.internal.schemas;
 
 import io.crnk.gen.openapi.internal.MetaResourceBaseTest;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.junit.Assert;
@@ -10,7 +12,10 @@ class ResourcePostAttributesTest extends MetaResourceBaseTest {
 
   @Test
   void isInsertable() {
+    MetaResource metaResource = getTestMetaResource();
+    MetaResourceField additionalMetaResourceField = (MetaResourceField) metaResource.getChildren().get(1);
     additionalMetaResourceField.setInsertable(true);
+
     Schema schema = new ResourcePostAttributes(metaResource).schema();
     Assert.assertTrue(schema instanceof ObjectSchema);
 
@@ -30,7 +35,10 @@ class ResourcePostAttributesTest extends MetaResourceBaseTest {
 
   @Test
   void notInsertable() {
+    MetaResource metaResource = getTestMetaResource();
+    MetaResourceField additionalMetaResourceField = (MetaResourceField) metaResource.getChildren().get(1);
     additionalMetaResourceField.setInsertable(false);
+
     Schema schema = new ResourcePostAttributes(metaResource).schema();
     Assert.assertTrue(schema instanceof ObjectSchema);
 

@@ -3,6 +3,46 @@ anchor:dataaccess[]
 
 # Data Access
 
+anchor:in_memory[]
+
+## In-Memory
+
+There are many use cases where data is not accessed from an external data store, but rather is already
+available in-memory on the server or is sufficiently small to so.
+For this purpose Crnk offers `QuerySpec.apply(...)` and `InMemoryResourceRepository` to quickly build
+repositories to offer access to in-memory data structures. This implementations are well suited for
+up to a few thousands of resources.
+
+`QuerySpec.apply(...)` allows the sorting, filtering, and paging for a list of objects:
+
+[source,java]
+----
+@Override
+public ResourceList<Task> findAll(QuerySpec querySpec) {
+    List<Task> tasks = ...
+    return querySpec.apply(resources.values());
+}
+----
+
+Behind the scenes it makes use of `InMemoryEvaluator` that offers further customization options.
+While sorting makes use of `Comparable`, filtering makes use of `FilterOperator.matches(value1, value2)`.
+Custom `FilterOperator` implementations may extend the feature set of  `InMemoryEvaluator`.
+
+Based on `QuerySpec.apply(...)` there is a `InMemoryResourceRepository` that simply holds resources in a
+`ConcurrentHashMap`. `POST` and `PATCH` will insert and update resources in the map, while `DELETE` will remove
+them again. Next to holding small data sets, it is also well suited for *mocking of repositories*.
+For example,  `InMemoryResourceRepository` might be used in the early phases of development to instantly give consumers
+a fully working repository without having to do the actual implementation. Or it can be used as replacement
+for third-party repositories during testing.
+
+IMPORTANT: `QuerySpec.apply(...)` makes use of the information held in-memory. In that regard, it is
+  conceptually simple. Make sure the in-memory data fits requirements. For example,
+  some application may want to filter relationships bi-directionally. In this case the in-memory
+  data structures must maintain the relationship from both ends (like `project` and `tasks` relationships
+  in `Task` and `Project` resources respectively). This may already be given, happen when the repositories
+  perform a change, or through getters and setters that are also accessed by Crnk.
+
+
 anchor:jpa_module[]
 
 ## JPA

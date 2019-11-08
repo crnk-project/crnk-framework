@@ -87,6 +87,13 @@ public class ResourceFieldImpl implements ResourceField {
         this.idAccessor = idAccessor;
         this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
         this.patchStrategy = patchStrategy;
+
+        if (resourceFieldType != ResourceFieldType.LINKS_INFORMATION) {
+            PreconditionUtil.verify(!jsonName.equals("links"), "cannot name none-@JsonLinksInformation field `links`");
+        }
+        if (resourceFieldType != ResourceFieldType.META_INFORMATION) {
+            PreconditionUtil.verify(!jsonName.equals("meta"), "cannot name none-@JsonMetanformation field `meta`");
+        }
     }
 
     public void setMappedBy(boolean mappedBy) {

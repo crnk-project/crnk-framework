@@ -108,7 +108,7 @@ public class AsciiDocCaptureTest {
 
 		asciidoc.capture("Link Project and Task").call(() -> taskToProjectOneRelationRepository.setRelation(createdTask, createdProject.getId(), "project"));
 
-		asciidoc.capture("Find Project by Task").call(() -> taskToProjectOneRelationRepository.findOneRelations(Collections.singleton(createdTask.getId()), "project", new QuerySpec(Task.class)));
+		asciidoc.capture("Find Project by Task").call(() -> taskToProjectOneRelationRepository.findOneRelations(Collections.singleton(createdTask.getId()), "project", new QuerySpec(Project.class)));
 
 		asciidoc.capture("Delete Project from Task").call(() -> taskToProjectOneRelationRepository.setRelation(createdTask, null, "project"));
 	}
@@ -132,7 +132,7 @@ public class AsciiDocCaptureTest {
 
 		asciidoc.capture("Link Task with several Projects").call(() -> taskToProjectManyRelationRepository.addRelations(createdTask, Arrays.asList(firstCreatedProject.getId(), secondCreatedProject.getId()), "projects"));
 
-		asciidoc.capture("Get Task relation Projects").call(() -> taskToProjectManyRelationRepository.findManyRelations(Collections.singleton(createdTask.getId()), "projects", new QuerySpec(Task.class)));
+		asciidoc.capture("Get Task relation Projects").call(() -> taskToProjectManyRelationRepository.findManyRelations(Collections.singleton(createdTask.getId()), "projects", new QuerySpec(Project.class)));
 
 		asciidoc.capture("Remove single Project from Task").call(() -> taskToProjectManyRelationRepository.removeRelations(createdTask, Collections.singleton(firstCreatedProject.getId()), "projects"));
 	}

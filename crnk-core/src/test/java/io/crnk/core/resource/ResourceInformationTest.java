@@ -122,6 +122,16 @@ public class ResourceInformationTest {
         Assert.assertEquals("testValue", resource.getProperties().get("test"));
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void attributeCannotBeNamedLinks() {
+        new ResourceFieldImpl("links", "id", ResourceFieldType.ATTRIBUTE, Long.class, Long.class, null);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void attributeCannotBeNamedMeta() {
+        new ResourceFieldImpl("meta", "id", ResourceFieldType.ATTRIBUTE, Long.class, Long.class, null);
+    }
+
     @Test
     public void checkGetAnyWithInvalidKey() {
         ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);

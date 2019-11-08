@@ -76,7 +76,7 @@ public class PageNumberSizeClientTest extends AbstractClientTest {
 			repo.create(task);
 		}
 
-		QuerySpec querySpec = new QuerySpec(Schedule.class);
+		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.setPaging(new NumberSizePagingSpec(2, 5));
 		ResourceList<Task> list = repo.findAll(querySpec);
 		Assert.assertEquals(5, list.size());

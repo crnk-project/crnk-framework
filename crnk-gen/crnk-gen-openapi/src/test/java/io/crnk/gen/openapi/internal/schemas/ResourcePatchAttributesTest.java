@@ -1,6 +1,8 @@
 package io.crnk.gen.openapi.internal.schemas;
 
 import io.crnk.gen.openapi.internal.MetaResourceBaseTest;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.junit.Assert;
@@ -10,7 +12,10 @@ class ResourcePatchAttributesTest extends MetaResourceBaseTest {
 
   @Test
   void isUpdatable() {
+    MetaResource metaResource = getTestMetaResource();
+    MetaResourceField additionalMetaResourceField = (MetaResourceField) metaResource.getChildren().get(1);
     additionalMetaResourceField.setUpdatable(true);
+
     Schema schema = new ResourcePatchAttributes(metaResource).schema();
     Assert.assertTrue(schema instanceof ObjectSchema);
 
@@ -30,7 +35,10 @@ class ResourcePatchAttributesTest extends MetaResourceBaseTest {
 
   @Test
   void notUpdatable() {
+    MetaResource metaResource = getTestMetaResource();
+    MetaResourceField additionalMetaResourceField = (MetaResourceField) metaResource.getChildren().get(1);
     additionalMetaResourceField.setUpdatable(false);
+    
     Schema schema = new ResourcePatchAttributes(metaResource).schema();
     Assert.assertTrue(schema instanceof ObjectSchema);
 

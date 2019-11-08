@@ -14,20 +14,21 @@ public class MetaResourceBaseTest {
 
   public MetaResourceField metaResourceField;
 
-  public MetaResourceField additionalMetaResourceField;
-
-  MetaPrimaryKey metaPrimaryKey;
-
   @BeforeEach
   void setUp() {
-    metaResource = new MetaResource();
+    metaResource = getTestMetaResource();
+    metaResourceField = (MetaResourceField) metaResource.getChildren().get(0);
+  }
+
+  protected MetaResource getTestMetaResource() {
+    MetaResource metaResource = new MetaResource();
     metaResource.setName("ResourceName");
     metaResource.setResourceType("ResourceType");
     metaResource.setResourcePath("ResourcePath");
 
     // Set up Primary Key
-    metaPrimaryKey = new MetaPrimaryKey();
-    metaResourceField = new MetaResourceField();
+    MetaPrimaryKey metaPrimaryKey = new MetaPrimaryKey();
+    MetaResourceField metaResourceField = new MetaResourceField();
     metaResourceField.setName("id");
     MetaPrimitiveType type = new MetaPrimitiveType();
     type.setName("string");
@@ -38,10 +39,12 @@ public class MetaResourceBaseTest {
     metaResource.setPrimaryKey(metaPrimaryKey);
     metaResource.addChild(metaResourceField);
 
-    additionalMetaResourceField = new MetaResourceField();
+    MetaResourceField additionalMetaResourceField = new MetaResourceField();
     additionalMetaResourceField.setName("name");
     additionalMetaResourceField.setType(type);
 
     metaResource.addChild(additionalMetaResourceField);
+
+    return metaResource;
   }
 }
