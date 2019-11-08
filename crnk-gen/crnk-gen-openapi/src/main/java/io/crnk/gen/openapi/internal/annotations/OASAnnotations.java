@@ -66,7 +66,7 @@ public class OASAnnotations {
         cache.put(type, model);
       } catch (Exception e) {
         failed.add(type);
-        LOGGER.error("Unable to parse model" + metaResource.getName(), e);
+        LOGGER.warn("Unable to parse model" + metaResource.getName());
         return;
       }
     }
