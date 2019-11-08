@@ -96,101 +96,97 @@ components:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: BAD_REQUEST
     401:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: UNAUTHORIZED
     403:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: FORBIDDEN
     404:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: NOT_FOUND
     405:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: METHOD_NOT_ALLOWED
     409:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: CONFLICT
     412:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: PRECONDITION_FAILED
     415:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: UNSUPPORTED_MEDIA_TYPE
     422:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: UNPROCESSABLE_ENTITY
     500:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: INTERNAL_SERVER_ERROR
     501:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: NOT_IMPLEMENTED
     502:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: BAD_GATEWAY
     503:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: SERVICE_UNAVAILABLE
     504:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: GATEWAY_TIMEOUT
     505:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ResponseMixin'
+            $ref: '#/components/schemas/Failure'
       description: HTTP_VERSION_NOT_SUPPORTED
     Accepted:
       content:
         application/vnd.api+json:
           schema:
-            properties:
-              id:
-                description: a unique identifier for this pending action
-                type: string
-            type: object
+            $ref: '#/components/schemas/Success'
       description: Accepted
     MetaElementResourceReferenceResponse:
       content:
@@ -244,6 +240,7 @@ components:
       description: OK
   schemas:
     ApiError:
+      additionalProperties: false
       properties:
         code:
           description: an application-specific error code, expressed as a string value
@@ -263,10 +260,7 @@ components:
               type: string
           type: object
         meta:
-          additionalProperties: true
-          description: a meta object containing non-standard meta-information about
-            the error
-          type: object
+          $ref: '#/components/schemas/Meta'
         source:
           properties:
             parameter:
@@ -288,44 +282,69 @@ components:
             of localization
           type: string
       type: object
-    ListResponseMixin:
-      description: A page of results
+    Failure:
+      additionalProperties: false
       properties:
         errors:
           items:
             $ref: '#/components/schemas/ApiError'
           type: array
+          uniqueItems: true
         jsonapi:
-          properties:
-            version:
-              type: string
-          type: object
+          $ref: '#/components/schemas/JsonApi'
         links:
-          properties:
-            first:
-              description: Link to the first page of results
-              type: string
-            last:
-              description: Link to the last page of results
-              type: string
-            next:
-              description: Link to the next page of results
-              type: string
-            prev:
-              description: Link to the previous page of results
-              type: string
-            self:
-              description: Link to this page of results
-              type: string
-          type: object
+          $ref: '#/components/schemas/Links'
         meta:
-          additionalProperties: true
-          properties:
-            totalResourceCount:
-              description: The total number of items available
-              format: int32
-              type: integer
-          type: object
+          $ref: '#/components/schemas/Meta'
+      required:
+      - errors
+      type: object
+    Info:
+      additionalProperties: false
+      properties:
+        jsonapi:
+          $ref: '#/components/schemas/JsonApi'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+      required:
+      - meta
+      type: object
+    JsonApi:
+      additionalProperties: false
+      properties:
+        version:
+          type: string
+      type: object
+    Link:
+      description: 'A link **MUST** be represented as either: a string containing
+        the link''s URL or a link object.'
+      oneOf:
+      - description: A string containing the link's URL.
+        format: uri
+        type: string
+      - properties:
+          href:
+            description: A string containing the link's URL.
+            format: uri
+            type: string
+          meta:
+            $ref: '#/components/schemas/Meta'
+        required:
+        - href
+        type: object
+    Links:
+      allOf:
+      - additionalProperties:
+          $ref: '#/components/schemas/Link'
+        type: object
+      - $ref: '#/components/schemas/Pagination'
+      description: Link members related to the primary data.
+    Meta:
+      additionalProperties: true
+      description: Non-standard meta-information that can not be represented as an
+        attribute or relationship.
       type: object
     MetaElementChildrenResourceAttribute:
       items:
@@ -469,7 +488,7 @@ components:
       type: object
     MetaElementResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/MetaElementResourceSchema'
@@ -489,7 +508,7 @@ components:
       - attributes
     MetaElementResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -497,35 +516,28 @@ components:
             type: array
         required:
         - data
-    ResponseMixin:
-      description: A JSON:API document with a single resource
+    Pagination:
       properties:
-        errors:
-          items:
-            $ref: '#/components/schemas/ApiError'
-          type: array
-        included:
-          description: Included resources
-          items:
-            properties:
-              id:
-                description: The JSON:API resource ID
-                type: string
-              type:
-                description: The JSON:API resource type
-                type: string
-            type: object
-          type: array
-        jsonapi:
-          properties:
-            version:
-              type: string
-          type: object
-        links:
-          properties:
-            self:
-              description: the link that generated the current response document
-              type: string
+        first:
+          description: The first page of data
+          format: uri
+          nullable: true
+          type: string
+        last:
+          description: The last page of data
+          format: uri
+          nullable: true
+          type: string
+        next:
+          description: The next page of data
+          format: uri
+          nullable: true
+          type: string
+        prev:
+          description: The previous page of data
+          format: uri
+          nullable: true
+          type: string
       type: object
     SimpleTasksIdResourceAttribute:
       description: The JSON:API resource ID
@@ -606,7 +618,7 @@ components:
       type: object
     SimpleTasksResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/SimpleTasksResourceSchema'
@@ -626,7 +638,7 @@ components:
       - attributes
     SimpleTasksResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -634,6 +646,34 @@ components:
             type: array
         required:
         - data
+    Success:
+      description: A JSON:API document with a single resource
+      properties:
+        included:
+          description: Included resources
+          items:
+            properties:
+              attributes:
+                additionalProperties: true
+                type: object
+              id:
+                description: The JSON:API resource ID
+                type: string
+              type:
+                description: The JSON:API resource type
+                type: string
+            type: object
+          type: array
+          uniqueItems: true
+        jsonapi:
+          $ref: '#/components/schemas/JsonApi'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+      required:
+      - data
+      type: object
 info:
   description: OpenAPI document with autogenerated paths, components, responses, etc.
   title: Title From Template
@@ -1197,7 +1237,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/SimpleTasksResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
           $ref: '#/components/responses/Accepted'

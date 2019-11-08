@@ -18,7 +18,7 @@ public class ResourcesResponseSchema extends AbstractSchemaGenerator {
     return new ComposedSchema()
         .allOf(
             Arrays.asList(
-                new ListResponseMixin().$ref(),
+                new Success().$ref(),
                 new Schema()
                     .addProperties(
                         "data",

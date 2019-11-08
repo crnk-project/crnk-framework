@@ -1,7 +1,7 @@
 package io.crnk.gen.openapi.internal;
 
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.gen.openapi.internal.schemas.ResponseMixin;
+import io.crnk.gen.openapi.internal.schemas.Failure;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -25,7 +25,7 @@ public class OASErrors {
         apiResponse.description(HttpStatus.toMessage(responseCode));
         apiResponse.content(new Content()
             .addMediaType("application/vnd.api+json",
-                new MediaType().schema(new ResponseMixin().$ref()))
+                new MediaType().schema(new Failure().$ref()))
         );
         responses.put(responseCode.toString(), apiResponse);
       }
