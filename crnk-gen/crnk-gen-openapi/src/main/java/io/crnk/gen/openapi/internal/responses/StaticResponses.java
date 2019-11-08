@@ -14,7 +14,6 @@ public class StaticResponses {
 
   private static Map<String, ApiResponse> generateStandardApiSuccessResponses() {
     Map<String, ApiResponse> responses = new LinkedHashMap<>();
-    responses.put(new Accepted().getName(), new Accepted().response());
     responses.put(new NoContent().getName(), new NoContent().response());
 
     return responses;

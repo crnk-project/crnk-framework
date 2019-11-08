@@ -11,8 +11,7 @@ class StaticResponsesTest {
   @Test
   void generateStandardApiResponses() {
     Map<String, ApiResponse> apiResponseMap = StaticResponses.generateStandardApiResponses();
-    Assert.assertEquals(17, apiResponseMap.size());
-    Assert.assertNotNull(apiResponseMap.get("Accepted"));
+    Assert.assertEquals(16, apiResponseMap.size());
     Assert.assertNotNull(apiResponseMap.get("NoContent"));
     Assert.assertNotNull(apiResponseMap.get("400"));
     Assert.assertNotNull(apiResponseMap.get("401"));
