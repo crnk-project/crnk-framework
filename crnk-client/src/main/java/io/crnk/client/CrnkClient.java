@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -420,6 +421,10 @@ public class CrnkClient {
 			for (Class subType : annotation.subTypes()) {
 				allocateRepository(subType, registryEntry);
 			}
+		}
+
+		if (resourceInformation.getIdField() != null) {
+			resourceInformation.initNesting();
 		}
 
 		return registryEntry;
