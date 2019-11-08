@@ -157,8 +157,8 @@ public class Task {
     ...
 }
 
-@JsonApiResource(type = "tasks")
-public class Task {
+@JsonApiResource(type = "project")
+public class Project {
 
     @JsonApiRelation(mappedBy="project")
     private Set<Task> tasks;
@@ -168,14 +168,28 @@ public class Task {
 ----
 
 The `project` and `tasks` field are linked through the `mappedBy` property by pointing from the non-owning
-to the owning field of the relationship. `project` as owning field will be used for all read and update operations.
+to the owning field of the relationship. `project` as owning field will be used for all read and update operations. This
+means:
+
+- for `GET /api/projects?include=tasks` and `GET /api/projects/{id}/tasks`, first the projects are loaded and then
+  a query is issued against the repository of `Task` with a filter `project.id = {list of project ids}`.
+- for `PATCH/POST/DELETE /api/project/{id}/tasks`, the request is forwarded
+  to the `Task` repository by setting the `project` field and saving the updated resources.
+- for `PATCH/POST /api/projects/{id}` the `tasks` attribute can by default not be modified because it is not the owner
+  of the relationships. But repositories are free to implement this functionality if desired.
+
+Behind the scenes `mappedBy` makes use of the `FORWARD_OPPOSITE` repository behavior whereas the opposite
+makes use of `FORWARD_OWNER` that are explained further down in this section. As such `mappedBy` can be
+considered to be a shortcut for setting various other notifications that is useful in many scenarios.
 The semantics of `mappedBy` matches with the concepts of, for example, JPA-related annotations.
 It is typical for single-valued fields like `project` to be the owner. Such fields are usually backed by something like
 a column in a database and are simple to read and write. In contrast,
 multi-valued fields like `tasks` can only be obtained by issuing a query against the single-valued counter-part.
+In such a setting, it might proof useful to to make use of <<jsonApiRelationId,@JsonApiRelationId>>
+on the owning side (introduced in the next section).
 
 @JsonApiRelation comes with a number of attributes to customize its behavior.
-<<jsonApiRelationId,@JsonApiRelation>> as complementary annotation is introduced in the subsequent section.
+<<jsonApiRelationId,@JsonApiRelationId>> as complementary annotation is introduced in the subsequent section.
 
 [source,java]
 ----
@@ -387,7 +401,21 @@ must be implemented*. Instead Crnk will automatically dispatch relationship requ
 opposite `ResourceRepository`. This allows to focus on the development of `ResourceRepository`.
 See <<relationshipRepository,RelationshipRepository>> for more information.
 
+Next to plain Java objects, many other libraries support this kind of semantic of having two attributes
+referring to the same data. For example in JPA this looks like:
 
+[source,java]
+----
+@JsonApiRelationId
+@Column(name = "project_id")
+private Long projectId;
+
+@OneToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "project_id", insertable = false, updatable = false)
+private ProjectEntity project;
+----
+
+Because two fields are mapped to the same column, one must be set to a read-only mode.
 
 ## JsonApiMetaInformation
 
