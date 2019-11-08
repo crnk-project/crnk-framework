@@ -284,7 +284,7 @@ public class ResourceInformation {
 								+ "%s",
 						parentAttribute.getName(), beanInformation.getImplementationClass());
 
-				parentField = findRelationshipFieldByName(relationshipName);
+				parentField = findFieldByUnderlyingName(relationshipName);
 				PreconditionUtil.verify(parentField != null,
 						"naming of relationship to parent resource and relationship identifier within resource identifier must "
 								+ "match, not found for %s of %s",

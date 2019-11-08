@@ -24,8 +24,8 @@ public class NestedRepositoryClientTest extends NestedRepositoryAccessTestBase {
         resource.setValue("nested");
         String postUrl = stub.computeUrl(resource, true);
         String patchUrl = stub.computeUrl(resource, false);
-        Assert.assertTrue(postUrl.endsWith("/post/a/header"));
-        Assert.assertTrue(patchUrl.endsWith("/post/a/header"));
+        Assert.assertTrue(postUrl.endsWith("/post/a/postHeader"));
+        Assert.assertTrue(patchUrl.endsWith("/post/a/postHeader"));
     }
 
     @Test

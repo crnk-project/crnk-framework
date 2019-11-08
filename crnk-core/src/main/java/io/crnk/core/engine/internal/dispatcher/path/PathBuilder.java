@@ -180,7 +180,9 @@ public class PathBuilder {
 
 		RegistryEntry oppositeEntry = resourceRegistry.getEntry(field.getOppositeResourceType());
 		ResourceInformation oppositeInformation = oppositeEntry.getResourceInformation();
-		ResourceField oppositeField = oppositeInformation.findRelationshipFieldByName(field.getOppositeName());
+		ResourceField oppositeField = oppositeInformation.findFieldByName(field.getOppositeName());
+		PreconditionUtil.verify(oppositeField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP,
+				"expected opposite field {} of {} to be a relationship", oppositeField, field);
 		if (!oppositeInformation.isNested()) {
 			LOGGER.debug("cannot process field={} because opposite={} is not an nested resource", field, oppositeInformation);
 			throw new BadRequestException("invalid url, cannot specify ID of related resource");
