@@ -44,7 +44,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 	public QueryPathSpec resolve(ResourceInformation resourceInformation, List<String> attributePath, NamingType sourceNamingType, String sourceParameter) {
 		if (attributePath == null) {
 			// no attribute specified, query string expected, use String
-			return new QueryPathSpec(String.class, null);
+			return new QueryPathSpec(String.class, null, null);
 		}
 
 		ResourceRegistry resourceRegistry = ctx.getResourceRegistry();
@@ -54,6 +54,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 		SubTypeMap subTypeMap = null;
 
 		List<String> targetPath = new ArrayList<>();
+		List<ResourceField> fields = new ArrayList<>();
 
 		for (String sourceAttributePath : attributePath) {
 			if (resourceInformation != null) {
@@ -72,6 +73,8 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 					}
 				}
 
+				fields.add(field);
+
 				if (field != null) {
 					if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
 						RegistryEntry entry = resourceRegistry.getEntry(field.getOppositeResourceType());
@@ -87,6 +90,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 				}
 			} else {
 				resourceInformation = null;
+				fields.add(null);
 				if (valueType == Object.class) {
 					targetPath.add(sourceAttributePath);
 					continue;
@@ -124,7 +128,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 		}
 
 		List<String> path = mapJsonNames ? targetPath : attributePath;
-		return new QueryPathSpec(valueType, path);
+		return new QueryPathSpec(valueType, path, fields);
 	}
 
 	@Override

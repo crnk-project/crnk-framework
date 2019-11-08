@@ -34,6 +34,7 @@ public class Task implements ResourceTypeHolder {
 
 	private boolean completed;
 
+	@JsonApiField(filterable = false, sortable = false)
 	private boolean deleted;
 
 	@JsonIgnore

@@ -440,9 +440,9 @@ public class DefaultQuerySpecUrlMapper
 
 		FilterOperator operator = parameter.getOperator();
 
-		QueryPathSpec resolvedPath = pathResolver
-				.resolve(resourceInformation, parameter.getAttributePath(), QueryPathResolver.NamingType.JSON,
-						parameter.getName());
+		QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, parameter.getAttributePath(),
+				QueryPathResolver.NamingType.JSON, parameter.getName());
+		resolvedPath.verifyFilterable();
 		Class filterType = ClassUtils.getRawType(operator.getFilterType(parameter, resolvedPath.getValueType()));
 
 		Optional<JsonNode> optional = getJsonQuery(resolvedPath, parameter);
@@ -522,6 +522,7 @@ public class DefaultQuerySpecUrlMapper
 
 				QueryPathSpec resolvedPath = pathResolver
 						.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
+				resolvedPath.verifySortable();
 
 				Direction dir = desc ? Direction.DESC : Direction.ASC;
 				querySpec.addSort(new SortSpec(resolvedPath.getAttributePath(), dir));
