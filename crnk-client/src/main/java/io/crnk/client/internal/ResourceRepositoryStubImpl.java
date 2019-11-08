@@ -140,25 +140,36 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 
     @Override
     public T findOne(I id, QuerySpec querySpec) {
+        verifyQuerySpec(querySpec);
         String url = urlBuilder.buildUrl(resourceInformation, id, querySpec);
         return findOne(url);
     }
 
     @Override
     public DefaultResourceList<T> findAll(QuerySpec querySpec) {
+        verifyQuerySpec(querySpec);
         String url = urlBuilder.buildUrl(resourceInformation, null, querySpec);
         return findAll(url);
     }
 
     @Override
-    public DefaultResourceList<T> findAll(Collection<I> ids, QuerySpec queryPaquerySpecrams) {
-        String url = urlBuilder.buildUrl(resourceInformation, ids, queryPaquerySpecrams);
+    public DefaultResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
+        verifyQuerySpec(querySpec);
+        String url = urlBuilder.buildUrl(resourceInformation, ids, querySpec);
         return findAll(url);
     }
 
     @SuppressWarnings("unchecked")
     public DefaultResourceList<T> findAll(String url) {
         return (DefaultResourceList<T>) executeGet(url, ResponseType.RESOURCES);
+    }
+
+    protected void verifyQuerySpec(QuerySpec querySpec) {
+        Class<?> resourceClass = querySpec.getResourceClass();
+        if (resourceClass != null && !resourceClass.equals(resourceInformation.getResourceClass())) {
+            throw new BadRequestException("resourceClass mismatch between repository and QuerySpec argument: "
+                    + resourceClass + " vs " + resourceInformation.getResourceClass());
+        }
     }
 
     @SuppressWarnings("unchecked")

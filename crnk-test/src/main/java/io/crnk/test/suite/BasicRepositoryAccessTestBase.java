@@ -479,11 +479,11 @@ public abstract class BasicRepositoryAccessTestBase {
 		taskRepo.create(task);
 
 		relRepo.addRelations(task, Arrays.asList(project0.getId(), project1.getId()), "projects");
-		ResourceList<Project> relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
+		ResourceList<Project> relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Project.class));
 		Assert.assertEquals(2, relProjects.size());
 		relRepo.setRelations(task, Arrays.asList(project1.getId()), "projects");
 
-		relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
+		relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Project.class));
 		Assert.assertEquals(1, relProjects.size());
 		Assert.assertEquals(project1.getId(), relProjects.get(0).getId());
 		ProjectRepository.ProjectsLinksInformation projectLinks = relProjects.getLinks(ProjectRepository.ProjectsLinksInformation.class);
