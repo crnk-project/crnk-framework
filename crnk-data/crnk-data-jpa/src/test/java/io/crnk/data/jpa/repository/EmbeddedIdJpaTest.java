@@ -3,6 +3,8 @@ package io.crnk.data.jpa.repository;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.inmemory.InMemoryHttpAdapter;
 import io.crnk.client.internal.proxy.ObjectProxy;
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
@@ -43,6 +45,32 @@ public class EmbeddedIdJpaTest extends AbstractJpaTest {
     }
 
     @Test
+    public void checkFindOne() {
+        ResourceList<TestEmbeddedIdEntity> list = embeddedRepository.findAll(new QuerySpec(TestEmbeddedIdEntity.class));
+        TestIdEmbeddable id = list.get(0).getId();
+        TestEmbeddedIdEntity entity = embeddedRepository.findOne(id, new QuerySpec(TestEmbeddedIdEntity.class));
+        Assert.assertNotNull(entity);
+        Assert.assertEquals(id, entity.getId());
+    }
+
+
+    @Test(expected = ResourceNotFoundException.class)
+    public void checkFindOneForNonExistent() {
+        ResourceList<TestEmbeddedIdEntity> list = embeddedRepository.findAll(new QuerySpec(TestEmbeddedIdEntity.class));
+        TestIdEmbeddable id = list.get(0).getId();
+        id.setEmbBooleanValue(false);
+        embeddedRepository.findOne(id, new QuerySpec(TestEmbeddedIdEntity.class));
+    }
+
+    @Test(expected = ResourceNotFoundException.class)
+    public void checkFindOneForNonExistent2() {
+        ResourceList<TestEmbeddedIdEntity> list = embeddedRepository.findAll(new QuerySpec(TestEmbeddedIdEntity.class));
+        TestIdEmbeddable id = list.get(0).getId();
+        id.setEmbStringValue("does not exist");
+        embeddedRepository.findOne(id, new QuerySpec(TestEmbeddedIdEntity.class));
+    }
+
+    @Test
     public void checkFindAll() {
         ResourceList<TestEmbeddedIdEntity> list = embeddedRepository.findAll(new QuerySpec(TestEmbeddedIdEntity.class));
         Assert.assertEquals(numTestEntities, list.size());
@@ -53,6 +81,49 @@ public class EmbeddedIdJpaTest extends AbstractJpaTest {
             Assert.assertNotNull(id.getEmbStringValue());
             Assert.assertNull(entity.getTestEntity());
         }
+    }
+
+
+    @Test
+    public void checkSortByIdElementAsc() {
+        QuerySpec querySpec = new QuerySpec(TestEmbeddedIdEntity.class);
+        querySpec.addSort(PathSpec.of("id", "embIntValue").sort(Direction.ASC));
+        ResourceList<TestEmbeddedIdEntity> list = embeddedRepository.findAll(querySpec);
+        Assert.assertEquals(5, list.size());
+        Assert.assertEquals(96L, list.get(0).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(97L, list.get(1).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(98L, list.get(2).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(99L, list.get(3).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(100L, list.get(4).getId().getEmbIntValue().longValue());
+    }
+
+    @Test
+    public void checkSortByIdElementDesc() {
+        QuerySpec querySpec = new QuerySpec(TestEmbeddedIdEntity.class);
+        querySpec.addSort(PathSpec.of("id", "embIntValue").sort(Direction.DESC));
+        ResourceList<TestEmbeddedIdEntity> list = embeddedRepository.findAll(querySpec);
+        Assert.assertEquals(5, list.size());
+        Assert.assertEquals(100L, list.get(0).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(99L, list.get(1).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(98L, list.get(2).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(97L, list.get(3).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(96L, list.get(4).getId().getEmbIntValue().longValue());
+    }
+
+
+    @Test
+    public void checkSortByIdBooleanElementDesc() {
+        QuerySpec querySpec = new QuerySpec(TestEmbeddedIdEntity.class);
+        querySpec.addSort(PathSpec.of("id", "embBooleanValue").sort(Direction.DESC));
+        ResourceList<TestEmbeddedIdEntity> list = embeddedRepository.findAll(querySpec);
+        Assert.assertEquals(5, list.size());
+
+        // total order will ensure to sort after embIntValue as second priority (ASC)
+        Assert.assertEquals(96L, list.get(0).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(97L, list.get(1).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(98L, list.get(2).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(99L, list.get(3).getId().getEmbIntValue().longValue());
+        Assert.assertEquals(100L, list.get(4).getId().getEmbIntValue().longValue());
     }
 
     @Test

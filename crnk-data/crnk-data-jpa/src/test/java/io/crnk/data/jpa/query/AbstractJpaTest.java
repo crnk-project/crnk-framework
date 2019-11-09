@@ -164,8 +164,8 @@ public abstract class AbstractJpaTest {
 
 
             TestEmbeddedIdEntity idEntity = new TestEmbeddedIdEntity();
-            idEntity.setId(new TestIdEmbeddable(i, "test" + i, true));
-            idEntity.setLongValue(100L + i);
+            idEntity.setLongValue(100L - i);
+            idEntity.setId(new TestIdEmbeddable(100 - i, "test" + (i >> 1), true));
             idEntity.setTestEntity(test);
             em.persist(idEntity);
 

@@ -109,7 +109,7 @@ public class JpaResourceInformationProviderTest {
 
         ArrayList<ResourceField> relFields = new ArrayList<>(info.getRelationshipFields());
         relFields.sort(ResourceFieldComparator.INSTANCE);
-        assertEquals(4, relFields.size());
+        assertEquals(5, relFields.size());
         boolean found = false;
         for (ResourceField relField : relFields) {
             if (relField.getUnderlyingName().equals(TestEntity.ATTR_oneRelatedValue)) {
