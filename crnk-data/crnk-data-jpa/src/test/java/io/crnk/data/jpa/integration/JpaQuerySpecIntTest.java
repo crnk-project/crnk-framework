@@ -312,7 +312,7 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
         // add
         TestEmbeddedIdEntity entity = new TestEmbeddedIdEntity();
-        entity.setId(new TestIdEmbeddable(13, "test"));
+        entity.setId(new TestIdEmbeddable(13, "test", true));
         entity.setLongValue(100L);
         rep.create(entity);
 
