@@ -1,7 +1,10 @@
 package io.crnk.data.jpa.model;
 
+import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.data.facet.annotation.Facet;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -9,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
@@ -79,8 +83,41 @@ public class TestEntity extends TestMappedSuperclass {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "testEntity", cascade = CascadeType.PERSIST)
     private List<TestEmbeddedIdEntity> embeddedIdEntities;
 
+    @Column
+    @AttributeOverrides({
+            @AttributeOverride(name = "embStringValue", column = @Column(name = "refEmbStringValue")),
+            @AttributeOverride(name = "embBooleanValue", column = @Column(name = "refEmbBooleanValue")),
+            @AttributeOverride(name = "embIntValue", column = @Column(name = "refEmbIntValue"))
+    })
+    @JsonApiRelationId
+    private TestIdEmbeddable embeddedIdEntityId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(insertable = false, updatable = false, name = "refEmbStringValue", referencedColumnName = "embStringValue"),
+            @JoinColumn(insertable = false, updatable = false, name = "refEmbBooleanValue", referencedColumnName = "embBooleanValue"),
+            @JoinColumn(insertable = false, updatable = false, name = "refEmbIntValue", referencedColumnName = "embIntValue")
+    })
+    private TestEmbeddedIdEntity embeddedIdEntity;
+
     public TestEntity() {
 
+    }
+
+    public TestIdEmbeddable getEmbeddedIdEntityId() {
+        return embeddedIdEntityId;
+    }
+
+    public void setEmbeddedIdEntityId(TestIdEmbeddable embeddedIdEntityId) {
+        this.embeddedIdEntityId = embeddedIdEntityId;
+    }
+
+    public TestEmbeddedIdEntity getEmbeddedIdEntity() {
+        return embeddedIdEntity;
+    }
+
+    public void setEmbeddedIdEntity(TestEmbeddedIdEntity embeddedIdEntity) {
+        this.embeddedIdEntity = embeddedIdEntity;
     }
 
     public List<TestEmbeddedIdEntity> getEmbeddedIdEntities() {

@@ -162,12 +162,14 @@ public abstract class AbstractJpaTest {
             test.setLongValue(i);
             test.setEmbValue(embValue);
 
-
             TestEmbeddedIdEntity idEntity = new TestEmbeddedIdEntity();
             idEntity.setLongValue(100L - i);
             idEntity.setId(new TestIdEmbeddable(100 - i, "test" + (i >> 1), true));
             idEntity.setTestEntity(test);
             em.persist(idEntity);
+
+            test.setEmbeddedIdEntityId(idEntity.getId());
+            em.persist(test);
 
             // do not include relation/map for last value to check for proper
             // left join sorting

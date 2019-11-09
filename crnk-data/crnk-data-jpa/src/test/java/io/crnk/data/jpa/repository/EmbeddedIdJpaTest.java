@@ -157,6 +157,22 @@ public class EmbeddedIdJpaTest extends AbstractJpaTest {
     }
 
     @Test
+    public void checkIncludeAsRelatedWithId() {
+        QuerySpec querySpec = new QuerySpec(TestEntity.class);
+        querySpec.includeRelation(PathSpec.of("embeddedIdEntity"));
+        ResourceList<TestEntity> list = testRepository.findAll(querySpec);
+        Assert.assertEquals(numTestEntities, list.size());
+        for (TestEntity entity : list) {
+            TestEmbeddedIdEntity embeddedIdEntity = entity.getEmbeddedIdEntity();
+            Assert.assertNotNull(embeddedIdEntity.getId());
+            Assert.assertNotNull(embeddedIdEntity.getId().getEmbStringValue());
+            Assert.assertNotNull(embeddedIdEntity.getId().getEmbIntValue());
+            Assert.assertEquals(embeddedIdEntity.getId(), entity.getEmbeddedIdEntityId());
+        }
+    }
+
+
+    @Test
     public void checkLazyLoadAsRelated() {
         QuerySpec querySpec = new QuerySpec(TestEntity.class);
         ResourceList<TestEntity> list = testRepository.findAll(querySpec);

@@ -43,6 +43,12 @@ public class TestIdEmbeddable implements Serializable {
         this.embBooleanValue = embBooleanValue;
     }
 
+    @Override
+    public String toString() {
+        return embIntValue + "-" + embStringValue + "-" + embBooleanValue;
+    }
+
+
     public Integer getEmbIntValue() {
         return embIntValue;
     }
