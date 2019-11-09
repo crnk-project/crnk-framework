@@ -14,7 +14,6 @@ include ':crnk-security'
 include ':crnk-ui'
 
 include ':crnk-setup:crnk-setup-spring'
-include ':crnk-setup:crnk-setup-spring-boot1'
 include ':crnk-setup:crnk-setup-spring-boot2'
 include ':crnk-setup:crnk-setup-vertx'
 include ':crnk-setup:crnk-setup-servlet'

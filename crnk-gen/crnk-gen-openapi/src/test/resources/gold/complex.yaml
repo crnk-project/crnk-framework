@@ -177,7 +177,7 @@ components:
       in: query
       name: fields
       schema:
-        default: id,comments,header
+        default: id,comments,postHeader
         type: string
     PostInclude:
       description: post relationships to include (csv)
@@ -197,7 +197,7 @@ components:
       in: query
       name: sort
       schema:
-        example: id,comments,header
+        example: id,comments,postHeader
         type: string
     PrimitiveAttributeFields:
       description: primitiveAttribute fields to include (csv)
@@ -1655,8 +1655,6 @@ components:
       nullable: true
       type: array
       uniqueItems: false
-    PostHeaderResourceAttribute:
-      $ref: '#/components/schemas/HeaderResourceReference'
     PostIdResourceAttribute:
       description: The JSON:API resource ID
       nullable: false
@@ -1665,6 +1663,8 @@ components:
       allOf:
       - $ref: '#/components/schemas/PostResourceReference'
       - $ref: '#/components/schemas/PostResourcePatchAttributes'
+    PostPostHeaderResourceAttribute:
+      $ref: '#/components/schemas/HeaderResourceReference'
     PostPostResource:
       allOf:
       - $ref: '#/components/schemas/PostPostResourceReference'
@@ -1687,8 +1687,8 @@ components:
           properties:
             comments:
               $ref: '#/components/schemas/PostCommentsResourceAttribute'
-            header:
-              $ref: '#/components/schemas/PostHeaderResourceAttribute'
+            postHeader:
+              $ref: '#/components/schemas/PostPostHeaderResourceAttribute'
           type: object
       type: object
     PostResourcePatchAttributes:
@@ -1697,8 +1697,8 @@ components:
           properties:
             comments:
               $ref: '#/components/schemas/PostCommentsResourceAttribute'
-            header:
-              $ref: '#/components/schemas/PostHeaderResourceAttribute'
+            postHeader:
+              $ref: '#/components/schemas/PostPostHeaderResourceAttribute'
           type: object
       type: object
     PostResourcePostAttributes:
@@ -1707,8 +1707,8 @@ components:
           properties:
             comments:
               $ref: '#/components/schemas/PostCommentsResourceAttribute'
-            header:
-              $ref: '#/components/schemas/PostHeaderResourceAttribute'
+            postHeader:
+              $ref: '#/components/schemas/PostPostHeaderResourceAttribute'
           type: object
       type: object
     PostResourceReference:
@@ -6133,9 +6133,9 @@ paths:
         name: filter[comments]
         schema:
           type: string
-      - description: Filter by header (csv)
+      - description: Filter by postHeader (csv)
         in: query
-        name: filter[header]
+        name: filter[postHeader]
         schema:
           type: string
       - $ref: '#/components/parameters/PostFields'

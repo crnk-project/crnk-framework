@@ -1,1 +1,185 @@
-Next minor release.
+This release provides many incremental improvements to 3.0 while introducing three major new features.
+
+
+<h4>OpenAPI Support (experimental)</h4>
+
+Experimental support for OpenAPI is now available as extension to the Crnk generator. It will generate
+an OpenAPI schema out of any Crnk endpoint by inspecting the implementation and derive a schema. An
+example setup looks like:
+
+<pre class="prettyprint">
+buildscript {
+    dependencies {
+        classpath "io.crnk:crnk-gen-gradle:${version}"
+    }
+}
+
+apply plugin: 'crnk-gen'
+    crnkGen {
+        runtime {
+            configuration = 'openapiGenRuntime'
+        }
+
+        // fork generation into new process to have clean environment
+        forked = true
+
+        // specify the package to look for resources
+        resourcePackages = ['io.crnk.test']
+
+        openapi {
+            // enable OpenAPI generation within Gradle plugin
+            enabled = true
+
+            // specify name of openapi template in the build dir to merge onto
+            templateName = "openapi-template.yml"
+
+            // specify name of API to display in the generated OpenAPI file
+            projectName = "Generated Title"
+
+            // specify version of the API to display in the generated OpenAPI file
+            projectVersion = "0.1.0"
+
+            // specify name of openapi template in the build dir to merge onto
+            projectDescription = "A generated description of the API."
+
+            // specify location of generated sources
+            genDir = file('src/resources')
+        }
+    }
+}
+crnkGen.init()
+</pre>
+
+Fore more information see <a href="http://www.crnk.io/releases/latest/documentation/#_openapi">here</a>.
+Have a look at the <a
+        href="https://github.com/crnk-project/crnk-framework/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+openapi">GitHub
+    tickets</a>
+for the future roadmap.
+
+
+<h4>Bulk Repositories (experimental)</h4>
+
+There is a new experimental <b>BulkResourceRepository</b> that closely resembles ResourceRepository but
+takes multiple resources as arguments. This give the repository the possibility to optimize
+bulk mutations of multiple resources, like sharing a database transaction.
+
+Currently only POST is implemented, not PATCH and DELETE yet! More information can be
+found <a href="http://www.crnk.io/releases/latest/documentation/#_bulkresourcerepository">here</a>.
+In future releases this will be aligned with support for the upcoming JSON:API 1.1 specification.
+
+<pre class="prettyprint">
+public class BulkInMemoryRepository implements BulkResourceRepository&lt;Task, Long&gt; {
+
+    @Override
+    public &lt;S extends T&gt; List&lt;S&gt; create(List&lt;S&gt; resources) {
+       ...
+    }
+
+    ...
+}
+</pre>
+
+
+<h4>TestKit</h4>
+
+There is a new project <b>io.crnk:crnk-testkit</b> to facilitate testing of JSON:API based endpoints.
+As first contribution there is a <code>RandomWalkLinkChecker</code>:
+
+<pre class="prettyprint">
+CrnkClient client = ...
+HttpAdapter httpAdapter = client.getHttpAdapter();
+
+RandomWalkLinkChecker linkChecker = new RandomWalkLinkChecker(httpAdapter);
+linkChecker.setWalkLength(100);
+linkChecker.addStartUrl(...)
+
+linkChecker.performCheck();
+</pre>
+
+It performs a random walk on an API endpoint by following the links as specified by JSON:API. It
+will verify that each links provides a valid 2xx response code. By having a sufficiently long walk,
+it will ensure that any GET request can be served with high probability. This in turn allows
+developers to focus on testing business functionality, while lower layer REST details like linking get
+verified automatically.
+
+More information and roadmap are available <a
+        href="http://www.crnk.io/releases/latest/documentation/#_testkit">here</a>.
+
+
+<h4>Minor Improvements</h4>
+
+<ul>
+    <li>There is a new documentation section about <a
+            href="http://www.crnk.io/releases/latest/documentation/#_in_memory">in-memory repositories</a> and their
+        use for small data sets, testing and mocking.
+    </li>
+    <li>
+        CrnkClient verifies the resourceClass of passed QuerySpec objects to ensure they match with the invoked
+        repositories. <b>Watch out for this change</b>, because it was easy to get this wrong and may never got noticed.
+        It makes no difference for empty QuerySpec, while it may led to ignored filtering, sorting and paging requests
+        (because the parameters referred to the wrong resource class).
+    </li>
+    <li>Attributes and relationships can no longer be named <code>meta</code> and <li>links</li> to
+        have a clear distinction to the JSON:API data structures.
+    </li>
+    <li>Sorting for JPA entities with @EmbeddedId has been improved (<a
+            href="https://github.com/crnk-project/crnk-framework/issues/603">603</a>).
+    </li>
+    <li>
+        Self URLs can now be written manually by letting resources hold link objects implementing SelfLinksInformation.
+    </li>
+    <li>
+        @JsonProperty support is fixed to allow renaming of nested resource relationships.
+    </li>
+    <li>
+        CrnkClient makes use of nested URLs to access nested resources, e.g. <code>/api/project/{projectId}/tasks/{taskId}</code>.
+    </li>
+    <li>@JsonApiField.sortable and @JsonApiField.filterable allow to disable sorting and filtering for a field.
+        A 400 BAD_REQUEST will be returned in case of a violation has been detected. See
+        <a href="http://www.crnk.io/releases/latest/documentation/#_jsonapifield">here</a>.
+    </li>
+    <li>
+        HomeModule will add links to JSON:API responses if there are resources with overlapping paths, such as
+        <code>/api/tasks</code> and <code>/api/tasks/history</code>.
+    </li>
+    <li>HomeModule supports the same exception response format as any other JSON:API response.</li>
+    <li>An example for @JsonAnyGetter and @JsonAnySetter has been added to the example application to showcase
+        the use of more dynamic resources, see
+        <a href="https://github.com/crnk-project/crnk-example/blob/master/crnk-example-service/src/main/java/io/crnk/example/service/model/PersonEntity.java">PersonEntity</a>
+    </li>
+    <li>
+        DataRoom filter logging has been refined to log with WARN.
+    </li>
+    <li>
+        JPA repositories are aware of @JsonApiRelationId annotations and optimize sorting and filtering accordingly.
+    </li>
+    <li>
+        JPA repositories will do a LEFT join when sorting a column on a related entity.
+    </li>
+    <li>Nested repositories can now span multiple levels, such as <code>/api/project/{projectId}/tasks/{taskId}/items/{itemId}</code>
+    </li>
+    <li>
+        Repositories from CrnkClient make use of <code>@JsonApiExposed(false)</code>. It allows there
+        use on the server-side to consume other services without exposing the repositories again.
+        When returning resources obtained from such a repository, they will maintain proper linking
+        to the original service as long a the resources carry a links object implementing
+        SelfLinksInformation. For an example see
+        <a href="https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-microservice-example">spring-boot-microservice-example</a>
+    </li>
+    <li>
+        CrnkClient can be configured with a custom ObjectMapper using <code>CrnkClient.setObjectMapper(...)</code>.
+    </li>
+    <li>
+        ResourceIdentifier can be used together with @JsonApiRelationId do not only hold the ID, but also
+        the type of the relationship. Useful when inheritance is involved to directly address the proper subtype.
+    </li>
+    <li>
+        <code>ResourceTypeHolder</code> interfaces allows a resource to hold its resource type. This can proof
+        useful in more dynamic settings where inheritance is involved and a repository likes to manipulate
+        the type of its resources without having to work with strongly-typed resource classes. Together
+        with @JsonAnyGetter and @JsonAnySetter it allows for highly dynamic, non-compile-time repository
+        implementations similar to the direct use of the Resource class. For information is available
+        in the documentation.
+    </li>
+</ul>
+
