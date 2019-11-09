@@ -3,8 +3,8 @@ package io.crnk.gen.openapi.internal.operations;
 import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.gen.openapi.internal.OperationType;
 import io.crnk.gen.openapi.internal.parameters.PrimaryKey;
+import io.crnk.gen.openapi.internal.schemas.Info;
 import io.crnk.gen.openapi.internal.schemas.PatchResource;
-import io.crnk.gen.openapi.internal.schemas.ResourceResponseSchema;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
@@ -50,7 +50,7 @@ public class ResourcePatch extends AbstractResourceOperation implements OASOpera
         .description("OK")
         .content(new Content()
             .addMediaType("application/vnd.api+json",
-                new MediaType().schema(new ResourceResponseSchema(metaResource).$ref()))));
+                new MediaType().schema(new Info().$ref()))));
     return operation.responses(apiResponsesFromMap(responses));
   }
 

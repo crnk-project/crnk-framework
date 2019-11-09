@@ -447,102 +447,92 @@ components:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: BAD_REQUEST
     401:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: UNAUTHORIZED
     403:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: FORBIDDEN
     404:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: NOT_FOUND
     405:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: METHOD_NOT_ALLOWED
     409:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: CONFLICT
     412:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: PRECONDITION_FAILED
     415:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: UNSUPPORTED_MEDIA_TYPE
     422:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: UNPROCESSABLE_ENTITY
     500:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: INTERNAL_SERVER_ERROR
     501:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: NOT_IMPLEMENTED
     502:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: BAD_GATEWAY
     503:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: SERVICE_UNAVAILABLE
     504:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: GATEWAY_TIMEOUT
     505:
       content:
         application/vnd.api+json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/Failure'
       description: HTTP_VERSION_NOT_SUPPORTED
-    Accepted:
-      content:
-        application/vnd.api+json:
-          schema:
-            properties:
-              id:
-                description: a unique identifier for this pending action
-                type: string
-            type: object
-      description: Accepted
     CommentResourceReferenceResponse:
       content:
         application/vnd.api+json:
@@ -907,6 +897,7 @@ components:
       description: OK
   schemas:
     ApiError:
+      additionalProperties: false
       properties:
         code:
           description: an application-specific error code, expressed as a string value
@@ -926,10 +917,7 @@ components:
               type: string
           type: object
         meta:
-          additionalProperties: true
-          description: a meta object containing non-standard meta-information about
-            the error
-          type: object
+          $ref: '#/components/schemas/Meta'
         source:
           properties:
             parameter:
@@ -1047,7 +1035,7 @@ components:
       type: object
     CommentResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/CommentResourceSchema'
@@ -1067,7 +1055,7 @@ components:
       - attributes
     CommentResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -1078,6 +1066,23 @@ components:
     CommentValueResourceAttribute:
       nullable: true
       type: string
+    Failure:
+      additionalProperties: false
+      properties:
+        errors:
+          items:
+            $ref: '#/components/schemas/ApiError'
+          type: array
+          uniqueItems: true
+        jsonapi:
+          $ref: '#/components/schemas/JsonApi'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+      required:
+      - errors
+      type: object
     HeaderIdResourceAttribute:
       description: The JSON:API resource ID
       nullable: false
@@ -1169,7 +1174,7 @@ components:
       type: object
     HeaderResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/HeaderResourceSchema'
@@ -1189,7 +1194,7 @@ components:
       - attributes
     HeaderResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -1279,7 +1284,7 @@ components:
       type: object
     HistoricTasksResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/HistoricTasksResourceSchema'
@@ -1299,7 +1304,7 @@ components:
       - attributes
     HistoricTasksResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -1307,44 +1312,52 @@ components:
             type: array
         required:
         - data
-    ListResponseMixin:
-      description: A page of results
+    Info:
+      additionalProperties: false
       properties:
-        errors:
-          items:
-            $ref: '#/components/schemas/ApiError'
-          type: array
         jsonapi:
-          properties:
-            version:
-              type: string
-          type: object
+          $ref: '#/components/schemas/JsonApi'
         links:
-          properties:
-            first:
-              description: Link to the first page of results
-              type: string
-            last:
-              description: Link to the last page of results
-              type: string
-            next:
-              description: Link to the next page of results
-              type: string
-            prev:
-              description: Link to the previous page of results
-              type: string
-            self:
-              description: Link to this page of results
-              type: string
-          type: object
+          $ref: '#/components/schemas/Links'
         meta:
-          additionalProperties: true
-          properties:
-            totalResourceCount:
-              description: The total number of items available
-              format: int32
-              type: integer
-          type: object
+          $ref: '#/components/schemas/Meta'
+      required:
+      - meta
+      type: object
+    JsonApi:
+      additionalProperties: false
+      properties:
+        version:
+          type: string
+      type: object
+    Link:
+      description: 'A link **MUST** be represented as either: a string containing
+        the link''s URL or a link object.'
+      oneOf:
+      - description: A string containing the link's URL.
+        format: uri
+        type: string
+      - properties:
+          href:
+            description: A string containing the link's URL.
+            format: uri
+            type: string
+          meta:
+            $ref: '#/components/schemas/Meta'
+        required:
+        - href
+        type: object
+    Links:
+      allOf:
+      - additionalProperties:
+          $ref: '#/components/schemas/Link'
+        type: object
+      - $ref: '#/components/schemas/Pagination'
+      description: Link members related to the primary data.
+    Meta:
+      additionalProperties: true
+      description: Non-standard meta-information that can not be represented as an
+        attribute or relationship.
       type: object
     MetaElementChildrenResourceAttribute:
       items:
@@ -1488,7 +1501,7 @@ components:
       type: object
     MetaElementResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/MetaElementResourceSchema'
@@ -1508,7 +1521,7 @@ components:
       - attributes
     MetaElementResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -1585,7 +1598,7 @@ components:
       type: object
     NestedRelatedResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/NestedRelatedResourceSchema'
@@ -1605,7 +1618,7 @@ components:
       - attributes
     NestedRelatedResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -1613,6 +1626,29 @@ components:
             type: array
         required:
         - data
+    Pagination:
+      properties:
+        first:
+          description: The first page of data
+          format: uri
+          nullable: true
+          type: string
+        last:
+          description: The last page of data
+          format: uri
+          nullable: true
+          type: string
+        next:
+          description: The next page of data
+          format: uri
+          nullable: true
+          type: string
+        prev:
+          description: The previous page of data
+          format: uri
+          nullable: true
+          type: string
+      type: object
     PostCommentsResourceAttribute:
       items:
         $ref: '#/components/schemas/CommentResourceReference'
@@ -1702,7 +1738,7 @@ components:
       type: object
     PostResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/PostResourceSchema'
@@ -1722,7 +1758,7 @@ components:
       - attributes
     PostResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -2024,7 +2060,7 @@ components:
       type: object
     PrimitiveAttributeResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/PrimitiveAttributeResourceSchema'
@@ -2044,7 +2080,7 @@ components:
       - attributes
     PrimitiveAttributeResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -2189,7 +2225,7 @@ components:
       type: object
     ProjectsResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/ProjectsResourceSchema'
@@ -2209,7 +2245,7 @@ components:
       - attributes
     ProjectsResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -2300,7 +2336,7 @@ components:
       type: object
     ReadOnlyTaskResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/ReadOnlyTaskResourceSchema'
@@ -2320,7 +2356,7 @@ components:
       - attributes
     ReadOnlyTaskResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -2455,7 +2491,7 @@ components:
       type: object
     RelationIdTestResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/RelationIdTestResourceSchema'
@@ -2475,7 +2511,7 @@ components:
       - attributes
     RelationIdTestResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -2582,7 +2618,7 @@ components:
       type: object
     RelocatedTaskResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/RelocatedTaskResourceSchema'
@@ -2602,7 +2638,7 @@ components:
       - attributes
     RelocatedTaskResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -2679,7 +2715,7 @@ components:
       type: object
     RenamedIdResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/RenamedIdResourceSchema'
@@ -2699,7 +2735,7 @@ components:
       - attributes
     RenamedIdResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -2707,36 +2743,6 @@ components:
             type: array
         required:
         - data
-    ResponseMixin:
-      description: A JSON:API document with a single resource
-      properties:
-        errors:
-          items:
-            $ref: '#/components/schemas/ApiError'
-          type: array
-        included:
-          description: Included resources
-          items:
-            properties:
-              id:
-                description: The JSON:API resource ID
-                type: string
-              type:
-                description: The JSON:API resource type
-                type: string
-            type: object
-          type: array
-        jsonapi:
-          properties:
-            version:
-              type: string
-          type: object
-        links:
-          properties:
-            self:
-              description: the link that generated the current response document
-              type: string
-      type: object
     ScheduleCustomDataResourceAttribute:
       additionalProperties:
         type: string
@@ -2877,7 +2883,7 @@ components:
       type: object
     ScheduleResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/ScheduleResourceSchema'
@@ -2897,7 +2903,7 @@ components:
       - attributes
     ScheduleResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -2986,7 +2992,7 @@ components:
       type: object
     ScheduleStatusResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/ScheduleStatusResourceSchema'
@@ -3006,7 +3012,7 @@ components:
       - attributes
     ScheduleStatusResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -3020,6 +3026,34 @@ components:
       nullable: true
       type: array
       uniqueItems: true
+    Success:
+      description: A JSON:API document with a single resource
+      properties:
+        included:
+          description: Included resources
+          items:
+            properties:
+              attributes:
+                additionalProperties: true
+                type: object
+              id:
+                description: The JSON:API resource ID
+                type: string
+              type:
+                description: The JSON:API resource type
+                type: string
+            type: object
+          type: array
+          uniqueItems: true
+        jsonapi:
+          $ref: '#/components/schemas/JsonApi'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+      required:
+      - data
+      type: object
     TasksIdResourceAttribute:
       description: The JSON:API resource ID
       format: int64
@@ -3163,7 +3197,7 @@ components:
       type: object
     TasksResourceResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             $ref: '#/components/schemas/TasksResourceSchema'
@@ -3183,7 +3217,7 @@ components:
       - attributes
     TasksResourcesResponseSchema:
       allOf:
-      - $ref: '#/components/schemas/ListResponseMixin'
+      - $ref: '#/components/schemas/Success'
       - properties:
           data:
             items:
@@ -3249,7 +3283,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3307,7 +3341,7 @@ paths:
                 $ref: '#/components/schemas/CommentResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3358,7 +3392,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3410,7 +3444,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3466,10 +3500,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/CommentResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3520,7 +3554,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3572,7 +3606,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3627,7 +3661,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3682,7 +3716,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3733,7 +3767,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3785,7 +3819,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3840,7 +3874,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3895,7 +3929,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3946,7 +3980,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -3998,7 +4032,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4053,7 +4087,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4108,7 +4142,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4159,7 +4193,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4211,7 +4245,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4266,7 +4300,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4321,7 +4355,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4397,7 +4431,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4455,7 +4489,7 @@ paths:
                 $ref: '#/components/schemas/HeaderResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4506,7 +4540,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4558,7 +4592,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4614,10 +4648,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/HeaderResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4668,7 +4702,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4720,7 +4754,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4775,7 +4809,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4830,7 +4864,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4881,7 +4915,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4933,7 +4967,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -4988,7 +5022,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5043,7 +5077,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5094,7 +5128,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5146,7 +5180,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5201,7 +5235,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5256,7 +5290,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5307,7 +5341,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5359,7 +5393,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5414,7 +5448,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5469,7 +5503,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5550,7 +5584,7 @@ paths:
         200:
           $ref: '#/components/responses/MetaElementResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/MetaElementResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5603,7 +5637,7 @@ paths:
         200:
           $ref: '#/components/responses/MetaElementResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/MetaElementResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5682,7 +5716,7 @@ paths:
         200:
           $ref: '#/components/responses/MetaElementResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/MetaElementResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5761,7 +5795,7 @@ paths:
         200:
           $ref: '#/components/responses/MetaElementResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/MetaElementResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5822,7 +5856,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5880,7 +5914,7 @@ paths:
                 $ref: '#/components/schemas/NestedRelatedResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5931,7 +5965,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -5983,7 +6017,7 @@ paths:
         200:
           $ref: '#/components/responses/NestedRelatedResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6039,10 +6073,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/NestedRelatedResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/NestedRelatedResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6113,7 +6147,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6171,7 +6205,7 @@ paths:
                 $ref: '#/components/schemas/PostResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6222,7 +6256,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6274,7 +6308,7 @@ paths:
         200:
           $ref: '#/components/responses/PostResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6330,10 +6364,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/PostResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PostResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6384,7 +6418,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6457,7 +6491,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6512,7 +6546,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6567,7 +6601,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6618,7 +6652,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6670,7 +6704,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6725,7 +6759,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6780,7 +6814,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6831,7 +6865,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6904,7 +6938,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -6959,7 +6993,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7014,7 +7048,7 @@ paths:
         200:
           $ref: '#/components/responses/CommentResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/CommentResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7065,7 +7099,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7117,7 +7151,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7172,7 +7206,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7227,7 +7261,7 @@ paths:
         200:
           $ref: '#/components/responses/HeaderResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HeaderResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7403,7 +7437,7 @@ paths:
         200:
           $ref: '#/components/responses/PrimitiveAttributeResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PrimitiveAttributeResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7461,7 +7495,7 @@ paths:
                 $ref: '#/components/schemas/PrimitiveAttributeResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PrimitiveAttributeResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7512,7 +7546,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PrimitiveAttributeResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7564,7 +7598,7 @@ paths:
         200:
           $ref: '#/components/responses/PrimitiveAttributeResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PrimitiveAttributeResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7620,10 +7654,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/PrimitiveAttributeResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/PrimitiveAttributeResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7709,7 +7743,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7767,7 +7801,7 @@ paths:
                 $ref: '#/components/schemas/ProjectsResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7818,7 +7852,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7870,7 +7904,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7926,10 +7960,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ProjectsResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -7980,7 +8014,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8077,7 +8111,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8132,7 +8166,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8187,7 +8221,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8238,7 +8272,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8335,7 +8369,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8390,7 +8424,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8445,7 +8479,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8511,7 +8545,7 @@ paths:
         200:
           $ref: '#/components/responses/ReadOnlyTaskResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8569,7 +8603,7 @@ paths:
                 $ref: '#/components/schemas/ReadOnlyTaskResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8620,7 +8654,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8672,7 +8706,7 @@ paths:
         200:
           $ref: '#/components/responses/ReadOnlyTaskResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8728,10 +8762,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyTaskResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8837,7 +8871,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8895,7 +8929,7 @@ paths:
                 $ref: '#/components/schemas/RelationIdTestResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8946,7 +8980,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -8998,7 +9032,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9054,10 +9088,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/RelationIdTestResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9108,7 +9142,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9160,7 +9194,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9215,7 +9249,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9270,7 +9304,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9321,7 +9355,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9374,7 +9408,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9429,7 +9463,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9484,7 +9518,7 @@ paths:
         200:
           $ref: '#/components/responses/RelationIdTestResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelationIdTestResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9535,7 +9569,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9632,7 +9666,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9687,7 +9721,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9742,7 +9776,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9793,7 +9827,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9890,7 +9924,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -9945,7 +9979,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10000,7 +10034,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10061,7 +10095,7 @@ paths:
         200:
           $ref: '#/components/responses/RenamedIdResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RenamedIdResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10119,7 +10153,7 @@ paths:
                 $ref: '#/components/schemas/RenamedIdResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RenamedIdResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10170,7 +10204,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RenamedIdResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10222,7 +10256,7 @@ paths:
         200:
           $ref: '#/components/responses/RenamedIdResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RenamedIdResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10278,10 +10312,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/RenamedIdResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RenamedIdResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10347,7 +10381,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10405,7 +10439,7 @@ paths:
                 $ref: '#/components/schemas/ScheduleStatusResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10456,7 +10490,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10508,7 +10542,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10564,10 +10598,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ScheduleStatusResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10668,7 +10702,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10726,7 +10760,7 @@ paths:
                 $ref: '#/components/schemas/ScheduleResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10777,7 +10811,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10829,7 +10863,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10885,10 +10919,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ScheduleResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -10939,7 +10973,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11022,7 +11056,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11077,7 +11111,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11132,7 +11166,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11183,7 +11217,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11266,7 +11300,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11321,7 +11355,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11376,7 +11410,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11427,7 +11461,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11479,7 +11513,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11534,7 +11568,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11589,7 +11623,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11640,7 +11674,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11738,7 +11772,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11793,7 +11827,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11848,7 +11882,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11899,7 +11933,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -11951,7 +11985,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12006,7 +12040,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12061,7 +12095,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleStatusResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleStatusResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12112,7 +12146,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12210,7 +12244,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12265,7 +12299,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12320,7 +12354,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceReferencesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12386,7 +12420,7 @@ paths:
         200:
           $ref: '#/components/responses/RelocatedTaskResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelocatedTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12444,7 +12478,7 @@ paths:
                 $ref: '#/components/schemas/RelocatedTaskResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelocatedTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12495,7 +12529,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelocatedTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12547,7 +12581,7 @@ paths:
         200:
           $ref: '#/components/responses/RelocatedTaskResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelocatedTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12603,10 +12637,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/RelocatedTaskResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/RelocatedTaskResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12707,7 +12741,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12765,7 +12799,7 @@ paths:
                 $ref: '#/components/schemas/TasksResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12831,7 +12865,7 @@ paths:
         200:
           $ref: '#/components/responses/HistoricTasksResourcesResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HistoricTasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12889,7 +12923,7 @@ paths:
                 $ref: '#/components/schemas/HistoricTasksResourceResponseSchema'
           description: Created
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HistoricTasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12940,7 +12974,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HistoricTasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -12992,7 +13026,7 @@ paths:
         200:
           $ref: '#/components/responses/HistoricTasksResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HistoricTasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13048,10 +13082,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/HistoricTasksResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/HistoricTasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13102,7 +13136,7 @@ paths:
         200:
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13154,7 +13188,7 @@ paths:
         200:
           $ref: '#/components/responses/TasksResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13210,10 +13244,10 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/TasksResourceResponseSchema'
+                $ref: '#/components/schemas/Info'
           description: OK
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/TasksResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13264,7 +13298,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13347,7 +13381,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13402,7 +13436,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13457,7 +13491,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13508,7 +13542,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13591,7 +13625,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13646,7 +13680,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13701,7 +13735,7 @@ paths:
         200:
           $ref: '#/components/responses/ProjectsResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ProjectsResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13752,7 +13786,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13804,7 +13838,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13859,7 +13893,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13914,7 +13948,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -13965,7 +13999,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -14017,7 +14051,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -14072,7 +14106,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:
@@ -14127,7 +14161,7 @@ paths:
         200:
           $ref: '#/components/responses/ScheduleResourceReferenceResponse'
         202:
-          $ref: '#/components/responses/Accepted'
+          $ref: '#/components/responses/ScheduleResourceReferencesResponse'
         204:
           $ref: '#/components/responses/NoContent'
         400:

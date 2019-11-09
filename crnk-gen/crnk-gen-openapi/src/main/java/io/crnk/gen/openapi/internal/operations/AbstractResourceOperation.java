@@ -17,6 +17,6 @@ abstract class AbstractResourceOperation extends AbstractOperation  {
   AbstractResourceOperation(MetaResource metaResource) {
     this.metaResource = metaResource;
     prefix = "";
-    responses = defaultResponsesMap();
+    responses = defaultResponsesMap(metaResource);
   }
 }

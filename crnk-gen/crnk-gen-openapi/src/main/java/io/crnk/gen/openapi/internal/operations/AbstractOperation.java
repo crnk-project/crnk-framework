@@ -6,8 +6,8 @@ import io.crnk.gen.openapi.internal.OperationType;
 import io.crnk.gen.openapi.internal.parameters.ContentType;
 import io.crnk.gen.openapi.internal.parameters.FieldFilter;
 import io.crnk.gen.openapi.internal.parameters.NestedFilter;
-import io.crnk.gen.openapi.internal.responses.Accepted;
 import io.crnk.gen.openapi.internal.responses.NoContent;
+import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -24,11 +24,11 @@ abstract class AbstractOperation {
 
   public static OperationType operationType;
 
-  Map<String, ApiResponse> defaultResponsesMap() {
+  Map<String, ApiResponse> defaultResponsesMap(MetaResource metaResource) {
     Map<String, ApiResponse> responses = new TreeMap<String, ApiResponse>() {
     };
 
-    responses.put("202", new Accepted().$ref());
+    responses.put("202", new ResourceReferencesResponse(metaResource).$ref());
     responses.put("204", new NoContent().$ref());
 
     Map<String, ApiResponse> apiResponseCodes = OASErrors.generateStandardApiErrorResponses();

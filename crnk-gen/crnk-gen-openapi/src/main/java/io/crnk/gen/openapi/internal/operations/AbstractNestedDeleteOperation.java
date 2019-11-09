@@ -20,7 +20,7 @@ abstract class AbstractNestedDeleteOperation extends AbstractNestedOperation {
   AbstractNestedDeleteOperation(MetaResource metaResource, MetaResourceField metaResourceField, MetaResource relatedMetaResource) {
     super(metaResource, metaResourceField, relatedMetaResource);
     prefix = "";
-    responses = defaultResponsesMap();
+    responses = defaultResponsesMap(relatedMetaResource);
   }
 
   Operation operation() {

@@ -17,7 +17,7 @@ class ResourcesResponseSchemaTest extends MetaResourceBaseTest {
     Assert.assertTrue(schema instanceof ComposedSchema);
     List<Schema> allOf = ((ComposedSchema) schema).getAllOf();
     Assert.assertEquals(2, allOf.size());
-    Assert.assertEquals("#/components/schemas/ListResponseMixin", allOf.get(0).get$ref());
+    Assert.assertEquals("#/components/schemas/Success", allOf.get(0).get$ref());
 
     Schema dataSchema = allOf.get(1);
     Assert.assertEquals(1, dataSchema.getRequired().size());

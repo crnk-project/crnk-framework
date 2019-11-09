@@ -6,16 +6,16 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 
-class ListResponseMixinTest {
+class SuccessTest {
 
   @Test
   void schema() {
-    Schema schema = new ListResponseMixin().schema();
+    Schema schema = new Success().schema();
     Assert.assertTrue(schema instanceof ObjectSchema);
     Assert.assertTrue(schema.getProperties().containsKey("jsonapi"));
-    Assert.assertTrue(schema.getProperties().containsKey("errors"));
     Assert.assertTrue(schema.getProperties().containsKey("links"));
     Assert.assertTrue(schema.getProperties().containsKey("meta"));
+    Assert.assertTrue(schema.getProperties().containsKey("included"));
     Assert.assertEquals(4, schema.getProperties().size());
   }
 }

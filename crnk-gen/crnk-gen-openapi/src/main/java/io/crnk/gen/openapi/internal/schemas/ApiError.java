@@ -46,8 +46,7 @@ public class ApiError extends AbstractSchemaGenerator {
                         .description("a string indicating which URI query parameter caused the error")))
         .addProperties(
             "meta",
-            new ObjectSchema()
-                .additionalProperties(true)
-                .description("a meta object containing non-standard meta-information about the error"));
+            new Meta().$ref())
+        .additionalProperties(false);
   }
 }
