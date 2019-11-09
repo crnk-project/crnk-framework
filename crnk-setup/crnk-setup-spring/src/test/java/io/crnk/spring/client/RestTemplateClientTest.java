@@ -1,12 +1,18 @@
 package io.crnk.spring.client;
 
 import io.crnk.client.CrnkClient;
+import io.crnk.client.http.HttpAdapterListener;
+import io.crnk.client.http.HttpAdapterRequest;
+import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.resource.links.SelfLinksInformation;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.resource.meta.JsonLinksInformation;
 import io.crnk.spring.app.TestConfiguration;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Project;
@@ -41,162 +47,180 @@ import java.util.concurrent.TimeUnit;
 @DirtiesContext
 public class RestTemplateClientTest {
 
-	@Value("${local.server.port}")
-	private int port;
+    @Value("${local.server.port}")
+    private int port;
 
-	private RestTemplateAdapterListener listener;
+    private RestTemplateAdapterListener listener;
 
-	private CrnkClient client;
+    private CrnkClient client;
 
-	protected ResourceRepository<Task, Long> taskRepo;
+    protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepository<Project, Long> projectRepo;
+    protected ResourceRepository<Project, Long> projectRepo;
 
-	protected RelationshipRepository<Task, Long, Project, Long> relRepo;
+    protected RelationshipRepository<Task, Long, Project, Long> relRepo;
 
-	protected RelationshipRepository<Schedule, Long, Task, Long> scheduleTaskRepo;
+    protected RelationshipRepository<Schedule, Long, Task, Long> scheduleTaskRepo;
 
-	protected RelationshipRepository<Task, Long, Schedule, Long> taskScheduleRepo;
+    protected RelationshipRepository<Task, Long, Schedule, Long> taskScheduleRepo;
 
-	@Before
-	public void setupClient() {
-		client = new CrnkClient("http://127.0.0.1:" + port);
-		client.findModules();
+    private HttpAdapterListener adapterListener;
 
-		RestTemplateAdapter adapter = RestTemplateAdapter.newInstance();
-		adapter.setReceiveTimeout(30000, TimeUnit.MILLISECONDS);
-		listener = Mockito.mock(RestTemplateAdapterListener.class);
-		adapter.addListener(listener);
-		adapter.addListener(new RestTemplateAdapterListenerBase());
-		adapter.getImplementation().setRequestFactory(new OkHttp3ClientHttpRequestFactory());
-		client.setHttpAdapter(adapter);
+    @Before
+    public void setupClient() {
+        client = new CrnkClient("http://127.0.0.1:" + port);
+        client.findModules();
 
-		taskRepo = client.getRepositoryForType(Task.class);
-		projectRepo = client.getRepositoryForType(Project.class);
-		relRepo = client.getRepositoryForType(Task.class, Project.class);
-		scheduleTaskRepo = client.getRepositoryForType(Schedule.class, Task.class);
-		taskScheduleRepo = client.getRepositoryForType(Task.class, Schedule.class);
+        RestTemplateAdapter adapter = RestTemplateAdapter.newInstance();
+        adapter.setReceiveTimeout(30000, TimeUnit.MILLISECONDS);
+        adapterListener = Mockito.spy(new HttpAdapterListener() {
+            @Override
+            public void onRequest(HttpAdapterRequest request) {
+                request.header("X-TEST", "Hello");
+            }
 
-		TestModule.clear();
-	}
+            @Override
+            public void onResponse(HttpAdapterRequest request, HttpAdapterResponse response) {
+            }
+        });
+        adapter.addListener(adapterListener);
+        listener = Mockito.mock(RestTemplateAdapterListener.class);
+        adapter.addListener(listener);
+        adapter.addListener(new RestTemplateAdapterListenerBase());
+        adapter.getImplementation().setRequestFactory(new OkHttp3ClientHttpRequestFactory());
+        client.setHttpAdapter(adapter);
 
-	@After
-	public void tearTown() {
-		TestModule.clear();
-	}
+        taskRepo = client.getRepositoryForType(Task.class);
+        projectRepo = client.getRepositoryForType(Project.class);
+        relRepo = client.getRepositoryForType(Task.class, Project.class);
+        scheduleTaskRepo = client.getRepositoryForType(Schedule.class, Task.class);
+        taskScheduleRepo = client.getRepositoryForType(Task.class, Schedule.class);
 
-	@Test
-	public void testListenerInvoked() {
-		taskRepo.findAll(new QuerySpec(Task.class));
+        TestModule.clear();
+    }
 
-		ArgumentCaptor<RestTemplate> captor = ArgumentCaptor.forClass(RestTemplate.class);
-		Mockito.verify(listener, Mockito.times(1)).onBuild(captor.capture());
-	}
+    @After
+    public void tearTown() {
+        TestModule.clear();
+    }
 
-	@Test
-	public void testCreate() {
-		ScheduleRepository scheduleRepository = client.getRepositoryForInterface(ScheduleRepository.class);
+    @Test
+    public void testListenerInvoked() {
+        ResourceList<Task> results = taskRepo.findAll(new QuerySpec(Task.class));
 
-		Schedule schedule = new Schedule();
-		schedule.setName("mySchedule");
-		scheduleRepository.create(schedule);
+        ArgumentCaptor<RestTemplate> captor = ArgumentCaptor.forClass(RestTemplate.class);
+        Mockito.verify(listener, Mockito.times(1)).onBuild(captor.capture());
 
-		QuerySpec querySpec = new QuerySpec(Schedule.class);
-		ScheduleRepository.ScheduleList list = scheduleRepository.findAll(querySpec);
-		Assert.assertEquals(1, list.size());
-		schedule = list.get(0);
-		Assert.assertNotNull(schedule.getId());
-		ScheduleRepository.ScheduleListMeta meta = list.getMeta();
-		ScheduleRepository.ScheduleListLinks links = list.getLinks();
-		Assert.assertNotNull(meta);
-		Assert.assertNotNull(links);
-	}
+        // links manipulated by test header sent along by http listener
+        JsonLinksInformation links = (JsonLinksInformation) results.getLinks();
+        String modifiedUrl = links.as(SelfLinksInformation.class).getSelf();
+        Assert.assertEquals("Hello", modifiedUrl);
+    }
 
-	@Test
-	public void testFindEmpty() {
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "doesNotExist"));
-		List<Task> tasks = taskRepo.findAll(querySpec);
-		Assert.assertTrue(tasks.isEmpty());
-	}
+    @Test
+    public void testCreate() {
+        ScheduleRepository scheduleRepository = client.getRepositoryForInterface(ScheduleRepository.class);
 
-	@Test(expected = ResourceNotFoundException.class)
-	public void testFindNull() {
-		taskRepo.findOne(123422L, new QuerySpec(Task.class));
-	}
+        Schedule schedule = new Schedule();
+        schedule.setName("mySchedule");
+        scheduleRepository.create(schedule);
 
-	@Test
-	public void testCreateAndFind() {
-		Task task = new Task();
-		task.setId(1L);
-		task.setName("test");
-		taskRepo.create(task);
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        ScheduleRepository.ScheduleList list = scheduleRepository.findAll(querySpec);
+        Assert.assertEquals(1, list.size());
+        schedule = list.get(0);
+        Assert.assertNotNull(schedule.getId());
+        ScheduleRepository.ScheduleListMeta meta = list.getMeta();
+        ScheduleRepository.ScheduleListLinks links = list.getLinks();
+        Assert.assertNotNull(meta);
+        Assert.assertNotNull(links);
+    }
 
-		// check retrievable with findAll
-		List<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
-		Assert.assertEquals(1, tasks.size());
-		Task savedTask = tasks.get(0);
-		Assert.assertEquals(task.getId(), savedTask.getId());
-		Assert.assertEquals(task.getName(), savedTask.getName());
+    @Test
+    public void testFindEmpty() {
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "doesNotExist"));
+        List<Task> tasks = taskRepo.findAll(querySpec);
+        Assert.assertTrue(tasks.isEmpty());
+    }
 
-		// check retrievable with findAll(ids)
-		tasks = taskRepo.findAll(Arrays.asList(1L), new QuerySpec(Task.class));
-		Assert.assertEquals(1, tasks.size());
-		savedTask = tasks.get(0);
-		Assert.assertEquals(task.getId(), savedTask.getId());
-		Assert.assertEquals(task.getName(), savedTask.getName());
+    @Test(expected = ResourceNotFoundException.class)
+    public void testFindNull() {
+        taskRepo.findOne(123422L, new QuerySpec(Task.class));
+    }
 
-		// check retrievable with findOne
-		savedTask = taskRepo.findOne(1L, new QuerySpec(Task.class));
-		Assert.assertEquals(task.getId(), savedTask.getId());
-		Assert.assertEquals(task.getName(), savedTask.getName());
-	}
+    @Test
+    public void testCreateAndFind() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setName("test");
+        taskRepo.create(task);
 
-	@Test
-	public void testUpdate() {
-		final List<String> methods = new ArrayList<>();
-		final List<String> paths = new ArrayList<>();
-		final Interceptor interceptor = new Interceptor() {
+        // check retrievable with findAll
+        List<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
+        Assert.assertEquals(1, tasks.size());
+        Task savedTask = tasks.get(0);
+        Assert.assertEquals(task.getId(), savedTask.getId());
+        Assert.assertEquals(task.getName(), savedTask.getName());
 
-			@Override
-			public Response intercept(Chain chain) throws IOException {
-				Request request = chain.request();
+        // check retrievable with findAll(ids)
+        tasks = taskRepo.findAll(Arrays.asList(1L), new QuerySpec(Task.class));
+        Assert.assertEquals(1, tasks.size());
+        savedTask = tasks.get(0);
+        Assert.assertEquals(task.getId(), savedTask.getId());
+        Assert.assertEquals(task.getName(), savedTask.getName());
 
-				methods.add(request.method());
-				paths.add(request.url().encodedPath());
+        // check retrievable with findOne
+        savedTask = taskRepo.findOne(1L, new QuerySpec(Task.class));
+        Assert.assertEquals(task.getId(), savedTask.getId());
+        Assert.assertEquals(task.getName(), savedTask.getName());
+    }
 
-				return chain.proceed(request);
-			}
-		};
+    @Test
+    public void testUpdate() {
+        final List<String> methods = new ArrayList<>();
+        final List<String> paths = new ArrayList<>();
+        final Interceptor interceptor = new Interceptor() {
 
-		Task task = new Task();
-		task.setId(1L);
-		task.setName("test");
-		taskRepo.create(task);
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
 
-		Task savedTask = taskRepo.findOne(1L, new QuerySpec(Task.class));
-		Assert.assertNotNull(savedTask);
+                methods.add(request.method());
+                paths.add(request.url().encodedPath());
 
-		// perform update
-		task.setName("updatedName");
-		taskRepo.save(task);
+                return chain.proceed(request);
+            }
+        };
 
-		// check updated
-		savedTask = taskRepo.findOne(1L, new QuerySpec(Task.class));
-		Assert.assertNotNull(savedTask);
-		Assert.assertEquals("updatedName", task.getName());
-	}
+        Task task = new Task();
+        task.setId(1L);
+        task.setName("test");
+        taskRepo.create(task);
 
-	@Test
-	public void testDelete() {
-		Task task = new Task();
-		task.setId(1L);
-		task.setName("test");
-		taskRepo.create(task);
+        Task savedTask = taskRepo.findOne(1L, new QuerySpec(Task.class));
+        Assert.assertNotNull(savedTask);
 
-		taskRepo.delete(1L);
+        // perform update
+        task.setName("updatedName");
+        taskRepo.save(task);
 
-		List<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
-		Assert.assertEquals(0, tasks.size());
-	}
+        // check updated
+        savedTask = taskRepo.findOne(1L, new QuerySpec(Task.class));
+        Assert.assertNotNull(savedTask);
+        Assert.assertEquals("updatedName", task.getName());
+    }
+
+    @Test
+    public void testDelete() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setName("test");
+        taskRepo.create(task);
+
+        taskRepo.delete(1L);
+
+        List<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
+        Assert.assertEquals(0, tasks.size());
+    }
 }
