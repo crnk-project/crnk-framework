@@ -38,7 +38,10 @@ public class RepositoryAdapterUtils {
 
         if (resourceRegistry != null && resourceInformation != null && linksInformation instanceof SelfLinksInformation) {
             QueryContext queryContext = queryAdapter.getQueryContext();
-            ((SelfLinksInformation) linksInformation).setSelf(resourceRegistry.getResourceUrl(queryContext, resourceInformation));
+            SelfLinksInformation selfLinksInformation = (SelfLinksInformation) linksInformation;
+            if(selfLinksInformation.getSelf() == null) {
+                selfLinksInformation.setSelf(resourceRegistry.getResourceUrl(queryContext, resourceInformation));
+            }
         }
         return linksInformation;
     }
