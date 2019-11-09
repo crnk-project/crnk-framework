@@ -513,7 +513,7 @@ Field or getter annotated with `@JsonApiField` allows to define  the behavior of
 
 		...
 
-		@JsonApiField(postable = true, patchable = false)
+		@JsonApiField(postable=true, patchable=false, sortable=false, filterable=false)
 		private Long projectId;
 
 		...
