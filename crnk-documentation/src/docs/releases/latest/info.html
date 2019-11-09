@@ -67,6 +67,18 @@ Currently only POST is implemented, not PATCH and DELETE yet! More information c
 found <a href="http://www.crnk.io/releases/latest/documentation/#_bulkresourcerepository">here</a>.
 In future releases this will be aligned with support for the upcoming JSON:API 1.1 specification.
 
+<pre class="prettyprint">
+public class BulkInMemoryRepository implements BulkResourceRepository&lt;Task, Long&gt; {
+
+    @Override
+    public &lt;S extends T&gt; List&lt;S&gt; create(List&lt;S&gt; resources) {
+       ...
+    }
+
+    ...
+}
+</pre>
+
 
 <h4>TestKit</h4>
 
