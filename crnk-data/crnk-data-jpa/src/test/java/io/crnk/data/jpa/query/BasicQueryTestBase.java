@@ -466,6 +466,18 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	}
 
 	@Test
+	public void testWithGraphControlWithNestedJoin() {
+		JpaQueryExecutor<TestEntity> exec =
+				builder().addFilter(TestEntity.ATTR_oneRelatedValue, FilterOperator.NEQ, null).buildExecutor()
+						.fetch(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_otherEntity));
+		for (TestEntity test : exec.getResultList()) {
+			assertTrue(Hibernate.isInitialized(test));
+			assertTrue(Hibernate.isInitialized(test.getOneRelatedValue()));
+		}
+	}
+
+
+	@Test
 	public void testWithoutGraphControl() {
 		JpaQueryExecutor<TestEntity> exec =
 				builder().addFilter(TestEntity.ATTR_oneRelatedValue, FilterOperator.NEQ, null).buildExecutor();
