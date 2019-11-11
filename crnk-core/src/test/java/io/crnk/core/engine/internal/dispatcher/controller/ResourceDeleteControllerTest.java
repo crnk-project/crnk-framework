@@ -13,7 +13,7 @@ public class ResourceDeleteControllerTest extends ControllerTestBase {
 	@Test
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.build("tasks/1");
+		JsonPath jsonPath = pathBuilder.build("tasks/1", queryContext);
 		ResourceDeleteController sut = new ResourceDeleteController();
 		sut.init(controllerContext);
 
@@ -27,7 +27,7 @@ public class ResourceDeleteControllerTest extends ControllerTestBase {
 	@Test
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
+		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project", queryContext);
 		ResourceDeleteController sut = new ResourceDeleteController();
 		sut.init(controllerContext);
 
@@ -42,7 +42,7 @@ public class ResourceDeleteControllerTest extends ControllerTestBase {
 	public void onGivenRequestResourceGetShouldHandleIt() {
 		// GIVEN
 
-		JsonPath jsonPath = pathBuilder.build("/tasks/1");
+		JsonPath jsonPath = pathBuilder.build("/tasks/1", queryContext);
 		ResourceDeleteController sut = new ResourceDeleteController();
 		sut.init(controllerContext);
 

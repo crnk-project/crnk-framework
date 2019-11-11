@@ -44,7 +44,7 @@ public class BraveUtil {
                     return objectMapper;
                 }
             });
-            Map<String, Set<String>> parameters = serializer.serialize(querySpec);
+            Map<String, Set<String>> parameters = serializer.serialize(querySpec, request.getQueryAdapter().getQueryContext());
             for (Map.Entry<String, Set<String>> entry : parameters.entrySet()) {
                 if (builder.length() > 1) {
                     builder.append("&");

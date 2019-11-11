@@ -10,6 +10,7 @@ import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.module.Module;
+import io.crnk.core.module.ModuleRegistry;
 import io.crnk.home.HomeModule;
 import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.ui.internal.UIHttpRequestProcessor;
@@ -33,8 +34,12 @@ public class UIModuleTest {
 	@Test
 	public void setup() {
 		UIModule module = UIModule.create(new UIModuleConfig());
+
+		ModuleRegistry moduleRegistry = Mockito.mock(ModuleRegistry.class);
 		Module.ModuleContext context = Mockito.mock(Module.ModuleContext.class);
+		Mockito.when(context.getModuleRegistry()).thenReturn(moduleRegistry);
 		module.setupModule(context);
+
 		Mockito.verify(context, Mockito.times(1)).addHttpRequestProcessor(Mockito.any(HttpRequestProcessor.class));
 	}
 
@@ -68,7 +73,9 @@ public class UIModuleTest {
 		config.setBrowserEnabled(false);
 		UIModule module = new UIModule(config);
 
+		ModuleRegistry moduleRegistry = Mockito.mock(ModuleRegistry.class);
 		Module.ModuleContext context = Mockito.mock(Module.ModuleContext.class);
+		Mockito.when(context.getModuleRegistry()).thenReturn(moduleRegistry);
 		module.setupModule(context);
 
 		Mockito.verify(context, Mockito.times(0)).addHttpRequestProcessor(Mockito.any(HttpRequestProcessor.class));
@@ -80,7 +87,9 @@ public class UIModuleTest {
 		config.setPresentationModelEnabled(false);
 		UIModule module = new UIModule(config);
 
+		ModuleRegistry moduleRegistry = Mockito.mock(ModuleRegistry.class);
 		Module.ModuleContext context = Mockito.mock(Module.ModuleContext.class);
+		Mockito.when(context.getModuleRegistry()).thenReturn(moduleRegistry);
 		module.setupModule(context);
 
 		Mockito.verify(context, Mockito.times(0)).addRepository(Mockito.any());

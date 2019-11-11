@@ -22,4 +22,6 @@ public class HttpHeaders {
 	public static final String JSONAPI_CONTENT_TYPE_AND_CHARSET = JSONAPI_CONTENT_TYPE + "; charset=" +
 			DEFAULT_CHARSET;
 
+	public static final String VERSION_ACCEPT_PARAMETER = "version";
+
 }

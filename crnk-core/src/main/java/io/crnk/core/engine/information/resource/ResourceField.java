@@ -96,4 +96,9 @@ public interface ResourceField {
 
     PatchStrategy getPatchStrategy();
 
+    /**
+     * @return version range this field is applicable to. See also {@link @JsonApiVersion}
+     */
+    VersionRange getVersionRange();
+
 }

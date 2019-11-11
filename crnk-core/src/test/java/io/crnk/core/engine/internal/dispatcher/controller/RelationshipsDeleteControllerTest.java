@@ -36,7 +36,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
     @Test
     public void onValidRequestShouldAcceptIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
+        JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project", queryContext);
         RelationsDeleteController sut = new RelationsDeleteController();
         sut.init(controllerContext);
 
@@ -50,7 +50,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
     @Test
     public void onNonRelationRequestShouldDenyIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks");
+        JsonPath jsonPath = pathBuilder.build("tasks", queryContext);
         RelationsDeleteController sut = new RelationsDeleteController();
         sut.init(controllerContext);
 
@@ -69,7 +69,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
         newTaskBody.setData(Nullable.of(data));
         data.setType("tasks");
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -88,7 +88,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
         data = createProject();
         newProjectBody.setData(Nullable.of(data));
 
-        JsonPath projectPath = pathBuilder.build("/projects");
+        JsonPath projectPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN -- adding a project
         Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, newProjectBody);
@@ -109,7 +109,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
         data.setType("projects");
         data.setId(projectId.toString());
 
-        JsonPath projectRelationPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
+        JsonPath projectRelationPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project", queryContext);
         RelationshipsPostController relationshipsPostController = new RelationshipsPostController();
         relationshipsPostController.init(controllerContext);
 
@@ -146,7 +146,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
         Document newUserDocument = new Document();
         newUserDocument.setData(Nullable.of(createUser()));
 
-        JsonPath taskPath = pathBuilder.build("/users");
+        JsonPath taskPath = pathBuilder.build("/users", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -164,7 +164,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
         Document newProjectDocument = new Document();
         newProjectDocument.setData(Nullable.of(createProject()));
 
-        JsonPath projectPath = pathBuilder.build("/projects");
+        JsonPath projectPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN -- adding a project
         Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, newProjectDocument);
@@ -182,7 +182,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
         Document newProjectDocument2 = new Document();
         newProjectDocument2.setData(Nullable.of(createProject(projectId.toString())));
 
-        JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
+        JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects", queryContext);
         RelationshipsPostController relationshipsPostController = new RelationshipsPostController();
         relationshipsPostController.init(controllerContext);
 
@@ -222,7 +222,7 @@ public class RelationshipsDeleteControllerTest extends ControllerTestBase {
         Document body = new Document();
         ResourceIdentifier id = new ResourceIdentifier("13", "things");
         body.setData(Nullable.of(id));
-        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/statusThing");
+        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/statusThing", queryContext);
         RelationsDeleteController sut = new RelationsDeleteController();
         sut.init(controllerContext);
 

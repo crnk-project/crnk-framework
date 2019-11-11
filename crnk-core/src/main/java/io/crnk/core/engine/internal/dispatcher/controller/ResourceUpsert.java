@@ -31,6 +31,7 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.AnyResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
@@ -44,6 +45,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceException;
@@ -102,8 +104,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		String type = resourceBody.getType();
 		if (type == null && path.getParentField() != null) {
 			resourceBody.setType(path.getParentField().getOppositeResourceType());
-		}
-		else if (type == null) {
+		} else if (type == null) {
 			resourceBody.setType(path.getRootEntry().getResourceInformation().getResourceType());
 		}
 	}
@@ -149,8 +150,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			try {
 				Object links = linksMapper.readValue(linksNode);
 				linksField.getAccessor().setValue(instance, links);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw newBodyException("failed to parse links information", e);
 			}
 		}
@@ -167,8 +167,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			try {
 				Object meta = metaMapper.readValue(metaNode);
 				metaField.getAccessor().setValue(instance, meta);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw newBodyException("failed to parse links information", e);
 			}
 		}
@@ -188,13 +187,19 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		}
 	}
 
-	private void setAttribute(ResourceInformation resourceInformation, Object instance, String attributeName,
+	private void setAttribute(ResourceInformation resourceInformation, Object instance, String attributeJsonName,
 			JsonNode valueNode, QueryContext queryContext) {
-		ResourceField field = resourceInformation.findAttributeFieldByName(attributeName);
+		ResourceField field = resourceInformation.findFieldByJsonName(attributeJsonName, queryContext.getRequestVersion());
+
+		if (field == null && resourceInformation.hasJsonField(attributeJsonName)) {
+			throw new BadRequestException(String.format("attribute %s not available for version {}", attributeJsonName, queryContext.getRequestVersion()));
+		} else if (field != null) {
+			PreconditionUtil.verifyEquals(ResourceFieldType.ATTRIBUTE, field.getResourceFieldType(), "expected %s being an attribute", attributeJsonName);
+		}
 
 		ResourceFilterDirectory filterDirectory = context.getResourceFilterDirectory();
 		if (!checkAccess() || filterDirectory.canAccess(field, getHttpMethod(), queryContext, ignoreImmutableFields())) {
-			logger.debug("set attribute {}={}", attributeName, valueNode);
+			logger.debug("set attribute {}={}", attributeJsonName, valueNode);
 			ObjectMapper objectMapper = context.getObjectMapper();
 			List<ResourceModificationFilter> modificationFilters = context.getModificationFilters();
 			try {
@@ -205,30 +210,33 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 						JavaType jacksonValueType = objectMapper.getTypeFactory().constructType(valueType);
 						ObjectReader reader = objectMapper.reader().forType(jacksonValueType);
 						value = reader.readValue(valueNode);
-					}
-					else {
+					} else {
 						value = null;
 					}
 					for (ResourceModificationFilter filter : modificationFilters) {
-						value = filter.modifyAttribute(instance, field, attributeName, value);
+						value = filter.modifyAttribute(instance, field, attributeJsonName, value);
 					}
 					field.getAccessor().setValue(instance, value);
-				}
-				else if (resourceInformation.getAnyFieldAccessor() != null) {
+				} else if (resourceInformation.getAnyFieldAccessor() != null) {
 					AnyResourceFieldAccessor anyFieldAccessor = resourceInformation.getAnyFieldAccessor();
 					Object value = objectMapper.reader().forType(Object.class).readValue(valueNode);
 					for (ResourceModificationFilter filter : modificationFilters) {
-						value = filter.modifyAttribute(instance, field, attributeName, value);
+						value = filter.modifyAttribute(instance, field, attributeJsonName, value);
 					}
-					anyFieldAccessor.setValue(instance, attributeName, value);
+					anyFieldAccessor.setValue(instance, attributeJsonName, value);
+				} else if(!isClient()) {
+					throw new BadRequestException(String.format("attribute %s not found", attributeJsonName));
 				}
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new ResourceException(
-						String.format("Exception while setting %s.%s=%s due to %s", instance, attributeName, valueNode,
+						String.format("Exception while setting %s.%s=%s due to %s", instance, attributeJsonName, valueNode,
 								e.getMessage()), e);
 			}
 		}
+	}
+
+	protected boolean isClient() {
+		return false;
 	}
 
 	protected boolean checkAccess() {
@@ -281,8 +289,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 									registryEntry,
 									entry,
 									queryAdapter);
-						}
-						else {
+						} else {
 							//noinspection unchecked
 							result = setRelationFieldAsync(newResource, registryEntry, relationshipName, relationship, queryAdapter);
 						}
@@ -302,9 +309,10 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			Map.Entry<String, Relationship> property, QueryAdapter queryAdapter) {
 		Relationship relationship = property.getValue();
 		if (relationship.getData().isPresent()) {
-			String propertyName = property.getKey();
-			ResourceField relationshipField = registryEntry.getResourceInformation()
-					.findRelationshipFieldByName(propertyName);
+			String fieldJsonName = property.getKey();
+			QueryContext queryContext = queryAdapter.getQueryContext();
+			ResourceField relationshipField = registryEntry.getResourceInformation().findFieldByJsonName(fieldJsonName, queryContext.getRequestVersion());
+			PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, relationshipField.getResourceFieldType(), "expected {} to be a relationship", fieldJsonName);
 
 
 			List<ResourceIdentifier> relationshipIds = relationship.getCollectionData().get();
@@ -328,12 +336,11 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			}
 
 			if (relationshipField.hasIdField()) {
-				logger.debug("set relationshipIds {}={}", propertyName, relationshipTypedIds);
+				logger.debug("set relationshipIds {}={}", fieldJsonName, relationshipTypedIds);
 				ResourceFieldAccessor idAccessor = relationshipField.getIdAccessor();
 				if (idAccessor.getImplementationClass() == ResourceIdentifier.class) {
 					idAccessor.setValue(newResource, relationshipIds);
-				}
-				else {
+				} else {
 					idAccessor.setValue(newResource, relationshipTypedIds);
 				}
 			}
@@ -362,20 +369,18 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 				if (relatedResults.isEmpty()) {
 
-					logger.debug("set relationships {}={}", propertyName, relatedList);
+					logger.debug("set relationships {}={}", fieldJsonName, relatedList);
 					relationshipField.getAccessor().setValue(newResource, relatedList);
-				}
-				else {
+				} else {
 					return Optional.of(context.getResultFactory().zip(relatedResults).doWork(relatedObjects -> {
 						relatedList.addAll(relatedObjects);
 
-						logger.debug("set relationships {}={}", propertyName, relatedList);
+						logger.debug("set relationships {}={}", fieldJsonName, relatedList);
 						relationshipField.getAccessor().setValue(newResource, relatedList);
 					}));
 				}
-			}
-			else {
-				logger.debug("decideSetRelationObjectsField skipped {}", propertyName, relationshipTypedIds);
+			} else {
+				logger.debug("decideSetRelationObjectsField skipped {}", fieldJsonName, relationshipTypedIds);
 			}
 		}
 		return Optional.empty();
@@ -393,8 +398,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			ResourceIdentifier relationshipId = (ResourceIdentifier) relationship.getData().get();
 
 			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
-			ResourceField field = resourceInformation
-					.findRelationshipFieldByName(relationshipName);
+			QueryContext queryContext = queryAdapter.getQueryContext();
+			ResourceField field = resourceInformation.findFieldByJsonName(relationshipName, queryContext.getRequestVersion());
 
 			if (field == null) {
 				throw new ResourceException(String.format("Invalid relationship name: %s", relationshipName));
@@ -407,8 +412,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			if (relationshipId == null) {
 				logger.debug("set relationship {}=null", relationshipName);
 				field.getAccessor().setValue(newResource, null);
-			}
-			else {
+			} else {
 				RegistryEntry entry = getRegistryEntry(relationshipId.getType());
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
@@ -420,8 +424,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 					ResourceFieldAccessor idAccessor = field.getIdAccessor();
 					if (idAccessor.getImplementationClass() == ResourceIdentifier.class) {
 						idAccessor.setValue(newResource, relationshipId);
-					}
-					else {
+					} else {
 						field.getIdAccessor().setValue(newResource, typedRelationshipId);
 					}
 				}
@@ -432,8 +435,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 								field.getAccessor().setValue(newResource, relatedObject);
 							});
 					return Optional.of(result);
-				}
-				else {
+				} else {
 					logger.debug("decideSetRelationObjectField skipped {}", relationshipName);
 				}
 			}

@@ -636,3 +636,55 @@ to compute URLs.
 WARNING: Nesting is currently limited to a single level (and the possibility to have further relationships on the nested resource).
 
 
+## @JsonApiVersion
+
+WARNING: This feature is experimental
+
+Crnk supports versioning of resources and fields based on content negotiation.
+Any resource and field can carry a version range where it is available.
+Crnk will disregard any resource and field with a version range that does not intersect with the request version.
+The HTTP `Accept` header is used to pass along the desired version as part of general content negotiation.
+This has the benefit that URLs remain constant across versions, greatly simplifying usability and linking.
+For a more detailed discussion, see here[https://blog.ploeh.dk/2015/06/22/rest-implies-content-negotiation/].
+
+A versioned resource looks like:
+
+[source,java]
+.VersionedTask.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/VersionedTask.java[tags=docs]
+----
+
+- The resource itself is available up to version 5.
+- The field `completed` is only available from version 1 to 3.
+- The field `newCompleted` introduces a new flavor of `completed` making use of `CompletionStatus` rather than
+  a boolean. Through the use of `@JsonProperty` it is mapped to `completed` on the REST layer whereas
+  the Java side has access to both the old and new field.
+
+Crnk makes use of integer-based version number to signal major versions with breaking changes. There is
+no need for minor versions in this scheme. But applications are free to use additional minor versions in other contexts.
+
+A request than carries an accept header like:
+
+----
+GET /api/versionedTask HTTP/1.1
+Accept: application/vnd.api+json; version=2
+----
+
+Alternatively, the version can be passed as URL parameter (easier to use from a browser:
+
+----
+GET /api/versionedTask?version=2 HTTP/1.1
+Accept: application/vnd.api+json
+----
+
+<<client,CrnkClient>> supports setting the request version through `CrnkClient.setVersion(...)`.
+
+Not supported is:
+
+- ID fields cannot be versioned.
+- for multiple classes to serve the same resource for different version ranges.
+  For example, it is not possible to introduce a class `VersionedTaskV2.java`.
+  For most use cases it should be sufficient to redefine fields. This may change in the future
+- Meta and link fields cannot be versioned, this may change in the future.
+

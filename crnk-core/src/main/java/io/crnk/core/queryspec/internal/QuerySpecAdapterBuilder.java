@@ -28,7 +28,7 @@ public class QuerySpecAdapterBuilder implements QueryAdapterBuilder {
 	@Override
 	public QueryAdapter build(ResourceInformation resourceInformation, Map<String, Set<String>> parameters,
 							  QueryContext queryContext) {
-		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpecUrlMapper.deserialize(resourceInformation, parameters),
+		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpecUrlMapper.deserialize(resourceInformation, parameters, queryContext),
 				moduleRegistry.getResourceRegistry(), queryContext);
 		HttpRequestContext requestContext = moduleRegistry.getHttpRequestContextProvider().getRequestContext();
 		if (requestContext != null) {

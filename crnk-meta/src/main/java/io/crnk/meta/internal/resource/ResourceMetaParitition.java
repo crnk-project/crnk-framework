@@ -88,8 +88,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 				String id = getId(entry.getResourceInformation().getResourceType());
 				if (isMeta) {
 					return id + "$meta";
-				}
-				else {
+				} else {
 					return id + "$links";
 				}
 			}
@@ -179,6 +178,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		resource.setName(getName(information));
 		resource.setResourceType(resourceType);
 		resource.setResourcePath(information.getResourcePath());
+		resource.setVersionRange(information.getVersionRange());
 		if (superMeta != null) {
 			resource.setSuperType(superMeta);
 			if (superMeta != null) {
@@ -217,8 +217,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		RegistryEntry entry = resourceRegistry.getEntry(resourceType);
 		if (idPrefix != null) {
 			return idPrefix + resourceType.replace('/', '.');
-		}
-		else {
+		} else {
 			Class<?> resourceClass = entry.getResourceInformation().getResourceClass();
 			return resourceClass.getName();
 		}
@@ -230,8 +229,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		for (int i = 0; i < resourceType.length(); i++) {
 			if (i == 0 || resourceType.charAt(i - 1) == '/') {
 				name.append(Character.toUpperCase(resourceType.charAt(i)));
-			}
-			else if (resourceType.charAt(i) != '/') {
+			} else if (resourceType.charAt(i) != '/') {
 				name.append(resourceType.charAt(i));
 			}
 		}
@@ -297,9 +295,11 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		attr.setUnderlyingName(field.getUnderlyingName());
 
 		attr.setParent(resource, true);
+		attr.setId(resource.getId() + "." + field.getUnderlyingName());
 		attr.setName(field.getJsonName());
 		attr.setAssociation(field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP);
 		attr.setFieldType(field.getResourceFieldType());
+		attr.setVersionRange(field.getVersionRange());
 		attr.setDerived(false);
 
 		attr.setLazy(field.getSerializeType() == SerializeType.LAZY);

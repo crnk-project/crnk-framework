@@ -1,10 +1,11 @@
 package io.crnk.meta.model.resource;
 
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
 /**
- * A JSON API resource.
+ * A JSON:API resource.
  */
 @JsonApiResource(type = "metaResource", resourcePath = "meta/resource")
 public class MetaResource extends MetaResourceBase { // NOSONAR ignore exception hierarchy
@@ -15,6 +16,16 @@ public class MetaResource extends MetaResourceBase { // NOSONAR ignore exception
 
 	@JsonApiRelation
 	private MetaResourceRepository repository;
+
+	private VersionRange versionRange;
+
+	public VersionRange getVersionRange() {
+		return versionRange;
+	}
+
+	public void setVersionRange(VersionRange versionRange) {
+		this.versionRange = versionRange;
+	}
 
 	public String getResourceType() {
 		return resourceType;

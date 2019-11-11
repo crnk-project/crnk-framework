@@ -1,9 +1,14 @@
 package io.crnk.core.engine.internal.http;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
@@ -20,16 +25,9 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.url.ServiceUrlProvider;
-import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.module.ModuleRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * A class that can be used to integrate Crnk with external frameworks like Jersey, Spring etc. See crnk-rs
@@ -55,8 +53,7 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
     public Optional<Result<HttpResponse>> process(HttpRequestContextBase requestContextBase) throws IOException {
         HttpRequestContext requestContext = requestContextBase instanceof HttpRequestContext ? (HttpRequestContext) requestContextBase : new HttpRequestContextBaseAdapter(requestContextBase);
 
-        QueryContext queryContext = requestContext.getQueryContext();
-
+		QueryContext queryContext = requestContext.getQueryContext();
         HttpRequestContextProvider httpRequestContextProvider = moduleRegistry.getHttpRequestContextProvider();
         try {
             httpRequestContextProvider.onRequestStarted(requestContext);
@@ -110,17 +107,21 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
         JsonApiRequestProcessor processor = (JsonApiRequestProcessor) processors.stream()
                 .filter(it -> it instanceof JsonApiRequestProcessor).findFirst().get();
 
-        JsonPath jsonPath = new PathBuilder(moduleRegistry.getResourceRegistry(), moduleRegistry.getTypeParser()).build(path);
-
         HttpRequestContext requestContext = moduleRegistry.getHttpRequestContextProvider().getRequestContext();
         QueryContext queryContext = requestContext.getQueryContext();
+        PathBuilder pathBuilder = new PathBuilder(moduleRegistry.getResourceRegistry(), moduleRegistry.getTypeParser());
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
+
         return processor.processAsync(jsonPath, method, parameters, requestBody, queryContext).get();
     }
 
 
     @Override
     public void dispatchAction(String path, String method, Map<String, Set<String>> parameters) {
-        JsonPath jsonPath = new PathBuilder(moduleRegistry.getResourceRegistry(), moduleRegistry.getTypeParser()).build(path);
+        QueryContext queryContext = new QueryContext();
+        PathBuilder pathBuilder = new PathBuilder(moduleRegistry.getResourceRegistry(), moduleRegistry.getTypeParser());
+
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
 
         // preliminary implementation, more to come in the future
         ActionFilterChain chain = new ActionFilterChain();

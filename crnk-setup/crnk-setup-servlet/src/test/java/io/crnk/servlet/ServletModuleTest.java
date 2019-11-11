@@ -21,7 +21,7 @@ public class ServletModuleTest {
 	@Test
 	public void testName() {
 		ImmediateResultFactory resultFactory = new ImmediateResultFactory();
-		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory);
+		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory, null);
 		ServletModule module = new ServletModule(provider);
 		Assert.assertEquals("servlet", module.getModuleName());
 	}
@@ -29,10 +29,10 @@ public class ServletModuleTest {
 	@Test
 	public void testSecurityProviderInstalled() {
 		ImmediateResultFactory resultFactory = new ImmediateResultFactory();
-		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory);
-		ServletModule module = new ServletModule(provider);
 
 		CrnkBoot boot = new CrnkBoot();
+		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory, boot.getModuleRegistry());
+		ServletModule module = new ServletModule(provider);
 		boot.addModule(module);
 		boot.boot();
 

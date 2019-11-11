@@ -165,13 +165,14 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 				}
 			}
 
+			QueryContext queryContext = requestContext.getQueryContext();
 			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-			JsonPath jsonPath = new PathBuilder(resourceRegistry, moduleContext.getTypeParser()).build(path);
+			PathBuilder pathBuilder = new PathBuilder(resourceRegistry, moduleContext.getTypeParser());
+			JsonPath jsonPath = pathBuilder.build(path, queryContext);
 
 			// check no repository with that path
 			if (jsonPath == null) {
 				// check there are children to display
-				QueryContext queryContext = requestContext.getQueryContext();
 				String requestPath = requestContext.getPath();
 				List<String> pathList = list(requestPath, queryContext);
 				boolean accepted = path.equals("/") || !pathList.isEmpty();

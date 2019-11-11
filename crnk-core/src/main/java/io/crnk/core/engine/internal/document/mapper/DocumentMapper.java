@@ -27,7 +27,7 @@ public class DocumentMapper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentMapper.class);
 
-	private final ResourceFilterDirectory resourceFilterDirectory;
+	protected final ResourceFilterDirectory resourceFilterDirectory;
 
 	private ObjectNode jsonapi;
 
