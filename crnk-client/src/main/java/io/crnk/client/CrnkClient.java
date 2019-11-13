@@ -423,6 +423,7 @@ public class CrnkClient {
 			}
 		}
 
+		moduleRegistry.initOpposites(true); // client only has partial knowledge o
 		if (resourceInformation.getIdField() != null) {
 			resourceInformation.initNesting();
 		}
