@@ -156,7 +156,7 @@ anchor:runtimerepository[]
 ## Create repositories at runtime
 
 Repositories are usually created at compile-time, either by making use of the various annotations or a module
-such as the ´JpaModule´. However, the module API also allows the creation of repositories at runtime.
+such as the `JpaModule`. However, the module API also allows the creation of repositories at runtime.
 There are two complementary mechanisms in place to achieve this and outlined in the next two sections.
 
 NOTE: this feature is in incubation, more refinements are expected in upcoming releases.
@@ -165,18 +165,22 @@ NOTE: this feature is in incubation, more refinements are expected in upcoming r
 
 There are different possibilities to implement resources and repositories at runtime:
 
-1. `JsonAnyGetter` and `JsonAnySetter` annotations from Jackson allow to dynamically add properties to a resource.
-  Further implementing `ResourceTypeHolder` interface allows to also customize the type of a resource. Together it
-   allows the implementation of arbitrarily custom resources. Note that when manipulating with `ResourceTypeHolder`
-   it may also become necessary to register the resource with the `ResourceRegistry` as outlined in the
-   similar `Resourrce`example below.
-2. Create a matching resource class at runtime with a library like http://bytebuddy.net/#/ to follow the same
+1. Create resources classes at runtime with a library like http://bytebuddy.net/#/ to follow the same
   pattern as for any compile-time repository.
+
+2. `JsonAnyGetter` and `JsonAnySetter` annotations from Jackson allow to dynamically add properties to a resource.
+  Further implementing `ResourceTypeHolder` interface allows to manipulate the type of a resource. Together
+  the annotations allow the implementation of arbitrarily custom resources and type hierarchies. Note that
+  when making use of `ResourceTypeHolder` it may also become necessary to register the resource types
+  to the `ResourceRegistry` as `RegistryEntry` as outlined in the `Resource` example below.
+
 3. Make use of the `Resource` class. It is the generic JSON:API resource presentation within the Crnk engine.
 4. Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
   each `ResourceField` to specify how to read and write attributes (see below for `ResourceField` examples).
 
 The use of `JsonAnyGetter` and `JsonAnySetter` is simplest and recommended for most use case.
+An example is given in
+https://github.com/crnk-project/crnk-example/blob/master/crnk-example-service/src/main/java/io/crnk/example/service/model/PersonEntity.java[PersonEntity]
 Nevertheless the direct use of `Resource` opens up the possibility for more deeper control of everything:
 
 [source]

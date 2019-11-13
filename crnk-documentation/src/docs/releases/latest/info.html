@@ -115,24 +115,45 @@ More information and roadmap are available <a
     </li>
     <li>
         CrnkClient verifies the resourceClass of passed QuerySpec objects to ensure they match with the invoked
-        repositories. <b>Watch out for this change</b>, because it was easy to get this wrong and may never got noticed.
-        It makes no difference for empty QuerySpec, while it may led to ignored filtering, sorting and paging requests
-        (because the parameters referred to the wrong resource class).
+        repositories. <b>Watch out for this change</b>, because it was easy to get it wrong and may never got noticed.
+        The change makes no difference for empty QuerySpecs. But filtering, sorting and paging requests
+        get ignored with in-proper typing. The following example will now cause an exception:
+
+        <pre class="prettyprint">
+CrnkClient client = ...
+ResourceRepository&lt;Task,Long&gt;repository = client.getRepositoryForType(Task.class);
+repository.findAll(new QuerySpec(Project.class));
+</pre>
     </li>
-    <li>Attributes and relationships can no longer be named <code>meta</code> and <li>links</li> to
+    <li>Attributes and relationships can no longer be named <code>meta</code> and <code>links</code> to
         have a clear distinction to the JSON:API data structures.
     </li>
-    <li>Sorting for JPA entities with @EmbeddedId has been improved (<a
-            href="https://github.com/crnk-project/crnk-framework/issues/603">603</a>).
+    <li>Sorting for JPA entities with @EmbeddedId has been improved. For details see <a
+            href="https://github.com/crnk-project/crnk-framework/issues/603">603</a>.
     </li>
     <li>
-        Self URLs can now be written manually by letting resources hold link objects implementing SelfLinksInformation.
+        Self URLs can now be written manually by letting resources hold link objects implementing
+        SelfLinksInformation. The Crnk engine will no longer interfere if a self link is already
+        set for a resource or list.
+
+        <pre class="prettyprint">
+@JsonApiResource(type = "project")
+public class Project {
+
+    @JsonApiLinksInformation
+    private DefaultSelfLinksInformation links = new DefaultSelfLinksInformation();
+
+    ...
+}
+</pre>
     </li>
     <li>
-        @JsonProperty support is fixed to allow renaming of nested resource relationships.
+        @JsonProperty handling is fixed for nested resource. This means the relationships between
+        parent and child can also be renamed.
     </li>
     <li>
-        CrnkClient makes use of nested URLs to access nested resources, e.g. <code>/api/project/{projectId}/tasks/{taskId}</code>.
+        CrnkClient makes use of nested URLs to access nested resources, e.g.
+        <code>/api/project/{projectId}/tasks/{taskId}</code>.
     </li>
     <li>@JsonApiField.sortable and @JsonApiField.filterable allow to disable sorting and filtering for a field.
         A 400 BAD_REQUEST will be returned in case of a violation has been detected. See
@@ -148,13 +169,17 @@ More information and roadmap are available <a
         <a href="https://github.com/crnk-project/crnk-example/blob/master/crnk-example-service/src/main/java/io/crnk/example/service/model/PersonEntity.java">PersonEntity</a>
     </li>
     <li>
-        DataRoom filter logging has been refined to log with WARN.
+        DataRoom logging has been refined to log with WARN if access to a resource is prohibited.
+        HTTP errors continue to make use of <code>403 FORBIDDEN</code>.
     </li>
     <li>
-        JPA repositories are aware of @JsonApiRelationId annotations and optimize sorting and filtering accordingly.
+        JPA repositories are aware of @JsonApiRelationId annotations and optimize
+        sorting and filtering accordingly. If the id of a relationship is filtered or sorted, Crnk rather
+        makes direct use of the foreign key rather than joining to the foreign table.
     </li>
     <li>
-        JPA repositories will do a LEFT join when sorting a column on a related entity.
+        JPA repositories make use of LEFT join when sorting a column on a related entity. This prevents
+        the resources from getting omitted if they do not have such a related entity.
     </li>
     <li>Nested repositories can now span multiple levels, such as <code>/api/project/{projectId}/tasks/{taskId}/items/{itemId}</code>
     </li>
@@ -178,8 +203,10 @@ More information and roadmap are available <a
         useful in more dynamic settings where inheritance is involved and a repository likes to manipulate
         the type of its resources without having to work with strongly-typed resource classes. Together
         with @JsonAnyGetter and @JsonAnySetter it allows for highly dynamic, non-compile-time repository
-        implementations similar to the direct use of the Resource class. For information is available
-        in the documentation.
+        implementations similar but simpler than the direct use of the <code>Resource</code> class.
+        For information is available in the <a
+            href="http://www.crnk.io/releases/stable/documentation/#_create_repositories_at_runtime">
+        documentation</a>.
     </li>
 </ul>
 
