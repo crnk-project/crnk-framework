@@ -159,7 +159,7 @@ public class OASGenerator {
 
   private boolean isJsonApiResource(MetaResource metaResource) {
     return metaResource.getSuperType() == null
-        && !metaResource.getResourceType().startsWith("meta/")
+        && !metaResource.getImplementationClassName().startsWith("io.crnk.meta")
         && metaResource.getRepository() != null
         && metaResource.getRepository().isExposed();
   }

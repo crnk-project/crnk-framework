@@ -1,9 +1,5 @@
 package io.crnk.gen.openapi;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.inmemory.InMemoryHttpAdapter;
 import io.crnk.core.boot.CrnkBoot;
@@ -23,6 +19,10 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
   private MetaModule metaModule;
@@ -87,8 +87,6 @@ public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
 
     // Ensure responses satisfy minimal requirements for JSON:API compliance
     for (Map.Entry<String, PathItem> entry : openApi.getPaths().entrySet()) {
-    	if(entry.getKey().contains("meta/"))
-    		continue; // FIXME
       assertJsonAPICompliantPath(entry.getKey(), entry.getValue());
       assertResponsesSorted(entry.getValue());
     }
