@@ -49,6 +49,7 @@ public class ResourcesPost extends AbstractResourceOperation implements OASOpera
         .description("Created")
         .content(new Content()
             .addMediaType("application/vnd.api+json",
+                // TODO: Adjust response based on metaResource.getRepository().isBulk()
                 new MediaType().schema(new ResourceResponseSchema(metaResource).$ref()))));
     return operation.responses(apiResponsesFromMap(responses));
   }

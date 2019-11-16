@@ -6,7 +6,7 @@ import io.crnk.test.mock.repository.TaskRepository;
 
 public class SimpleTestModule implements Module {
 
-	private SimpleTaskRepository tasks = new SimpleTaskRepository();
+	private SimpleTaskRepository tasks = new SimpleTaskRepository(SimpleTask.class);
 
 	@Override
 	public String getModuleName() {
