@@ -136,7 +136,7 @@ public class NestedResourceTest extends ControllerTestBase {
 	@Test
 	public void checkOneFieldPath() {
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		FieldPath path = (FieldPath) pathBuilder.build("test/b/oneNested/value");
+		FieldPath path = (FieldPath) pathBuilder.build("test/b/oneNested/value", queryContext);
 		Assert.assertEquals("oneNested", path.getRootEntry().getResourceInformation().getResourceType());
 		Assert.assertEquals("b", path.getId());
 		Assert.assertEquals("value", path.getField().getJsonName());
@@ -146,7 +146,7 @@ public class NestedResourceTest extends ControllerTestBase {
 	@Test
 	public void checkManyFieldPath() {
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		FieldPath path = (FieldPath) pathBuilder.build("test/b/manyNested");
+		FieldPath path = (FieldPath) pathBuilder.build("test/b/manyNested", queryContext);
 		Assert.assertEquals("test", path.getRootEntry().getResourceInformation().getResourceType());
 		Assert.assertEquals("b", path.getId());
 		Assert.assertEquals("manyNested", path.getField().getJsonName());
@@ -155,7 +155,7 @@ public class NestedResourceTest extends ControllerTestBase {
 	@Test
 	public void checkOneNestedResourcePath() {
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		ResourcePath path = (ResourcePath) pathBuilder.build("test/b/oneNested");
+		ResourcePath path = (ResourcePath) pathBuilder.build("test/b/oneNested", queryContext);
 		Assert.assertEquals("oneNested", path.getRootEntry().getResourceInformation().getResourceType());
 
 		String id = (String) path.getId();
@@ -165,7 +165,7 @@ public class NestedResourceTest extends ControllerTestBase {
 	@Test
 	public void checkManyNestedResourcePath() {
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		ResourcePath path = (ResourcePath) pathBuilder.build("test/b/manyNested/a");
+		ResourcePath path = (ResourcePath) pathBuilder.build("test/b/manyNested/a", queryContext);
 		Assert.assertEquals("manyNested", path.getRootEntry().getResourceInformation().getResourceType());
 
 		ManyNestedId id = (ManyNestedId) path.getId();
@@ -176,7 +176,7 @@ public class NestedResourceTest extends ControllerTestBase {
 	@Test
 	public void checkOneRelationshipPath() {
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		RelationshipsPath path = (RelationshipsPath) pathBuilder.build("test/b/oneNested/relationships/related");
+		RelationshipsPath path = (RelationshipsPath) pathBuilder.build("test/b/oneNested/relationships/related", queryContext);
 		Assert.assertEquals("oneNested", path.getRootEntry().getResourceInformation().getResourceType());
 
 		String id = (String) path.getId();
@@ -188,7 +188,7 @@ public class NestedResourceTest extends ControllerTestBase {
 	@Test
 	public void checkManyNestedRelationshipPath() {
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		RelationshipsPath path = (RelationshipsPath) pathBuilder.build("test/b/manyNested/a/relationships/related");
+		RelationshipsPath path = (RelationshipsPath) pathBuilder.build("test/b/manyNested/a/relationships/related", queryContext);
 		Assert.assertEquals("manyNested", path.getRootEntry().getResourceInformation().getResourceType());
 
 		ManyNestedId id = (ManyNestedId) path.getId();
@@ -202,7 +202,7 @@ public class NestedResourceTest extends ControllerTestBase {
 	@Test
 	public void checkOneNestedFieldPath() {
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		FieldPath path = (FieldPath) pathBuilder.build("test/b/oneNested/related");
+		FieldPath path = (FieldPath) pathBuilder.build("test/b/oneNested/related", queryContext);
 		Assert.assertEquals("oneNested", path.getRootEntry().getResourceInformation().getResourceType());
 
 		String id = (String) path.getId();
@@ -213,7 +213,7 @@ public class NestedResourceTest extends ControllerTestBase {
 	@Test
 	public void checkManyNestedFieldPath() {
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		FieldPath path = (FieldPath) pathBuilder.build("test/b/manyNested/a/related");
+		FieldPath path = (FieldPath) pathBuilder.build("test/b/manyNested/a/related", queryContext);
 		Assert.assertEquals("manyNested", path.getRootEntry().getResourceInformation().getResourceType());
 
 		ManyNestedId id = (ManyNestedId) path.getId();
@@ -233,7 +233,7 @@ public class NestedResourceTest extends ControllerTestBase {
 		resource.getRelationships().put("related", relationship);
 		Document document = new Document();
 		document.setData(Nullable.of(resource));
-		JsonPath path = pathBuilder.build("test/b/oneNested");
+		JsonPath path = pathBuilder.build("test/b/oneNested", queryContext);
 
 		QuerySpecAdapter queryAdapter = container.toQueryAdapter(new QuerySpec(ManyNestedResource.class));
 		Controller postController = boot.getControllerRegistry().getController(path, HttpMethod.POST.toString());
@@ -245,7 +245,7 @@ public class NestedResourceTest extends ControllerTestBase {
 
 		// PATCH resource
 		document.setData(Nullable.of(createdResource));
-		path = pathBuilder.build("test/b/oneNested");
+		path = pathBuilder.build("test/b/oneNested", queryContext);
 		Assert.assertNotNull(path);
 		createdResource.setAttribute("value", toJson("valueB"));
 		Controller patchController = boot.getControllerRegistry().getController(path, HttpMethod.PATCH.toString());
@@ -297,7 +297,7 @@ public class NestedResourceTest extends ControllerTestBase {
 		child.setId("b");
 		Document document = new Document();
 		document.setData(Nullable.of(child));
-		JsonPath childPath = pathBuilder.build("test/b/oneNested");
+		JsonPath childPath = pathBuilder.build("test/b/oneNested", queryContext);
 
 		QuerySpecAdapter queryAdapter = container.toQueryAdapter(new QuerySpec(ManyNestedResource.class));
 		Controller postController = boot.getControllerRegistry().getController(childPath, HttpMethod.POST.toString());
@@ -313,7 +313,7 @@ public class NestedResourceTest extends ControllerTestBase {
 		grandchild.setId("b");
 		document = new Document();
 		document.setData(Nullable.of(grandchild));
-		response = postController.handleAsync(pathBuilder.build("test/b/oneNested/oneGrandchild"),
+		response = postController.handleAsync(pathBuilder.build("test/b/oneNested/oneGrandchild", queryContext),
 								   queryAdapter, document).get();
 		Resource createdGrandchild = response.getDocument().getSingleData().get();
 		Assert.assertEquals("http://127.0.0.1/test/b/oneNested/oneGrandchild", createdGrandchild.getLinks().get("self").asText());
@@ -321,7 +321,7 @@ public class NestedResourceTest extends ControllerTestBase {
 
 		// PATCH resource
 		document.setData(Nullable.of(createdGrandchild));
-		JsonPath path = pathBuilder.build("test/b/oneNested/oneGrandchild");
+		JsonPath path = pathBuilder.build("test/b/oneNested/oneGrandchild", queryContext);
 		Assert.assertNotNull(path);
 		createdGrandchild.setAttribute("value", toJson("valueB"));
 		Controller patchController = boot.getControllerRegistry().getController(path, HttpMethod.PATCH.toString());
@@ -378,7 +378,7 @@ public class NestedResourceTest extends ControllerTestBase {
 		resource.getRelationships().put("related", relationship);
 		Document document = new Document();
 		document.setData(Nullable.of(resource));
-		JsonPath path = pathBuilder.build("test/b/manyNested");
+		JsonPath path = pathBuilder.build("test/b/manyNested", queryContext);
 
 		QuerySpecAdapter queryAdapter = container.toQueryAdapter(new QuerySpec(ManyNestedResource.class));
 		Controller postController = boot.getControllerRegistry().getController(path, HttpMethod.POST.toString());
@@ -390,7 +390,7 @@ public class NestedResourceTest extends ControllerTestBase {
 
 		// PATCH resource
 		document.setData(Nullable.of(createdResource));
-		path = pathBuilder.build("test/b/manyNested/a");
+		path = pathBuilder.build("test/b/manyNested/a", queryContext);
 		Assert.assertNotNull(path);
 		createdResource.setAttribute("value", toJson("valueB"));
 		Controller patchController = boot.getControllerRegistry().getController(path, HttpMethod.PATCH.toString());
@@ -442,7 +442,7 @@ public class NestedResourceTest extends ControllerTestBase {
 		child.setId("b-a");
 		Document document = new Document();
 		document.setData(Nullable.of(child));
-		JsonPath childPath = pathBuilder.build("test/b/manyNested");
+		JsonPath childPath = pathBuilder.build("test/b/manyNested", queryContext);
 
 		QuerySpecAdapter queryAdapter = container.toQueryAdapter(new QuerySpec(ManyNestedResource.class));
 		Controller postController = boot.getControllerRegistry().getController(childPath, HttpMethod.POST.toString());
@@ -458,7 +458,7 @@ public class NestedResourceTest extends ControllerTestBase {
 		grandchild.setId("b-a-c");
 		document = new Document();
 		document.setData(Nullable.of(grandchild));
-		JsonPath grandchildPath = pathBuilder.build("test/b/manyNested/a/manyGrandchildren");
+		JsonPath grandchildPath = pathBuilder.build("test/b/manyNested/a/manyGrandchildren", queryContext);
 
 		response = postController.handleAsync(grandchildPath, queryAdapter, document).get();
 		Assert.assertEquals(HttpStatus.CREATED_201, response.getHttpStatus().intValue());
@@ -468,7 +468,7 @@ public class NestedResourceTest extends ControllerTestBase {
 
 		// PATCH resource
 		document.setData(Nullable.of(createdGrandchild));
-		grandchildPath = pathBuilder.build("test/b/manyNested/a/manyGrandchildren/c");
+		grandchildPath = pathBuilder.build("test/b/manyNested/a/manyGrandchildren/c", queryContext);
 		Assert.assertNotNull(grandchildPath);
 		createdGrandchild.setAttribute("value", toJson("valueC"));
 		Controller patchController = boot.getControllerRegistry().getController(grandchildPath, HttpMethod.PATCH.toString());

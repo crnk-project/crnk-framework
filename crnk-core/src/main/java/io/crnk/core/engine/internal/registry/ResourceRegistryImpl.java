@@ -104,6 +104,11 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
         return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
     }
 
+    @Override
+    public int getLatestVersion() {
+        return rootPart.getLatestVersion();
+    }
+
 
     public Optional<Class<?>> getResourceClass(Object resource) {
         return getResourceClass(resource.getClass());

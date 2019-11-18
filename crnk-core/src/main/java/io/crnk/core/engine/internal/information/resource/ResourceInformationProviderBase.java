@@ -11,6 +11,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
@@ -150,6 +151,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         fieldBuilder.jsonIncludeStrategy(getJsonIncludeStrategy(attributeDesc));
         fieldBuilder.serializeType(getSerializeType(attributeDesc, fieldType));
         fieldBuilder.relationshipRepositoryBehavior(getRelationshipRepositoryBehavior(attributeDesc));
+        fieldBuilder.versionRange(getVersionRange(attributeDesc));
 
         Type genericType;
         if (useFieldType(attributeDesc)) {
@@ -202,6 +204,16 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 
             fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc, idAttribute != null));
         }
+    }
+
+    protected VersionRange getVersionRange(BeanAttributeInformation attributeDesc) {
+        for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+            Optional<VersionRange> versionRange = fieldInformationProvider.getVersionRange(attributeDesc);
+            if (versionRange.isPresent()) {
+                return versionRange.get();
+            }
+        }
+        return VersionRange.UNBOUNDED;
     }
 
     protected RelationshipRepositoryBehavior getRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {

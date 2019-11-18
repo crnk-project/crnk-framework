@@ -124,7 +124,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase 
 		resource.getRelationships().put("related", relationship);
 		Document document = new Document();
 		document.setData(Nullable.of(resource));
-		JsonPath path = pathBuilder.build("/testA");
+		JsonPath path = pathBuilder.build("/testA", queryContext);
 
 		QuerySpecAdapter queryAdapter = container.toQueryAdapter(new QuerySpec(TestResourceB.class));
 		Controller postController = boot.getControllerRegistry().getController(path, HttpMethod.POST.toString());
@@ -136,7 +136,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase 
 
 		// PATCH resource
 		document.setData(Nullable.of(createdResource));
-		path = pathBuilder.build("/testA/b");
+		path = pathBuilder.build("/testA/b", queryContext);
 		createdResource.setAttribute("value", toJson("valueB"));
 		Controller patchController = boot.getControllerRegistry().getController(path, HttpMethod.PATCH.toString());
 		response = patchController.handleAsync(path, queryAdapter, document).get();

@@ -39,7 +39,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Task.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("name");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(String.class, spec.getValueType());
         Assert.assertEquals(jsonPath, spec.getAttributePath());
     }
@@ -49,7 +49,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Task.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("id");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(Long.class, spec.getValueType());
         Assert.assertEquals(jsonPath, spec.getAttributePath());
     }
@@ -60,7 +60,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Project.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("data", "data");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(String.class, spec.getValueType());
         Assert.assertEquals(jsonPath, spec.getAttributePath());
     }
@@ -71,7 +71,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Project.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("data", "priorities", "foo");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(Integer.class, spec.getValueType());
         Assert.assertEquals(jsonPath, spec.getAttributePath());
     }
@@ -81,7 +81,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Task.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("project");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(Project.class, spec.getValueType());
         Assert.assertEquals(jsonPath, spec.getAttributePath());
     }
@@ -92,7 +92,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         List<String> jsonPath = Arrays.asList("doesNotExists");
 
         try {
-            resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+            resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
             Assert.fail();
         } catch (BadRequestException e) {
             // ok
@@ -107,7 +107,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         resolver.setAllowUnknownAttributes(true);
         List<String> jsonPath = Arrays.asList("doesNotExists");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(jsonPath, spec.getAttributePath());
         Assert.assertEquals(Object.class, spec.getValueType());
     }
@@ -117,7 +117,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Schedule.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("description");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JSON, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JSON, "test", queryContext);
         Assert.assertEquals(Arrays.asList("desc"), spec.getAttributePath());
         Assert.assertEquals(String.class, spec.getValueType());
     }
@@ -127,7 +127,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Schedule.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("desc");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(Arrays.asList("description"), spec.getAttributePath());
         Assert.assertEquals(String.class, spec.getValueType());
     }
@@ -137,7 +137,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Schedule.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("desc");
 
-        resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JSON, "test");
+        resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JSON, "test", queryContext);
     }
 
     @Test
@@ -145,7 +145,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Task.class).getResourceInformation();
         List<String> jsonPath = Arrays.asList("project", "id");
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(Long.class, spec.getValueType());
         Assert.assertEquals(jsonPath, spec.getAttributePath());
     }
@@ -155,7 +155,7 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
         List<String> jsonPath = Arrays.asList("project", "includedTask");
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Task.class).getResourceInformation();
 
-        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test");
+        QueryPathSpec spec = resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
         Assert.assertEquals(Task.class, spec.getValueType());
         Assert.assertEquals(jsonPath, spec.getAttributePath());
     }

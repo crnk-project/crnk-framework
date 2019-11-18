@@ -3,6 +3,7 @@ package io.crnk.validation.internal;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.validation.ValidationModule;
@@ -27,6 +28,7 @@ public class ConstraintViolationImplTest {
     private CrnkBoot boot;
 
     private ConstraintViolationImpl violation;
+    private QueryContext queryContext = new QueryContext().setRequestVersion(0);
 
     @Before
     public void setup() {
@@ -48,7 +50,7 @@ public class ConstraintViolationImplTest {
 
         ResourceRegistry resourceRegistry = boot.getResourceRegistry();
 
-        violation = ConstraintViolationImpl.fromError(resourceRegistry, errorData);
+        violation = ConstraintViolationImpl.fromError(resourceRegistry, errorData, queryContext);
     }
 
     @Test

@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.http;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -18,42 +15,46 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 
+import java.util.Map;
+import java.util.Set;
+
 public class JsonApiRequestProcessorHelper {
 
-	private Module.ModuleContext moduleContext;
+    private Module.ModuleContext moduleContext;
 
-	public JsonApiRequestProcessorHelper(Module.ModuleContext moduleContext) {
-		this.moduleContext = moduleContext;
-	}
+    public JsonApiRequestProcessorHelper(Module.ModuleContext moduleContext) {
+        this.moduleContext = moduleContext;
+    }
 
-	public JsonPath getJsonPath(HttpRequestContext requestContext) {
-		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		TypeParser typeParser = moduleContext.getTypeParser();
-		PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		String path = requestContext.getPath();
-		return pathBuilder.build(path);
-	}
+    public JsonPath getJsonPath(HttpRequestContext requestContext) {
+        ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+        TypeParser typeParser = moduleContext.getTypeParser();
 
-	public QueryAdapter toQueryAdapter(Map<String, Set<String>> parameters, JsonPath jsonPath, QueryContext queryContext) {
-		ResourceInformation resourceInformation = getRequestedResource(jsonPath);
-		QueryAdapterBuilder queryAdapterBuilder = moduleContext.getModuleRegistry().getQueryAdapterBuilder();
-		return queryAdapterBuilder.build(resourceInformation, parameters, queryContext);
-	}
+        PathBuilder pathBuilder = new PathBuilder(resourceRegistry, typeParser);
+        String path = requestContext.getPath();
+        QueryContext queryContext = requestContext.getQueryContext();
+        return pathBuilder.build(path, queryContext);
+    }
+
+    public QueryAdapter toQueryAdapter(Map<String, Set<String>> parameters, JsonPath jsonPath, QueryContext queryContext) {
+        ResourceInformation resourceInformation = getRequestedResource(jsonPath);
+        QueryAdapterBuilder queryAdapterBuilder = moduleContext.getModuleRegistry().getQueryAdapterBuilder();
+        return queryAdapterBuilder.build(resourceInformation, parameters, queryContext);
+    }
 
 
-	protected ResourceInformation getRequestedResource(JsonPath jsonPath) {
-		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		RegistryEntry registryEntry = jsonPath.getRootEntry();
+    protected ResourceInformation getRequestedResource(JsonPath jsonPath) {
+        ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+        RegistryEntry registryEntry = jsonPath.getRootEntry();
 
-		ResourceField field = (jsonPath instanceof RelationshipsPath) ? ((RelationshipsPath) jsonPath).getRelationship()
-				: jsonPath instanceof FieldPath ? ((FieldPath) jsonPath).getField() : null;
-		if (field != null) {
-			String oppositeResourceType = field.getOppositeResourceType();
-			return resourceRegistry.getEntry(oppositeResourceType).getResourceInformation();
-		}
-		else {
-			return registryEntry.getResourceInformation();
-		}
-	}
+        ResourceField field = (jsonPath instanceof RelationshipsPath) ? ((RelationshipsPath) jsonPath).getRelationship()
+                : jsonPath instanceof FieldPath ? ((FieldPath) jsonPath).getField() : null;
+        if (field != null) {
+            String oppositeResourceType = field.getOppositeResourceType();
+            return resourceRegistry.getEntry(oppositeResourceType).getResourceInformation();
+        } else {
+            return registryEntry.getResourceInformation();
+        }
+    }
 
 }

@@ -10,6 +10,7 @@ import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.ControllerContext;
@@ -21,6 +22,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.module.ModuleRegistry;
@@ -44,7 +46,8 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 	public ClientDocumentMapper(ModuleRegistry moduleRegistry, ObjectMapper objectMapper, PropertiesProvider
 			propertiesProvider) {
-		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, null, new ImmediateResultFactory(), null, true);
+		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(),
+				new ImmediateResultFactory(), null, true);
 		this.moduleRegistry = moduleRegistry;
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
 		this.typeParser = moduleRegistry.getTypeParser();
@@ -53,7 +56,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 	@Override
 	protected ResourceMapper newResourceMapper(final DocumentMapperUtil util, boolean client, ObjectMapper objectMapper) {
-		return new ResourceMapper(util, client, objectMapper, null) {
+		return new ResourceMapper(util, client, objectMapper, resourceFilterDirectory) {
 
 			@Override
 			protected void setRelationship(Resource resource, ResourceField field, Object entity,
@@ -123,7 +126,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 		this.proxyFactory = proxyFactory;
 	}
 
-	public Object fromDocument(Document document, boolean getList) {
+	public Object fromDocument(Document document, boolean getList, QueryContext queryContext) {
 		ControllerContext controllerContext = new ControllerContext(moduleRegistry, () -> this);
 		ClientResourceUpsert upsert = new ClientResourceUpsert(proxyFactory);
 		upsert.init(controllerContext);
@@ -137,14 +140,14 @@ public class ClientDocumentMapper extends DocumentMapper {
 		List<Resource> included = document.getIncluded();
 		List<Resource> data = document.getCollectionData().get();
 
-		List<Object> dataObjects = upsert.allocateResources(data);
+		List<Object> dataObjects = upsert.allocateResources(data, queryContext);
 		if (included != null) {
-			upsert.allocateResources(included);
+			upsert.allocateResources(included, queryContext);
 		}
 
-		upsert.setRelations(data);
+		upsert.setRelations(data, queryContext);
 		if (included != null) {
-			upsert.setRelations(included);
+			upsert.setRelations(included, queryContext);
 		}
 
 		if (getList) {

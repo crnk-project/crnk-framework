@@ -82,7 +82,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 		List<String> values = headers.get(name);
 		Assert.assertNotNull(values);
 
-		Assert.assertTrue(values.contains(value));
+		Assert.assertTrue(values.toString(), values.contains(value));
 	}
 
 	/**

@@ -61,6 +61,7 @@ public class ResourcePatchController extends ResourceUpsert {
 		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, registryEntry);
 		DocumentMappingConfig mappingConfig = context.getMappingConfig();
 		DocumentMapper documentMapper = context.getDocumentMapper();
+		QueryContext queryContext = queryAdapter.getQueryContext();
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository();
 		return resourceRepository
@@ -71,7 +72,7 @@ public class ResourcePatchController extends ResourceUpsert {
 					resourceInformation.verify(existingEntity, requestDocument);
 					return documentMapper.toDocument(existingResponse, queryAdapter, mappingConfig)
 							.map(it -> it.getSingleData().get())
-							.doWork(existing -> mergeNestedAttribute(existing, requestResource, resourceInformation))
+							.doWork(existing -> mergeNestedAttribute(existing, requestResource, queryContext, resourceInformation))
 							.map(it -> existingEntity);
 				})
 				.merge(existingEntity -> applyChanges(registryEntry, existingEntity, requestResource, queryAdapter))
@@ -119,7 +120,7 @@ public class ResourcePatchController extends ResourceUpsert {
 				.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
 	}
 
-	private void mergeNestedAttribute(Resource existingResource, Resource requestResource, ResourceInformation resourceInformation) {
+	private void mergeNestedAttribute(Resource existingResource, Resource requestResource, QueryContext queryContext, ResourceInformation resourceInformation) {
 		// extract current attributes from findOne without any manipulation by query params (such as sparse fieldsets)
 		ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 			@Override
@@ -144,7 +145,7 @@ public class ResourcePatchController extends ResourceUpsert {
 				}
 
 				// walk the source map and apply target values from request
-				updateValues(attributesToUpdate, attributesFromRequest, resourceInformation, null);
+				updateValues(attributesToUpdate, attributesFromRequest, resourceInformation, queryContext, null);
 				Map<String, JsonNode> upsertedAttributes = new HashMap<>();
 				for (Map.Entry<String, Object> entry : attributesToUpdate.entrySet()) {
 					JsonNode value = objectMapper.valueToTree(entry.getValue());
@@ -181,8 +182,9 @@ public class ResourcePatchController extends ResourceUpsert {
 
 	}
 
-	private void updateValues(Map<String, Object> source, Map<String, Object> updates, ResourceInformation resourceInformation, PatchStrategy patchStrategy) {
+	private void updateValues(Map<String, Object> source, Map<String, Object> updates, ResourceInformation resourceInformation, QueryContext queryContext, PatchStrategy patchStrategy) {
 
+		int requestVersion = queryContext.getRequestVersion();
 		for (Map.Entry<String, Object> entry : updates.entrySet()) {
 			String fieldName = entry.getKey();
 			Object updatedValue = entry.getValue();
@@ -192,7 +194,7 @@ public class ResourcePatchController extends ResourceUpsert {
 
 				// we don't have yet ResourceFields for nested resource, make use of root patchStrategy instead
 				if (patchStrategy == null) {
-					ResourceField field = resourceInformation.findFieldByName(fieldName);
+					ResourceField field = resourceInformation.findFieldByJsonName(fieldName, requestVersion);
 					PreconditionUtil.verify(field != null, "field %s not found", fieldName);
 					patchStrategy = field.getPatchStrategy();
 				}
@@ -207,7 +209,7 @@ public class ResourcePatchController extends ResourceUpsert {
 				}
 				else {
 					Object sourceMap = source.get(fieldName);
-					updateValues((Map<String, Object>) sourceMap, (Map<String, Object>) updatedValue, resourceInformation, patchStrategy);
+					updateValues((Map<String, Object>) sourceMap, (Map<String, Object>) updatedValue, resourceInformation, queryContext, patchStrategy);
 				}
 				continue;
 			}

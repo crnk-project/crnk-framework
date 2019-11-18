@@ -1,5 +1,6 @@
 package io.crnk.core.queryspec.mapper;
 
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.mock.models.Project;
@@ -17,6 +18,8 @@ import java.util.Set;
 public class DefaultQuerySpecUrlMapperDeserializerTest extends DefaultQuerySpecUrlMapperDeserializerTestBase {
 
 
+    private QueryContext queryContext = new QueryContext().setRequestVersion(0);
+
     @Before
     public void setup() {
         super.setup();
@@ -28,7 +31,7 @@ public class DefaultQuerySpecUrlMapperDeserializerTest extends DefaultQuerySpecU
     public void testDotNotationDisallowsBrackets() {
         Map<String, Set<String>> params = new HashMap<>();
         add(params, "filter[projects][tasks][name]", "test");
-        urlMapper.deserialize(taskInformation, params);
+        urlMapper.deserialize(taskInformation, params, queryContext);
     }
 
     @Test
@@ -36,7 +39,7 @@ public class DefaultQuerySpecUrlMapperDeserializerTest extends DefaultQuerySpecU
         Map<String, Set<String>> params = new HashMap<>();
         add(params, "filter[deleted]", "true");
         try {
-            urlMapper.deserialize(taskInformation, params);
+            urlMapper.deserialize(taskInformation, params, queryContext);
             Assert.fail();
         } catch (BadRequestException e) {
             Assert.assertEquals("path [deleted] is not filterable", e.getMessage());
@@ -48,7 +51,7 @@ public class DefaultQuerySpecUrlMapperDeserializerTest extends DefaultQuerySpecU
         Map<String, Set<String>> params = new HashMap<>();
         add(params, "sort", "deleted");
         try {
-            urlMapper.deserialize(taskInformation, params);
+            urlMapper.deserialize(taskInformation, params, queryContext);
             Assert.fail();
         } catch (BadRequestException e) {
             Assert.assertEquals("path [deleted] is not sortable", e.getMessage());
@@ -62,7 +65,7 @@ public class DefaultQuerySpecUrlMapperDeserializerTest extends DefaultQuerySpecU
         // note that there is both a type and an attribute on tasks called
         // projects
         add(params, "filter[projects][name]", "test");
-        QuerySpec querySpec = urlMapper.deserialize(taskInformation, params);
+        QuerySpec querySpec = urlMapper.deserialize(taskInformation, params, queryContext);
         Assert.assertEquals(Task.class, querySpec.getResourceClass());
         Assert.assertEquals(0, querySpec.getFilters().size());
         QuerySpec projectQuerySpec = querySpec.getQuerySpec(Project.class);
@@ -77,7 +80,7 @@ public class DefaultQuerySpecUrlMapperDeserializerTest extends DefaultQuerySpecU
         Map<String, Set<String>> params = new HashMap<>();
         add(params, "filter[projects]", "someValue");
         urlMapper.setIgnoreParseExceptions(true);
-        QuerySpec querySpec = urlMapper.deserialize(taskInformation, params);
+        QuerySpec querySpec = urlMapper.deserialize(taskInformation, params, queryContext);
         Assert.assertEquals(Task.class, querySpec.getResourceClass());
         Assert.assertEquals(Arrays.asList("projects"), querySpec.getFilters().get(0).getAttributePath());
         Assert.assertNull(querySpec.getQuerySpec(Project.class));

@@ -26,7 +26,7 @@ public class FieldPostControllerTest extends ControllerTestBase {
     @Test
     public void onValidRequestShouldAcceptIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks/1/project");
+        JsonPath jsonPath = pathBuilder.build("tasks/1/project", queryContext);
         FieldResourcePost sut = new FieldResourcePost();
         sut.init(controllerContext);
 
@@ -40,7 +40,7 @@ public class FieldPostControllerTest extends ControllerTestBase {
     @Test
     public void onRelationshipRequestShouldDenyIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
+        JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project", queryContext);
         FieldResourcePost sut = new FieldResourcePost();
         sut.init(controllerContext);
 
@@ -54,7 +54,7 @@ public class FieldPostControllerTest extends ControllerTestBase {
     @Test
     public void onNonRelationRequestShouldDenyIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks");
+        JsonPath jsonPath = pathBuilder.build("tasks", queryContext);
         FieldResourcePost sut = new FieldResourcePost();
         sut.init(controllerContext);
 
@@ -71,7 +71,7 @@ public class FieldPostControllerTest extends ControllerTestBase {
         Document newTaskDocument = new Document();
         newTaskDocument.setData(Nullable.of(createTask()));
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -89,7 +89,7 @@ public class FieldPostControllerTest extends ControllerTestBase {
         Document newProjectDocument = new Document();
         newProjectDocument.setData(Nullable.of(createProject()));
 
-        JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/project");
+        JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/project", queryContext);
         FieldResourcePost sut = new FieldResourcePost();
         sut.init(controllerContext);
 
@@ -122,7 +122,7 @@ public class FieldPostControllerTest extends ControllerTestBase {
         Document newTaskDocument = new Document();
         newTaskDocument.setData(Nullable.of(createTask()));
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -140,7 +140,7 @@ public class FieldPostControllerTest extends ControllerTestBase {
         Document newProjectDocument = new Document();
         newProjectDocument.setData(Nullable.of(createProject()));
 
-        JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/projects");
+        JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/projects", queryContext);
         FieldResourcePost sut = new FieldResourcePost();
         sut.init(controllerContext);
 

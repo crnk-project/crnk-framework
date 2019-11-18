@@ -86,7 +86,7 @@ public class ResourceIdControllerTest extends ControllerTestBase {
 		resource.getRelationships().put("testLookupAlways", new Relationship(schedule3Id));
 		Document newDocument = createDocument(resource);
 
-		JsonPath postPath = pathBuilder.build("/relationIdTest");
+		JsonPath postPath = pathBuilder.build("/relationIdTest", queryContext);
 
 		// WHEN POST
 		ResourcePostController sut = new ResourcePostController();
@@ -116,7 +116,7 @@ public class ResourceIdControllerTest extends ControllerTestBase {
 	}
 
 	private Resource checkPatchResource(Resource resource) {
-		JsonPath path = pathBuilder.build("/relationIdTest/" + resource.getId());
+		JsonPath path = pathBuilder.build("/relationIdTest/" + resource.getId(), queryContext);
 
 		resource.getRelationships().put("testLookupAlways", new Relationship(schedule2Id));
 		Document newDocument = createDocument(resource);
@@ -149,7 +149,7 @@ public class ResourceIdControllerTest extends ControllerTestBase {
 
 	private void checkPatchRelationship(Resource resource, ResourceIdentifier scheduleId) {
 
-		JsonPath path = pathBuilder.build("/relationIdTest/" + resource.getId() + "/relationships/testLookupAlways");
+		JsonPath path = pathBuilder.build("/relationIdTest/" + resource.getId() + "/relationships/testLookupAlways", queryContext);
 		Document newDocument = createDocument(scheduleId);
 
 		// WHEN PATCH

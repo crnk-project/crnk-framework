@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.CoreTestContainer;
@@ -13,6 +19,7 @@ import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.mock.models.ComplexPojo;
@@ -30,12 +37,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class ControllerTestBase {
 
@@ -55,6 +56,8 @@ public abstract class ControllerTestBase {
     protected TypeParser typeParser;
 
     protected DocumentMapper documentMapper;
+
+    protected QueryContext queryContext = new QueryContext().setRequestVersion(0);
 
     protected ModuleRegistry moduleRegistry;
 
@@ -136,7 +139,7 @@ public abstract class ControllerTestBase {
         data.setId("1");
         try {
             data.setAttribute("name", objectMapper.readTree("\"sample task\""));
-            data.setAttribute("data", objectMapper.readTree("\"asd\""));
+            data.setAttribute("category", objectMapper.readTree("\"asd\""));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
