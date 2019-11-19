@@ -14,7 +14,6 @@ public class PatchResource extends AbstractSchemaGenerator {
 
   public Schema schema() {
     return new ComposedSchema()
-        // TODO: One of, or a list of depending on metaResource.getRespository().isBulk()
         .allOf(
             Arrays.asList(
                 new ResourceReference(metaResource).$ref(),

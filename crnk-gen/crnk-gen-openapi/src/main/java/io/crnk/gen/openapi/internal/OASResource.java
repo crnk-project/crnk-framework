@@ -25,6 +25,7 @@ import io.crnk.gen.openapi.internal.responses.ResourcesResponse;
 import io.crnk.gen.openapi.internal.schemas.PatchResource;
 import io.crnk.gen.openapi.internal.schemas.PostResource;
 import io.crnk.gen.openapi.internal.schemas.PostResourceReference;
+import io.crnk.gen.openapi.internal.schemas.PostResources;
 import io.crnk.gen.openapi.internal.schemas.ResourceAttribute;
 import io.crnk.gen.openapi.internal.schemas.ResourceAttributes;
 import io.crnk.gen.openapi.internal.schemas.ResourcePatchAttributes;
@@ -95,6 +96,7 @@ public class OASResource {
     componentSchemas.put(new ResourceSchema(metaResource).getName(), new ResourceSchema(metaResource).schema());
     componentSchemas.put(new PatchResource(metaResource).getName(), new PatchResource(metaResource).schema());
     componentSchemas.put(new PostResource(metaResource).getName(), new PostResource(metaResource).schema());
+    componentSchemas.put(new PostResources(metaResource).getName(), new PostResources(metaResource).schema());
     componentSchemas.put(new ResourceResponseSchema(metaResource).getName(), new ResourceResponseSchema(metaResource).schema());
     componentSchemas.put(new ResourcesResponseSchema(metaResource).getName(), new ResourcesResponseSchema(metaResource).schema());
     componentSchemas.put(new ResourceReferenceResponseSchema(metaResource).getName(), new ResourceReferenceResponseSchema(metaResource).schema());
