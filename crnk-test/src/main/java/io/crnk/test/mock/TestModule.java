@@ -3,6 +3,7 @@ package io.crnk.test.mock;
 import io.crnk.core.module.Module;
 import io.crnk.core.repository.InMemoryResourceRepository;
 import io.crnk.test.mock.models.BulkTask;
+import io.crnk.test.mock.models.NoAccessTask;
 import io.crnk.test.mock.models.RelocatedTask;
 import io.crnk.test.mock.models.ResourceIdentifierBasedRelationshipResource;
 import io.crnk.test.mock.models.VersionedTask;
@@ -67,6 +68,7 @@ public class TestModule implements Module {
         context.addRepository(new ScheduleStatusRepositoryImpl());
         context.addRepository(new ReadOnlyTaskRepository());
         context.addRepository(new HistoricTaskRepository());
+		context.addRepository(new InMemoryResourceRepository<>(NoAccessTask.class));
         context.addRepository(new InMemoryResourceRepository<>(RelocatedTask.class));
         if (extended) {
             context.addRepository(new InMemoryResourceRepository<>(ResourceIdentifierBasedRelationshipResource.class));

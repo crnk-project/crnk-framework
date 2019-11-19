@@ -72,9 +72,10 @@ class OpenAPIGeneratorTestBase {
   }
 
   private static void assertOperationResponseCodes(Operation operation, List<String> codes) {
-  	if(operation == null){
-  		throw new IllegalStateException();
-	}
+    // Some operations will be null in cases where a JsonApiResource has postable, patchable,
+    // readable, deleteable set to false. In that case, do not perform any response checks
+    if(operation == null) { return; }
+
     ApiResponses responses = operation.getResponses();
     for (String code : codes) {
       Assert.assertTrue("Operation missing response code " + code, responses.containsKey(code));
