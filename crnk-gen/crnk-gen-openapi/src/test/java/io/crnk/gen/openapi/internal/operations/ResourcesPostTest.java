@@ -33,6 +33,13 @@ class ResourcesPostTest extends OperationsBaseTest {
   }
 
   @Test
+  void getDescriptionWhenRepositoryIsBulk() {
+    metaResource.getRepository().setBulk(true);
+    ResourcesPost resourcePost = new ResourcesPost(metaResource);
+    Assert.assertEquals("Create one (or more) ResourceName", resourcePost.getDescription());
+  }
+
+  @Test
   void operation() {
     Operation operation = new ResourcesPost(metaResource).operation();
     Assert.assertTrue(operation.getResponses().containsKey("201"));
