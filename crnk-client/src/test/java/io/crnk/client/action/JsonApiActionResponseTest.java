@@ -24,8 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import javax.swing.*;
-
 public class JsonApiActionResponseTest extends AbstractClientTest {
 
     protected ScheduleRepository scheduleRepository;

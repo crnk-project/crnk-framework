@@ -17,6 +17,11 @@ public enum QueryParameterType {
 	PAGE,
 
 	/**
+	 * Used as fallback to content negotiation with HTTP ACCEPT header
+	 */
+	VERSION,
+
+	/**
 	 * List of specified fields to include in models
 	 */
 	FIELDS,

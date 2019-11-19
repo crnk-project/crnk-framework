@@ -68,7 +68,7 @@ public class JsonApiUrlBuilder {
 
         QuerySpec querySpec = (QuerySpec) query;
         QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
-        urlBuilder.addQueryParameters(urlMapper.serialize(querySpec));
+        urlBuilder.addQueryParameters(urlMapper.serialize(querySpec, queryContext));
 
         return urlBuilder.toString();
     }

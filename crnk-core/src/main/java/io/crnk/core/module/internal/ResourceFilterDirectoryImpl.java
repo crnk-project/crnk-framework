@@ -66,6 +66,7 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
     @Override
     public FilterBehavior get(ResourceField field, HttpMethod method, QueryContext queryContext) {
+    	PreconditionUtil.verify(field != null, "field cannot be null");
         Map<Object, FilterBehavior> map = getCache(method, queryContext);
 
         FilterBehavior behavior = map.get(field);

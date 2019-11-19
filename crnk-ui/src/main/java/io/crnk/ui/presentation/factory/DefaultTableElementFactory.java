@@ -9,6 +9,7 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.ui.presentation.PresentationEnvironment;
 import io.crnk.ui.presentation.PresentationType;
 import io.crnk.ui.presentation.element.DataTableElement;
@@ -45,11 +46,11 @@ public class DefaultTableElementFactory implements PresentationElementFactory {
 			ArrayDeque<MetaAttribute> attributePath) {
 		MetaAttribute lastAttribute = attributePath.getLast();
 		MetaType type = lastAttribute.getType();
-		if(type == null){
+		if (type == null) {
 			return; // TODO support e.g. from other services
 		}
 
-		if (isIgnored(attributePath) || type.isCollection()) {
+		if (isIgnored(attributePath, env) || type.isCollection()) {
 			return;
 		}
 
@@ -64,8 +65,7 @@ public class DefaultTableElementFactory implements PresentationElementFactory {
 					buildColumn(env, columns, resource, filtersEnabled, sortingEnabled, nestedPath);
 				}
 			}
-		}
-		else {
+		} else {
 			PresentationEnvironment cellEnv = env.clone();
 			cellEnv.setAttributePath(attributePath);
 			cellEnv.setAcceptedTypes(Arrays.asList(PresentationType.CELL, PresentationType.DISPLAY));
@@ -98,8 +98,8 @@ public class DefaultTableElementFactory implements PresentationElementFactory {
 
 	}
 
-	private boolean isIgnored(ArrayDeque<MetaAttribute> attributePath) {
-		return attributePath.getLast().isVersion();
+	private boolean isIgnored(ArrayDeque<MetaAttribute> attributePath, PresentationEnvironment env) {
+		MetaAttribute last = attributePath.getLast();
+		return last.isVersion() || last instanceof MetaResourceField && !((MetaResourceField) last).getVersionRange().contains(env.getRequestVersion());
 	}
-
 }

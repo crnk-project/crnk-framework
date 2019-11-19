@@ -187,10 +187,11 @@ public class SecurityModule implements Module {
     @Override
     public void setupModule(ModuleContext context) {
         this.moduleContext = context;
-        context.addRepositoryFilter(new SecurityRepositoryFilter(this));
-        context.addResourceFilter(new SecurityResourceFilter(this, context));
 
         if (config != null) {
+            context.addRepositoryFilter(new SecurityRepositoryFilter(this));
+            context.addResourceFilter(new SecurityResourceFilter(this, context));
+
             if (config.isExposeRepositories()) {
                 context.addRepository(new RolePermissionRepository(this));
                 context.addRepository(new CallerPermissionRepository(this));

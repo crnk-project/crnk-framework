@@ -1,6 +1,7 @@
 package io.crnk.client;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -67,7 +68,7 @@ public class QuerySpecAllowUnknownAttributeClientTest extends AbstractClientTest
         parameterMap.put("sort", Collections.singleton("-unknownAttr"));
         ResourceInformation taskInformation = client.getRegistry().getEntry(Task.class).getResourceInformation();
         QuerySpecUrlMapper urlMapper = client.getUrlMapper();
-        QuerySpec querySpec = urlMapper.deserialize(taskInformation, parameterMap);
+        QuerySpec querySpec = urlMapper.deserialize(taskInformation, parameterMap, new QueryContext());
         Assert.assertEquals(1, querySpec.getFilters().size());
         FilterSpec filterSpec = querySpec.getFilters().get(0);
         Assert.assertEquals("unknownAttr", filterSpec.getAttributePath().get(0));

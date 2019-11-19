@@ -5,10 +5,12 @@ import java.util.List;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiVersion;
 import io.crnk.ui.presentation.annotation.PresentationFullTextSearchable;
 import io.crnk.ui.presentation.annotation.PresentationLabel;
 
 @JsonApiResource(type = "presentationProject")
+@JsonApiVersion(min = 1)
 public class PresentationProject {
 
 	@JsonApiId
@@ -18,6 +20,7 @@ public class PresentationProject {
 	@PresentationLabel
 	private String name;
 
+	@JsonApiVersion(min = 2)
 	private String description;
 
 	@JsonApiRelation(mappedBy = "project")

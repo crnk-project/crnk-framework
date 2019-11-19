@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.meta.MetaLookup;
@@ -33,12 +35,16 @@ public class PresentationManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PresentationManager.class);
 
+	private final HttpRequestContextProvider requestContextProvider;
+
 	private List<PresentationElementFactory> factories = new ArrayList<>();
 
 	private Supplier<List<PresentationService>> services;
 
-	public PresentationManager(Supplier<List<PresentationService>> services) {
+	public PresentationManager(Supplier<List<PresentationService>> services, HttpRequestContextProvider requestContextProvider) {
 		this.services = services;
+
+		this.requestContextProvider = requestContextProvider;
 
 		this.factories.add(new DefaultTableElementFactory());
 		this.factories.add(new DefaultExplorerFactory());
@@ -85,6 +91,11 @@ public class PresentationManager {
 		MetaLookup lookup = service.getLookup();
 		MetaResource resource = lookup.findElement(MetaResource.class, resourceMetaId);
 
+		int requestVersion = getRequestVersion();
+		if (!resource.getVersionRange().contains(requestVersion)) {
+			throw new ResourceNotFoundException("no presentation service found with name " + serviceName + " serving version " + requestVersion);
+		}
+
 		ResourceRef ref = new ResourceRef();
 		ref.service = service;
 		ref.resource = resource;
@@ -115,6 +126,7 @@ public class PresentationManager {
 		env.setType(resource);
 		env.setService(service);
 		env.setManager(this);
+		env.setRequestVersion(getRequestVersion());
 		return env;
 	}
 
@@ -142,8 +154,7 @@ public class PresentationManager {
 						map.put(element.getId(), element);
 					}
 				}
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				LOGGER.error("failed to retrieve meta data from " + service, e);
 			}
 		}
@@ -151,9 +162,15 @@ public class PresentationManager {
 	}
 
 	private boolean isIgnored(MetaResource resource) {
-		return resource.getResourceType().startsWith("meta/") && resource.getRepository() != null && resource.getRepository().isExposed();
+		int requestVersion = getRequestVersion();
+		return resource.getResourceType().startsWith("meta/") || resource.getRepository() == null ||
+				!resource.getRepository().isExposed() || !resource.getVersionRange().contains(requestVersion);
 	}
 
+	private int getRequestVersion() {
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+		return requestContext.getQueryContext().getRequestVersion();
+	}
 
 	private MenuElements createMenu() {
 		MenuElements menuElements = new MenuElements();

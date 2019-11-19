@@ -6,26 +6,27 @@ import java.util.Collection;
 
 public interface ResourceRegistryPart {
 
-	RegistryEntry addEntry(RegistryEntry entry);
+    RegistryEntry addEntry(RegistryEntry entry);
 
-	boolean hasEntry(Class<?> clazz);
+    boolean hasEntry(Class<?> clazz);
 
-	boolean hasEntry(Type type);
+    boolean hasEntry(Type type);
 
-	boolean hasEntry(String resourceType);
+    boolean hasEntry(String resourceType);
 
-	RegistryEntry getEntry(String resourceType);
+    RegistryEntry getEntry(String resourceType);
 
-	Collection<RegistryEntry> getEntries();
+    Collection<RegistryEntry> getEntries();
 
-	RegistryEntry getEntry(Class<?> clazz);
+    RegistryEntry getEntry(Class<?> clazz);
 
-	RegistryEntry getEntry(Type type);
+    RegistryEntry getEntry(Type type);
 
-	RegistryEntry getEntryByPath(String resourcePath);
+    RegistryEntry getEntryByPath(String resourcePath);
 
-	void addListener(ResourceRegistryPartListener listener);
+    void addListener(ResourceRegistryPartListener listener);
 
-	void removeListener(ResourceRegistryPartListener listener);
+    void removeListener(ResourceRegistryPartListener listener);
 
+    int getLatestVersion();
 }

@@ -44,6 +44,7 @@ public class CoreTestContainer {
         requestContextBase = Mockito.mock(HttpRequestContextBase.class);
         requestContext = new HttpRequestContextBaseAdapter(requestContextBase);
         queryContext = requestContext.getQueryContext();
+        queryContext.setRequestVersion(0);
         queryContext.setBaseUrl(boot.getServiceUrlProvider().getUrl());
 
         boot.boot();

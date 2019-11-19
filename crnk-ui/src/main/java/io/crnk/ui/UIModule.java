@@ -111,7 +111,7 @@ public class UIModule implements Module {
 				servicesSupplier = () -> Arrays.asList(new PresentationService("local", null, initMetaModule()));
 			}
 
-			presentationManager = new PresentationManager(servicesSupplier);
+			presentationManager = new PresentationManager(servicesSupplier, context.getModuleRegistry().getHttpRequestContextProvider());
 			config.getPresentationElementFactories().forEach(it -> presentationManager.registerFactory(it));
 
 			explorerRepository = new ExplorerRepository(presentationManager);

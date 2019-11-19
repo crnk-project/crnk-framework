@@ -102,7 +102,7 @@ public class ResourceInformation {
 	 */
 	private String superResourceType;
 
-	private Map<String, ResourceField> fieldByJsonName = new HashMap<>();
+	private Map<String, List<ResourceField>> fieldVersionsByJsonName = new HashMap<>();
 
 	private Map<String, ResourceField> fieldByUnderlyingName = new HashMap<>();
 
@@ -136,6 +136,8 @@ public class ResourceInformation {
 	private ResourceFieldAccessor parentIdAccessor;
 
 	private boolean singularNesting;
+
+	private VersionRange versionRange = VersionRange.UNBOUNDED;
 
 	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String superResourceType,
 			List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
@@ -244,8 +246,7 @@ public class ResourceInformation {
 						"nested identifiers can only have a single @JsonApiRelationId annotated field, got multiple for %s",
 						beanInformation.getImplementationClass());
 				parentAttribute = attribute;
-			}
-			else if (attribute.getAnnotation(JsonApiId.class).isPresent()) {
+			} else if (attribute.getAnnotation(JsonApiId.class).isPresent()) {
 				PreconditionUtil.verify(idAttribute == null,
 						"nested identifiers can only one attribute being annotated with @JsonApiId, got multiple for %s",
 						beanInformation.getImplementationClass());
@@ -277,8 +278,7 @@ public class ResourceInformation {
 			Optional<ResourceField> optParentField = relationshipFields.stream().filter(it -> it.hasIdField() && it.getIdName().equals(parentName)).findFirst();
 			if (optParentField.isPresent()) {
 				parentField = optParentField.get();
-			}
-			else {
+			} else {
 				PreconditionUtil.verify(parentAttribute.getName().endsWith("Id"),
 						"nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix or match in name with a @JsonApiRelationId annotated field on the resource, got %s for "
 								+ "%s",
@@ -319,6 +319,10 @@ public class ResourceInformation {
 		this.resourcePath = resourcePath;
 	}
 
+	public boolean hasJsonField(String jsonName) {
+		return fieldVersionsByJsonName.containsKey(jsonName);
+	}
+
 	class NestedIdAccessor implements ResourceFieldAccessor {
 
 		private final BeanAttributeInformation nestedField;
@@ -340,8 +344,7 @@ public class ResourceInformation {
 		public void setValue(Object object, Object fieldValue) {
 			if (idField.getType().isInstance(object)) {
 				nestedField.setValue(object, fieldValue);
-			}
-			else {
+			} else {
 				Object id = getIdField().getAccessor().getValue(object);
 				nestedField.setValue(id, fieldValue);
 			}
@@ -395,8 +398,7 @@ public class ResourceInformation {
 					try {
 						Object o = jsonAnyGetter.invoke(resource);
 						return (Map<String, Object>) o;
-					}
-					catch (IllegalAccessException | InvocationTargetException e) {
+					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
 								String.format("Exception while reading %s due to %s", resource, e.getMessage()), e);
 					}
@@ -406,8 +408,7 @@ public class ResourceInformation {
 				public void setValue(Object resource, String name, Object fieldValue) {
 					try {
 						jsonAnySetter.invoke(resource, name, fieldValue);
-					}
-					catch (IllegalAccessException | InvocationTargetException e) {
+					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
 								String.format("Exception while writting %s.%s=%s due to %s", resource, name, fieldValue,
 										e.getMessage()), e);
@@ -445,7 +446,11 @@ public class ResourceInformation {
 
 			for (ResourceField resourceField : fields) {
 				resourceField.setResourceInformation(this);
-				fieldByJsonName.put(resourceField.getJsonName(), resourceField);
+				String jsonName = resourceField.getJsonName();
+				List<ResourceField> list = fieldVersionsByJsonName.getOrDefault(jsonName, new ArrayList<>());
+				list.add(resourceField);
+				fieldVersionsByJsonName.put(jsonName, list);
+
 				fieldByUnderlyingName.put(resourceField.getUnderlyingName(), resourceField);
 
 				fieldAccessors.put(resourceField.getUnderlyingName(), resourceField.getAccessor());
@@ -458,8 +463,7 @@ public class ResourceInformation {
 					}
 				}
 			}
-		}
-		else {
+		} else {
 			this.relationshipFields = Collections.emptyList();
 			this.attributeFields = Collections.emptyList();
 			this.fieldAccessors = null;
@@ -493,8 +497,7 @@ public class ResourceInformation {
 
 		if (matches.isEmpty()) {
 			return null;
-		}
-		else if (matches.size() > 1) {
+		} else if (matches.size() > 1) {
 			throw new IllegalStateException("multiple " + type + " fields for + " + resourceClass.getCanonicalName());
 		}
 		return matches.get(0);
@@ -546,24 +549,49 @@ public class ResourceInformation {
 		return relationshipFields;
 	}
 
-	public ResourceField findFieldByName(String name) {
-		return fieldByJsonName.get(name);
-	}
-
 	public ResourceField findFieldByUnderlyingName(String name) {
 		return fieldByUnderlyingName.get(name);
 	}
 
-	public ResourceField findRelationshipFieldByName(String name) {
-		ResourceField resourceField = fieldByJsonName.get(name);
-		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? resourceField
-				: null;
+	/**
+	 * @return field that matches the request jsonName and version.
+	 */
+	public ResourceField findFieldByJsonName(String jsonName, int version) {
+		List<ResourceField> fieldVersions = fieldVersionsByJsonName.get(jsonName);
+		if (fieldVersions != null) {
+			for (ResourceField field : fieldVersions) {
+				if (field.getVersionRange().contains(version)) {
+					return field;
+				}
+			}
+		}
+		return null;
 	}
 
+	/**
+	 * @deprecated use {@link #findFieldByJsonName(String, int)} with version instead.
+	 */
+	@Deprecated
+	public ResourceField findFieldByName(String name) {
+		return findFieldByJsonName(name, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * @deprecated use {@link #findFieldByJsonName(String, int)} with version instead.
+	 */
+	@Deprecated
+	public ResourceField findRelationshipFieldByName(String name) {
+		ResourceField resourceField = findFieldByName(name);
+		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? resourceField : null;
+	}
+
+	/**
+	 * @deprecated use {@link #findFieldByJsonName(String, int)} with version instead.
+	 */
+	@Deprecated
 	public ResourceField findAttributeFieldByName(String name) {
-		ResourceField resourceField = fieldByJsonName.get(name);
-		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.ATTRIBUTE ? resourceField
-				: null;
+		ResourceField resourceField = findFieldByName(name);
+		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.ATTRIBUTE ? resourceField : null;
 	}
 
 	public ResourceField getMetaField() {
@@ -625,8 +653,7 @@ public class ResourceInformation {
 		String strId;
 		if (resourceOrId instanceof String) {
 			strId = (String) resourceOrId;
-		}
-		else {
+		} else {
 			strId = toIdString(resourceOrId);
 		}
 		return new ResourceIdentifier(strId, getResourceType());
@@ -713,5 +740,16 @@ public class ResourceInformation {
 	public ResourceFieldAccessor getParentIdAccessor() {
 		PreconditionUtil.verify(isNested(), "not a nested resource, cannot access nested id accessor");
 		return parentIdAccessor;
+	}
+
+	/**
+	 * @return version range this field is applicable to. See also {@link @JsonApiVersion}
+	 */
+	public VersionRange getVersionRange() {
+		return versionRange;
+	}
+
+	public void setVersionRange(VersionRange versionRange) {
+		this.versionRange = versionRange;
 	}
 }

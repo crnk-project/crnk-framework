@@ -9,8 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.servlet.internal.ServletRequestContext;
@@ -71,13 +73,16 @@ public class CrnkWebMvcTagsProvider extends DefaultWebMvcTagsProvider {
 	private Tag uri(final HttpServletRequest request) {
 		if (matchesPrefix(request)) {
 			ServletContext servletContext = request.getServletContext();
-			ServletRequestContext context = new ServletRequestContext(servletContext, request, null, boot.getWebPathPrefix());
+			HttpRequestContext context = new HttpRequestContextBaseAdapter(new ServletRequestContext(servletContext, request, null, boot.getWebPathPrefix()));
+			context.getQueryContext().initializeDefaults(boot.getResourceRegistry());
+
 			String path = context.getPath();
+
 
 			TypeParser typeParser = boot.getModuleRegistry().getTypeParser();
 			PathBuilder pathBuilder = new PathBuilder(boot.getResourceRegistry(), typeParser);
 
-			JsonPath jsonPath = pathBuilder.build(path);
+			JsonPath jsonPath = pathBuilder.build(path, context.getQueryContext());
 			if (jsonPath != null) {
 				URL baseUrl;
 				try {

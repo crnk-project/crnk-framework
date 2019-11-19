@@ -33,7 +33,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
     @Test
     public void onGivenRequestCollectionGetShouldAcceptIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("/tasks/");
+        JsonPath jsonPath = pathBuilder.build("/tasks/", queryContext);
         CollectionGetController sut = new CollectionGetController();
         sut.init(controllerContext);
 
@@ -47,7 +47,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
     @Test
     public void onGivenRequestCollectionGetShouldDenyIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("/tasks/2");
+        JsonPath jsonPath = pathBuilder.build("/tasks/2", queryContext);
         CollectionGetController sut = new CollectionGetController();
         sut.init(controllerContext);
 
@@ -62,7 +62,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
     public void onGivenRequestCollectionGetShouldHandleIt() {
         // GIVEN
 
-        JsonPath jsonPath = pathBuilder.build("/tasks/");
+        JsonPath jsonPath = pathBuilder.build("/tasks/", queryContext);
         CollectionGetController sut = new CollectionGetController();
         sut.init(controllerContext);
 
@@ -77,7 +77,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
     public void onGivenRequestCollectionWithIdsGetShouldHandleIt() {
         // GIVEN
 
-        JsonPath jsonPath = pathBuilder.build("/tasks/1,2");
+        JsonPath jsonPath = pathBuilder.build("/tasks/1,2", queryContext);
         CollectionGetController sut = new CollectionGetController();
         sut.init(controllerContext);
 
@@ -98,7 +98,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         data.setType("tasks");
         data.setId(Long.toString(taskId));
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -117,7 +117,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         Document newTaskBody = new Document();
         Resource data = createTask();
         newTaskBody.setData(Nullable.of(data));
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -135,7 +135,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         Document newProjectBody = new Document();
         data = createProject();
         newProjectBody.setData(Nullable.of(data));
-        JsonPath projectPath = pathBuilder.build("/projects");
+        JsonPath projectPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN -- adding a project
         Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, newProjectBody);
@@ -157,7 +157,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         data.setType("projects");
         data.setId(projectId.toString());
 
-        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/includedProjects");
+        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/includedProjects", queryContext);
         RelationshipsPostController sut = new RelationshipsPostController();
         sut.init(controllerContext);
 
@@ -173,7 +173,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         assertThat(projects.get(0).getId()).isEqualTo(projectId);
 
         // Given
-        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
+        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId, queryContext);
         ResourceGetController responseGetResp = new ResourceGetController();
         responseGetResp.init(controllerContext);
         QuerySpec queryParams1 = new QuerySpec(Task.class);
@@ -201,7 +201,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         newTaskBody.setData(Nullable.of(data));
         data.setType("tasks");
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -220,7 +220,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         data = createProject();
         newProjectBody.setData(Nullable.of(data));
 
-        JsonPath projectPath = pathBuilder.build("/projects");
+        JsonPath projectPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN -- adding a project
         Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, newProjectBody);
@@ -242,7 +242,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         data.setType("projects");
         data.setId(projectId.toString());
 
-        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/projects");
+        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/projects", queryContext);
         RelationshipsPostController sut =
                 new RelationshipsPostController();
         sut.init(controllerContext);
@@ -260,7 +260,7 @@ public class CollectionGetControllerTest extends ControllerTestBase {
         assertThat(projects.get(0).getId()).isNotNull();
 
         // Given
-        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
+        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId, queryContext);
         ResourceGetController responseGetResp = new ResourceGetController();
         responseGetResp.init(controllerContext);
         QuerySpec requestParams = new QuerySpec(Task.class);

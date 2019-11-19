@@ -1,6 +1,8 @@
 package io.crnk.core.engine.registry;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.VersionRange;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,12 +24,15 @@ public class DefaultResourceRegistryPartTest {
 
 		ResourceInformation resourceInformation = Mockito.mock(ResourceInformation.class);
 		Mockito.when(resourceInformation.getResourceType()).thenReturn("test");
+		Mockito.when(resourceInformation.getVersionRange()).thenReturn(VersionRange.UNBOUNDED);
 
 		ResourceInformation resourceInformation2 = Mockito.mock(ResourceInformation.class);
 		Mockito.when(resourceInformation2.getResourceType()).thenReturn("test2");
+		Mockito.when(resourceInformation2.getVersionRange()).thenReturn(VersionRange.of(1, 3));
 
 		ResourceInformation resourceInformation3 = Mockito.mock(ResourceInformation.class);
 		Mockito.when(resourceInformation3.getResourceType()).thenReturn("test3");
+		Mockito.when(resourceInformation3.getVersionRange()).thenReturn(VersionRange.UNBOUNDED);
 
 		entry = Mockito.mock(RegistryEntry.class);
 		Mockito.when(entry.getResourceInformation()).thenReturn(resourceInformation);
@@ -63,5 +68,14 @@ public class DefaultResourceRegistryPartTest {
 		part.addListener(listener);
 		part.addEntry(entry3);
 		Mockito.verify(listener, Mockito.times(2)).onChanged(Mockito.any(ResourceRegistryPartEvent.class));
+	}
+
+	@Test
+	public void checkLatestVersionComputation() {
+		part.addEntry(entry);
+		Assert.assertEquals(0, part.getLatestVersion());
+
+		part.addEntry(entry2);
+		Assert.assertEquals(3, part.getLatestVersion());
 	}
 }

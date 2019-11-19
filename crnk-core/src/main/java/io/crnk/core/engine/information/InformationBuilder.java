@@ -8,7 +8,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonIncludeStrategy;
@@ -65,6 +65,8 @@ public interface InformationBuilder {
 
         ResourceInformationBuilder pagingSpecType(Class<? extends PagingSpec> pagingSpecType);
 
+        ResourceInformationBuilder versionRange(VersionRange versionRange);
+
         ResourceInformation build();
 
     }
@@ -113,6 +115,8 @@ public interface InformationBuilder {
         FieldInformationBuilder patchStrategy(PatchStrategy patchStrategy);
 
         FieldInformationBuilder setMappedBy(boolean mappedBy);
+
+        FieldInformationBuilder versionRange(VersionRange versionRange);
     }
 
     RelationshipRepositoryInformationBuilder createRelationshipRepository(String sourceResourceType, String targeResourceType);

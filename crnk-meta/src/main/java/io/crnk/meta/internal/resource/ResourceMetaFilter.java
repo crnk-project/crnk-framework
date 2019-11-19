@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class ResourceMetaFilter implements MetaFilter {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceMetaFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceMetaFilter.class);
 
     private final MetaProviderContext context;
 
@@ -70,7 +70,7 @@ public class ResourceMetaFilter implements MetaFilter {
         Module.ModuleContext moduleContext = context.getModuleContext();
         RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(metaResource.getResourceType());
         ResourceInformation resourceInformation = entry.getResourceInformation();
-        ResourceField fieldInformation = resourceInformation.findFieldByName(field.getName());
+        ResourceField fieldInformation = resourceInformation.findFieldByUnderlyingName(field.getUnderlyingName());
 
         ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
         boolean readable =
@@ -163,7 +163,7 @@ public class ResourceMetaFilter implements MetaFilter {
                         throw new IllegalStateException(
                                 "failed to resolve opposite for field=" + field + ", oppositeTypeId=" + oppositeTypeId, e);
                     }
-                }else{
+                } else {
                     attr.setOwner(true);
                 }
             }
@@ -191,7 +191,7 @@ public class ResourceMetaFilter implements MetaFilter {
             MetaResourceBase parent = (MetaResourceBase) attr.getParent();
 
             ResourceInformation information = getResourceInformation(parent, true);
-            ResourceField field = information.findFieldByName(attr.getName());
+            ResourceField field = information.findFieldByUnderlyingName(attr.getUnderlyingName());
             PreconditionUtil.assertNotNull(attr.getName(), field);
 
             if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
@@ -200,33 +200,31 @@ public class ResourceMetaFilter implements MetaFilter {
                 Optional<MetaElement> optOppositeMeta = context.getMetaElement(oppositeId);
                 if (optOppositeMeta.isPresent()) {
 
-					MetaResource oppositeMeta = (MetaResource) optOppositeMeta.get();
+                    MetaResource oppositeMeta = (MetaResource) optOppositeMeta.get();
 
-					if (field.isCollection()) {
-						boolean isSet = Set.class.isAssignableFrom(field.getType());
-						String suffix = (isSet ? "$set" : "$list");
-						Optional<MetaElement> optMetaCollection = context.getMetaElement(oppositeId + suffix);
-						MetaCollectionType metaCollection;
-						if (optMetaCollection.isPresent()) {
-							metaCollection = (MetaCollectionType) optMetaCollection.get();
-						}
-						else {
-							metaCollection = isSet ? new MetaSetType() : new MetaListType();
-							metaCollection.setId(oppositeMeta.getId() + suffix);
-							metaCollection.setName(oppositeMeta.getName() + suffix);
-							metaCollection.setImplementationType(field.getGenericType());
-							metaCollection.setElementType(oppositeMeta);
-							partition.addElement(null, metaCollection);
-						}
-						attr.setType(metaCollection);
+                    if (field.isCollection()) {
+                        boolean isSet = Set.class.isAssignableFrom(field.getType());
+                        String suffix = (isSet ? "$set" : "$list");
+                        Optional<MetaElement> optMetaCollection = context.getMetaElement(oppositeId + suffix);
+                        MetaCollectionType metaCollection;
+                        if (optMetaCollection.isPresent()) {
+                            metaCollection = (MetaCollectionType) optMetaCollection.get();
+                        } else {
+                            metaCollection = isSet ? new MetaSetType() : new MetaListType();
+                            metaCollection.setId(oppositeMeta.getId() + suffix);
+                            metaCollection.setName(oppositeMeta.getName() + suffix);
+                            metaCollection.setImplementationType(field.getGenericType());
+                            metaCollection.setElementType(oppositeMeta);
+                            partition.addElement(null, metaCollection);
+                        }
+                        attr.setType(metaCollection);
 
-					}
-					else {
-						attr.setType(oppositeMeta);
-					}
-				}else{
-					LOGGER.info("opposite meta element '{}' for element '{}' not found",oppositeId, element.getId());
-				}
+                    } else {
+                        attr.setType(oppositeMeta);
+                    }
+                } else {
+                    LOGGER.info("opposite meta element '{}' for element '{}' not found", oppositeId, element.getId());
+                }
             } else {
                 Type implementationType = field.getGenericType();
                 MetaElement metaType = partition.allocateMetaElement(implementationType).get();
