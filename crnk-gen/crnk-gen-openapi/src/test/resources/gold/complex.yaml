@@ -128,6 +128,33 @@ components:
       schema:
         example: id
         type: string
+    NoAccessTaskFields:
+      description: noAccessTask fields to include (csv)
+      in: query
+      name: fields
+      schema:
+        default: id,name
+        type: string
+    NoAccessTaskInclude:
+      description: noAccessTask relationships to include (csv)
+      in: query
+      name: include
+      schema:
+        default: ""
+        type: string
+    NoAccessTaskPrimaryKey:
+      in: path
+      name: id
+      required: true
+      schema:
+        $ref: '#/components/schemas/NoAccessTaskIdResourceAttribute'
+    NoAccessTaskSort:
+      description: noAccessTask sort order (csv)
+      in: query
+      name: sort
+      schema:
+        example: id,name
+        type: string
     PageLimit:
       description: Max number of items
       in: query
@@ -601,6 +628,30 @@ components:
         application/vnd.api+json:
           schema:
             $ref: '#/components/schemas/NestedRelatedResourcesResponseSchema'
+      description: OK
+    NoAccessTaskResourceReferenceResponse:
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/NoAccessTaskResourceReferenceResponseSchema'
+      description: OK
+    NoAccessTaskResourceReferencesResponse:
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/NoAccessTaskResourceReferencesResponseSchema'
+      description: OK
+    NoAccessTaskResourceResponse:
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/NoAccessTaskResourceResponseSchema'
+      description: OK
+    NoAccessTaskResourcesResponse:
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/NoAccessTaskResourcesResponseSchema'
       description: OK
     NoContent:
       description: No Content
@@ -1402,6 +1453,109 @@ components:
           data:
             items:
               $ref: '#/components/schemas/NestedRelatedResourceSchema'
+            type: array
+        required:
+        - data
+    NoAccessTaskIdResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    NoAccessTaskNameResourceAttribute:
+      nullable: true
+      type: string
+    NoAccessTaskPatchResource:
+      allOf:
+      - $ref: '#/components/schemas/NoAccessTaskResourceReference'
+      - $ref: '#/components/schemas/NoAccessTaskResourcePatchAttributes'
+    NoAccessTaskPostResource:
+      allOf:
+      - $ref: '#/components/schemas/NoAccessTaskPostResourceReference'
+      - $ref: '#/components/schemas/NoAccessTaskResourcePostAttributes'
+    NoAccessTaskPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/NoAccessTaskIdResourceAttribute'
+        type:
+          description: The JSON:API resource type (NoAccessTask)
+          enum:
+          - NoAccessTask
+          type: string
+      required:
+      - type
+      type: object
+    NoAccessTaskResourceAttributes:
+      properties:
+        attributes:
+          properties:
+            name:
+              $ref: '#/components/schemas/NoAccessTaskNameResourceAttribute'
+          type: object
+      type: object
+    NoAccessTaskResourcePatchAttributes:
+      properties:
+        attributes:
+          properties: {}
+          type: object
+      type: object
+    NoAccessTaskResourcePostAttributes:
+      properties:
+        attributes:
+          properties: {}
+          type: object
+      type: object
+    NoAccessTaskResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/NoAccessTaskIdResourceAttribute'
+        type:
+          description: The JSON:API resource type (NoAccessTask)
+          enum:
+          - NoAccessTask
+          type: string
+      required:
+      - id
+      - type
+      type: object
+    NoAccessTaskResourceReferenceResponseSchema:
+      properties:
+        data:
+          $ref: '#/components/schemas/NoAccessTaskResourceReference'
+      type: object
+    NoAccessTaskResourceReferencesResponseSchema:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/NoAccessTaskResourceReference'
+          type: array
+      type: object
+    NoAccessTaskResourceResponseSchema:
+      allOf:
+      - $ref: '#/components/schemas/Success'
+      - properties:
+          data:
+            $ref: '#/components/schemas/NoAccessTaskResourceSchema'
+        required:
+        - data
+    NoAccessTaskResourceSchema:
+      allOf:
+      - $ref: '#/components/schemas/NoAccessTaskResourceReference'
+      - $ref: '#/components/schemas/NoAccessTaskResourceAttributes'
+      - properties:
+          links:
+            type: object
+          relationships:
+            type: object
+        type: object
+      required:
+      - attributes
+    NoAccessTaskResourcesResponseSchema:
+      allOf:
+      - $ref: '#/components/schemas/Success'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/NoAccessTaskResourceSchema'
             type: array
         required:
         - data
