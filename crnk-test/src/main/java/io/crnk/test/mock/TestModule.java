@@ -68,7 +68,7 @@ public class TestModule implements Module {
         context.addRepository(new ScheduleStatusRepositoryImpl());
         context.addRepository(new ReadOnlyTaskRepository());
         context.addRepository(new HistoricTaskRepository());
-		context.addRepository(new InMemoryResourceRepository<>(NoAccessTask.class));
+        context.addRepository(new InMemoryResourceRepository<>(NoAccessTask.class));
         context.addRepository(new InMemoryResourceRepository<>(RelocatedTask.class));
         if (extended) {
             context.addRepository(new InMemoryResourceRepository<>(ResourceIdentifierBasedRelationshipResource.class));
