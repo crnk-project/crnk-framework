@@ -340,6 +340,10 @@ components:
       required:
       - type
       type: object
+    SimpleTasksPostResources:
+      items:
+        $ref: '#/components/schemas/SimpleTasksPostResource'
+      type: array
     SimpleTasksResourceAttributes:
       properties:
         attributes:
@@ -528,7 +532,7 @@ paths:
         type: http
         uri: /api/public/todo/simpleTasks
     post:
-      description: Create a SimpleTasks
+      description: Create one (or more) SimpleTasks
       parameters:
       - in: header
         name: Content-Type
@@ -543,13 +547,17 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/SimpleTasksPostResource'
+              oneOf:
+              - $ref: '#/components/schemas/SimpleTasksPostResource'
+              - $ref: '#/components/schemas/SimpleTasksPostResources'
       responses:
         201:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/SimpleTasksResourceResponseSchema'
+                oneOf:
+                - $ref: '#/components/schemas/SimpleTasksResourceResponseSchema'
+                - $ref: '#/components/schemas/SimpleTasksResourcesResponseSchema'
           description: Created
         202:
           $ref: '#/components/responses/SimpleTasksResourceReferencesResponse'

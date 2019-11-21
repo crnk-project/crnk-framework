@@ -1,13 +1,5 @@
 package io.crnk.meta.internal.resource;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -20,6 +12,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -37,6 +30,14 @@ import io.crnk.meta.model.resource.MetaResourceBase;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.MetaPartitionContext;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
 
 public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
@@ -257,6 +258,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		if (repository instanceof ResourceRepository) {
 			setListInformationTypes(repository, meta);
 		}
+		meta.setBulk(repository instanceof BulkResourceRepository);
 		return meta;
 	}
 

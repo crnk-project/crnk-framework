@@ -2,7 +2,6 @@ package io.crnk.gen.openapi.mock;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.resource.list.ResourceList;
 
@@ -12,9 +11,13 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @JsonApiExposed
-public class SimpleTaskRepository implements ResourceRepository<SimpleTask, Long> {
+public class SimpleTaskRepository extends SimpleTaskRepositoryBase implements BulkSimpleTaskRespository {
 
   private static final ConcurrentHashMap<Long, SimpleTask> map = new ConcurrentHashMap<>();
+
+  SimpleTaskRepository(Class<SimpleTask> resourceClass) {
+    super(resourceClass);
+  }
 
   public static void clear() {
     map.clear();
@@ -77,5 +80,20 @@ public class SimpleTaskRepository implements ResourceRepository<SimpleTask, Long
   @Override
   public void delete(Long aLong) {
     map.remove(aLong);
+  }
+
+  @Override
+  public <S extends SimpleTask> List<S> save(List<S> resources) {
+    return null;
+  }
+
+  @Override
+  public <S extends SimpleTask> List<S> create(List<S> resources) {
+    return null;
+  }
+
+  @Override
+  public void delete(List<Long> ids) {
+
   }
 }

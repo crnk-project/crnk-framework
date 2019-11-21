@@ -919,6 +919,10 @@ components:
       required:
       - type
       type: object
+    CommentPostResources:
+      items:
+        $ref: '#/components/schemas/CommentPostResource'
+      type: array
     CommentRelatedResourceAttribute:
       $ref: '#/components/schemas/NestedRelatedResourceReference'
     CommentResourceAttributes:
@@ -1058,6 +1062,10 @@ components:
       required:
       - type
       type: object
+    HeaderPostResources:
+      items:
+        $ref: '#/components/schemas/HeaderPostResource'
+      type: array
     HeaderRelatedResourceAttribute:
       $ref: '#/components/schemas/NestedRelatedResourceReference'
     HeaderResourceAttributes:
@@ -1182,6 +1190,10 @@ components:
       required:
       - type
       type: object
+    HistoricTasksPostResources:
+      items:
+        $ref: '#/components/schemas/HistoricTasksPostResource'
+      type: array
     HistoricTasksResourceAttributes:
       properties:
         attributes:
@@ -1332,6 +1344,10 @@ components:
       required:
       - type
       type: object
+    NestedRelatedPostResources:
+      items:
+        $ref: '#/components/schemas/NestedRelatedPostResource'
+      type: array
     NestedRelatedResourceAttributes:
       properties:
         attributes:
@@ -1460,6 +1476,10 @@ components:
       required:
       - type
       type: object
+    PostPostResources:
+      items:
+        $ref: '#/components/schemas/PostPostResource'
+      type: array
     PostResourceAttributes:
       properties:
         attributes:
@@ -1656,6 +1676,10 @@ components:
       required:
       - type
       type: object
+    PrimitiveAttributePostResources:
+      items:
+        $ref: '#/components/schemas/PrimitiveAttributePostResource'
+      type: array
     PrimitiveAttributeResourceAttributes:
       properties:
         attributes:
@@ -1929,6 +1953,10 @@ components:
       required:
       - type
       type: object
+    ProjectsPostResources:
+      items:
+        $ref: '#/components/schemas/ProjectsPostResource'
+      type: array
     ProjectsResourceAttributes:
       properties:
         attributes:
@@ -2068,6 +2096,10 @@ components:
       required:
       - type
       type: object
+    ReadOnlyTaskPostResources:
+      items:
+        $ref: '#/components/schemas/ReadOnlyTaskPostResource'
+      type: array
     ReadOnlyTaskResourceAttributes:
       properties:
         attributes:
@@ -2171,6 +2203,10 @@ components:
       required:
       - type
       type: object
+    RelationIdTestPostResources:
+      items:
+        $ref: '#/components/schemas/RelationIdTestPostResource'
+      type: array
     RelationIdTestResourceAttributes:
       properties:
         attributes:
@@ -2346,6 +2382,10 @@ components:
       required:
       - type
       type: object
+    RelocatedTaskPostResources:
+      items:
+        $ref: '#/components/schemas/RelocatedTaskPostResource'
+      type: array
     RelocatedTaskResourceAttributes:
       properties:
         attributes:
@@ -2449,6 +2489,10 @@ components:
       required:
       - type
       type: object
+    RenamedIdPostResources:
+      items:
+        $ref: '#/components/schemas/RenamedIdPostResource'
+      type: array
     RenamedIdResourceAttributes:
       properties:
         attributes:
@@ -2561,6 +2605,10 @@ components:
       required:
       - type
       type: object
+    SchedulePostResources:
+      items:
+        $ref: '#/components/schemas/SchedulePostResource'
+      type: array
     ScheduleProjectResourceAttribute:
       $ref: '#/components/schemas/ProjectsResourceReference'
     ScheduleProjectsResourceAttribute:
@@ -2718,6 +2766,10 @@ components:
       required:
       - type
       type: object
+    ScheduleStatusPostResources:
+      items:
+        $ref: '#/components/schemas/ScheduleStatusPostResource'
+      type: array
     ScheduleStatusResourceAttribute:
       $ref: '#/components/schemas/ScheduleStatusResourceReference'
     ScheduleStatusResourceAttributes:
@@ -2875,6 +2927,10 @@ components:
       required:
       - type
       type: object
+    TasksPostResources:
+      items:
+        $ref: '#/components/schemas/TasksPostResource'
+      type: array
     TasksProjectResourceAttribute:
       $ref: '#/components/schemas/ProjectsResourceReference'
     TasksProjectsResourceAttribute:
