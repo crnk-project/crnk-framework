@@ -82,10 +82,6 @@ public class ResourcePostController extends ResourceUpsert {
 				.map(this::toResponse);
 	}
 
-	private Object collectionOrSingleton(List<Object> entities) {
-		return entities.size() == 1 ? entities.get(0) : entities;
-	}
-
 	private Response toResponse(Document responseDocument) {
 		int status = getStatus(responseDocument, HttpMethod.POST);
 		Response response = new Response(responseDocument, status);

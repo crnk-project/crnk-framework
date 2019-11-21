@@ -261,7 +261,10 @@ public class OperationsModule implements Module {
 
             JsonPath repositoryPath = new ResourcePath(rootEntry, null);
 
-            PreconditionUtil.verifyEquals(HttpMethod.POST.toString(), method, "experimental bulk support is currently limited to POST");
+            PreconditionUtil.assertTrue(
+                method.equals(HttpMethod.POST.toString()) || method.equals(HttpMethod.PATCH.toString()) ,
+                "experimental bulk support is currently limited to POST and PATCH"
+            );
 
             Document requestBody = new Document();
             requestBody.setData(Nullable.of(operations.stream().map(it -> it.getOperation().getValue()).collect(Collectors.toList())));

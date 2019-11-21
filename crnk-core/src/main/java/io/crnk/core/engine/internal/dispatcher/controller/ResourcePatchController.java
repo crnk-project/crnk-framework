@@ -1,15 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
@@ -29,9 +19,21 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
+import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.PatchStrategy;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 public class ResourcePatchController extends ResourceUpsert {
 
@@ -42,40 +44,54 @@ public class ResourcePatchController extends ResourceUpsert {
 
 	@Override
 	public boolean isAcceptable(JsonPath jsonPath, String method) {
-		return !jsonPath.isCollection() &&
-				jsonPath instanceof ResourcePath &&
+		return jsonPath instanceof ResourcePath &&
 				HttpMethod.PATCH.name().equals(method);
 	}
 
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
-
 		RegistryEntry endpointRegistryEntry = jsonPath.getRootEntry();
-		final Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.PATCH);
-		RegistryEntry registryEntry = context.getResourceRegistry().getEntry(requestResource.getType());
-		logger.debug("using registry entry {}", registryEntry);
+		List<Resource> resourceBodies = getRequestBodys(requestDocument, jsonPath, HttpMethod.PATCH);
+		ResultFactory resultFactory = context.getResultFactory();
 
-		Serializable resourceId = jsonPath.getId();
+		List<Result<Object>> entityResults = new ArrayList<>();
+		Set<String> loadedRelationshipNames = new HashSet<>();
+		for (Resource resourceBody : resourceBodies) {
+			RegistryEntry registryEntry = getRegistryEntry(resourceBody.getType());
+			logger.debug("using registry entry {}", registryEntry);
+			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+			verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, registryEntry);
 
-		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
-		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, registryEntry);
-		DocumentMappingConfig mappingConfig = context.getMappingConfig();
-		DocumentMapper documentMapper = context.getDocumentMapper();
-		QueryContext queryContext = queryAdapter.getQueryContext();
+			loadedRelationshipNames.addAll(getLoadedRelationshipNames(resourceBody));
+
+			QueryContext queryContext = queryAdapter.getQueryContext();
+			if (Resource.class.equals(resourceInformation.getImplementationClass())) {
+				entityResults.add(resultFactory.just(resourceBody));
+			}
+			else {
+			// TODO: Merge this instead of creating new
+				
+				Object entity = newEntity(resourceInformation, resourceBody);
+				setId(resourceBody, entity, resourceInformation);
+				setType(resourceBody, entity);
+				setAttributes(resourceBody, entity, resourceInformation, queryContext);
+				setMeta(resourceBody, entity, resourceInformation);
+				setLinks(resourceBody, entity, resourceInformation);
+				Result zipped = setRelationsAsync(entity, registryEntry, resourceBody, queryAdapter, false);
+				entityResults.add(zipped.map(it -> entity));
+			}
+		}
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository();
-		return resourceRepository
-				.findOne(resourceId, queryAdapter)
-				.merge(existingResponse -> {
-					Object existingEntity = existingResponse.getEntity();
-					checkNotNull(existingEntity, jsonPath);
-					resourceInformation.verify(existingEntity, requestDocument);
-					return documentMapper.toDocument(existingResponse, queryAdapter, mappingConfig)
-							.map(it -> it.getSingleData().get())
-							.doWork(existing -> mergeNestedAttribute(existing, requestResource, queryContext, resourceInformation))
-							.map(it -> existingEntity);
-				})
-				.merge(existingEntity -> applyChanges(registryEntry, existingEntity, requestResource, queryAdapter))
+		Result<List<Object>> result = resultFactory.all(entityResults);
+
+		Result<JsonApiResponse> response = result.merge(entities -> resourceRepository.update(collectionOrSingleton(entities), queryAdapter));
+		DocumentMappingConfig mappingConfig = context.getMappingConfig().clone()
+				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
+		DocumentMapper documentMapper = this.context.getDocumentMapper();
+
+		return response
+				.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig))
 				.map(this::toResponse);
 	}
 
@@ -84,7 +100,12 @@ public class ResourcePatchController extends ResourceUpsert {
 			updatedDocument = null;
 		}
 		int status = getStatus(updatedDocument, HttpMethod.PATCH);
-		return new Response(updatedDocument, status);
+		Response response = new Response(updatedDocument, status);
+
+		validateUpdatedResponse(response);
+
+		logger.debug("set response {}", response);
+		return response;
 	}
 
 	private Result<Document> applyChanges(RegistryEntry registryEntry, Object entity, Resource requestResource,

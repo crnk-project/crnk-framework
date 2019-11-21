@@ -18,6 +18,8 @@ import io.crnk.core.exception.RequestBodyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  * Represents a controller contract. There can be many kinds of requests that can be send to the framework. The
  * initial process of checking if a request is acceptable is managed by
@@ -90,6 +92,35 @@ public abstract class BaseController implements Controller {
 				}
 			}
 		}
+	}
+
+	protected void validateUpdatedResponse(Response response) {
+		Integer httpStatus = response.getHttpStatus();
+		Document document = response.getDocument();
+		if (httpStatus == HttpStatus.OK_200) {
+			if (!document.getData().isPresent()) {
+				throw new IllegalStateException("upon PATCH with status 200 a resource must be returned");
+			}
+		}
+		else if (httpStatus == HttpStatus.ACCEPTED_202) {
+			for (Resource resource : document.getCollectionData().get()) {
+				if (resource.getId() == null) {
+					throw new IllegalStateException("upon PATCH with status 202 the resource must have an ID");
+				}
+			}
+		}
+		else if (httpStatus == HttpStatus.NO_CONTENT_204) {
+			// TODO: Figure out what we actually want here
+			for (Resource resource : document.getCollectionData().get()) {
+				if (resource != null) {
+					throw new IllegalStateException("upon PATCH with status 204 should not return any resources");
+				}
+			}
+		}
+	}
+
+	Object collectionOrSingleton(List<Object> entities) {
+		return entities.size() == 1 ? entities.get(0) : entities;
 	}
 
 	protected int getStatus(Document responseDocument, HttpMethod method) {
