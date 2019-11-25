@@ -72,7 +72,7 @@ public class DefaultResourceInformationProviderTest {
 
     private final ResourceInformationProviderContext context =
             new DefaultResourceInformationProviderContext(resourceInformationProvider,
-                    new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper());
+                    new DefaultInformationBuilder(new TypeParser()), new TypeParser(), () -> new ObjectMapper());
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();

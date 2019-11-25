@@ -127,7 +127,7 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
                 new DefaultResourceFieldInformationProvider(),
                 new JacksonResourceFieldInformationProvider());
         informationProvider.init(new DefaultResourceInformationProviderContext(informationProvider, informationBuilder,
-                context.getTypeParser(), null) {
+                context.getTypeParser(), () -> context.getObjectMapper()) {
             @Override
             public ObjectMapper getObjectMapper() {
                 return context.getObjectMapper();

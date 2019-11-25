@@ -154,7 +154,7 @@ public class ModuleRegistry {
 
     private RequestDispatcher requestDispatcher;
 
-	private HttpRequestContextProvider httpRequestContextProvider = new HttpRequestContextProvider(() -> getResultFactory(), this);
+    private HttpRequestContextProvider httpRequestContextProvider = new HttpRequestContextProvider(() -> getResultFactory(), this);
 
     private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
@@ -215,7 +215,7 @@ public class ModuleRegistry {
      * @param module module
      */
     public void addModule(Module module) {
-		checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
+        checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
         LOGGER.debug("adding module {}", module);
         module.setupModule(new ModuleContextImpl(module));
         modules.add(module);
@@ -291,7 +291,7 @@ public class ModuleRegistry {
             InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
             DefaultResourceInformationProviderContext context =
                     new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,
-                            objectMapper);
+                            () -> objectMapper);
             resourceInformationProvider.init(context);
         }
         return resourceInformationProvider;
@@ -449,7 +449,7 @@ public class ModuleRegistry {
             Optional<? extends Module> optModule = getModule(extension.getTargetModule());
             if (optModule.isPresent()) {
                 reverseExtensionMap.add(optModule.get(), extension);
-			} else if (!extension.isOptional()) {
+            } else if (!extension.isOptional()) {
                 throw new IllegalStateException(extension.getTargetModule() + " not installed but required by " + extension);
             }
         }
@@ -536,7 +536,7 @@ public class ModuleRegistry {
             for (ResourceField field : resourceInformation.getRelationshipFields()) {
                 String oppositeName = field.getOppositeName();
                 if (oppositeName != null) {
-                    if(allowMissing && !resourceRegistry.hasEntry(field.getOppositeResourceType())){
+                    if (allowMissing && !resourceRegistry.hasEntry(field.getOppositeResourceType())) {
                         continue;
                     }
                     RegistryEntry oppositeEntry = resourceRegistry.getEntry(field.getOppositeResourceType());
@@ -546,7 +546,7 @@ public class ModuleRegistry {
                     String oppositeOppositeName = oppositeField.getOppositeName();
                     if (oppositeOppositeName != null) {
                         PreconditionUtil.verifyEquals(field.getUnderlyingName(), oppositeOppositeName, "opposite references do not match for %s and %s", field, oppositeField);
-					} else {
+                    } else {
                         ((ResourceFieldImpl) oppositeField).setOppositeName(field.getUnderlyingName());
                     }
                 }
@@ -587,7 +587,7 @@ public class ModuleRegistry {
             RegistryEntry parentEntry;
             if (resourceInformationProvider.accept(superclass)) {
                 parentEntry = applyResourceRegistration(superclass, additionalEntryMap);
-			} else {
+            } else {
                 throw new IllegalStateException("super type " + superclass + " of " + resourceClass
                         + " is not a resource. Is it annotated with @JsonApiResource?");
             }
