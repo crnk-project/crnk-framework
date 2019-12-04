@@ -52,7 +52,7 @@ public class ProxiedMicroServiceApplicationTest {
 		ResourceList<Task> tasks = repository.findAll(querySpec);
 		Assert.assertNotEquals(0, tasks.size());
 		for (Task task : tasks) {
-			Assert.assertEquals("http://127.0.0.1:12001/task/" + task.getId(), task.getLinks().getSelf());
+			Assert.assertEquals("http://127.0.0.1:" + ProxiedMicroServiceApplication.TASK_PORT + "/task/" + task.getId(), task.getLinks().getSelf());
 			ProjectProxy project = task.getProject();
 
 			Assert.assertNotNull(task.getProject());
@@ -62,7 +62,7 @@ public class ProxiedMicroServiceApplicationTest {
 			Assert.assertEquals("Mike", project.getAttributes().get("owner").toString());
 			Assert.assertEquals(2, project.getAttributes().size());
 
-			Assert.assertEquals("http://127.0.0.1:12002/project/" + project.getId(), project.getLinks().getSelf());
+			Assert.assertEquals("http://127.0.0.1:" + + ProxiedMicroServiceApplication.PROJECT_PORT + "/project/" + project.getId(), project.getLinks().getSelf());
 		}
 	}
 

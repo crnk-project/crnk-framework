@@ -13,9 +13,9 @@ import java.util.Map;
  */
 public class ProxiedMicroServiceApplication {
 
-	public static final Integer TASK_PORT = 12001;
+	public static final Integer TASK_PORT = 12011;
 
-	public static final Integer PROJECT_PORT = 12002;
+	public static final Integer PROJECT_PORT = 12012;
 
 	public static ConfigurableApplicationContext startTaskApplication() {
 		Map<String, Object> taskProperties = new HashMap<>();
@@ -36,6 +36,6 @@ public class ProxiedMicroServiceApplication {
 	public static void main(String[] args) {
 		startTaskApplication();
 		startProjectApplication();
-		System.out.println("visit http://127.0.0.1:12001/ and  http://127.0.0.1:12002/ in your browser");
+		System.out.println("visit http://127.0.0.1:12011/ and  http://127.0.0.1:12012/ in your browser");
 	}
 }
