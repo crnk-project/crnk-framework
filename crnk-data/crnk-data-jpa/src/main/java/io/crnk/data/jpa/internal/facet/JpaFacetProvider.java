@@ -12,12 +12,12 @@ import io.crnk.data.facet.FacetValue;
 import io.crnk.data.facet.config.BasicFacetInformation;
 import io.crnk.data.facet.config.FacetInformation;
 import io.crnk.data.facet.provider.FacetProviderBase;
-import io.crnk.data.jpa.internal.query.QueryBuilder;
-import io.crnk.data.jpa.internal.query.backend.criteria.JpaCriteriaQueryBackend;
-import io.crnk.data.jpa.internal.query.backend.criteria.JpaCriteriaQueryImpl;
 import io.crnk.data.jpa.JpaEntityRepository;
 import io.crnk.data.jpa.internal.JpaRepositoryUtils;
 import io.crnk.data.jpa.internal.JpaRequestContext;
+import io.crnk.data.jpa.internal.query.QueryBuilder;
+import io.crnk.data.jpa.internal.query.backend.criteria.JpaCriteriaQueryBackend;
+import io.crnk.data.jpa.internal.query.backend.criteria.JpaCriteriaQueryImpl;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 
 import javax.persistence.TypedQuery;
@@ -34,7 +34,7 @@ public class JpaFacetProvider extends FacetProviderBase implements Prioritizable
 
     @Override
     public boolean accepts(RegistryEntry entry) {
-        Object resourceRepository = entry.getResourceRepository().getResourceRepository();
+        Object resourceRepository = entry.getResourceRepository().getImplementation();
         return unwrap(resourceRepository) instanceof JpaEntityRepository;
     }
 
@@ -49,8 +49,8 @@ public class JpaFacetProvider extends FacetProviderBase implements Prioritizable
     @Override
     public List<FacetValue> findValues(FacetInformation facetInformation, QuerySpec querySpec) {
         if (facetInformation instanceof BasicFacetInformation) {
-            String resourceType = facetInformation.getResource().getType();
-            ResourceRepository repository = (ResourceRepository) context.getEntry(resourceType).getResourceRepository().getResourceRepository();
+            String resourceType = facetInformation.getResource().getResourceType();
+            ResourceRepository repository = (ResourceRepository) context.getEntry(resourceType).getResourceRepository().getImplementation();
             JpaEntityRepository entityRepository = (JpaEntityRepository) unwrap(repository);
             BasicFacetInformation basicFacetInformation = (BasicFacetInformation) facetInformation;
 

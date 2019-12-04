@@ -1,12 +1,12 @@
 package io.crnk.data.jpa.internal.query.backend;
 
+import java.util.List;
+import javax.persistence.criteria.JoinType;
+
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaAttributePath;
-
-import javax.persistence.criteria.JoinType;
-import java.util.List;
 
 public interface JpaQueryBackend<F, O, P, E> {
 
@@ -23,6 +23,8 @@ public interface JpaQueryBackend<F, O, P, E> {
 	void addPredicate(P predicate);
 
 	E getAttribute(MetaAttributePath attrPath);
+
+	E getAttribute(MetaAttributePath attrPath, JoinType joinType);
 
 	void addParentPredicate(MetaAttribute primaryKeyAttr);
 

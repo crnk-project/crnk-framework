@@ -12,6 +12,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -35,7 +36,7 @@ public class DefaultInformationBuilderTest {
 		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks");
 		ResourceInformation info = resource.build();
 		resource.superResourceType("superTask");
-		resource.resourceClass(Project.class);
+		resource.implementationType(Project.class);
 		Assert.assertEquals("tasks", info.getResourceType());
 		Assert.assertEquals("tasks", info.getResourcePath());
 	}
@@ -45,7 +46,7 @@ public class DefaultInformationBuilderTest {
 		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
-		resource.resourceClass(Project.class);
+		resource.implementationType(Project.class);
 
 		InformationBuilder.FieldInformationBuilder idField = resource.addField("id", ResourceFieldType.ID, String.class);
 		idField.serializeType(SerializeType.EAGER);
@@ -96,7 +97,7 @@ public class DefaultInformationBuilderTest {
 		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
-		resource.resourceClass(Project.class);
+		resource.implementationType(Project.class);
 
 		InformationBuilder.FieldInformationBuilder idField = resource.addField("id", ResourceFieldType.ID, String.class);
 		idField.serializeType(SerializeType.EAGER);
@@ -149,6 +150,13 @@ public class DefaultInformationBuilderTest {
 		RepositoryMethodAccess actualAccess = repositoryInformation.getAccess();
 		Assert.assertEquals(expectedAccess, actualAccess);
 		Assert.assertSame(resourceInformation, repositoryInformation.getResourceInformation().get());
+	}
+
+	@Test
+	public void checkResourceTypeHolderIngored() {
+		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks", null).build();
+		Assert.assertTrue(ResourceTypeHolder.class.isAssignableFrom(ResourceTypeHolder.class));
+		Assert.assertNull(resourceInformation.findFieldByName("type"));
 	}
 
 	@Test

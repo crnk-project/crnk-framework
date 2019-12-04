@@ -15,16 +15,18 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.resource.list.DefaultResourceList;
 
-import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 
-public class ResourceRepositoryStubImpl<T, I > extends ClientStubBase
-        implements ResourceRepository<T, I> {
+@JsonApiExposed(false)
+public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
+        implements BulkResourceRepository<T, I> {
 
     protected ResourceInformation resourceInformation;
 
@@ -35,7 +37,28 @@ public class ResourceRepositoryStubImpl<T, I > extends ClientStubBase
         this.resourceInformation = resourceInformation;
     }
 
-    private Object executeUpdate(String requestUrl, T resource, boolean create) {
+    @Override
+    public <S extends T> List<S> save(List<S> resources) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public <S extends T> List<S> create(List<S> resources) {
+        return bulkModify(resources, true);
+    }
+
+    @Override
+    public void delete(List<I> id) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <S extends T> List<S> bulkModify(List<S> entities, boolean create) {
+        String url = urlBuilder.buildUrl(resourceInformation, null, (QuerySpec) null);
+        return (List<S>) executeUpdate(url, entities, create);
+    }
+
+    protected Object executeUpdate(String requestUrl, Object resource, boolean create) {
         JsonApiResponse response = new JsonApiResponse();
         response.setEntity(resource);
 
@@ -62,6 +85,10 @@ public class ResourceRepositoryStubImpl<T, I > extends ClientStubBase
         return execute(requestUrl, ResponseType.RESOURCE, method, requestBodyValue);
     }
 
+    @Override
+    public <S extends T> S create(S entity) {
+        return modify(entity, true);
+    }
 
     @Override
     public <S extends T> S save(S entity) {
@@ -69,7 +96,12 @@ public class ResourceRepositoryStubImpl<T, I > extends ClientStubBase
     }
 
     @SuppressWarnings("unchecked")
-    private <S extends T> S modify(S entity, boolean create) {
+    protected <S extends T> S modify(S entity, boolean create) {
+        String url = computeUrl(entity, create);
+        return (S) executeUpdate(url, entity, create);
+    }
+
+    public String computeUrl(T entity, boolean create) {
         Object id = getId(entity);
 
         if (create && !resourceInformation.isNested()) {
@@ -83,12 +115,7 @@ public class ResourceRepositoryStubImpl<T, I > extends ClientStubBase
             // for multi-valued nested resource drop the nested id part
             url = url.substring(0, url.lastIndexOf('/'));
         }
-        return (S) executeUpdate(url, entity, create);
-    }
-
-    @Override
-    public <S extends T> S create(S entity) {
-        return modify(entity, true);
+        return url;
     }
 
     private <S extends T> Object getId(S entity) {
@@ -113,25 +140,36 @@ public class ResourceRepositoryStubImpl<T, I > extends ClientStubBase
 
     @Override
     public T findOne(I id, QuerySpec querySpec) {
+        verifyQuerySpec(querySpec);
         String url = urlBuilder.buildUrl(resourceInformation, id, querySpec);
         return findOne(url);
     }
 
     @Override
     public DefaultResourceList<T> findAll(QuerySpec querySpec) {
+        verifyQuerySpec(querySpec);
         String url = urlBuilder.buildUrl(resourceInformation, null, querySpec);
         return findAll(url);
     }
 
     @Override
-    public DefaultResourceList<T> findAll(Collection<I> ids, QuerySpec queryPaquerySpecrams) {
-        String url = urlBuilder.buildUrl(resourceInformation, ids, queryPaquerySpecrams);
+    public DefaultResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
+        verifyQuerySpec(querySpec);
+        String url = urlBuilder.buildUrl(resourceInformation, ids, querySpec);
         return findAll(url);
     }
 
     @SuppressWarnings("unchecked")
     public DefaultResourceList<T> findAll(String url) {
         return (DefaultResourceList<T>) executeGet(url, ResponseType.RESOURCES);
+    }
+
+    protected void verifyQuerySpec(QuerySpec querySpec) {
+        Class<?> resourceClass = querySpec.getResourceClass();
+        if (resourceClass != null && !resourceClass.equals(resourceInformation.getResourceClass())) {
+            throw new BadRequestException("resourceClass mismatch between repository and QuerySpec argument: "
+                    + resourceClass + " vs " + resourceInformation.getResourceClass());
+        }
     }
 
     @SuppressWarnings("unchecked")

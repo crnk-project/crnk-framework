@@ -1,5 +1,9 @@
 package io.crnk.legacy.repository.information;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
@@ -11,13 +15,9 @@ import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInf
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.UntypedResourceRepository;
+import io.crnk.core.repository.decorate.Wrapper;
 import io.crnk.core.resource.annotations.JsonApiExposed;
-import io.crnk.legacy.repository.LegacyResourceRepository;
 import net.jodah.typetools.TypeResolver;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 public class DefaultResourceRepositoryInformationProvider implements RepositoryInformationProvider {
 
@@ -30,10 +30,9 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 
 	@Override
 	public boolean accept(Class<?> repositoryClass) {
-		boolean legacyRepo = LegacyResourceRepository.class.isAssignableFrom(repositoryClass);
 		boolean interfaceRepo = ResourceRepository.class.isAssignableFrom(repositoryClass);
 		boolean untypedRepo = UntypedResourceRepository.class.isAssignableFrom(repositoryClass);
-		return (legacyRepo || interfaceRepo) && !untypedRepo;
+		return interfaceRepo && !untypedRepo;
 	}
 
 	@Override
@@ -47,7 +46,7 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	}
 
 	private RepositoryInformation build(Object repository, Class<? extends Object> repositoryClass,
-										RepositoryInformationProviderContext context) {
+			RepositoryInformationProviderContext context) {
 		Class<?> resourceClass = getResourceClass(repository, repositoryClass);
 
 		ResourceInformationProvider resourceInformationProvider = context.getResourceInformationBuilder();
@@ -76,24 +75,29 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	}
 
 	protected boolean isExposed(ResourceInformation resourceInformation, Object repository) {
-		JsonApiExposed annotation = repository.getClass().getAnnotation(JsonApiExposed.class);
+		Object unwrappedRepository = repository;
+		while (unwrappedRepository instanceof Wrapper) {
+			// allow a wrapper to override the default expose behavior
+			JsonApiExposed annotation = unwrappedRepository.getClass().getAnnotation(JsonApiExposed.class);
+			if (annotation != null) {
+				return annotation.value();
+			}
+
+			unwrappedRepository = ((Wrapper) unwrappedRepository).getWrappedObject();
+		}
+		JsonApiExposed annotation = unwrappedRepository.getClass().getAnnotation(JsonApiExposed.class);
 		return annotation == null || annotation.value();
 	}
 
 
 	protected Class<?> getResourceClass(Object repository, Class<?> repositoryClass) {
-		if (repository instanceof LegacyResourceRepository) {
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(LegacyResourceRepository.class, repository.getClass());
-			return typeArgs[0];
-		} else if (repository != null) {
+		if (repository != null) {
 			ResourceRepository<?, ?> querySpecRepo = (ResourceRepository<?, ?>) repository;
 			Class<?> resourceClass = querySpecRepo.getResourceClass();
 			PreconditionUtil.verify(resourceClass != null, "().getResourceClass() must not return null", querySpecRepo);
 			return resourceClass;
-		} else if (LegacyResourceRepository.class.isAssignableFrom(repositoryClass)) {
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(LegacyResourceRepository.class, repositoryClass);
-			return typeArgs[0];
-		} else if (ResourceRepository.class.isAssignableFrom(repositoryClass)) {
+		}
+		if (ResourceRepository.class.isAssignableFrom(repositoryClass)) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repositoryClass);
 			return typeArgs[0];
 		}

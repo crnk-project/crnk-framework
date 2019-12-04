@@ -1,99 +1,90 @@
 package io.crnk.core.mock.repository;
 
 import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.LinksRepository;
+import io.crnk.core.repository.MetaRepository;
+import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
-import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.LegacyMetaRepository;
-import io.crnk.legacy.repository.LegacyResourceRepository;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-public class TaskRepository implements LegacyResourceRepository<Task, Long>, LegacyMetaRepository<Task> {
+public class TaskRepository extends ResourceRepositoryBase<Task, Long>
+        implements MetaRepository<Task>, LinksRepository<Task> {
 
-    private static final ConcurrentHashMap<Long, Task> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
+    public static final String BAD_REQUEST_NAME = "badName";
 
-    public static void clear() {
-        THREAD_LOCAL_REPOSITORY.clear();
+    private Set<Task> tasks = new HashSet<>();
+
+    private long nextId = 0;
+
+    public TaskRepository() {
+        super(Task.class);
     }
+
+    @Override
+    public ResourceList<Task> findAll(QuerySpec querySpec) {
+        TaskList list = new TaskList();
+        querySpec.apply(tasks, list);
+        list.setMeta(new DefaultPagedMetaInformation());
+        list.setLinks(new DefaultPagedLinksInformation());
+        return list;
+    }
+
 
     @Override
     public <S extends Task> S save(S entity) {
-        if ("badName".equals(entity.getName())) {
-            throw new BadRequestException("badName not a valid name");
+        if (BAD_REQUEST_NAME.equals(entity.getName())) {
+            throw new BadRequestException("badName");
         }
         if (entity.getId() == null) {
-            entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
+            entity.setId(nextId++);
         }
-        THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
+        delete(entity.getId()); // replace current one
 
+        // maintain bidirectional mapping, not perfect, should be done in the resources, but serves its purpose her.
+        Project project = entity.getProject();
+        if (project != null && !project.getTasks().contains(entity)) {
+            project.getTasks().add(entity);
+        }
+
+        tasks.add(entity);
         return entity;
     }
 
-
     @Override
-    public Task findOne(Long aLong, QueryParams querySpec) {
-        Task task = THREAD_LOCAL_REPOSITORY.get(aLong);
-        if (task == null) {
-            throw new ResourceNotFoundException("");
-        }
-        return task;
-    }
-
-    @Override
-    public ResourceList<Task> findAll(QueryParams querySpec) {
-        TaskList list = new TaskList();
-        DefaultPagedMetaInformation pagedMetaInformation = new DefaultPagedMetaInformation();
-        pagedMetaInformation.setTotalResourceCount((long)THREAD_LOCAL_REPOSITORY.values().size());
-        list.setMeta(pagedMetaInformation);
-        list.setLinks(new DefaultPagedLinksInformation());
-        list.addAll(THREAD_LOCAL_REPOSITORY.values());
-        return list;
-    }
-
-    @Override
-    public ResourceList<Task> findAll(Iterable<Long> ids, QueryParams querySpec) {
-        List<Task> values = new LinkedList<>();
-        for (Task value : THREAD_LOCAL_REPOSITORY.values()) {
-            if (contains(value, ids)) {
-                values.add(value);
+    public void delete(Long id) {
+        Iterator<Task> iterator = tasks.iterator();
+        while (iterator.hasNext()) {
+            Task next = iterator.next();
+            if (next.getId().equals(id)) {
+                iterator.remove();
             }
         }
-
-        DefaultResourceList<Task> list = new DefaultResourceList<>();
-        list.addAll(values);
-        return list;
-    }
-
-    private boolean contains(Task value, Iterable<Long> ids) {
-        for (Long id : ids) {
-            if (value.getId().equals(id)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
-    public void delete(Long aLong) {
-        THREAD_LOCAL_REPOSITORY.remove(aLong);
+    public LinksInformation getLinksInformation(Collection<Task> resources, QuerySpec queryParams, LinksInformation current) {
+        return new LinksInformation() {
+
+            public String name = "value";
+        };
     }
 
     @Override
-    public MetaInformation getMetaInformation(Iterable<Task> resources, QueryParams querySpec) {
-        return new MetaData();
-    }
+    public MetaInformation getMetaInformation(Collection<Task> resources, QuerySpec queryParams, MetaInformation current) {
+        return new MetaInformation() {
 
-    public static class MetaData implements MetaInformation {
-
-        public String someValue;
+            public String name = "value";
+        };
     }
 }

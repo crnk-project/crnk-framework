@@ -8,34 +8,44 @@ import io.crnk.security.ResourcePermission;
 @JsonApiResource(type = "securityCallerPermission", resourcePath = "security/callerPermission")
 public class CallerPermission {
 
-    @JsonApiId
-    private String resourceType;
+	@JsonApiId
+	private String id;
 
-    private ResourcePermission permission;
+	private String resourceType;
 
-    private FilterSpec dataRoomFilter;
+	private ResourcePermission permission;
 
-    public String getResourceType() {
-        return resourceType;
-    }
+	private FilterSpec dataRoomFilter;
 
-    public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public ResourcePermission getPermission() {
-        return permission;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public void setPermission(ResourcePermission permission) {
-        this.permission = permission;
-    }
+	public String getResourceType() {
+		return resourceType;
+	}
 
-    public FilterSpec getDataRoomFilter() {
-        return dataRoomFilter;
-    }
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
-    public void setDataRoomFilter(FilterSpec dataRoomFilter) {
-        this.dataRoomFilter = dataRoomFilter;
-    }
+	public ResourcePermission getPermission() {
+		return permission;
+	}
+
+	public void setPermission(ResourcePermission permission) {
+		this.permission = permission;
+	}
+
+	public FilterSpec getDataRoomFilter() {
+		return dataRoomFilter;
+	}
+
+	public void setDataRoomFilter(FilterSpec dataRoomFilter) {
+		this.dataRoomFilter = dataRoomFilter;
+	}
 }

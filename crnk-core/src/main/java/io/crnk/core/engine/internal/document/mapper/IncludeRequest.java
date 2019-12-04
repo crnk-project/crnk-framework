@@ -1,15 +1,7 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -21,186 +13,230 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.resource.annotations.SerializeType;
+import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 public class IncludeRequest {
 
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(IncludeLookupSetter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IncludeLookupSetter.class);
 
-	private final IncludePopulatedCache populatedCache;
+    private final IncludePopulatedCache populatedCache;
 
-	private final HashSet<ResourceIdentifier> inclusions;
+    private final HashSet<ResourceIdentifier> inclusions;
 
-	private final List<Resource> dataList;
+    private final List<Resource> dataList;
 
-	private final QueryAdapter queryAdapter;
+    private final QueryAdapter queryAdapter;
 
-	private final IncludeLookupUtil util;
+    private final IncludeLookupUtil util;
 
-	private final DocumentMappingConfig mappingConfig;
+    private final DocumentMappingConfig mappingConfig;
 
-	private final ResourceRegistry resourceRegistry;
+    private final ResourceRegistry resourceRegistry;
 
-	private final ResourceMapper resourceMapper;
+    private final ResourceMapper resourceMapper;
 
-	private Map<ResourceIdentifier, Resource> dataMap;
+    private final ObjectMapper objectMapper;
 
-	private Map<ResourceIdentifier, Object> entityMap;
+    private Map<ResourceIdentifier, Resource> dataMap;
 
-	private Map<ResourceIdentifier, Resource> resourceMap;
+    private Map<ResourceIdentifier, Object> entityMap;
 
-	public IncludeRequest(Object entity, Document document, ResourceRegistry resourceRegistry,
-			DocumentMappingConfig mappingConfig, QueryAdapter queryAdapter,
-			IncludeLookupUtil util, ResourceMapper resourceMapper) {
-		this.resourceMapper = resourceMapper;
-		this.resourceRegistry = resourceRegistry;
-		this.mappingConfig = mappingConfig;
-		this.queryAdapter = queryAdapter;
-		this.util = util;
+    private Map<ResourceIdentifier, Resource> resourceMap;
 
-		List<Object> entityList = DocumentMapperUtil.toList(entity);
-		dataList = DocumentMapperUtil.toList(document.getData().get());
-		dataMap = new HashMap<>();
-		entityMap = new HashMap<>();
-		for (int i = 0; i < dataList.size(); i++) {
-			Resource dataElement = dataList.get(i);
+    public IncludeRequest(Object entity, Document document, ResourceRegistry resourceRegistry,
+                          DocumentMappingConfig mappingConfig, QueryAdapter queryAdapter,
+                          IncludeLookupUtil util, ResourceMapper resourceMapper, ObjectMapper objectMapper) {
+        this.resourceMapper = resourceMapper;
+        this.objectMapper = objectMapper;
+        this.resourceRegistry = resourceRegistry;
+        this.mappingConfig = mappingConfig;
+        this.queryAdapter = queryAdapter;
+        this.util = util;
 
-			// no inclusion for new resources without possible
-			ResourceIdentifier id = dataElement.toIdentifier();
-			entityMap.put(id, entityList.get(i));
-			dataMap.put(id, dataElement);
-		}
+        List<Object> entityList = DocumentMapperUtil.toList(entity);
+        dataList = DocumentMapperUtil.toList(document.getData().get());
+        dataMap = new HashMap<>();
+        entityMap = new HashMap<>();
+        for (int i = 0; i < dataList.size(); i++) {
+            Resource dataElement = dataList.get(i);
 
-		resourceMap = new HashMap<>();
-		resourceMap.putAll(dataMap);
+            // no inclusion for new resources without possible
+            ResourceIdentifier id = dataElement.toIdentifier();
+            entityMap.put(id, entityList.get(i));
+            dataMap.put(id, dataElement);
+        }
 
-		inclusions = new HashSet<>();
-		populatedCache = new IncludePopulatedCache(resourceRegistry);
-	}
+        resourceMap = new HashMap<>();
+        resourceMap.putAll(dataMap);
 
-	public synchronized boolean isInclusionRequest(List<ResourceField> fieldPath,
-			ResourceField resourceField) {
-		return util.isInclusionRequested(queryAdapter, fieldPath)
-				|| resourceField.getSerializeType() == SerializeType.EAGER;
-	}
+        inclusions = new HashSet<>();
+        populatedCache = new IncludePopulatedCache(resourceRegistry);
+    }
 
-	public synchronized List<Resource> getDataList() {
-		return dataList;
-	}
+    public synchronized boolean isInclusionRequest(List<ResourceField> fieldPath,
+                                                   ResourceField resourceField) {
+        return util.isInclusionRequested(queryAdapter, fieldPath)
+                || resourceField.getSerializeType() == SerializeType.EAGER;
+    }
 
-	public synchronized void removeDataFromIncluded() {
-		// no need to include resources included in the data section
-		inclusions.removeAll(dataMap.keySet());
-	}
+    public synchronized List<Resource> getDataList() {
+        return dataList;
+    }
 
-	public synchronized List<Resource> getIncluded() {
-		// setup included section
-		ArrayList<Resource> included = new ArrayList<>();
-		for (ResourceIdentifier inclusionId : inclusions) {
-			Resource includedResource = resourceMap.get(inclusionId);
-			PreconditionUtil.verify(includedResource != null, "resource with id=%d not found", inclusionId);
-			included.add(includedResource);
-		}
-		Collections.sort(included);
-		LOGGER.debug("Extracted included resources {}", included.toString());
-		return included;
-	}
+    public synchronized void removeDataFromIncluded() {
+        // no need to include resources included in the data section
+        inclusions.removeAll(dataMap.keySet());
+    }
 
-	public synchronized boolean isRelationIdSerialized(List<ResourceField> resourceFieldPath) {
-		ResourceField lastResourceField = resourceFieldPath.get(resourceFieldPath.size() - 1);
+    public synchronized List<Resource> getIncluded() {
+        // setup included section
+        ArrayList<Resource> included = new ArrayList<>();
+        for (ResourceIdentifier inclusionId : inclusions) {
+            Resource includedResource = resourceMap.get(inclusionId);
+            PreconditionUtil.verify(includedResource != null, "resource with id=%d not found", inclusionId);
+            included.add(includedResource);
+        }
+        Collections.sort(included);
+        LOGGER.debug("Extracted included resources {}", included.toString());
+        return included;
+    }
 
-		Set<String> fieldsWithEnforcedIdSerialization = mappingConfig.getFieldsWithEnforcedIdSerialization();
-		return lastResourceField.getSerializeType() != SerializeType.LAZY
-				|| resourceFieldPath.size() == 1 && fieldsWithEnforcedIdSerialization.contains(lastResourceField.getJsonName());
-	}
+    public synchronized boolean isRelationIdSerialized(List<ResourceField> resourceFieldPath) {
+        ResourceField lastResourceField = resourceFieldPath.get(resourceFieldPath.size() - 1);
 
-	public synchronized Collection<Resource> filterProcessed(Collection<Resource> resourceList, ResourceField resourceField) {
-		return populatedCache.filterProcessed(resourceList, resourceField);
-	}
+        Set<String> fieldsWithEnforcedIdSerialization = mappingConfig.getFieldsWithEnforcedIdSerialization();
+        return lastResourceField.getSerializeType() != SerializeType.LAZY
+                || resourceFieldPath.size() == 1 && fieldsWithEnforcedIdSerialization.contains(lastResourceField.getJsonName());
+    }
 
-	public synchronized void markForInclusion(Set<Resource> resources) {
-		inclusions.addAll(util.toIds(resources));
-	}
+    public synchronized Collection<Resource> filterProcessed(Collection<Resource> resourceList, ResourceField resourceField) {
+        return populatedCache.filterProcessed(resourceList, resourceField);
+    }
 
-	public synchronized Resource merge(Object targetEntity) {
-		ResourceMappingConfig resourceMappingConfig = mappingConfig.getResourceMapping();
-		Resource targetResource = resourceMapper.toData(targetEntity, queryAdapter, resourceMappingConfig);
-		ResourceIdentifier targetId = targetResource.toIdentifier();
-		if (!resourceMap.containsKey(targetId)) {
-			resourceMap.put(targetId, targetResource);
-		}
-		else {
-			// TODO consider merging
-			targetResource = resourceMap.get(targetId);
-		}
-		if (!(targetEntity instanceof Resource)) {
-			entityMap.put(targetId, targetEntity);
-		}
-		return targetResource;
-	}
+    public synchronized void markForInclusion(Set<Resource> resources) {
+        inclusions.addAll(util.toIds(resources));
+    }
 
-	public synchronized void setupRelationId(Resource sourceResource, ResourceField relationshipField, Object targetEntityId) {
-		// set the relation
-		String relationshipName = relationshipField.getJsonName();
-		Map<String, Relationship> relationships = sourceResource.getRelationships();
-		Relationship relationship = relationships.get(relationshipName);
+    public synchronized Resource merge(Object targetEntity) {
+        ResourceMappingConfig resourceMappingConfig = mappingConfig.getResourceMapping();
+        Resource targetResource = resourceMapper.toData(targetEntity, queryAdapter, resourceMappingConfig);
+        ResourceIdentifier targetId = targetResource.toIdentifier();
+        if (!resourceMap.containsKey(targetId)) {
+            resourceMap.put(targetId, targetResource);
+        } else {
+            // TODO consider merging
+            targetResource = resourceMap.get(targetId);
+        }
+        if (!(targetEntity instanceof Resource)) {
+            entityMap.put(targetId, targetEntity);
+        }
+        return targetResource;
+    }
 
-		String oppositeType = relationshipField.getOppositeResourceType();
-		RegistryEntry entry = resourceRegistry.getEntry(oppositeType);
-		PreconditionUtil.verify(entry != null, "opposite type %s not found for relationship %s", oppositeType, relationshipName);
-		ResourceInformation targetResourceInformation = entry.getResourceInformation();
+    public synchronized void setupRelationId(Resource sourceResource, ResourceField relationshipField, Object targetEntityId) {
+        // set the relation
+        String relationshipName = relationshipField.getJsonName();
+        Map<String, Relationship> relationships = sourceResource.getRelationships();
+        Relationship relationship = relationships.get(relationshipName);
 
-		if (targetEntityId instanceof Iterable) {
-			List<ResourceIdentifier> targetIds = new ArrayList<>();
-			for (Object targetElementId : (Iterable<?>) targetEntityId) {
-				targetIds.add(util.idToResourceId(targetResourceInformation, targetElementId));
-			}
-			relationship.setData(Nullable.of(targetIds));
-		}
-		else {
-			ResourceIdentifier targetResourceId = util.idToResourceId(targetResourceInformation, targetEntityId);
-			relationship.setData(Nullable.of(targetResourceId));
-		}
-	}
+        String oppositeType = relationshipField.getOppositeResourceType();
+        RegistryEntry entry = resourceRegistry.getEntry(oppositeType);
+        PreconditionUtil.verify(entry != null, "opposite type %s not found for relationship %s", oppositeType, relationshipName);
+        ResourceInformation targetResourceInformation = entry.getResourceInformation();
 
-	public synchronized List<Resource> setupRelation(Resource sourceResource, ResourceField relationshipField,
-			Object targetEntity) {
-		// set the relation
-		String relationshipName = relationshipField.getJsonName();
-		Map<String, Relationship> relationships = sourceResource.getRelationships();
-		Relationship relationship = relationships.get(relationshipName);
-		if (targetEntity instanceof Iterable) {
-			List<Resource> targets = new ArrayList<>();
-			for (Object targetElement : (Iterable<?>) targetEntity) {
-				Resource targetResource = merge(targetElement);
-				targets.add(targetResource);
-			}
-			relationship.setData(Nullable.of(util.toIds(targets)));
-			return targets;
-		}
-		else {
-			Resource targetResource = merge(targetEntity);
-			relationship.setData(Nullable.of(targetResource.toIdentifier()));
-			return Collections.singletonList(targetResource);
-		}
-	}
+        if (targetEntityId instanceof Iterable) {
+            List<ResourceIdentifier> targetIds = new ArrayList<>();
+            for (Object targetElementId : (Iterable<?>) targetEntityId) {
+                targetIds.add(util.idToResourceId(targetResourceInformation, targetElementId));
+            }
+            relationship.setData(Nullable.of(targetIds));
+        } else {
+            ResourceIdentifier targetResourceId = util.idToResourceId(targetResourceInformation, targetEntityId);
+            relationship.setData(Nullable.of(targetResourceId));
+        }
+        setRelationshipInformation(relationship, targetEntityId);
+    }
 
-	public synchronized QueryAdapter getQueryAdapter() {
-		return queryAdapter;
-	}
 
-	public synchronized boolean containsResource(ResourceIdentifier id) {
-		return resourceMap.containsKey(id);
-	}
+    public synchronized List<Resource> setupRelation(Resource sourceResource, ResourceField relationshipField,
+                                                     Object targetEntity) {
+        // set the relation
+        String relationshipName = relationshipField.getJsonName();
+        Map<String, Relationship> relationships = sourceResource.getRelationships();
+        Relationship relationship = relationships.get(relationshipName);
+        if (targetEntity instanceof Iterable) {
+            List<Resource> targets = new ArrayList<>();
+            for (Object targetElement : (Iterable<?>) targetEntity) {
+                Resource targetResource = merge(targetElement);
+                targets.add(targetResource);
+            }
+            relationship.setData(Nullable.of(util.toIds(targets)));
+            setRelationshipInformation(relationship, targetEntity);
+            return targets;
+        } else {
+            Resource targetResource = merge(targetEntity);
+            relationship.setData(Nullable.of(targetResource.toIdentifier()));
+            return Collections.singletonList(targetResource);
+        }
+    }
 
-	public synchronized Resource getResource(ResourceIdentifier id) {
-		return Objects.requireNonNull(resourceMap.get(id));
-	}
+    private void setRelationshipInformation(Relationship relationship, Object targetData) {
+        if (targetData instanceof ResourceList) {
+            ResourceList list = (ResourceList) targetData;
 
-	public synchronized Object getEntity(ResourceIdentifier id) {
-		return entityMap.get(id);
-	}
+            MetaInformation meta = list.getMeta();
+            if (meta != null) {
+                ObjectNode jsonNode = objectMapper.valueToTree(meta);
+                jsonNode.remove("totalResourceCount"); // get rid of this entirely
+                if (jsonNode.fieldNames().hasNext()) {
+                    relationship.setMeta(jsonNode);
+                }
+            }
+
+            LinksInformation links = list.getLinks();
+            if (links != null) {
+                ObjectNode jsonNode = objectMapper.valueToTree(links);
+                ObjectNode baseLinks = relationship.getLinks();
+                if (baseLinks != null) {
+                    jsonNode.set("self", baseLinks.get("self"));
+                }
+                if (baseLinks != null) {
+                    jsonNode.set("related", baseLinks.get("related"));
+                }
+                relationship.setLinks(jsonNode);
+            }
+        }
+    }
+
+    public synchronized QueryAdapter getQueryAdapter() {
+        return queryAdapter;
+    }
+
+    public synchronized boolean containsResource(ResourceIdentifier id) {
+        return resourceMap.containsKey(id);
+    }
+
+    public synchronized Resource getResource(ResourceIdentifier id) {
+        return Objects.requireNonNull(resourceMap.get(id));
+    }
+
+    public synchronized Object getEntity(ResourceIdentifier id) {
+        return entityMap.get(id);
+    }
 }

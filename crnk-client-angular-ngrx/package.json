@@ -62,7 +62,7 @@
 		"karma-typescript": "^3.0.5",
 		"karma-typescript-angular2-transform": "^1.0.1",
 		"karma-typescript-es6-transform": "^1.0.2",
-		"lodash": "4.17.4",
+		"lodash": "4.17.13",
 		"ncp": "2.0.0",
 		"ngrx-json-api": "^2.0.0-rc.2",
 		"primeng": "^5.0.2",

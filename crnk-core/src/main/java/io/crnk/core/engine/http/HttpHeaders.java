@@ -5,6 +5,8 @@ public class HttpHeaders {
 	private HttpHeaders() {
 	}
 
+	public static final String X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
+
 	public static final String HTTP_HEADER_ACCEPT = "Accept";
 
 	public static final String HTTP_HEADER_CRNK_COMPACT = "Crnk-Compact";
@@ -19,5 +21,7 @@ public class HttpHeaders {
 
 	public static final String JSONAPI_CONTENT_TYPE_AND_CHARSET = JSONAPI_CONTENT_TYPE + "; charset=" +
 			DEFAULT_CHARSET;
+
+	public static final String VERSION_ACCEPT_PARAMETER = "version";
 
 }

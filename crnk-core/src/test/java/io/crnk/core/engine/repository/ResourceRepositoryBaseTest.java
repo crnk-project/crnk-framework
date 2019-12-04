@@ -1,6 +1,7 @@
 package io.crnk.core.engine.repository;
 
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.MethodNotAllowedException;
@@ -32,7 +33,7 @@ public class ResourceRepositoryBaseTest {
 	@Before
 	public void setup() {
 		CoreTestContainer container = new CoreTestContainer();
-		container.setDefaultPackage();
+		container.addModule(new CoreTestModule());
 		container.getBoot().setPropertiesProvider(new PropertiesProvider() {
 			@Override
 			public String getProperty(String key) {

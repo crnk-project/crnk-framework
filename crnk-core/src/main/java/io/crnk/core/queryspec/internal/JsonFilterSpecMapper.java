@@ -1,12 +1,5 @@
 package io.crnk.core.queryspec.internal;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.queryspec.FilterOperator;
@@ -25,6 +19,13 @@ import io.crnk.core.queryspec.mapper.QueryPathResolver;
 import io.crnk.core.queryspec.mapper.QueryPathSpec;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 public class JsonFilterSpecMapper {
 
 	private final QuerySpecUrlContext context;
@@ -33,44 +34,53 @@ public class JsonFilterSpecMapper {
 
 	private final QueryPathResolver pathResolver;
 
-	public JsonFilterSpecMapper(QuerySpecUrlContext ctx, Map<String, FilterOperator> supportedOperators, QueryPathResolver pathResolver) {
+	private final FilterOperator defaultOperator;
+
+	public JsonFilterSpecMapper(QuerySpecUrlContext ctx, Map<String, FilterOperator> supportedOperators, FilterOperator defaultOperator, QueryPathResolver pathResolver) {
 		this.context = ctx;
+		this.defaultOperator = defaultOperator;
 		this.supportedOperators = supportedOperators;
 		this.pathResolver = pathResolver;
 	}
 
-	public List<FilterSpec> deserialize(JsonNode jsonNode, ResourceInformation resourceInformation) {
+	public List<FilterSpec> deserialize(JsonNode jsonNode, ResourceInformation resourceInformation, QueryContext queryContext) {
 		// we support both the serialized FilterSpec (crnk-specific) and a more compact, user-friendly format
 		if (isSerializedFilterSpec(jsonNode)) {
 			ObjectMapper objectMapper = context.getObjectMapper();
 			try {
-				List<FilterSpec> filterSpecs = Arrays.asList(objectMapper.readerFor(FilterSpec[].class).readValue(jsonNode));
-				useRegisteredOperatorImplementation(filterSpecs);
+
+				ObjectReader pathReader = objectMapper.readerFor(PathSpec.class);
+				ArrayNode arrayNode = (ArrayNode) jsonNode;
+				List<FilterSpec> filterSpecs = new ArrayList<>();
+				for (int i = 0; i < arrayNode.size(); i++) {
+					JsonNode filterNode = arrayNode.get(i);
+
+					JsonNode pathNode = filterNode.get("path");
+					JsonNode opNode = filterNode.get("operator");
+					JsonNode valueNode = filterNode.get("value");
+					JsonNode expressionNode = filterNode.get("expression");
+
+					FilterOperator operator = null;
+					if (opNode != null && !opNode.isNull()) {
+						operator = supportedOperators.get(opNode.asText());
+						if (operator == null) {
+							throw new BadRequestException("unknown operator " + opNode.asText());
+						}
+					}else{
+						operator = defaultOperator;
+					}
+					PathSpec pathSpec = pathNode != null && !pathNode.isNull() ? pathReader.readValue(pathNode) : null;
+					Object value = valueNode != null && !valueNode.isNull() ? deserializeJsonFilterValue(resourceInformation, pathSpec, valueNode, queryContext) : null;
+					List<FilterSpec> expressions = expressionNode != null && !expressionNode.isNull() ? deserialize(expressionNode, resourceInformation, queryContext) : null;
+					filterSpecs.add(expressions != null ? new FilterSpec(operator, expressions) : new FilterSpec(pathSpec, operator, value));
+				}
 				return filterSpecs;
 			}
 			catch (IOException e) {
 				throw new BadRequestException("failed to parse parameter", e);
 			}
 		}
-		return deserialize(jsonNode, resourceInformation, PathSpec.empty());
-	}
-
-	/**
-	 * Move from default FilterOperator do specific implementation with custom match function. Maybe alternative solution at some point
-	 * in the future.
-	 */
-	private void useRegisteredOperatorImplementation(List<FilterSpec> filterSpecs) {
-		if (filterSpecs != null) {
-			for (FilterSpec filterSpec : filterSpecs) {
-				if (filterSpec.getOperator() != null) {
-					FilterOperator filterOperator = supportedOperators.get(filterSpec.getOperator().getName());
-					if (filterOperator != null) {
-						filterSpec.setOperator(filterOperator);
-					}
-				}
-				useRegisteredOperatorImplementation(filterSpec.getExpression());
-			}
-		}
+		return deserialize(jsonNode, resourceInformation, PathSpec.empty(), queryContext);
 	}
 
 	private boolean isSerializedFilterSpec(JsonNode jsonNode) {
@@ -141,9 +151,9 @@ public class JsonFilterSpecMapper {
 		return objectMapper.valueToTree(value);
 	}
 
-	private List<FilterSpec> deserialize(JsonNode jsonNode, ResourceInformation resourceInformation, PathSpec attributePath) {
+	private List<FilterSpec> deserialize(JsonNode jsonNode, ResourceInformation resourceInformation, PathSpec attributePath, QueryContext queryContext) {
 		if (jsonNode instanceof ArrayNode) {
-			return deserializeJsonArrayFilter((ArrayNode) jsonNode, resourceInformation, attributePath);
+			return deserializeJsonArrayFilter((ArrayNode) jsonNode, resourceInformation, attributePath, queryContext);
 		}
 		else if (jsonNode instanceof ObjectNode) {
 			ObjectNode objectNode = (ObjectNode) jsonNode;
@@ -155,15 +165,15 @@ public class JsonFilterSpecMapper {
 				JsonNode element = objectNode.get(fieldName);
 				FilterOperator operator = findOperator(fieldName);
 				if (operator != null) {
-					filterSpecs.add(deserializeJsonOperatorFilter(operator, element, resourceInformation, attributePath));
+					filterSpecs.add(deserializeJsonOperatorFilter(operator, element, resourceInformation, attributePath, queryContext));
 				}
 				else if (element instanceof ObjectNode) {
 					PathSpec nestedAttrPath = attributePath.append(fieldName);
-					filterSpecs.add(FilterSpec.and(deserialize(element, resourceInformation, nestedAttrPath)));
+					filterSpecs.add(FilterSpec.and(deserialize(element, resourceInformation, nestedAttrPath, queryContext)));
 				}
 				else {
 					PathSpec nestedAttrPath = attributePath.append(fieldName);
-					Object value = deserializeJsonFilterValue(resourceInformation, nestedAttrPath, element);
+					Object value = deserializeJsonFilterValue(resourceInformation, nestedAttrPath, element, queryContext);
 					filterSpecs.add(new FilterSpec(nestedAttrPath, FilterOperator.EQ, value));
 				}
 			}
@@ -189,8 +199,9 @@ public class JsonFilterSpecMapper {
 		return null;
 	}
 
-	private Object deserializeJsonFilterValue(ResourceInformation resourceInformation, PathSpec attributePath, JsonNode jsonNode) {
-		QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath.getElements(), QueryPathResolver.NamingType.JSON, "filter");
+	private Object deserializeJsonFilterValue(ResourceInformation resourceInformation, PathSpec attributePath, JsonNode jsonNode, QueryContext queryContext) {
+		QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath.getElements(), QueryPathResolver.NamingType.JSON, "filter", queryContext);
+		resolvedPath.verifyFilterable();
 
 		Class valueType = ClassUtils.getRawType(resolvedPath.getValueType());
 		ObjectReader reader = context.getObjectMapper().readerFor(valueType);
@@ -209,16 +220,16 @@ public class JsonFilterSpecMapper {
 		}
 	}
 
-	private List<FilterSpec> deserializeJsonArrayFilter(ArrayNode arrayNode, ResourceInformation resourceInformation, PathSpec attributePath) {
+	private List<FilterSpec> deserializeJsonArrayFilter(ArrayNode arrayNode, ResourceInformation resourceInformation, PathSpec attributePath, QueryContext queryContext) {
 		List<FilterSpec> filterSpecs = new ArrayList<>();
 		for (int i = 0; i < arrayNode.size(); i++) {
-			filterSpecs.add(FilterSpec.and(deserialize(arrayNode.get(i), resourceInformation, attributePath)));
+			filterSpecs.add(FilterSpec.and(deserialize(arrayNode.get(i), resourceInformation, attributePath, queryContext)));
 		}
 		return filterSpecs;
 	}
 
-	private FilterSpec deserializeJsonOperatorFilter(FilterOperator operator, JsonNode element, ResourceInformation resourceInformation, PathSpec attributePath) {
-		List<FilterSpec> elementFilters = deserialize(element, resourceInformation, attributePath);
+	private FilterSpec deserializeJsonOperatorFilter(FilterOperator operator, JsonNode element, ResourceInformation resourceInformation, PathSpec attributePath, QueryContext queryContext) {
+		List<FilterSpec> elementFilters = deserialize(element, resourceInformation, attributePath, queryContext);
 		if (elementFilters.size() == 1) {
 			FilterSpec elementFilter = elementFilters.get(0);
 			if (elementFilter.getOperator() == FilterOperator.EQ) {

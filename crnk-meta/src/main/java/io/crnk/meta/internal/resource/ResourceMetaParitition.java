@@ -12,6 +12,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -109,7 +110,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 					closedResourceType = resourceInformation.getResourceType();
 				}
 
-				Object resourceRepository = entry.getResourceRepository().getResourceRepository();
+				Object resourceRepository = entry.getResourceRepository().getImplementation();
 				Package resourcePackage = resourceRepository.getClass().getPackage();
 				resourcePackageName = resourcePackage != null ? resourcePackage.getName() : resourceClass.getPackage().getName();
 				if (packageName.startsWith(resourcePackageName) && (closedPackageName == null
@@ -142,9 +143,11 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 			ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
 			ResourceRepositoryAdapter resourceRepository = entry.getResourceRepository();
 			if (repositoryInformation != null) {
-				MetaResourceRepository repository = discoverRepository(repositoryInformation, metaResource,
+				MetaResourceRepository metaRepository = discoverRepository(repositoryInformation, metaResource,
 						resourceRepository);
-				context.addElement(repository);
+				context.addElement(metaRepository);
+
+				metaResource.setRepository(metaRepository);
 			}
 		}
 	}
@@ -176,6 +179,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		resource.setName(getName(information));
 		resource.setResourceType(resourceType);
 		resource.setResourcePath(information.getResourcePath());
+		resource.setVersionRange(information.getVersionRange());
 		if (superMeta != null) {
 			resource.setSuperType(superMeta);
 			if (superMeta != null) {
@@ -187,7 +191,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		RegistryEntry entry = resourceRegistry.getEntry(information.getResourceType());
 		if (entry != null) {
 			boolean readOnlyImpl =
-					entry.getResourceRepository().getResourceRepository() instanceof ReadOnlyResourceRepositoryBase;
+					entry.getResourceRepository().getImplementation() instanceof ReadOnlyResourceRepositoryBase;
 			resource.setUpdatable(resource.isUpdatable() && !readOnlyImpl);
 			resource.setInsertable(resource.isInsertable() && !readOnlyImpl);
 			resource.setDeletable(resource.isDeletable() && !readOnlyImpl);
@@ -234,10 +238,11 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 	}
 
 	private MetaResourceRepository discoverRepository(ResourceRepositoryInformation repositoryInformation,
-													  MetaResource metaResource, ResourceRepositoryAdapter resourceRepository) {
+			MetaResource metaResource, ResourceRepositoryAdapter resourceRepository) {
 
 		MetaResourceRepository meta = new MetaResourceRepository();
 		meta.setResourceType(metaResource);
+		meta.setExposed(repositoryInformation.isExposed());
 		meta.setName(metaResource.getName() + "$repository");
 		meta.setId(metaResource.getId() + "$repository");
 
@@ -249,10 +254,11 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		}
 
 		// TODO avoid use of ResourceRepositoryAdapter by enriching ResourceRepositoryInformation
-		Object repository = resourceRepository.getResourceRepository();
+		Object repository = resourceRepository.getImplementation();
 		if (repository instanceof ResourceRepository) {
 			setListInformationTypes(repository, meta);
 		}
+		meta.setBulk(repository instanceof BulkResourceRepository);
 		return meta;
 	}
 
@@ -291,10 +297,11 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		attr.setUnderlyingName(field.getUnderlyingName());
 
 		attr.setParent(resource, true);
+		attr.setId(resource.getId() + "." + field.getUnderlyingName());
 		attr.setName(field.getJsonName());
 		attr.setAssociation(field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP);
-		attr.setMeta(field.getResourceFieldType() == ResourceFieldType.META_INFORMATION);
-		attr.setLinks(field.getResourceFieldType() == ResourceFieldType.LINKS_INFORMATION);
+		attr.setFieldType(field.getResourceFieldType());
+		attr.setVersionRange(field.getVersionRange());
 		attr.setDerived(false);
 
 		attr.setLazy(field.getSerializeType() == SerializeType.LAZY);

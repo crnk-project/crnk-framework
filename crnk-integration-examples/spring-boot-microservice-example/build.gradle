@@ -8,6 +8,7 @@ dependencies {
 
 	compile project(':crnk-setup:crnk-setup-spring-boot2')
 	compile project(':crnk-home')
+	compile project(':crnk-testkit')
 	compile project(':crnk-client')
 	compile 'com.squareup.okhttp3:okhttp:3.4.1'
 

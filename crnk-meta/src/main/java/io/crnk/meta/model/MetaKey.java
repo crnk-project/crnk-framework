@@ -7,7 +7,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "meta/key")
+@JsonApiResource(type = "metaKey", resourcePath = "meta/key")
 public class MetaKey extends MetaElement {
 
 	public static final String ID_ELEMENT_SEPARATOR = "-";
@@ -49,8 +49,9 @@ public class MetaKey extends MetaElement {
 
 	@JsonIgnore
 	public MetaAttribute getUniqueElement() {
-		if (elements.size() != 1)
+		if (elements.size() != 1) {
 			throw new IllegalStateException(getName() + " must contain a single primary key attribute");
+		}
 		return elements.get(0);
 	}
 

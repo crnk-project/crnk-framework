@@ -1,5 +1,18 @@
 package io.crnk.rs;
 
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpRequestContext;
@@ -9,6 +22,7 @@ import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
@@ -19,19 +33,6 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Nullable;
 import io.crnk.rs.type.JsonApiMediaType;
-
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Uses the Crnk {@link DocumentMapper} to create a JSON API response for
@@ -73,8 +74,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
             DocumentMapper documentMapper = boot.getDocumentMapper();
             HttpRequestContextProvider httpRequestContextProvider = boot.getModuleRegistry().getHttpRequestContextProvider();
             try {
-                HttpRequestContext context = new HttpRequestContextBaseAdapter(new JaxrsRequestContext(requestContext,
-                        feature));
+                HttpRequestContext context = new HttpRequestContextBaseAdapter(new JaxrsRequestContext(requestContext, feature));
                 httpRequestContextProvider.onRequestStarted(context);
 
                 JsonApiResponse jsonApiResponse = new JsonApiResponse();
@@ -89,10 +89,11 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
                         .filter(entry -> isJsonApiParameter(entry.getKey()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 QuerySpecUrlMapper urlMapper = feature.getBoot().getUrlMapper();
-                QuerySpec querySpec = urlMapper.deserialize(resourceInformation, jsonApiParameters);
+                QueryContext queryContext = context.getQueryContext();
+                QuerySpec querySpec = urlMapper.deserialize(resourceInformation, jsonApiParameters, queryContext);
 
                 ResourceRegistry resourceRegistry = feature.getBoot().getResourceRegistry();
-                QueryAdapter queryAdapter = new QuerySpecAdapter(querySpec, resourceRegistry, context.getQueryContext());
+                QueryAdapter queryAdapter = new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
                 responseContext.setEntity(documentMapper.toDocument(jsonApiResponse, queryAdapter, mappingConfig).get());
                 responseContext.getHeaders().put("Content-Type",
                         Collections.singletonList(JsonApiMediaType.APPLICATION_JSON_API));

@@ -60,22 +60,6 @@ public class ErrorData implements Serializable {
 	 */
 	private final Map<String, Object> meta; // NOSONAR this is not transient
 
-	/**
-	 * @deprecated make use of {@link ErrorDataBuilder}
-	 */
-	@Deprecated
-	public ErrorData(String id, String aboutLink, String status, String code, String title, String detail,
-					 String sourcePointer, String sourceParameter, Map<String, Object> meta) {
-		this.id = id;
-		this.aboutLink = aboutLink;
-		this.status = status;
-		this.code = code;
-		this.title = title;
-		this.detail = detail;
-		this.sourcePointer = sourcePointer;
-		this.sourceParameter = sourceParameter;
-		this.meta = meta == null ? null : Collections.unmodifiableMap(meta);
-	}
 
 	protected ErrorData(ErrorDataBuilder builder) {
 		id = builder.getId();

@@ -1,4 +1,6 @@
 
+anchor:operations[]
+
 # Bulk Updates with Operations Module
 
 By its nature RESTful applications are limited to the insertion, update and deletion of single resources. As such, developers
@@ -39,6 +41,30 @@ There is further an operations client implementation that works along the regula
 ----
 include::../../../../crnk-operations/src/test/java/io/crnk/operations/OperationsPostTest.java[tags=client]
 ----
+
+## Operation Module Properties
+
+The operations module can be customized using one of the following properties:
+
+.Operation Module Properties
+|===
+|*Property Name* |*Description* |*Default Value*
+|resumeOnError | If an error occurs during the operation execution, continue the other operations. | False
+|includeChangedRelationships | Toggle to include all changed relationships in the request by default. This only applies for POST and PATCH operation requests. | True
+|displayOperationResponseOnSuccess | If true, the response will always be included. Otherwise, it only displays the status codes of the operation unless an error has occurred. | True
+|===
+
+Here is an example of how to set these properties:
+
+[source]
+----
+OperationsModule operationsModule = OperationsModule.create();
+operationsModule.setIncludeChangedRelationships(false);
+operationsModule.resumeOnError(true);
+...
+----
+
+## Example Request and Response
 
 An example request in JSON looks like:
 
@@ -148,5 +174,8 @@ The current limitations of the implementation are:
 
 With support for `POST`, `PATCH` and `DELETE` operations the most important building blocks should be in place.
 The limitations are expected to be addressed at some point as well, contributions welcomed.
+
+There is experimental support for <<resource_bulk_repository,BulkResourceRepository>>. If multiple changes to the
+same repository are detected, it can make use of the appropriate bulk methods.
 
 

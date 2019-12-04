@@ -2,7 +2,7 @@ package io.crnk.meta.model;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "meta/enumType")
+@JsonApiResource(type = "metaEnumType", resourcePath = "meta/enumType")
 public class MetaEnumType extends MetaType {
 
 }

@@ -28,7 +28,7 @@ public class InMemoryFacetProvider extends FacetProviderBase implements Prioriti
 
 	@Override
 	public List<FacetValue> findValues(FacetInformation facetInformation, QuerySpec querySpec) {
-		String resourceType = facetInformation.getResource().getType();
+		String resourceType = facetInformation.getResource().getResourceType();
 		ResourceRepository repository = context.getRepository(resourceType);
 		ResourceInformation resourceInformation = context.getResourceInformation(resourceType);
 

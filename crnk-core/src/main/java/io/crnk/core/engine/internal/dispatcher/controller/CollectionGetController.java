@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.util.Collection;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -13,9 +15,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
-
-import java.io.Serializable;
-import java.util.Collection;
 
 public class CollectionGetController extends ResourceIncludeField {
 
@@ -33,7 +32,7 @@ public class CollectionGetController extends ResourceIncludeField {
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestBody) {
 		RegistryEntry registryEntry = jsonPath.getRootEntry();
 
-		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create();
+		DocumentMappingConfig mappingConfig = context.getMappingConfig();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository();
@@ -47,7 +46,7 @@ public class CollectionGetController extends ResourceIncludeField {
 			response = resourceRepository.findAll(parsedIds, queryAdapter);
 		}
 
-		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, docummentMapperConfig)).map(this::toResponse);
+		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig)).map(this::toResponse);
 	}
 
 
@@ -57,6 +56,7 @@ public class CollectionGetController extends ResourceIncludeField {
 			document.setData(Nullable.nullValue());
 		}
 		logger.debug("mapping {} to response");
-		return new Response(document, 200);
+		int status = getStatus(document, HttpMethod.GET);
+		return new Response(document, status);
 	}
 }

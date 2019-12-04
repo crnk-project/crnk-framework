@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -116,7 +117,8 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 	private void collectInformation() {
 		Collection<RegistryEntry> entries = moduleContext.getResourceRegistry().getEntries();
 		for (RegistryEntry entry : entries) {
-			if (entry.getRepositoryInformation().isExposed()) {
+			ResourceRepositoryInformation repoInfo = entry.getRepositoryInformation();
+			if (repoInfo != null && repoInfo.isExposed()) {
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 
 				List<FacetInformation> informations = new ArrayList<>();
@@ -139,7 +141,7 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 					LOGGER.debug("discovered facet for {}", resourceInformation.getResourceType());
 					FacetResourceInformation facetResourceInformation = new FacetResourceInformation();
 					informations.stream().forEach(it -> facetResourceInformation.addFacet(it));
-					facetResourceInformation.setType(resourceInformation.getResourceType());
+					facetResourceInformation.setResourceType(resourceInformation.getResourceType());
 					config.addResource(facetResourceInformation);
 				}
 			}
@@ -154,7 +156,7 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 	}
 
 	private FacetResourceInformation setupDefaultProvider(FacetResourceInformation facetResourceInformation) {
-		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(facetResourceInformation.getType());
+		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(facetResourceInformation.getResourceType());
 
 		FacetProvider acceptedFacetProvider = null;
 		if (facetResourceInformation.getProvider() == null) {

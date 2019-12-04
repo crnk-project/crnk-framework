@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -11,11 +16,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.repository.response.JsonApiResponse;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class ResourceDeleteController extends BaseController {
 
@@ -41,7 +41,8 @@ public class ResourceDeleteController extends BaseController {
 		}
 
 		ResultFactory resultFactory = context.getResultFactory();
-		Response response = new Response(null, 204);
+		int status = getStatus(null, HttpMethod.DELETE);
+		Response response = new Response(null, status);
 		if (results.isEmpty()) {
 			return resultFactory.just(response);
 		}

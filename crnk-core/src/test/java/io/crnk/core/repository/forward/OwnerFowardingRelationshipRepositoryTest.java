@@ -1,6 +1,13 @@
 package io.crnk.core.repository.forward;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -10,32 +17,24 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.mock.repository.MockRepositoryUtil;
-import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
-import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.foward.ForwardingDirection;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class OwnerFowardingRelationshipRepositoryTest {
 
 
 	private ForwardingRelationshipRepository relRepository;
 
-	private ScheduleRepositoryImpl scheduleRepository;
+	private ResourceRepository<Schedule, Long> scheduleRepository;
 
 	private Schedule schedule3;
 
@@ -45,11 +44,11 @@ public class OwnerFowardingRelationshipRepositoryTest {
 
 	private Schedule schedule;
 
-	private ProjectRepository projectRepository;
+	private ResourceRepository<Project, Long> projectRepository;
 
 	private Project project;
 
-	private TaskRepository taskRepository;
+	private ResourceRepository<Task, Long> taskRepository;
 
 	private Task task;
 
@@ -62,7 +61,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
 	@Before
 	public void setup() {
 		CoreTestContainer container = new CoreTestContainer();
-		container.setDefaultPackage();
+		container.addModule(new CoreTestModule());
 		container.boot();
 
 		resourceRegistry = container.getResourceRegistry();
@@ -70,7 +69,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
 		relRepository =
 				(ForwardingRelationshipRepository) entry.getRelationshipRepository("testSerializeEager")
-						.getRelationshipRepository();
+						.getImplementation();
 
 		RelationshipMatcher taskProjectMatcher = new RelationshipMatcher().rule().source(Task.class).target(Project.class).add();
 		taskProjectRepository = new ForwardingRelationshipRepository(Task.class, taskProjectMatcher, ForwardingDirection.OWNER,
@@ -84,7 +83,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		projectTaskRepository.setResourceRegistry(resourceRegistry);
 		projectTaskRepository.setHttpRequestContextProvider(container.getModuleRegistry().getHttpRequestContextProvider());
 
-		testRepository = (RelationIdTestRepository) entry.getResourceRepository().getResourceRepository();
+		testRepository = (RelationIdTestRepository) entry.getResourceRepository().getImplementation();
 		testRepository.setResourceRegistry(resourceRegistry);
 		resource = new RelationIdTestResource();
 		resource.setId(2L);
@@ -92,7 +91,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		testRepository.create(resource);
 
 
-		scheduleRepository = new ScheduleRepositoryImpl();
+		scheduleRepository = container.getRepository(Schedule.class);
 		schedule3 = new Schedule();
 		schedule3.setId(3L);
 		schedule3.setName("schedule");
@@ -104,13 +103,13 @@ public class OwnerFowardingRelationshipRepositoryTest {
 			schedule.setName("schedule");
 			scheduleRepository.create(schedule);
 
-			projectRepository = new ProjectRepository();
+			projectRepository = container.getRepository(Project.class);
 			project = new Project();
 			project.setId(42L + i);
 			project.setName("project");
 			projectRepository.save(project);
 
-			taskRepository = new TaskRepository();
+			taskRepository = container.getRepository(Task.class);
 			task = new Task();
 			task.setId(13L + i);
 			task.setName("task");
@@ -143,7 +142,6 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		Assert.assertNull(resource.getTestSerializeEager());
 	}
 
-
 	@Test(expected = ResourceNotFoundException.class)
 	public void checkSetRelationIdNotFound() {
 		relRepository.setRelation(resource, 123123L, "testSerializeEager");
@@ -151,7 +149,6 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		Assert.assertNull(resource.getTestSerializeEager());
 		relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class));
 	}
-
 
 	@Test
 	public void checkSetRelationIdToNull() {
@@ -220,20 +217,22 @@ public class OwnerFowardingRelationshipRepositoryTest {
 	@Test
 	public void checkAddRemoveRelations() {
 		projectTaskRepository.addRelations(project, Arrays.asList(13L, 14L), "tasks");
-		Assert.assertEquals(2, project.getTasks().size());
-		Assert.assertEquals(13L, project.getTasks().get(0).getId().longValue());
-		Assert.assertEquals(14L, project.getTasks().get(1).getId().longValue());
+		Set<Long> taskIds = project.getTasks().stream().map(it -> it.getId()).collect(Collectors.toSet());
+		Assert.assertTrue(taskIds.contains(13L));
+		Assert.assertTrue(taskIds.contains(14L));
 
 		projectTaskRepository.addRelations(project, Arrays.asList(15L), "tasks");
 		Assert.assertEquals(3, project.getTasks().size());
-		Assert.assertEquals(13L, project.getTasks().get(0).getId().longValue());
-		Assert.assertEquals(14L, project.getTasks().get(1).getId().longValue());
-		Assert.assertEquals(15L, project.getTasks().get(2).getId().longValue());
+		taskIds = project.getTasks().stream().map(it -> it.getId()).collect(Collectors.toSet());
+		Assert.assertTrue(taskIds.contains(13L));
+		Assert.assertTrue(taskIds.contains(14L));
+		Assert.assertTrue(taskIds.contains(15L));
 
 		projectTaskRepository.removeRelations(project, Arrays.asList(13L), "tasks");
 		Assert.assertEquals(2, project.getTasks().size());
-		Assert.assertEquals(14L, project.getTasks().get(0).getId().longValue());
-		Assert.assertEquals(15L, project.getTasks().get(1).getId().longValue());
+		taskIds = project.getTasks().stream().map(it -> it.getId()).collect(Collectors.toSet());
+		Assert.assertTrue(taskIds.contains(14L));
+		Assert.assertTrue(taskIds.contains(15L));
 	}
 
 	@Test
@@ -265,10 +264,4 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		Assert.assertEquals(2, targetsTasks.getList(project.getId()).size());
 		Assert.assertEquals(1, targetsMap.getList(resource.getId()).size());
 	}
-
-	@After
-	public void teardown() {
-		MockRepositoryUtil.clear();
-	}
-
 }

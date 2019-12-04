@@ -53,8 +53,8 @@ public class WorkerResourceRepositoryAdapter implements ResourceRepositoryAdapte
 	}
 
 	@Override
-	public Object getResourceRepository() {
-		return adapter.getResourceRepository();
+	public Object getImplementation() {
+		return adapter.getImplementation();
 	}
 
 	@Override

@@ -133,9 +133,19 @@ the create, delete and update methods. `crnk-meta` accordingly reports
 insertable, updateable, deltable for such repositories as false.
 
 
+anchor:resource_bulk_repository[]
 
+## BulkResourceRepository
 
+WARNING: Experimental and only supports POST
 
+Similar to `ResourceRepository` but takes a list of resources for `create(...)`, `save(...)` and `delete(...)`.
+Allows a repository to process multiple resources at the same time. A request can be made in two ways:
+
+- The data section of the request document must includes a collection rather than a single data item.
+- A JSON Patch request whereas multiple changes to the same repository then access the bulk methods.
+
+For more information about bulk processing can be found <<operations,here>>.
 
 
 ## Query parameters with QuerySpec
@@ -151,9 +161,6 @@ QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameter
 is implemented by <<urlmapper,`QuerySpecUrlMapper`>> that may can also be extended, customized or replaced.
 
 For example showing its use URLs also have a look at the <<resource_repository,ResourceRepository>> section.
-
-
-### API
 
 The QuerySpec API looks like (further setters available as well):
 
@@ -201,7 +208,7 @@ the implementation of a repository as simple as possible.
 
 anchor:filtering[]
 
-### Basic Filtering
+## Basic Filtering
 
 NOTE: The JSON:API specification does not a mandate a specific filtering semantic. Instead
 it provides a recommendation that comes by default with Crnk. Depending on the data store
@@ -298,7 +305,7 @@ For example:
 
 anchor:nested_filtering[]
 
-### Nested Filtering
+## Nested Filtering
 
 WARNING: This feature is experimental. Please provide feedback.
 
@@ -355,7 +362,7 @@ or more simply:
 
 anchor:sorting[]
 
-### Sorting
+## Sorting
 
 Sorting information for the resources can be achieved by providing `sort` parameter.
 
@@ -375,10 +382,10 @@ SortSpec sortSpec = new SortSpec(PathSpec.of("person.address.city"), Direction.D
 
 anchor:pagination[]
 
-### Pagination
+## Pagination
 
 
-#### Offset/Limit Paging
+### Offset/Limit Paging
 
 Crnk comes by default with support for offset/limit paging:
 
@@ -387,7 +394,7 @@ Crnk comes by default with support for offset/limit paging:
 The parameters are then available with `QuerySpec.getPaging(type)` or the shortcuts `QuerySpec.getLimit` and `QuerySpec.getOffset`.
 
 
-#### Number/Size Paging
+## Number/Size Paging
 
 Support for number/size-based paging can be enabled by registering the `NumberSizePagingBehavior` in one of two ways:
 
@@ -403,7 +410,7 @@ a repository has been implemented with offset/limit paging, it works equally wel
 The conversion takes place automatically when invoking `QuerySpec.getPaging(desiredPagingType)`.
 
 
-#### Pagination Links
+### Pagination Links
 
 JSON:API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
 The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
@@ -424,7 +431,7 @@ The potential benefit of the second over the first approach is that it might be 
 determine whether more resources are available rather than counting all resources.
 This is typically achieved by querying `limit + 1` resources.
 
-#### Custom strategies
+### Custom strategies
 
 `OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec` and `NumberSizePagingBehavior` and `NumberSizePagingSpec`
 are two implementations of `PagingBehavior` and `PagingSpec`. Applications are free to add further implementations
@@ -452,7 +459,7 @@ by `NumberSizePagingBehavior` to translate `number` and `size` to `offset` and `
 that are based on `OffsetLimitPagingSpec`.
 
 
-### Sparse Fieldsets
+## Sparse Fieldsets
 
 Information about fields to include in the response can be achieved by providing `fields` parameter:
 
@@ -488,7 +495,7 @@ The QuerySpec for a particular resource type can be obtained with `QuerySpec.get
 
 anchor:urlmapper[]
 
-### URL Mapping
+## URL Mapping
 
 The mapping of request parameters to QuerySpec and back is implemented by `QuerySpecUrlMapper`.
 With `DefaultQuerySpecUrlMapper` there is a default implementation that follows the JSON:API

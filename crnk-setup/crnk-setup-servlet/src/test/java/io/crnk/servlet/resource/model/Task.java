@@ -19,49 +19,47 @@ package io.crnk.servlet.resource.model;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "tasks")
 public class Task {
 
-	@JsonApiId
-	private Long id;
+    @JsonApiId
+    private Long id;
 
-	private String name;
+    private String name;
 
-	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
-	private Project project;
+    @JsonApiRelation
+    private Project project;
 
-	public Task() {
-	}
+    public Task() {
+    }
 
-	public Task(Long id, String name) {
-		this.id = id;
-		this.name = name;
-	}
+    public Task(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public Project getProject() {
-		return project;
-	}
+    public Project getProject() {
+        return project;
+    }
 
-	public void setProject(Project project) {
-		this.project = project;
-	}
+    public void setProject(Project project) {
+        this.project = project;
+    }
 }

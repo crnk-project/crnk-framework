@@ -1,5 +1,11 @@
 package io.crnk.data.jpa.meta.internal;
 
+import java.lang.reflect.Type;
+import java.util.Optional;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.data.jpa.meta.MetaJpaDataObject;
 import io.crnk.meta.model.MetaAttribute;
@@ -10,12 +16,6 @@ import io.crnk.meta.provider.MetaFilterBase;
 import io.crnk.meta.provider.MetaProviderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import java.lang.reflect.Type;
-import java.util.Optional;
 
 public class JpaMetaFilter extends MetaFilterBase {
 
@@ -39,7 +39,7 @@ public class JpaMetaFilter extends MetaFilterBase {
             Type implementationType = beanInformation.getAttribute(attr.getName()).getType();
             Optional<MetaElement> optMetaType = partition.allocateMetaElement(implementationType);
             if (!optMetaType.isPresent()) {
-                LOGGER.warn("unknown type {} for {}, make sure it is a properly annotated with JPA annotations like @Entity, @MappedSuperclass or @Embeddable",
+                LOGGER.info("unknown type {} for {}, make sure it is a properly annotated with JPA annotations like @Entity, @MappedSuperclass or @Embeddable",
                         implementationType, attr.getId());
                 optMetaType = partition.allocateMetaElement(Object.class);
             }

@@ -1,13 +1,14 @@
 package io.crnk.core.engine.registry;
 
 
+import java.util.Collection;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.module.TestResource;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Collection;
 
 public class HierarchicalResourceRegistryPartTest {
 
@@ -38,6 +39,7 @@ public class HierarchicalResourceRegistryPartTest {
 		Mockito.when(information.getResourceType()).thenReturn("test");
 		Mockito.when(information.getImplementationClass()).thenReturn((Class) TestResource.class);
 		Mockito.when(information.getImplementationType()).thenReturn(TestResource.class);
+		Mockito.when(information.getVersionRange()).thenReturn(VersionRange.UNBOUNDED);
 		Mockito.when(information.getResourcePath()).thenReturn("path");
 		RegistryEntry entry = Mockito.mock(RegistryEntry.class);
 		Mockito.when(entry.getResourceInformation()).thenReturn(information);
@@ -63,6 +65,7 @@ public class HierarchicalResourceRegistryPartTest {
 		ResourceInformation information = Mockito.mock(ResourceInformation.class);
 		Mockito.when(information.getResourceType()).thenReturn("child/test");
 		Mockito.when(information.getImplementationType()).thenReturn(TestResource.class);
+		Mockito.when(information.getVersionRange()).thenReturn(VersionRange.UNBOUNDED);
 		RegistryEntry entry = Mockito.mock(RegistryEntry.class);
 		Mockito.when(entry.getResourceInformation()).thenReturn(information);
 		RegistryEntry savedEntry = part.addEntry(entry);
@@ -85,6 +88,7 @@ public class HierarchicalResourceRegistryPartTest {
 		ResourceInformation information = Mockito.mock(ResourceInformation.class);
 		Mockito.when(information.getResourceType()).thenReturn("child/test");
 		Mockito.when(information.getResourceClass()).thenReturn((Class) TestResource.class);
+		Mockito.when(information.getVersionRange()).thenReturn(VersionRange.UNBOUNDED);
 		RegistryEntry entry = Mockito.mock(RegistryEntry.class);
 		Mockito.when(entry.getResourceInformation()).thenReturn(information);
 		part.addEntry(entry);

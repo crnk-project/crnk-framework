@@ -102,4 +102,9 @@ public class ResourceFieldInformationProviderBase implements ResourceFieldInform
     public Optional<String> getMappedBy(BeanAttributeInformation attributeDesc) {
         return Optional.empty();
     }
+
+    @Override
+    public Optional<VersionRange> getVersionRange(BeanAttributeInformation attributeDesc) {
+        return Optional.empty();
+    }
 }

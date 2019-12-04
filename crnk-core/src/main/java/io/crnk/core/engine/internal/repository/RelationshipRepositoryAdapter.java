@@ -13,27 +13,26 @@ import java.util.Map;
  */
 public interface RelationshipRepositoryAdapter {
 
-	Result<JsonApiResponse> setRelation(Object source, Object targetId, ResourceField field, QueryAdapter queryAdapter);
+    Result<JsonApiResponse> setRelation(Object source, Object targetId, ResourceField field, QueryAdapter queryAdapter);
 
-	Result<JsonApiResponse> setRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter queryAdapter);
+    Result<JsonApiResponse> setRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter queryAdapter);
 
-	Result<JsonApiResponse> addRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter queryAdapter);
+    Result<JsonApiResponse> addRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter queryAdapter);
 
-	Result<JsonApiResponse> removeRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter queryAdapter);
+    Result<JsonApiResponse> removeRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter queryAdapter);
 
-	Result<JsonApiResponse> findOneRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter);
+    Result<JsonApiResponse> findOneRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter);
 
 
-	Result<JsonApiResponse> findManyRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter);
+    Result<JsonApiResponse> findManyRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter);
 
-	Result<Map<Object, JsonApiResponse>> findBulkManyTargets(Collection sourceIds, ResourceField field, QueryAdapter
-			queryAdapter);
+    Result<Map<Object, JsonApiResponse>> findBulkManyTargets(Collection sourceIds, ResourceField field, QueryAdapter
+            queryAdapter);
 
-	Result<Map<Object, JsonApiResponse>> findBulkOneTargets(Collection sourceIds, ResourceField field, QueryAdapter
-			queryAdapter);
+    Result<Map<Object, JsonApiResponse>> findBulkOneTargets(Collection sourceIds, ResourceField field, QueryAdapter
+            queryAdapter);
 
-	@Deprecated
-	Object getRelationshipRepository();
+    Object getImplementation();
 
-	ResourceField getResourceField();
+    ResourceField getResourceField();
 }

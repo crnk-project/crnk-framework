@@ -11,7 +11,6 @@
 		"lint": "ng lint",
 		"e2e": "ng e2e"
 	},
-	"private": true,
 	"dependencies": {
 		"@angular/common": "^4.3.2",
 		"@angular/animations": "^4.3.2",
@@ -24,7 +23,7 @@
 		"@angular/router": "^4.3.2",
 		"@types/lodash": "^4.14.50",
 		"core-js": "^2.4.1",
-		"jquery": "^3.2.1",
+		"jquery": "^3.4.0",
 		"lodash": "^4.17.4",
 		"nanoscroller": "^0.8.7",
 		"primeng": "^4.1.2",

@@ -10,6 +10,8 @@ public class HttpStatus {
 
     public static final int CREATED_201 = 201;
 
+    public static final int ACCEPTED_202 = 202;
+
     public static final int NO_CONTENT_204 = 204;
 
     public static final int NOT_FOUND_404 = 404;

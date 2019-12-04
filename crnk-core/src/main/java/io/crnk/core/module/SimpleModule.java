@@ -15,6 +15,8 @@ import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.information.NamingStrategy;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -44,6 +46,8 @@ public class SimpleModule implements Module {
 
 	private List<ResourceFilter> resourceFilters = new ArrayList<>();
 
+	private List<HttpStatusBehavior> httpStatusBehaviors = new ArrayList<>();
+
 	private List<ResourceModificationFilter> resourceModificationFilters = new ArrayList<>();
 
 	private List<ResourceFieldContributor> resourceFieldContributors = new ArrayList<>();
@@ -68,6 +72,8 @@ public class SimpleModule implements Module {
 
 	private List<RepositoryAdapterFactory> repositoryAdapterFactories = new ArrayList<>();
 
+	private List<NamingStrategy> namingStrategies = new ArrayList<>();
+
 	private String moduleName;
 
 	private ModuleContext context;
@@ -87,7 +93,7 @@ public class SimpleModule implements Module {
 	public void setupModule(ModuleContext context) {
 		this.context = context;
 		for (ResourceInformationProvider resourceInformationProvider : resourceInformationProviders) {
-			context.addResourceInformationBuilder(resourceInformationProvider);
+			context.addResourceInformationProvider(resourceInformationProvider);
 		}
 		for (RepositoryInformationProvider resourceInformationBuilder : repositoryInformationProviders) {
 			context.addRepositoryInformationBuilder(resourceInformationBuilder);
@@ -104,6 +110,9 @@ public class SimpleModule implements Module {
 		for (ResourceFilter filter : resourceFilters) {
 			context.addResourceFilter(filter);
 		}
+		for (HttpStatusBehavior httpStatusBehavior : httpStatusBehaviors) {
+			context.addHttpStatusBehavior(httpStatusBehavior);
+		}
 		for (ResourceModificationFilter filter : resourceModificationFilters) {
 			context.addResourceModificationFilter(filter);
 		}
@@ -115,6 +124,9 @@ public class SimpleModule implements Module {
 		}
 		for (RepositoryAdapterFactory factory : repositoryAdapterFactories) {
 			context.addRepositoryAdapterFactory(factory);
+		}
+		for (NamingStrategy namingStrategy : namingStrategies) {
+			context.addNamingStrategy(namingStrategy);
 		}
 		for (Object repository : repositories) {
 			context.addRepository(repository);
@@ -208,6 +220,12 @@ public class SimpleModule implements Module {
 	public void addResourceFilter(ResourceFilter filter) {
 		checkInitialized();
 		resourceFilters.add(filter);
+	}
+
+
+	public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
+		checkInitialized();
+		httpStatusBehaviors.add(httpStatusBehavior);
 	}
 
 	public void addResourceFieldContributor(ResourceFieldContributor resourceFieldContributor) {
@@ -323,24 +341,6 @@ public class SimpleModule implements Module {
 		repositories.add(repository);
 	}
 
-	/**
-	 * @deprecated use addRepository(repository)
-	 */
-	@Deprecated
-	public void addRepository(Class<?> resourceClass, Object repository) {
-		checkInitialized();
-		repositories.add(repository);
-	}
-
-	/**
-	 * @deprecated use addRepository(repository)
-	 */
-	@Deprecated
-	public void addRepository(Class<?> sourceType, Class<?> targetType, Object repository) {
-		checkInitialized();
-		repositories.add(repository);
-	}
-
 	public List<Object> getRepositories() {
 		return Collections.unmodifiableList(repositories);
 	}
@@ -351,6 +351,10 @@ public class SimpleModule implements Module {
 
 	public List<SecurityProvider> getSecurityProviders() {
 		return Collections.unmodifiableList(securityProviders);
+	}
+
+	public List<HttpStatusBehavior> getHttpStatusBehaviors() {
+		return Collections.unmodifiableList(httpStatusBehaviors);
 	}
 
 	public void addHttpRequestProcessor(HttpRequestProcessor httpRequestProcessor) {
@@ -367,6 +371,14 @@ public class SimpleModule implements Module {
 
 	public List<RepositoryAdapterFactory> getRepositoryAdapterFactories() {
 		return Collections.unmodifiableList(repositoryAdapterFactories);
+	}
+
+	public void addNamingStrategy(NamingStrategy namingStrategy) {
+		namingStrategies.add(namingStrategy);
+	}
+
+	public List<NamingStrategy> getNamingStrategies() {
+		return Collections.unmodifiableList(namingStrategies);
 	}
 
 	public void addRegistryPart(String prefix, ResourceRegistryPart part) {

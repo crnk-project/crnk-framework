@@ -55,7 +55,7 @@ public abstract class ResourceRepositoryBase<T, I > implements ResourceRepositor
 		RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
 		String idName = entry.getResourceInformation().getIdField().getUnderlyingName();
 
-		QuerySpec idQuerySpec = querySpec.duplicate();
+		QuerySpec idQuerySpec = querySpec.clone();
 		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idName), FilterOperator.EQ, id));
 		Collection<T> Collection = findAll(idQuerySpec);
 		Iterator<T> iterator = Collection.iterator();
@@ -80,7 +80,7 @@ public abstract class ResourceRepositoryBase<T, I > implements ResourceRepositor
 		RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
 		String idName = entry.getResourceInformation().getIdField().getUnderlyingName();
 
-		QuerySpec idQuerySpec = querySpec.duplicate();
+		QuerySpec idQuerySpec = querySpec.clone();
 		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idName), FilterOperator.EQ, ids));
 		return findAll(idQuerySpec);
 	}

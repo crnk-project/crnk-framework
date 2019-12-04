@@ -8,7 +8,7 @@ import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.data.jpa.AbstractJpaJerseyTest;
-import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.model.QTestEntity;
 import io.crnk.data.jpa.model.SequenceEntity;
 import io.crnk.data.jpa.query.JpaQuery;
@@ -53,12 +53,11 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 	}
 
 	@Override
-	protected void setupModule(JpaModule module, boolean server) {
-		super.setupModule(module, server);
+	protected void setupModule(JpaModuleConfig config, boolean server, EntityManager em) {
+		super.setupModule(config, server, em);
 
 		if (server) {
-			EntityManager entityManager = module.getEntityManager();
-			dtoMapper = Mockito.spy(new TestDTOMapper(entityManager));
+			dtoMapper = Mockito.spy(new TestDTOMapper(em));
 			QuerydslExpressionFactory<QTestEntity> basicComputedValueFactory = (parent, jpaQuery) -> parent.stringValue.upper();
 			QuerydslExpressionFactory<QTestEntity> complexComputedValueFactory = (parent, jpaQuery) -> {
                 QTestEntity root = QTestEntity.testEntity;
@@ -66,21 +65,21 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
                 return JPAExpressions.select(sub.id.count()).from(sub).where(sub.id.lt(root.id));
             };
 
-			QuerydslQueryFactory queryFactory = (QuerydslQueryFactory) module.getQueryFactory();
+			QuerydslQueryFactory queryFactory = (QuerydslQueryFactory) config.getQueryFactory();
 			queryFactory.registerComputedAttribute(TestEntity.class, TestDTO.ATTR_COMPUTED_UPPER_STRING_VALUE, String.class,
 					basicComputedValueFactory);
 			queryFactory.registerComputedAttribute(TestEntity.class, TestDTO.ATTR_COMPUTED_NUMBER_OF_SMALLER_IDS, Long.class,
 					complexComputedValueFactory);
 
 
-			module.addRepository(
+			config.addRepository(
 					JpaRepositoryConfig.builder(TestEntity.class, TestDTO.class, dtoMapper).build());
-			module.addRepository(JpaRepositoryConfig
-					.builder(RelatedEntity.class, RelatedDTO.class, new RelatedDTOMapper(entityManager)).build());
-			module.addRepository(JpaRepositoryConfig
-					.builder(SequenceEntity.class, SequenceDTO.class, new SequenceDTOMapper(entityManager)).build());
+			config.addRepository(JpaRepositoryConfig
+					.builder(RelatedEntity.class, RelatedDTO.class, new RelatedDTOMapper(em)).build());
+			config.addRepository(JpaRepositoryConfig
+					.builder(SequenceEntity.class, SequenceDTO.class, new SequenceDTOMapper(em)).build());
 
-			module.addFilter(new JpaRepositoryFilterBase() {
+			config.addFilter(new JpaRepositoryFilterBase() {
 
 				@Override
 				public <T> JpaQuery<T> filterQuery(Object repository, QuerySpec querySpec, JpaQuery<T> query) {

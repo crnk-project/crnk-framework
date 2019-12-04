@@ -1,9 +1,17 @@
 package io.crnk.test.mock;
 
 import io.crnk.core.module.Module;
+import io.crnk.core.repository.InMemoryResourceRepository;
+import io.crnk.test.mock.models.BulkTask;
+import io.crnk.test.mock.models.RelocatedTask;
+import io.crnk.test.mock.models.ResourceIdentifierBasedRelationshipResource;
+import io.crnk.test.mock.models.VersionedTask;
+import io.crnk.test.mock.repository.BulkInMemoryRepository;
+import io.crnk.test.mock.repository.HistoricTaskRepository;
 import io.crnk.test.mock.repository.PrimitiveAttributeRepository;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.ProjectToTaskRepository;
+import io.crnk.test.mock.repository.ReadOnlyTaskRepository;
 import io.crnk.test.mock.repository.RelationIdTestRepository;
 import io.crnk.test.mock.repository.RenamedIdRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
@@ -36,6 +44,10 @@ public class TestModule implements Module {
 
     private TaskRepository tasks = new TaskRepository();
 
+    private boolean extended = true;
+
+    private BulkInMemoryRepository<BulkTask, Object> bulkTasks = new BulkInMemoryRepository<>(BulkTask.class);
+
     @Override
     public String getModuleName() {
         return "test";
@@ -53,6 +65,15 @@ public class TestModule implements Module {
         context.addRepository(new RelationIdTestRepository());
         context.addRepository(new RenamedIdRepository());
         context.addRepository(new ScheduleStatusRepositoryImpl());
+        context.addRepository(new ReadOnlyTaskRepository());
+        context.addRepository(new HistoricTaskRepository());
+        context.addRepository(new InMemoryResourceRepository<>(RelocatedTask.class));
+        if (extended) {
+            context.addRepository(new InMemoryResourceRepository<>(ResourceIdentifierBasedRelationshipResource.class));
+            context.addRepository(bulkTasks);
+
+            context.addRepository(new InMemoryResourceRepository<>(VersionedTask.class));
+        }
 
         context.addRepository(manyNestedRepository);
         context.addRepository(oneNestedRepository);
@@ -61,7 +82,16 @@ public class TestModule implements Module {
         context.addRepository(nestedManyRelationshipRepository);
         context.addRepository(nestedOneRelationshipRepository);
 
+        context.addNamingStrategy(new TestNamingStrategy());
         context.addExceptionMapper(new TestExceptionMapper());
+    }
+
+    /**
+     * if true will expose the full set of repositories. Some omitted to not over complicate e.g. schema generation
+     */
+    public TestModule setExtended(boolean extended) {
+        this.extended = extended;
+        return this;
     }
 
     public ProjectRepository getProjects() {
@@ -70,6 +100,10 @@ public class TestModule implements Module {
 
     public TaskRepository getTasks() {
         return tasks;
+    }
+
+    public BulkInMemoryRepository<BulkTask, Object> getBulkTasks() {
+        return bulkTasks;
     }
 
     public static void clear() {

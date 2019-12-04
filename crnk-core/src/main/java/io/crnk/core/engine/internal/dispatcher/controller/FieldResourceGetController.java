@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -14,8 +16,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
-
-import java.io.Serializable;
 
 public class FieldResourceGetController extends ResourceIncludeField {
 
@@ -38,7 +38,7 @@ public class FieldResourceGetController extends ResourceIncludeField {
 		// TODO remove Class usage and replace by resourceId
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
 
-		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create();
+		DocumentMappingConfig mappingConfig = context.getMappingConfig();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField);
@@ -48,7 +48,7 @@ public class FieldResourceGetController extends ResourceIncludeField {
 		} else {
 			response = relationshipRepositoryForClass.findOneRelations(castedResourceId, relationshipField, queryAdapter);
 		}
-		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, docummentMapperConfig)).map(this::toResponse);
+		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig)).map(this::toResponse);
 	}
 
 
@@ -57,6 +57,7 @@ public class FieldResourceGetController extends ResourceIncludeField {
 		if (!document.getData().isPresent()) {
 			document.setData(Nullable.nullValue());
 		}
-		return new Response(document, 200);
+		int status = getStatus(document, HttpMethod.GET);
+		return new Response(document, status);
 	}
 }

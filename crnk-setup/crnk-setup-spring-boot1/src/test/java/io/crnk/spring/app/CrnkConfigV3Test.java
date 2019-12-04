@@ -18,43 +18,42 @@ import org.springframework.core.env.Environment;
 public class CrnkConfigV3Test {
 
 
-	@Test
-	public void checkProperties() {
-		ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
-		Mockito.when(applicationContext.getEnvironment()).thenReturn(Mockito.mock(Environment.class));
+    @Test
+    public void checkProperties() {
+        ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
+        Mockito.when(applicationContext.getEnvironment()).thenReturn(Mockito.mock(Environment.class));
 
-		CrnkSpringBootProperties properties = new CrnkSpringBootProperties();
-		properties.setDomainName("testDomain");
-		properties.setDefaultPageLimit(12L);
-		properties.setMaxPageLimit(20L);
-		properties.setPathPrefix("/prefix");
-		properties.setAllowUnknownAttributes(true);
-		properties.setReturn404OnNull(true);
-		properties.setResourcePackage("ch.something");
+        CrnkSpringBootProperties properties = new CrnkSpringBootProperties();
+        properties.setDomainName("testDomain");
+        properties.setDefaultPageLimit(12L);
+        properties.setMaxPageLimit(20L);
+        properties.setPathPrefix("/prefix");
+        properties.setAllowUnknownAttributes(true);
+        properties.setReturn404OnNull(true);
+        properties.setResourcePackage("ch.something");
 
-		ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
 
-		CrnkConfigV3 config = new CrnkConfigV3(properties, objectMapper);
-		config.setApplicationContext(applicationContext);
+        CrnkConfigV3 config = new CrnkConfigV3(properties, objectMapper);
+        config.setApplicationContext(applicationContext);
 
-		SpringServiceDiscovery serviceDiscovery = Mockito.mock(SpringServiceDiscovery.class);
-		CrnkBoot boot = config.crnkBoot(serviceDiscovery);
+        SpringServiceDiscovery serviceDiscovery = Mockito.mock(SpringServiceDiscovery.class);
+        CrnkBoot boot = config.crnkBoot(serviceDiscovery);
 
-		PropertiesProvider propertiesProvider = boot.getPropertiesProvider();
-		Assert.assertEquals("testDomain", propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN));
-		Assert.assertEquals("ch.something", propertiesProvider.getProperty(CrnkProperties.RESOURCE_SEARCH_PACKAGE));
-		Assert.assertEquals("/prefix", propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX));
-		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES));
-		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
+        PropertiesProvider propertiesProvider = boot.getPropertiesProvider();
+        Assert.assertEquals("testDomain", propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN));
+        Assert.assertEquals("/prefix", propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX));
+        Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES));
+        Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
 
-		DefaultQuerySpecUrlMapper deserializer = (DefaultQuerySpecUrlMapper) boot.getUrlMapper();
-		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
+        DefaultQuerySpecUrlMapper deserializer = (DefaultQuerySpecUrlMapper) boot.getUrlMapper();
+        Assert.assertTrue(deserializer.getAllowUnknownAttributes());
 
-		ConstantServiceUrlProvider constantServiceUrlProvider = (ConstantServiceUrlProvider) boot.getServiceUrlProvider();
-		Assert.assertEquals("testDomain/prefix", constantServiceUrlProvider.getUrl());
+        ConstantServiceUrlProvider constantServiceUrlProvider = (ConstantServiceUrlProvider) boot.getServiceUrlProvider();
+        Assert.assertEquals("testDomain/prefix", constantServiceUrlProvider.getUrl());
 
-		Assert.assertSame(objectMapper, boot.getObjectMapper());
+        Assert.assertSame(objectMapper, boot.getObjectMapper());
 
-		Assert.assertNotNull(boot.getModuleRegistry().getSecurityProvider());
-	}
+        Assert.assertNotNull(boot.getModuleRegistry().getSecurityProvider());
+    }
 }

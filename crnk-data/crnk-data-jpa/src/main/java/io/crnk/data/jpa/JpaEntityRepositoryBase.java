@@ -1,7 +1,14 @@
 package io.crnk.data.jpa;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.EntityManager;
+
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
@@ -11,6 +18,7 @@ import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeRelationSpec;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
@@ -28,224 +36,268 @@ import io.crnk.data.jpa.query.JpaQueryExecutor;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 import io.crnk.data.jpa.query.Tuple;
 
-import javax.persistence.EntityManager;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 /**
  * Exposes a JPA entity as ResourceRepository. Inherit from this class to setup
  * a repository.
  */
-public class JpaEntityRepositoryBase<T, I > extends JpaRepositoryBase<T> implements ResourceRepository<T, I>,
-        ResourceRegistryAware {
+public class JpaEntityRepositoryBase<T, I> extends JpaRepositoryBase<T> implements ResourceRepository<T, I>,
+		ResourceRegistryAware {
 
-    private final BeanAttributeInformation primaryKeyAttribute;
+	private final BeanAttributeInformation primaryKeyAttribute;
 
-    private ResourceRegistry resourceRegistry;
+	private ResourceRegistry resourceRegistry;
 
-    public JpaEntityRepositoryBase(Class<T> entityClass) {
-        this(JpaRepositoryConfig.create(entityClass));
-    }
+	public JpaEntityRepositoryBase(Class<T> entityClass) {
+		this(JpaRepositoryConfig.create(entityClass));
+	}
 
-    public JpaEntityRepositoryBase(JpaRepositoryConfig<T> config) {
-        super(config);
-        primaryKeyAttribute = JpaMetaUtils.getUniquePrimaryKey(config.getEntityClass());
-    }
+	public JpaEntityRepositoryBase(JpaRepositoryConfig<T> config) {
+		super(config);
+		primaryKeyAttribute = JpaMetaUtils.getUniquePrimaryKey(config.getEntityClass());
+	}
 
-    public JpaQueryFactory getQueryFactory() {
-        return repositoryConfig.getQueryFactory();
-    }
+	public JpaQueryFactory getQueryFactory() {
+		return repositoryConfig.getQueryFactory();
+	}
 
-    @Override
-    public T findOne(I id, QuerySpec querySpec) {
-        String idField = getIdField().getUnderlyingName();
-        QuerySpec idQuerySpec = querySpec.duplicate();
-        idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, id));
-        List<T> results = findAll(idQuerySpec);
-        return getUnique(results, id);
-    }
+	@Override
+	public T findOne(I id, QuerySpec querySpec) {
+		String idField = getIdField().getUnderlyingName();
+		QuerySpec idQuerySpec = querySpec.clone();
+		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, id));
+		List<T> results = findAll(idQuerySpec);
+		return getUnique(results, id);
+	}
 
-    @Override
-    public ResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
-        String idField = getIdField().getUnderlyingName();
-        QuerySpec idQuerySpec = querySpec.duplicate();
-        idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, ids));
-        return findAll(idQuerySpec);
-    }
+	@Override
+	public ResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
+		String idField = getIdField().getUnderlyingName();
+		QuerySpec idQuerySpec = querySpec.clone();
+		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, ids));
+		return findAll(idQuerySpec);
+	}
 
-    @Override
-    public ResourceList<T> findAll(QuerySpec querySpec) {
-        Class<?> entityClass = repositoryConfig.getEntityClass();
-        QuerySpec filteredQuerySpec = JpaRepositoryUtils.filterQuerySpec(repositoryConfig, this, querySpec);
-        JpaQueryFactory queryFactory = repositoryConfig.getQueryFactory();
-        JpaQuery<?> query = queryFactory.query(entityClass);
-        query.setPrivateData(new JpaRequestContext(this, querySpec));
+	@Override
+	public ResourceList<T> findAll(QuerySpec querySpec) {
+		Class<?> entityClass = repositoryConfig.getEntityClass();
+		QuerySpec filteredQuerySpec = JpaRepositoryUtils.filterQuerySpec(repositoryConfig, this, querySpec);
+		QuerySpec optimizedQuerySpec = optimizeQuerySpec(filteredQuerySpec);
 
-        ComputedAttributeRegistry computedAttributesRegistry = queryFactory.getComputedAttributes();
-        Set<String> computedAttrs = computedAttributesRegistry.getForType(entityClass);
+		JpaQueryFactory queryFactory = repositoryConfig.getQueryFactory();
+		JpaQuery<?> query = queryFactory.query(entityClass);
+		query.setPrivateData(new JpaRequestContext(this, querySpec));
+		configureQuery(query);
 
-        JpaRepositoryUtils.prepareQuery(query, filteredQuerySpec, computedAttrs);
-        query = JpaRepositoryUtils.filterQuery(repositoryConfig, this, filteredQuerySpec, query);
-        JpaQueryExecutor<?> executor = query.buildExecutor();
+		ComputedAttributeRegistry computedAttributesRegistry = queryFactory.getComputedAttributes();
+		Set<String> computedAttrs = computedAttributesRegistry.getForType(entityClass);
 
-        if (optimizeForInclusion(querySpec)) {
-            IncludeRelationSpec includedRelationSpec = querySpec.getIncludedRelations().get(0);
-            executor.fetch(includedRelationSpec.getAttributePath());
-        }
+		JpaRepositoryUtils.prepareQuery(query, optimizedQuerySpec, computedAttrs);
+		query = JpaRepositoryUtils.filterQuery(repositoryConfig, this, optimizedQuerySpec, query);
+		JpaQueryExecutor<?> executor = query.buildExecutor();
 
-        boolean fetchNext = repositoryConfig.isNextFetched(filteredQuerySpec);
-        boolean fetchTotal = repositoryConfig.isTotalFetched(filteredQuerySpec);
+		if (optimizeForInclusion(querySpec)) {
+			IncludeRelationSpec includedRelationSpec = querySpec.getIncludedRelations().get(0);
+			executor.fetch(includedRelationSpec.getAttributePath());
+		}
 
-        JpaRepositoryUtils.prepareExecutor(executor, filteredQuerySpec, fetchRelations());
+		boolean fetchNext = repositoryConfig.isNextFetched(optimizedQuerySpec);
+		boolean fetchTotal = repositoryConfig.isTotalFetched(optimizedQuerySpec);
 
-        if (fetchNext) {
-            executor.setLimit(executor.getLimit() + 1);
-        }
+		JpaRepositoryUtils.prepareExecutor(executor, optimizedQuerySpec, fetchRelations());
 
-        executor = JpaRepositoryUtils.filterExecutor(repositoryConfig, this, filteredQuerySpec, executor);
+		if (fetchNext) {
+			executor.setLimit(executor.getLimit() + 1);
+		}
 
-        List<Tuple> tuples = executor.getResultTuples();
+		executor = JpaRepositoryUtils.filterExecutor(repositoryConfig, this, optimizedQuerySpec, executor);
 
-        Boolean hasNext = null;
-        if (fetchNext) {
-            hasNext = tuples.size() == querySpec.getLimit() + 1;
-            if (hasNext) {
-                tuples = tuples.subList(0, querySpec.getLimit().intValue());
-            }
-        }
+		List<Tuple> tuples = executor.getResultTuples();
 
-        tuples = JpaRepositoryUtils.filterTuples(repositoryConfig, this, filteredQuerySpec, tuples);
+		Boolean hasNext = null;
+		if (fetchNext) {
+			hasNext = tuples.size() == querySpec.getLimit() + 1;
+			if (hasNext) {
+				tuples = tuples.subList(0, querySpec.getLimit().intValue());
+			}
+		}
 
-        ResourceList<T> resources = repositoryConfig.newResultList();
-        MetaInformation metaInfo = resources.getMeta();
-        JpaRepositoryUtils.fillResourceList(repositoryConfig, tuples, resources);
-        resources = JpaRepositoryUtils.filterResults(repositoryConfig, this, filteredQuerySpec, resources);
-        if (fetchTotal) {
-            long totalRowCount = executor.getTotalRowCount();
-            ((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
-        }
-        if (fetchNext) {
-            ((HasMoreResourcesMetaInformation) metaInfo).setHasMoreResources(hasNext);
-        }
+		tuples = JpaRepositoryUtils.filterTuples(repositoryConfig, this, optimizedQuerySpec, tuples);
 
-        return resources;
-    }
+		ResourceList<T> resources = repositoryConfig.newResultList();
+		MetaInformation metaInfo = resources.getMeta();
+		JpaRepositoryUtils.fillResourceList(repositoryConfig, tuples, resources);
+		resources = JpaRepositoryUtils.filterResults(repositoryConfig, this, optimizedQuerySpec, resources);
+		if (fetchTotal) {
+			long totalRowCount = executor.getTotalRowCount();
+			((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
+		}
+		if (fetchNext) {
+			((HasMoreResourcesMetaInformation) metaInfo).setHasMoreResources(hasNext);
+		}
 
-    /**
-     * if single relationship is requested, perform eager loading. For example, helps to
-     * optimize loading uni-directional associations during inclusions (used the default
-     * relationship repositories)
-     */
-    private boolean optimizeForInclusion(QuerySpec querySpec) {
-        ResourceField idField = getIdField();
-        return querySpec.getIncludedRelations().size() == 1 &&
-                querySpec.getIncludedFields().size() == 1
-                && idField.getUnderlyingName().equals(querySpec.getIncludedFields().get(0).getPath().toString());
-    }
+		return resources;
+	}
 
-    /**
-     * By default LookupIncludeBehavior.ALWAYS is in place and we let the relationship repositories load the relations. There
-     * is no need to do join fetches, which can lead to problems with paging (evaluated in memory instead of the db).
-     *
-     * @return relation will be eagerly fetched if true
-     */
-    protected boolean fetchRelations() {
-        return false;
-    }
+	/**
+	 * override to customize query.
+	 */
+	protected void configureQuery(JpaQuery<?> query) {
+		// override to customize  query
+	}
+
+	/**
+	 * Make use of @JsonApiRelationId to avoid joins to foreign tables. Further allows
+	 * the use of @JsonRelation fields that are not backed by a @JoinColumn but just
+	 * a @JsonApiRelationId field.
+	 */
+	protected QuerySpec optimizeQuerySpec(QuerySpec filteredQuerySpec) {
+		QuerySpec clone = filteredQuerySpec.clone();
+
+		String resourceType = filteredQuerySpec.getResourceType();
+		RegistryEntry entry = resourceType != null ? resourceRegistry.getEntry(resourceType) : resourceRegistry.getEntry(filteredQuerySpec.getResourceClass());
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		List<FilterSpec> filters = clone.getFilters();
+		for (FilterSpec filter : filters) {
+			PathSpec path = filter.getPath();
+			if (path == null || path.getElements().size() < 2) {
+				continue;
+			}
+			List<String> elements = path.getElements();
+			String attr1 = elements.get(elements.size() - 2);
+			String attr2 = elements.get(elements.size() - 1);
+			ResourceField firstField = resourceInformation.findFieldByUnderlyingName(attr1);
+			if (firstField != null && firstField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP && firstField.hasIdField() && isRequestingOppositeId(firstField, attr2)) {
+				// use primitive field directly rather than joining
+				PathSpec optimizedPath = PathSpec.of(elements.subList(0, elements.size() - 2)).append(firstField.getIdName());
+				filter.setPath(optimizedPath);
+			}
+		}
+
+		return clone;
+	}
+
+	private boolean isRequestingOppositeId(ResourceField firstField, String requestedField) {
+		String oppositeResourceType = firstField.getOppositeResourceType();
+		ResourceInformation oppositeInformation = resourceRegistry.getEntry(oppositeResourceType).getResourceInformation();
+		ResourceField oppositeField = oppositeInformation.findFieldByUnderlyingName(requestedField);
+		return oppositeField.getResourceFieldType() == ResourceFieldType.ID;
+	}
 
 
-    @Override
-    public <S extends T> S create(S resource) {
-        return saveInternal(resource);
-    }
+	/**
+	 * if single relationship is requested, perform eager loading. For example, helps to
+	 * optimize loading uni-directional associations during inclusions (used the default
+	 * relationship repositories)
+	 */
+	private boolean optimizeForInclusion(QuerySpec querySpec) {
+		ResourceField idField = getIdField();
+		return querySpec.getIncludedRelations().size() == 1 &&
+				querySpec.getIncludedFields().size() == 1
+				&& idField.getUnderlyingName().equals(querySpec.getIncludedFields().get(0).getPath().toString());
+	}
 
-    @Override
-    public <S extends T> S save(S resource) {
-        return saveInternal(resource);
-    }
+	/**
+	 * By default LookupIncludeBehavior.ALWAYS is in place and we let the relationship repositories load the relations. There
+	 * is no need to do join fetches, which can lead to problems with paging (evaluated in memory instead of the db).
+	 *
+	 * @return relation will be eagerly fetched if true
+	 */
+	protected boolean fetchRelations() {
+		return false;
+	}
 
-    @SuppressWarnings("unchecked")
-    private <S extends T> S saveInternal(S resource) {
-        JpaMapper<Object, T> mapper = repositoryConfig.getMapper();
-        Object entity = mapper.unmap(resource);
 
-        // PATCH reads, updates and saves entities, needs reattachment during
-        // save since reads do a detach
-        EntityManager em = getEntityManager();
-        em.persist(entity);
+	@Override
+	public <S extends T> S create(S resource) {
+		return saveInternal(resource);
+	}
 
-        // fetch again since we may have to fetch tuple data and do DTO mapping
-        QuerySpec querySpec = new QuerySpec(repositoryConfig.getResourceClass());
+	@Override
+	public <S extends T> S save(S resource) {
+		return saveInternal(resource);
+	}
 
-        // id may differ from primary key
-        ResourceField idField = getIdField();
-        I id = (I) idField.getAccessor().getValue(resource);
-        // id could have been created during persist
-        if (id == null) {
-            id = getIdFromEntity(em, entity, idField);
-        }
-        PreconditionUtil.verify(id != null, "id not available for entity %s", resource);
-        return (S) findOne(id, querySpec);
-    }
+	@SuppressWarnings("unchecked")
+	private <S extends T> S saveInternal(S resource) {
+		JpaMapper<Object, T> mapper = repositoryConfig.getMapper();
+		Object entity = mapper.unmap(resource);
 
-    /**
-     * Extracts the resource ID from the entity.
-     * By default it uses the entity's primary key if the field name matches the DTO's ID field.
-     * Override in subclasses if a different entity field should be used.
-     *
-     * @return the resource ID or <code>null</code> when it could not be determined
-     */
-    @SuppressWarnings("unchecked")
-    protected I getIdFromEntity(EntityManager em, Object entity, ResourceField idField) {
-        Object pk = em.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
-        PreconditionUtil.verify(pk != null, "pk not available for entity %s", entity);
-        if (pk != null && primaryKeyAttribute.getName().equals(idField.getUnderlyingName()) && idField.getElementType().isAssignableFrom(pk.getClass())) {
-            return (I) pk;
-        }
-        return null;
-    }
+		// PATCH reads, updates and saves entities, needs reattachment during
+		// save since reads do a detach
+		EntityManager em = getEntityManager();
+		em.persist(entity);
 
-    @Override
-    public void delete(I id) {
-        Object pk;
-        ResourceField idField = getIdField();
-        if (idField.getUnderlyingName().equals(primaryKeyAttribute.getName())) {
-            pk = id;
-        } else {
-            T resource = findOne(id, new QuerySpec(getResourceClass()));
-            pk = PropertyUtils.getProperty(resource, primaryKeyAttribute.getName());
-            if (pk == null) {
-                throw new IllegalStateException(
-                        "no primary key available for type=" + getResourceClass().getSimpleName() + " id=" + id);
-            }
-        }
+		// fetch again since we may have to fetch tuple data and do DTO mapping
+		QuerySpec querySpec = new QuerySpec(repositoryConfig.getResourceClass());
 
-        EntityManager em = getEntityManager();
-        Object object = em.find(repositoryConfig.getEntityClass(), pk);
-        if (object != null) {
-            em.remove(object);
-        }
-    }
+		// id may differ from primary key
+		ResourceField idField = getIdField();
+		I id = (I) idField.getAccessor().getValue(resource);
+		// id could have been created during persist
+		if (id == null) {
+			id = getIdFromEntity(em, entity, idField);
+		}
+		PreconditionUtil.verify(id != null, "id not available for entity %s", resource);
+		return (S) findOne(id, querySpec);
+	}
 
-    @Override
-    public Class<T> getResourceClass() {
-        return repositoryConfig.getResourceClass();
-    }
+	/**
+	 * Extracts the resource ID from the entity.
+	 * By default it uses the entity's primary key if the field name matches the DTO's ID field.
+	 * Override in subclasses if a different entity field should be used.
+	 *
+	 * @return the resource ID or <code>null</code> when it could not be determined
+	 */
+	@SuppressWarnings("unchecked")
+	protected I getIdFromEntity(EntityManager em, Object entity, ResourceField idField) {
+		Object pk = em.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
+		PreconditionUtil.verify(pk != null, "pk not available for entity %s", entity);
+		if (pk != null && primaryKeyAttribute.getName().equals(idField.getUnderlyingName()) && idField.getElementType().isAssignableFrom(pk.getClass())) {
+			return (I) pk;
+		}
+		return null;
+	}
 
-    public Class<?> getEntityClass() {
-        return repositoryConfig.getEntityClass();
-    }
+	@Override
+	public void delete(I id) {
+		Object pk;
+		ResourceField idField = getIdField();
+		if (idField.getUnderlyingName().equals(primaryKeyAttribute.getName())) {
+			pk = id;
+		}
+		else {
+			T resource = findOne(id, new QuerySpec(getResourceClass()));
+			pk = PropertyUtils.getProperty(resource, primaryKeyAttribute.getName());
+			if (pk == null) {
+				throw new IllegalStateException(
+						"no primary key available for type=" + getResourceClass().getSimpleName() + " id=" + id);
+			}
+		}
 
-    @Override
-    public void setResourceRegistry(ResourceRegistry resourceRegistry) {
-        this.resourceRegistry = resourceRegistry;
-    }
+		EntityManager em = getEntityManager();
+		Object object = em.find(repositoryConfig.getEntityClass(), pk);
+		if (object != null) {
+			em.remove(object);
+		}
+	}
 
-    public ResourceField getIdField() {
-        RegistryEntry entry = resourceRegistry.getEntry(getResourceClass());
-        ResourceInformation resourceInformation = entry.getResourceInformation();
-        return resourceInformation.getIdField();
-    }
+	@Override
+	public Class<T> getResourceClass() {
+		return repositoryConfig.getResourceClass();
+	}
+
+	public Class<?> getEntityClass() {
+		return repositoryConfig.getEntityClass();
+	}
+
+	@Override
+	public void setResourceRegistry(ResourceRegistry resourceRegistry) {
+		this.resourceRegistry = resourceRegistry;
+	}
+
+	public ResourceField getIdField() {
+		RegistryEntry entry = resourceRegistry.getEntry(getResourceClass());
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		return resourceInformation.getIdField();
+	}
 }

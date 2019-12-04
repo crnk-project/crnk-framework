@@ -16,7 +16,7 @@ public class ProcessInstanceImmediateTerminatationTest extends ActivitiTestBase 
 
         processRepository =
                 (ProcessInstanceResourceRepository<ImmediateTerminatationProcessInstance>) boot.getResourceRegistry().getEntry
-                        (ImmediateTerminatationProcessInstance.class).getResourceRepository().getResourceRepository();
+                        (ImmediateTerminatationProcessInstance.class).getResourceRepository().getImplementation();
 
     }
 

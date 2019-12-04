@@ -20,6 +20,6 @@ public class DefaultServiceDiscoveryFactory implements ServiceDiscoveryFactory {
 			PreconditionUtil.verify(!iterator.hasNext(), "expected unique ServiceDiscovery implementation, got: %s", loader);
 			return discovery;
 		}
-		return null;
+		return new EmptyServiceDiscovery();
 	}
 }

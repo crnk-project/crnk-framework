@@ -1,6 +1,7 @@
 package io.crnk.core.engine.filter;
 
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -17,7 +18,6 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,24 +58,17 @@ public class RepositoryFilterTest {
     private CoreTestContainer container;
 
     @Before
-    @After
-    public void cleanup() {
-        UserRepository.clear();
-        UserToProjectRepository.clear();
-    }
-
-    @Before
     public void prepare() {
         SimpleModule filterModule = new SimpleModule("filter");
         filterModule.addRepositoryFilter(filter);
 
         container = new CoreTestContainer();
-        container.setDefaultPackage();
+        container.addModule(new CoreTestModule());
         container.addModule(filterModule);
         container.boot();
 
         querySpec = new QuerySpec(User.class);
-        querySpec.setPagingSpec(new OffsetLimitPagingSpec());
+        querySpec.setPaging(new OffsetLimitPagingSpec());
         queryAdapter = container.toQueryAdapter(querySpec);
 
         scheduleInfo = container.getEntry(Schedule.class).getResourceInformation();
@@ -85,7 +78,7 @@ public class RepositoryFilterTest {
         taskRelationAdapter = userEntry.getRelationshipRepository("assignedTasks");
         userInfo = userEntry.getResourceInformation();
 
-        UserRepository resourceRepository = (UserRepository) resourceAdapter.getResourceRepository();
+        UserRepository resourceRepository = (UserRepository) resourceAdapter.getImplementation();
         user1 = new User();
         user1.setLoginId(1L);
         resourceRepository.save(user1);
@@ -94,7 +87,7 @@ public class RepositoryFilterTest {
         resourceRepository.save(user2);
 
         UserToProjectRepository userProjectRepository =
-                (UserToProjectRepository) projectRelationAdapter.getRelationshipRepository();
+                (UserToProjectRepository) projectRelationAdapter.getImplementation();
         userProjectRepository.setRelation(user1, 11L, "assignedProjects");
 
         UserToTaskRepository userTaskRepository = new UserToTaskRepository();
@@ -113,7 +106,7 @@ public class RepositoryFilterTest {
         ResourceRepositoryAdapter scheduleResourceAdapter = scheduleRegistry.getResourceRepository();
 
         querySpec = new QuerySpec(Schedule.class);
-        querySpec.setPagingSpec(new OffsetLimitPagingSpec());
+        querySpec.setPaging(new OffsetLimitPagingSpec());
         queryAdapter = container.toQueryAdapter(querySpec);
         scheduleResourceAdapter.findAll(queryAdapter);
 

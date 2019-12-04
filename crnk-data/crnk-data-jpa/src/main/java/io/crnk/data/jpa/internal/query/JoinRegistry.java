@@ -1,14 +1,14 @@
 package io.crnk.data.jpa.internal.query;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.persistence.criteria.JoinType;
+
 import io.crnk.data.jpa.internal.query.backend.JpaQueryBackend;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaMapAttribute;
-
-import javax.persistence.criteria.JoinType;
-import java.util.HashMap;
-import java.util.Map;
 
 public class JoinRegistry<F, E> {
 
@@ -34,11 +34,15 @@ public class JoinRegistry<F, E> {
 	}
 
 	public E getEntityAttribute(MetaAttributePath attrPath) {
+		return getEntityAttribute(attrPath, query.getDefaultJoinType());
+	}
+
+	public E getEntityAttribute(MetaAttributePath attrPath, JoinType defaultJoinType) {
 		MetaAttributePath associationPath = extractAssociationPath(attrPath);
 		MetaAttributePath primitivePath = attrPath.subPath(associationPath.length());
 
 		@SuppressWarnings("unchecked")
-		E from = (E) getOrCreateJoin(associationPath);
+		E from = (E) getOrCreateJoin(associationPath, defaultJoinType);
 		if (primitivePath.length() == 0) {
 			return from;
 		}
@@ -50,10 +54,12 @@ public class JoinRegistry<F, E> {
 
 			E currentCriteriaPath = criteriaPath != null ? criteriaPath : from;
 			if (pathElement instanceof MetaMapAttribute) {
-				if (criteriaPath != null)
+				if (criteriaPath != null) {
 					throw new IllegalStateException("Cannot join to map");
+				}
 				criteriaPath = joinMap(currentCriteriaPath, pathElement);
-			} else {
+			}
+			else {
 				// we may need to downcast if attribute is defined on a subtype
 				MetaDataObject parent = pathElement.getParent().asDataObject();
 				Class<?> pathType = parent.getImplementationClass();
@@ -74,27 +80,28 @@ public class JoinRegistry<F, E> {
 		return backend.joinMapValue(currentCriteriaPath, pathElement, mapPathElement.getKey());
 	}
 
-	public F getOrCreateJoin(MetaAttributePath path) {
-		if (path.length() == 0)
+	public F getOrCreateJoin(MetaAttributePath path, JoinType defaultJoinType) {
+		if (path.length() == 0) {
 			return backend.getRoot();
+		}
 
 		MetaAttributePath subPath = new MetaAttributePath();
 		F from = backend.getRoot();
 
 		for (int i = 0; i < path.length(); i++) {
 			MetaAttribute pathElement = path.getElement(i);
-			from = getOrCreateJoin(subPath, pathElement);
+			from = getOrCreateJoin(subPath, pathElement, defaultJoinType);
 			subPath = subPath.concat(pathElement);
 		}
 		return from;
 	}
 
-	private F getOrCreateJoin(MetaAttributePath srcPath, MetaAttribute targetAttr) {
+	private F getOrCreateJoin(MetaAttributePath srcPath, MetaAttribute targetAttr, JoinType defaultJoinType) {
 		MetaAttributePath path = srcPath.concat(targetAttr);
 		F parent = joinMap.get(srcPath);
 		F join = joinMap.get(path);
 		if (join == null) {
-			JoinType joinType = query.getJoinType(path);
+			JoinType joinType = query.getJoinType(path, defaultJoinType);
 			join = backend.doJoin(targetAttr, joinType, parent);
 			joinMap.put(path, join);
 		}
@@ -102,8 +109,9 @@ public class JoinRegistry<F, E> {
 	}
 
 	public void putJoin(MetaAttributePath path, F root) {
-		if (joinMap.containsKey(path))
+		if (joinMap.containsKey(path)) {
 			throw new IllegalArgumentException(path.toString() + " already exists");
+		}
 		joinMap.put(path, root);
 	}
 }

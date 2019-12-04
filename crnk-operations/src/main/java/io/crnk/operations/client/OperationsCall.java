@@ -84,7 +84,7 @@ public class OperationsCall {
 	protected <T> T fromResource(Document document, Class<T> clazz) {
 		CrnkClient crnk = client.getCrnk();
 		ClientDocumentMapper documentMapper = crnk.getDocumentMapper();
-		return (T) documentMapper.fromDocument(document, false);
+		return (T) documentMapper.fromDocument(document, false, crnk.getQueryContext());
 	}
 
 	public void execute() {

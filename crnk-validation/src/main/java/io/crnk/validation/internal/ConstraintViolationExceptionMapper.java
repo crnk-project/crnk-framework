@@ -5,6 +5,8 @@ import io.crnk.core.engine.document.ErrorDataBuilder;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.ExceptionMapperHelper;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
@@ -13,6 +15,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module.ModuleContext;
@@ -173,9 +176,13 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 
 		StringBuilder message = new StringBuilder();
 
+		HttpRequestContextProvider httpRequestContextProvider = context.getModuleRegistry().getHttpRequestContextProvider();
+		HttpRequestContext requestContext = httpRequestContextProvider.getRequestContext();
+		QueryContext queryContext = requestContext.getQueryContext();
+
 		Iterable<ErrorData> errors = errorResponse.getErrors();
 		for (ErrorData error : errors) {
-			ConstraintViolationImpl violation = ConstraintViolationImpl.fromError(context.getResourceRegistry(), error);
+			ConstraintViolationImpl violation = ConstraintViolationImpl.fromError(context.getResourceRegistry(), error, queryContext);
 			violations.add(violation);
 
 			// TODO cleanup message handling

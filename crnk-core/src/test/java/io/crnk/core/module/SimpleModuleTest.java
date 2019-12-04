@@ -1,5 +1,10 @@
 package io.crnk.core.module;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -10,11 +15,14 @@ import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.information.NamingStrategy;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.dispatcher.filter.TestFilter;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.CrnkExceptionMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
@@ -41,11 +49,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class SimpleModuleTest {
 
@@ -76,6 +79,18 @@ public class SimpleModuleTest {
 		Assert.assertEquals(0, context.numJacksonModules);
 		Assert.assertEquals(0, context.numRepositories);
 	}
+
+	@Test
+	public void testNamingStrategy() {
+		NamingStrategy namingStrategy = Mockito.mock(NamingStrategy.class);
+		module.addNamingStrategy(namingStrategy);
+		Assert.assertEquals(1, module.getNamingStrategies().size());
+		module.setupModule(context);
+
+		Assert.assertEquals(1, context.numNamingStrategies++);
+		Assert.assertEquals(0, context.numRepositories);
+	}
+
 
 	@Test
 	public void testRepositoryInformationBuilder() {
@@ -125,7 +140,8 @@ public class SimpleModuleTest {
 		try {
 			module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
 			Assert.fail("IllegalArgumentException expected, paging was added already");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 		}
 	}
 
@@ -244,6 +260,8 @@ public class SimpleModuleTest {
 
 		private int numRepositories = 0;
 
+		private int numNamingStrategies = 0;
+
 		private int numFilters = 0;
 
 		private int numExceptionMapperLookup = 0;
@@ -253,7 +271,7 @@ public class SimpleModuleTest {
 		private int numDecorators = 0;
 
 		@Override
-		public void addResourceInformationBuilder(ResourceInformationProvider resourceInformationProvider) {
+		public void addResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
 			numResourceInformationBuilds++;
 		}
 
@@ -265,16 +283,6 @@ public class SimpleModuleTest {
 		@Override
 		public void addJacksonModule(Module module) {
 			numJacksonModules++;
-		}
-
-		@Override
-		public void addRepository(Class<?> resourceClass, Object repository) {
-			numRepositories++;
-		}
-
-		@Override
-		public void addRepository(Class<?> sourceResourceClass, Class<?> targetResourceClass, Object repository) {
-			numRepositories++;
 		}
 
 		@Override
@@ -305,6 +313,11 @@ public class SimpleModuleTest {
 		@Override
 		public SecurityProvider getSecurityProvider() {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DocumentMapper getDocumentMapper() {
+			return null;
 		}
 
 		@Override
@@ -433,6 +446,20 @@ public class SimpleModuleTest {
 		@Override
 		public ModuleRegistry getModuleRegistry() {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
+		}
+
+		@Override
+		public List<NamingStrategy> getNamingStrategies() {
+			return null;
+		}
+
+		@Override
+		public void addNamingStrategy(NamingStrategy namingStrategy) {
+			numNamingStrategies++;
 		}
 
 		@Override

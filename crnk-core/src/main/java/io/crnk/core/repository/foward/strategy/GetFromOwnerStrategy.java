@@ -1,17 +1,5 @@
 package io.crnk.core.repository.foward.strategy;
 
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.MultivaluedMap;
-import io.crnk.core.engine.query.QueryContext;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.list.DefaultResourceList;
-
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.internal.utils.MultivaluedMap;
+import io.crnk.core.engine.internal.utils.ResourceUtils;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.list.DefaultResourceList;
+
+public class GetFromOwnerStrategy<T, I, D, J> extends ForwardingStrategyBase
 		implements ForwardingGetStrategy<T, I, D, J> {
 
 
@@ -40,6 +40,9 @@ public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 			Set targetIds = new HashSet();
 			for (Object source : sources) {
 				Object targetId = field.getIdAccessor().getValue(source);
+				if(targetId == null){
+					continue; // null relationship
+				}
 				if (field.isCollection()) {
 					targetIds.addAll((Collection) targetId);
 				} else {
@@ -47,18 +50,16 @@ public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 				}
 			}
 
-			ResourceRepositoryAdapter targetAdapter = targetEntry.getResourceRepository();
-			JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(querySpec, queryContext)).get();
-			targets = (List<D>) response.getEntity();
-			return toResult(field, targetInformation, sources, targets);
+			if(!targetIds.isEmpty()) {
+				ResourceRepositoryAdapter targetAdapter = targetEntry.getResourceRepository();
+				JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(querySpec, queryContext)).get();
+				targets = (List<D>) response.getEntity();
+				return toResult(field, targetInformation, sources, targets);
+			}else{
+				return newResultMap();
+			}
 		} else {
-			MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
-
-				@Override
-				protected List<D> newList() {
-					return new DefaultResourceList<>();
-				}
-			};
+			MultivaluedMap bulkResult = newResultMap();
 			for (Object source : sources) {
 				Object sourceId = sourceInformation.getId(source);
 
@@ -75,18 +76,21 @@ public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 		}
 	}
 
-	private MultivaluedMap<I, D> toResult(ResourceField field, ResourceInformation targetInformation,
-										  List sources,
-										  List<D> targets) {
-
-		MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
+	private MultivaluedMap newResultMap() {
+		return new MultivaluedMap<I, D>() {
 
 			@Override
 			protected List<D> newList() {
 				return new DefaultResourceList<>();
 			}
 		};
+	}
 
+	private MultivaluedMap<I, D> toResult(ResourceField field, ResourceInformation targetInformation,
+			List sources,
+			List<D> targets) {
+
+		MultivaluedMap bulkResult = newResultMap();
 		Map targetMap = new HashMap();
 		for (D target : targets) {
 			Object targetId = targetInformation.getId(target);
@@ -94,14 +98,17 @@ public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 		}
 
 		for (Object source : sources) {
-			Object sourceId = field.getParentResourceInformation().getId(source);
+			Object sourceId = field.getResourceInformation().getId(source);
+
 			Object targetId = field.getIdAccessor().getValue(source);
 			if (field.isCollection()) {
-				((Collection) targetId).retainAll(targetMap.keySet());
-				for (Object targetElementId : (Collection) targetId) {
+				Collection targetIds = ResourceUtils.toTypedIds(targetInformation, ((Collection) targetId));
+				targetIds.retainAll(targetMap.keySet());
+				for (Object targetElementId : targetIds) {
 					addResult(bulkResult, field, sourceId, targetElementId, targetMap);
 				}
 			} else if (targetId != null) {
+				targetId = ResourceUtils.toTypedId(targetInformation, targetId);
 				addResult(bulkResult, field, sourceId, targetId, targetMap);
 			} else {
 				bulkResult.add(sourceId, null);
@@ -114,7 +121,7 @@ public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 		Object target = targetMap.get(targetId);
 		if (target == null) {
 			throw new ResourceNotFoundException("targetId=" + targetId + " not found for sourceId=" + sourceId + ", field=" +
-					field.getUnderlyingName() + ", sourceType=" + field.getParentResourceInformation().getResourceType());
+					field.getUnderlyingName() + ", sourceType=" + field.getResourceInformation().getResourceType());
 		}
 		bulkResult.add(sourceId, target);
 	}

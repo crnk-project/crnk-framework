@@ -47,7 +47,7 @@ public class EmbeddableMetaFactory extends AbstractJpaDataObjectFactory<MetaEmbe
 	}
 
 	@Override
-	protected MetaAttribute createAttribute(MetaEmbeddable metaDataObject, String name) {
+	protected MetaAttribute createAttribute(MetaEmbeddable metaDataObject, BeanAttributeInformation attrInformation, String name) {
 		MetaEmbeddableAttribute attr = new MetaEmbeddableAttribute();
 		attr.setParent(metaDataObject, true);
 		attr.setName(name);

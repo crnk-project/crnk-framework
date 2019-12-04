@@ -16,8 +16,10 @@
  */
 package io.crnk.servlet;
 
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.servlet.resource.model.ServletTestModule;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,172 +49,174 @@ import static org.junit.Assert.assertNotNull;
 
 public class CrnkFilterTest {
 
-	private static final String FIRST_TASK_ATTRIBUTES = "{\"name\":\"First task\"}";
+    private static final String FIRST_TASK_ATTRIBUTES = "{\"name\":\"First task\"}";
 
-	private static final String SOME_TASK_ATTRIBUTES = "{\"name\":\"Some task\"}";
+    private static final String SOME_TASK_ATTRIBUTES = "{\"name\":\"Some task\"}";
 
-	private static final String FIRST_TASK_LINKS = "{\"self\":\"http://localhost:8080/api/tasks/1\"}";
+    private static final String FIRST_TASK_LINKS = "{\"self\":\"http://localhost:8080/api/tasks/1\"}";
 
-	private static final String PROJECT1_RELATIONSHIP_LINKS =
-			"{\"self\":\"http://localhost:8080/api/tasks/1/relationships/project\","
-					+ "\"related\":\"http://localhost:8080/api/tasks/1/project\"}";
+    private static final String PROJECT1_RELATIONSHIP_LINKS =
+            "{\"self\":\"http://localhost:8080/api/tasks/1/relationships/project\","
+                    + "\"related\":\"http://localhost:8080/api/tasks/1/project\"}";
 
-	private static final String RESOURCE_SEARCH_PACKAGE = "io.crnk.servlet.resource";
+    private static final String RESOURCE_DEFAULT_DOMAIN = "http://localhost:8080";
 
-	private static final String RESOURCE_DEFAULT_DOMAIN = "http://localhost:8080";
+    private static Logger log = LoggerFactory.getLogger(CrnkFilterTest.class);
 
-	private static Logger log = LoggerFactory.getLogger(CrnkFilterTest.class);
+    private ServletContext servletContext;
 
-	private ServletContext servletContext;
+    private FilterConfig filterConfig;
 
-	private FilterConfig filterConfig;
+    private Filter filter;
 
-	private Filter filter;
+    @Before
+    public void before() throws Exception {
+        filter = new CrnkFilter() {
+            @Override
+            protected void initCrnk(CrnkBoot boot) {
+                boot.addModule(new ServletTestModule());
+            }
+        };
 
-	@Before
-	public void before() throws Exception {
-		filter = new CrnkFilter();
+        servletContext = new MockServletContext();
+        ((MockServletContext) servletContext).setContextPath("");
+        filterConfig = new MockFilterConfig(servletContext);
+        ((MockFilterConfig) filterConfig).addInitParameter(CrnkProperties.WEB_PATH_PREFIX, "/api");
+        ((MockFilterConfig) filterConfig).addInitParameter(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, RESOURCE_DEFAULT_DOMAIN);
 
-		servletContext = new MockServletContext();
-		((MockServletContext) servletContext).setContextPath("");
-		filterConfig = new MockFilterConfig(servletContext);
-		((MockFilterConfig) filterConfig).addInitParameter(CrnkProperties.WEB_PATH_PREFIX, "/api");
-		((MockFilterConfig) filterConfig).addInitParameter(CrnkProperties.RESOURCE_SEARCH_PACKAGE, RESOURCE_SEARCH_PACKAGE);
-		((MockFilterConfig) filterConfig).addInitParameter(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, RESOURCE_DEFAULT_DOMAIN);
+        filter.init(filterConfig);
+    }
 
-		filter.init(filterConfig);
-	}
+    @After
+    public void after() {
+        filter.destroy();
+    }
 
-	@After
-	public void after() {
-		filter.destroy();
-	}
+    @Test
+    public void testNonHttpRequest() throws Exception {
+        FilterChain chain = Mockito.mock(FilterChain.class);
+        ServletRequest nonHttpRequest = Mockito.mock(ServletRequest.class);
+        ServletResponse nonHttpResponse = Mockito.mock(ServletResponse.class);
+        HttpServletRequest httpRequest = Mockito.mock(HttpServletRequest.class);
+        ServletResponse httpResponse = Mockito.mock(HttpServletResponse.class);
+        filter.doFilter(nonHttpRequest, nonHttpResponse, chain);
+        Mockito.verify(chain, Mockito.times(1)).doFilter(nonHttpRequest, nonHttpResponse);
 
-	@Test
-	public void testNonHttpRequest() throws Exception {
-		FilterChain chain = Mockito.mock(FilterChain.class);
-		ServletRequest nonHttpRequest = Mockito.mock(ServletRequest.class);
-		ServletResponse nonHttpResponse = Mockito.mock(ServletResponse.class);
-		HttpServletRequest httpRequest = Mockito.mock(HttpServletRequest.class);
-		ServletResponse httpResponse = Mockito.mock(HttpServletResponse.class);
-		filter.doFilter(nonHttpRequest, nonHttpResponse, chain);
-		Mockito.verify(chain, Mockito.times(1)).doFilter(nonHttpRequest, nonHttpResponse);
+        filter.doFilter(nonHttpRequest, httpResponse, chain);
+        Mockito.verify(chain, Mockito.times(1)).doFilter(nonHttpRequest, httpResponse);
 
-		filter.doFilter(nonHttpRequest, httpResponse, chain);
-		Mockito.verify(chain, Mockito.times(1)).doFilter(nonHttpRequest, httpResponse);
+        filter.doFilter(httpRequest, nonHttpResponse, chain);
+        Mockito.verify(chain, Mockito.times(1)).doFilter(httpRequest, nonHttpResponse);
+    }
 
-		filter.doFilter(httpRequest, nonHttpResponse, chain);
-		Mockito.verify(chain, Mockito.times(1)).doFilter(httpRequest, nonHttpResponse);
-	}
+    @Test
+    public void onNonRepositoryRequestShouldPassTrough() throws Exception {
+        MockFilterChain filterChain = new MockFilterChain();
 
-	@Test
-	public void onNonRepositoryRequestShouldPassTrough() throws Exception {
-		MockFilterChain filterChain = new MockFilterChain();
+        MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+        request.setMethod("GET");
+        request.setContextPath("");
+        request.setServletPath("/api");
+        request.setPathInfo(null);
+        request.setRequestURI("/api/somethingDifferent/");
+        request.addHeader("Accept", "*/*");
 
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
-		request.setMethod("GET");
-		request.setContextPath("");
-		request.setServletPath("/api");
-		request.setPathInfo(null);
-		request.setRequestURI("/api/somethingDifferent/");
-		request.addHeader("Accept", "*/*");
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
+        filter.doFilter(request, response, filterChain);
 
-		filter.doFilter(request, response, filterChain);
+        // no content set yet
+        Assert.assertEquals(0, response.getContentLength());
+    }
 
-		// no content set yet
-		Assert.assertEquals(0, response.getContentLength());
-	}
+    @Test
+    public void onSimpleCollectionGetShouldReturnCollectionOfResources() throws Exception {
+        MockFilterChain filterChain = new MockFilterChain();
 
-	@Test
-	public void onSimpleCollectionGetShouldReturnCollectionOfResources() throws Exception {
-		MockFilterChain filterChain = new MockFilterChain();
+        MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+        request.setMethod("GET");
+        request.setContextPath("");
+        request.setServletPath("/api");
+        request.setPathInfo(null);
+        request.setRequestURI("/api/tasks/");
+        request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
+        request.addHeader("Accept", "*/*");
 
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
-		request.setMethod("GET");
-		request.setContextPath("");
-		request.setServletPath("/api");
-		request.setPathInfo(null);
-		request.setRequestURI("/api/tasks/");
-		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-		request.addHeader("Accept", "*/*");
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
+        filter.doFilter(request, response, filterChain);
 
-		filter.doFilter(request, response, filterChain);
+        Assert.assertEquals(200, response.getStatus());
 
-		Assert.assertEquals(200, response.getStatus());
+        String responseContent = response.getContentAsString();
 
-		String responseContent = response.getContentAsString();
+        log.debug("responseContent: {}", responseContent);
+        assertNotNull(responseContent);
 
-		log.debug("responseContent: {}", responseContent);
-		assertNotNull(responseContent);
+        assertJsonPartEquals("tasks", responseContent, "data[0].type");
+        assertJsonPartEquals("\"1\"", responseContent, "data[0].id");
+        assertJsonPartEquals(FIRST_TASK_ATTRIBUTES, responseContent, "data[0].attributes");
+        assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data[0].links");
+        assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data[0].relationships.project.links");
+    }
 
-		assertJsonPartEquals("tasks", responseContent, "data[0].type");
-		assertJsonPartEquals("\"1\"", responseContent, "data[0].id");
-		assertJsonPartEquals(FIRST_TASK_ATTRIBUTES, responseContent, "data[0].attributes");
-		assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data[0].links");
-		assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data[0].relationships.project.links");
-	}
+    @Test
+    public void onSimpleResourceGetShouldReturnOneResource() throws Exception {
+        MockFilterChain filterChain = new MockFilterChain();
 
-	@Test
-	public void onSimpleResourceGetShouldReturnOneResource() throws Exception {
-		MockFilterChain filterChain = new MockFilterChain();
+        MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+        request.setMethod("GET");
+        request.setContextPath("");
+        request.setServletPath("/api");
+        request.setPathInfo(null);
+        request.setRequestURI("/api/tasks/1");
+        request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
+        request.addHeader("Accept", "*/*");
 
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
-		request.setMethod("GET");
-		request.setContextPath("");
-		request.setServletPath("/api");
-		request.setPathInfo(null);
-		request.setRequestURI("/api/tasks/1");
-		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-		request.addHeader("Accept", "*/*");
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
+        filter.doFilter(request, response, filterChain);
 
-		filter.doFilter(request, response, filterChain);
+        String responseContent = response.getContentAsString();
 
-		String responseContent = response.getContentAsString();
+        log.debug("responseContent: {}", responseContent);
+        assertNotNull(responseContent);
 
-		log.debug("responseContent: {}", responseContent);
-		assertNotNull(responseContent);
+        assertJsonPartEquals("tasks", responseContent, "data.type");
+        assertJsonPartEquals("\"1\"", responseContent, "data.id");
+        assertJsonPartEquals(FIRST_TASK_ATTRIBUTES, responseContent, "data.attributes");
+        assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data.links");
+        assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data.relationships.project.links");
+    }
 
-		assertJsonPartEquals("tasks", responseContent, "data.type");
-		assertJsonPartEquals("\"1\"", responseContent, "data.id");
-		assertJsonPartEquals(SOME_TASK_ATTRIBUTES, responseContent, "data.attributes");
-		assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data.links");
-		assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data.relationships.project.links");
-	}
+    @Test
+    public void onCollectionRequestWithParamsGetShouldReturnCollection() throws Exception {
+        MockFilterChain filterChain = new MockFilterChain();
 
-	@Test
-	public void onCollectionRequestWithParamsGetShouldReturnCollection() throws Exception {
-		MockFilterChain filterChain = new MockFilterChain();
+        MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+        request.setMethod("GET");
+        request.setContextPath("");
+        request.setServletPath("/api");
+        request.setPathInfo(null);
+        request.setRequestURI("/api/tasks");
+        request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
+        request.addHeader("Accept", "*/*");
+        request.addParameter("filter[name]", "First task");
+        request.setQueryString(URLEncoder.encode("filter[name]", StandardCharsets.UTF_8.name()) + "=First task");
 
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
-		request.setMethod("GET");
-		request.setContextPath("");
-		request.setServletPath("/api");
-		request.setPathInfo(null);
-		request.setRequestURI("/api/tasks");
-		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-		request.addHeader("Accept", "*/*");
-		request.addParameter("filter[name]", "John");
-		request.setQueryString(URLEncoder.encode("filter[name]", StandardCharsets.UTF_8.name()) + "=John");
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
+        filter.doFilter(request, response, filterChain);
 
-		filter.doFilter(request, response, filterChain);
+        String responseContent = response.getContentAsString();
 
-		String responseContent = response.getContentAsString();
+        log.debug("responseContent: {}", responseContent);
+        assertNotNull(responseContent);
 
-		log.debug("responseContent: {}", responseContent);
-		assertNotNull(responseContent);
-
-		assertJsonPartEquals("tasks", responseContent, "data[0].type");
-		assertJsonPartEquals("\"1\"", responseContent, "data[0].id");
-		assertJsonPartEquals(FIRST_TASK_ATTRIBUTES, responseContent, "data[0].attributes");
-		assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data[0].links");
-		assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data[0].relationships.project.links");
-	}
+        assertJsonPartEquals("tasks", responseContent, "data[0].type");
+        assertJsonPartEquals("\"1\"", responseContent, "data[0].id");
+        assertJsonPartEquals(FIRST_TASK_ATTRIBUTES, responseContent, "data[0].attributes");
+        assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data[0].links");
+        assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data[0].relationships.project.links");
+    }
 }

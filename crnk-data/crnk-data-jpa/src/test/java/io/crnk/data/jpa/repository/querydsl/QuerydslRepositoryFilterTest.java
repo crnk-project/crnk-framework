@@ -2,7 +2,7 @@ package io.crnk.data.jpa.repository.querydsl;
 
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.data.jpa.JpaEntityRepository;
-import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.JpaRepositoryConfig;
 import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.query.AbstractJpaTest;
@@ -19,32 +19,32 @@ import javax.transaction.Transactional;
 @Transactional
 public class QuerydslRepositoryFilterTest extends AbstractJpaTest {
 
-	private QuerydslRepositoryFilterBase filter;
+    private QuerydslRepositoryFilterBase filter;
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void translationInterceptor() {
-		JpaRepositoryConfig<TestEntity> config = JpaRepositoryConfig.create(TestEntity.class);
-		config.setQueryFactory(module.getConfig().getQueryFactory());
-		JpaEntityRepository<TestEntity, Long> repo = new JpaEntityRepository<>(config);
-		repo.setResourceRegistry(resourceRegistry);
+    @SuppressWarnings("unchecked")
+    @Test
+    public void translationInterceptor() {
+        JpaRepositoryConfig<TestEntity> config = JpaRepositoryConfig.create(TestEntity.class);
+        config.setQueryFactory(module.getConfig().getQueryFactory());
+        JpaEntityRepository<TestEntity, Long> repo = new JpaEntityRepository<>(config);
+        repo.setResourceRegistry(resourceRegistry);
 
 
-		QuerySpec querySpec = new QuerySpec(TestEntity.class);
-		repo.findAll(querySpec);
+        QuerySpec querySpec = new QuerySpec(TestEntity.class);
+        repo.findAll(querySpec);
 
-		Mockito.verify(filter, Mockito.times(1)).filterQueryTranslation(Mockito.eq(repo), Mockito.eq(querySpec),
-				Mockito.any(QuerydslTranslationContext.class));
-	}
+        Mockito.verify(filter, Mockito.times(1)).filterQueryTranslation(Mockito.eq(repo), Mockito.eq(querySpec),
+                Mockito.any(QuerydslTranslationContext.class));
+    }
 
-	@Override
-	protected void setupModule(JpaModule module2) {
-		filter = Mockito.spy(new QuerydslRepositoryFilterBase());
-		module.addFilter(filter);
-	}
+    @Override
+    protected void setupModule(JpaModuleConfig config) {
+        filter = Mockito.spy(new QuerydslRepositoryFilterBase());
+        config.addFilter(filter);
+    }
 
-	@Override
-	protected JpaQueryFactory createQueryFactory(EntityManager em) {
-		return QuerydslQueryFactory.newInstance();
-	}
+    @Override
+    protected JpaQueryFactory createQueryFactory(EntityManager em) {
+        return QuerydslQueryFactory.newInstance();
+    }
 }

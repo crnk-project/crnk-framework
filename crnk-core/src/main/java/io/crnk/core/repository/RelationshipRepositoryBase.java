@@ -275,7 +275,7 @@ public class RelationshipRepositoryBase<T, I , D, J >
 		RegistryEntry targetEntry = getTargetEntry(field);
 
 		String oppositeName = getOppositeName(fieldName);
-		QuerySpec idQuerySpec = querySpec.duplicate();
+		QuerySpec idQuerySpec = querySpec.clone();
 		idQuerySpec.addFilter(
 				new FilterSpec(Arrays.asList(oppositeName, sourceInformation.getIdField().getUnderlyingName()), FilterOperator
 						.EQ, sourceIds));

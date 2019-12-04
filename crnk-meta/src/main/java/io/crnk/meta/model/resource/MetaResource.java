@@ -1,30 +1,53 @@
 package io.crnk.meta.model.resource;
 
+import io.crnk.core.engine.information.resource.VersionRange;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
 /**
- * A JSON API resource.
+ * A JSON:API resource.
  */
-@JsonApiResource(type = "meta/resource")
+@JsonApiResource(type = "metaResource", resourcePath = "meta/resource")
 public class MetaResource extends MetaResourceBase { // NOSONAR ignore exception hierarchy
 
-    private String resourceType;
+	private String resourceType;
 
-    private String resourcePath;
+	private String resourcePath;
 
-    public String getResourceType() {
-        return resourceType;
-    }
+	@JsonApiRelation
+	private MetaResourceRepository repository;
 
-    public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
-    }
+	private VersionRange versionRange;
 
-    public String getResourcePath() {
-        return resourcePath;
-    }
+	public VersionRange getVersionRange() {
+		return versionRange;
+	}
 
-    public void setResourcePath(String resourcePath) {
-        this.resourcePath = resourcePath;
-    }
+	public void setVersionRange(VersionRange versionRange) {
+		this.versionRange = versionRange;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public String getResourcePath() {
+		return resourcePath;
+	}
+
+	public void setResourcePath(String resourcePath) {
+		this.resourcePath = resourcePath;
+	}
+
+	public MetaResourceRepository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(MetaResourceRepository repository) {
+		this.repository = repository;
+	}
 }

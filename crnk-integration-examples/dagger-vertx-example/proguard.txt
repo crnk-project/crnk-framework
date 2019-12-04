@@ -63,7 +63,7 @@
   *;
 }
 
--keepclasseswithmembers public class io.crnk.example.vertx.VertxApplication {
+-keepclasseswithmembers public class io.crnk.example.vertx.AppMain {
     public static void main(java.lang.String[]);
 }
 

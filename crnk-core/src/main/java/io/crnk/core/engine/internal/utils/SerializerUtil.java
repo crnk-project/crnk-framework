@@ -1,11 +1,11 @@
 package io.crnk.core.engine.internal.utils;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.io.IOException;
 
 /**
  * Util class taking care of link serialization.<br />
@@ -21,7 +21,7 @@ public class SerializerUtil {
 	 * Constructor takes a flag to decide whether links should be serialized as JSON objects or not.
 	 *
 	 * @param serializeLinksAsObjects if set to <code>true</code>, links will be serialized as JSON objects,<br />
-	 *                                otherwise as simple JSON attributes.
+	 * otherwise as simple JSON attributes.
 	 */
 	public SerializerUtil(boolean serializeLinksAsObjects) {
 		this.serializeLinksAsObjects = serializeLinksAsObjects;
@@ -37,6 +37,21 @@ public class SerializerUtil {
 		}
 		return node;
 	}
+
+
+	public String getLinks(ObjectNode node, String fieldName) {
+		JsonNode linkNode = node != null ? node.get(fieldName) : null;
+		if (linkNode != null) {
+			if (serializeLinksAsObjects) {
+				JsonNode hrefNode = linkNode.get(HREF);
+				return hrefNode != null ? hrefNode.textValue() : null;
+			} else {
+				return linkNode.textValue();
+			}
+		}
+		return null;
+	}
+
 
 	public void serializeLink(JsonGenerator gen, String fieldName, String url) throws IOException {
 		if (serializeLinksAsObjects) {

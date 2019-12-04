@@ -1,56 +1,111 @@
 package io.crnk.ui.presentation.element;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.data.facet.annotation.Facet;
 
+
+@JsonApiResource(type = "uiEditor", resourcePath = "presentation/editor")
 public class EditorElement extends PresentationElement {
 
-    private ViewHeaderElement header = new ViewHeaderElement();
+	@Facet
+	private String serviceName;
 
-    private QueryElement baseQuery = new QueryElement();
+	private String servicePath;
 
-    private ActionContainerElement actions = new ActionContainerElement();
+	private ViewHeaderElement header = new ViewHeaderElement();
 
-    private FormContainerElement form = new FormContainerElement();
+	private QueryElement baseQuery = new QueryElement();
 
-    private ObjectNode newResourceTemplate;
+	private ActionContainerElement actions = new ActionContainerElement();
 
-    public ViewHeaderElement getHeader() {
-        return header;
-    }
+	private FormContainerElement form = new FormContainerElement();
 
-    public void setHeader(ViewHeaderElement header) {
-        this.header = header;
-    }
+	private ObjectNode newResourceTemplate;
 
-    public QueryElement getBaseQuery() {
-        return baseQuery;
-    }
+	private String path;
 
-    public void setBaseQuery(QueryElement baseQuery) {
-        this.baseQuery = baseQuery;
-    }
+	public EditorElement() {
+	}
 
-    public ActionContainerElement getActions() {
-        return actions;
-    }
+	public <T extends EditorElement> T toSubClass(Class<T> subClass) {
+		T element = ClassUtils.newInstance(subClass);
+		element.setId(getId());
+		element.setComponentId(getComponentId());
+		element.setServiceName(serviceName);
+		element.setServicePath(servicePath);
+		element.setHeader(header);
+		element.setBaseQuery(baseQuery);
+		element.setActions(actions);
+		element.setForm(form);
+		element.setNewResourceTemplate(newResourceTemplate);
+		element.setPath(path);
 
-    public void setActions(ActionContainerElement actions) {
-        this.actions = actions;
-    }
+		return element;
+	}
 
-    public FormContainerElement getForm() {
-        return form;
-    }
+	public String getServiceName() {
+		return serviceName;
+	}
 
-    public void setForm(FormContainerElement form) {
-        this.form = form;
-    }
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
 
-    public ObjectNode getNewResourceTemplate() {
-        return newResourceTemplate;
-    }
+	public String getServicePath() {
+		return servicePath;
+	}
 
-    public void setNewResourceTemplate(ObjectNode newResourceTemplate) {
-        this.newResourceTemplate = newResourceTemplate;
-    }
+	public void setServicePath(String servicePath) {
+		this.servicePath = servicePath;
+	}
+
+	public ViewHeaderElement getHeader() {
+		return header;
+	}
+
+	public void setHeader(ViewHeaderElement header) {
+		this.header = header;
+	}
+
+	public QueryElement getBaseQuery() {
+		return baseQuery;
+	}
+
+	public void setBaseQuery(QueryElement baseQuery) {
+		this.baseQuery = baseQuery;
+	}
+
+	public ActionContainerElement getActions() {
+		return actions;
+	}
+
+	public void setActions(ActionContainerElement actions) {
+		this.actions = actions;
+	}
+
+	public FormContainerElement getForm() {
+		return form;
+	}
+
+	public void setForm(FormContainerElement form) {
+		this.form = form;
+	}
+
+	public ObjectNode getNewResourceTemplate() {
+		return newResourceTemplate;
+	}
+
+	public void setNewResourceTemplate(ObjectNode newResourceTemplate) {
+		this.newResourceTemplate = newResourceTemplate;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
 }

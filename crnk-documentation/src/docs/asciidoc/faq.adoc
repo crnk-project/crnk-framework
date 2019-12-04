@@ -11,7 +11,15 @@ How to do Cors with Crnk?::
   the other parts of the application.
 
 Is Swagger supported by Crnk?::
-  Have a look at http://www.crnk.io/related/.
+  Crnk comes with an experimental generator that will create an Open API-compatible
+  specification. For more general information about the benefits of a more opinionated
+  specification like JSON:API see http://www.crnk.io/related/.
+
+How can the serialization of Java 8 date and time data types be customized?::
+  This is entirely in the hands of Jackson and not related to Crnk. A custom `JsonDeserializer`
+  and `JsonSerializer` can be implemented and registered with `ObjectMapper`.
+  See https://stackoverflow.com/questions/46263773/jackson-parse-custom-offset-date-time.
+
 
 
 

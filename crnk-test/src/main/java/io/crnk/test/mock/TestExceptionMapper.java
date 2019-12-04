@@ -20,7 +20,7 @@ public class TestExceptionMapper implements ExceptionMapper<TestException> {
 	@Override
 	public TestException fromErrorResponse(ErrorResponse errorResponse) {
 		JsonApiResponse response = errorResponse.getResponse();
-		List<ErrorData> errors = (List<ErrorData>) response.getEntity();
+		List<ErrorData> errors = (List<ErrorData>) response.getErrors();
 		StringBuilder message = new StringBuilder();
 		for (ErrorData error : errors) {
 			String title = error.getDetail();

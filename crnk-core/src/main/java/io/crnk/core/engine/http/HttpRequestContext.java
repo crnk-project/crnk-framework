@@ -1,8 +1,13 @@
 package io.crnk.core.engine.http;
 
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.query.QueryContext;
 
 public interface HttpRequestContext extends HttpRequestContextBase {
+
+    static HttpRequestContext create(HttpRequestContextBase baseImpl) {
+        return new HttpRequestContextBaseAdapter(baseImpl);
+    }
 
     boolean accepts(String contentType);
 
@@ -15,4 +20,6 @@ public interface HttpRequestContext extends HttpRequestContextBase {
     void setRequestAttribute(String name, Object value);
 
     QueryContext getQueryContext();
+
+    boolean hasResponse();
 }

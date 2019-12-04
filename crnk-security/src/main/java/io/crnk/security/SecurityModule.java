@@ -1,38 +1,45 @@
 package io.crnk.security;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
+import io.crnk.core.engine.security.SecurityProviderContext;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.Module;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.ManyRelationshipRepository;
 import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.utils.Supplier;
+import io.crnk.security.internal.DataRoomBulkResourceFilter;
 import io.crnk.security.internal.DataRoomMatcher;
 import io.crnk.security.internal.DataRoomRelationshipFilter;
 import io.crnk.security.internal.DataRoomResourceFilter;
 import io.crnk.security.internal.SecurityRepositoryFilter;
 import io.crnk.security.internal.SecurityResourceFilter;
 import io.crnk.security.repository.CallerPermissionRepository;
+import io.crnk.security.repository.RolePermissionRepository;
 import io.crnk.security.repository.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 public class SecurityModule implements Module {
 
-    protected static final String ALL_ROLE = null;
+    protected static final String ANY_ROLE = "ANY";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityModule.class);
+
     private Map<String, Map<String, ResourcePermission>> permissions;
 
-    private ModuleContext context;
+    private ModuleContext moduleContext;
 
     private Supplier<Boolean> enabled = new Supplier<Boolean>() {
 
@@ -45,6 +52,18 @@ public class SecurityModule implements Module {
     private SecurityConfig config;
 
     private DataRoomMatcher matcher;
+
+    private SecurityProvider callerSecurityProvider = new SecurityProvider() {
+        @Override
+        public boolean isUserInRole(String role, SecurityProviderContext context) {
+            return SecurityModule.this.isUserInRole(context.getQueryContext(), role);
+        }
+
+        @Override
+        public boolean isAuthenticated(SecurityProviderContext context) {
+            return moduleContext.getSecurityProvider().isAuthenticated(context);
+        }
+    };
 
     // protected for CDI
     protected SecurityModule() {
@@ -125,23 +144,6 @@ public class SecurityModule implements Module {
         }
     }
 
-	/*
-	public QuerySpec filter(QuerySpec querySpec, HttpMethod method) {
-		return filter.filter(querySpec, operation);
-	}
-
-    void verifyMatch(Object resource, Operation operation) {
-        QuerySpec querySpec = filter(new QuerySpec(resource.getClass()), operation);
-
-        DefaultResourceList<Object> list = querySpec.apply(Collections.singleton(resource));
-        if (list.isEmpty()) {
-            Object principal = principalSupplier.get();
-            LOGGER.error("dataroom prevented access to {} for {} for {}", resource, principal, operation);
-            throw new ForbiddenException("not allowed to access resource");
-        }
-    } */
-
-
     /**
      * Applies the new configuration to this module.
      */
@@ -161,13 +163,13 @@ public class SecurityModule implements Module {
             }
 
             if (resourceType == null) {
-                Collection<RegistryEntry> entries = context.getResourceRegistry().getEntries();
+                Collection<RegistryEntry> entries = moduleContext.getResourceRegistry().getEntries();
                 for (RegistryEntry entry : entries) {
                     String entryResourceType = entry.getResourceInformation().getResourceType();
                     configureRule(newPermissions, entryResourceType, rule.getRole(), rule.getPermission());
                 }
             } else {
-                ResourceRegistry resourceRegistry = context.getResourceRegistry();
+                ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
                 RegistryEntry entry = resourceRegistry.getEntry(resourceType);
                 if (entry == null) {
                     throw new RepositoryNotFoundException(resourceType);
@@ -184,20 +186,25 @@ public class SecurityModule implements Module {
 
     @Override
     public void setupModule(ModuleContext context) {
-        this.context = context;
-        context.addRepositoryFilter(new SecurityRepositoryFilter(this));
-        context.addResourceFilter(new SecurityResourceFilter(this, context));
+        this.moduleContext = context;
 
         if (config != null) {
+            context.addRepositoryFilter(new SecurityRepositoryFilter(this));
+            context.addResourceFilter(new SecurityResourceFilter(this, context));
+
             if (config.isExposeRepositories()) {
+                context.addRepository(new RolePermissionRepository(this));
                 context.addRepository(new CallerPermissionRepository(this));
                 context.addRepository(new RoleRepository(this));
             }
 
             if (config.getDataRoomFilter() != null && config.getPerformDataRoomChecks()) {
-                matcher = new DataRoomMatcher(() -> config.getDataRoomFilter());
+                matcher = new DataRoomMatcher(() -> config.getDataRoomFilter(), callerSecurityProvider);
                 LOGGER.debug("registering dataroom filter {}", config.getDataRoomFilter());
                 context.addRepositoryDecoratorFactory(repository -> {
+                    if (repository instanceof BulkResourceRepository) {
+                        return new DataRoomBulkResourceFilter((BulkResourceRepository) repository, matcher);
+                    }
                     if (repository instanceof ResourceRepository) {
                         return new DataRoomResourceFilter((ResourceRepository) repository, matcher);
                     }
@@ -212,7 +219,7 @@ public class SecurityModule implements Module {
                     return repository;
                 });
             } else {
-                matcher = new DataRoomMatcher(() -> (querySpec, method) -> querySpec);
+                matcher = new DataRoomMatcher(() -> (querySpec, method, callerSecurityProvider) -> querySpec, callerSecurityProvider);
             }
         }
     }
@@ -222,9 +229,9 @@ public class SecurityModule implements Module {
      * @param permission    the required permissions.
      * @return true if the requested permissions are satisfied for the given resourceClass.
      */
-    public boolean isAllowed(Class<?> resourceClass, ResourcePermission permission) {
+    public boolean isAllowed(QueryContext queryContext, Class<?> resourceClass, ResourcePermission permission) {
         String resourceType = toType(resourceClass);
-        return isAllowed(resourceType, permission);
+        return isAllowed(queryContext, resourceType, permission);
     }
 
     /**
@@ -232,8 +239,8 @@ public class SecurityModule implements Module {
      * @param permission   the required permissions.
      * @return true if the requested permissions are satisfied for the given resourceType.
      */
-    public boolean isAllowed(String resourceType, ResourcePermission permission) {
-        ResourcePermission missingPermissions = getMissingPermissions(resourceType, permission);
+    public boolean isAllowed(QueryContext queryContext, String resourceType, ResourcePermission permission) {
+        ResourcePermission missingPermissions = getMissingPermissions(resourceType, permission, callerSecurityProvider, toSecurityContext(queryContext));
         boolean allowed = missingPermissions.isEmpty();
         if (allowed) {
             LOGGER.debug("isAllowed returns {} for permission {}", allowed, permission);
@@ -247,12 +254,37 @@ public class SecurityModule implements Module {
     /**
      * @return permissions the caller is authorized to for the passed resourceType.
      */
-    public ResourcePermission getCallerPermissions(String resourceType) {
-        ResourcePermission missingPermissions = getMissingPermissions(resourceType, ResourcePermission.ALL);
+    public ResourcePermission getCallerPermissions(QueryContext queryContext, String resourceType) {
+        ResourcePermission missingPermissions = getMissingPermissions(resourceType, ResourcePermission.ALL, callerSecurityProvider,
+                toSecurityContext(queryContext));
         return missingPermissions.xor(ResourcePermission.ALL);
     }
 
-    private ResourcePermission getMissingPermissions(String resourceType, ResourcePermission requiredPermissions) {
+    private SecurityProviderContext toSecurityContext(QueryContext queryContext) {
+        return () -> queryContext;
+    }
+
+    /**
+     * @return permissions the caller is authorized to for the passed resourceType.
+     */
+    public ResourcePermission getRolePermissions(QueryContext queryContext, String resourceType, String checkedRole) {
+        SecurityProviderContext securityContext = toSecurityContext(queryContext);
+        ResourcePermission missingPermissions = getMissingPermissions(resourceType, ResourcePermission.ALL, new SecurityProvider() {
+            @Override
+            public boolean isUserInRole(String role, SecurityProviderContext context) {
+                return checkedRole.equals(role) || role.equals(ANY_ROLE);
+            }
+
+            @Override
+            public boolean isAuthenticated(SecurityProviderContext securityContext) {
+                throw new UnsupportedOperationException("not implemented");
+            }
+        }, securityContext);
+        return missingPermissions.xor(ResourcePermission.ALL);
+    }
+
+    private ResourcePermission getMissingPermissions(String resourceType, ResourcePermission requiredPermissions,
+                                                     SecurityProvider securityProvider, SecurityProviderContext securityContext) {
         if (!isEnabled()) {
             return ResourcePermission.EMPTY;
         }
@@ -264,7 +296,7 @@ public class SecurityModule implements Module {
                 String role = entry.getKey();
                 ResourcePermission intersection = entry.getValue().and(requiredPermissions);
                 boolean hasMorePermissions = !intersection.isEmpty();
-                if (hasMorePermissions && isUserInRole(role)) {
+                if (hasMorePermissions && securityProvider.isUserInRole(role, securityContext)) {
                     missingPermission = updateMissingPermissions(missingPermission, intersection);
                     if (missingPermission.isEmpty()) {
                         break;
@@ -279,16 +311,16 @@ public class SecurityModule implements Module {
      * @param resourceClass to get the permissions for
      * @return ResourcePermission for the given resource for the current user.
      */
-    public ResourcePermission getResourcePermission(Class<?> resourceClass) {
+    public ResourcePermission getResourcePermission(QueryContext queryContext, Class<?> resourceClass) {
         String resourceType = toType(resourceClass);
-        return getResourcePermission(resourceType);
+        return getResourcePermission(queryContext, resourceType);
     }
 
     /**
      * @param resourceType to get the permissions for
      * @return ResourcePermission for the given resource for the current user.
      */
-    public ResourcePermission getResourcePermission(String resourceType) {
+    public ResourcePermission getResourcePermission(QueryContext queryContext, String resourceType) {
         checkInit();
         if (!isEnabled()) {
             return ResourcePermission.ALL;
@@ -298,7 +330,7 @@ public class SecurityModule implements Module {
         if (map != null) {
             for (Entry<String, ResourcePermission> entry : map.entrySet()) {
                 String role = entry.getKey();
-                if (isUserInRole(role)) {
+                if (isUserInRole(queryContext, role)) {
                     result = result.or(entry.getValue());
                 }
             }
@@ -312,20 +344,20 @@ public class SecurityModule implements Module {
      * @param role to check
      * @return true if in this role
      */
-    public boolean isUserInRole(String role) {
+    public boolean isUserInRole(QueryContext queryContext, String role) {
         if (!isEnabled()) {
             throw new IllegalStateException("security module is disabled");
         }
         checkInit();
-        SecurityProvider securityProvider = context.getSecurityProvider();
-        boolean contained = role == ALL_ROLE || securityProvider.isUserInRole(role);
+        SecurityProvider securityProvider = moduleContext.getSecurityProvider();
+        boolean contained = role.equals(ANY_ROLE) || securityProvider.isUserInRole(role, toSecurityContext(queryContext));
         LOGGER.debug("isUserInRole returns {} for role {}", contained, role);
         return contained;
     }
 
     private <T> String toType(Class<T> resourceClass) {
-        ResourceRegistry resourceRegistry = context.getResourceRegistry();
-        RegistryEntry entry = resourceRegistry.getEntryForClass(resourceClass);
+        ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+        RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
         if (entry == null) {
             throw new RepositoryNotFoundException(resourceClass);
         }
@@ -333,4 +365,7 @@ public class SecurityModule implements Module {
         return resourceInformation.getResourceType();
     }
 
+    public SecurityProvider getCallerSecurityProvider() {
+        return callerSecurityProvider;
+    }
 }

@@ -92,7 +92,7 @@ public abstract class JsonPath {
 		String resourcePath;
 		if (parentField != null) {
 			// TODO nested resource can be queried through two means, nested or direct flat (maybe). should be stored and considered somewhere here
-			ResourceInformation parentType = parentField.getParentResourceInformation();
+			ResourceInformation parentType = parentField.getResourceInformation();
 			resourcePath = parentType.getResourcePath() + "/{id}/" + parentField.getJsonName();
 		}
 		else {

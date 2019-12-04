@@ -2,6 +2,7 @@ package io.crnk.core.engine.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Resource;
@@ -14,8 +15,8 @@ import io.crnk.core.mock.models.TaskLinks;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,10 +41,8 @@ public class JsonApiRequestProcessorTest {
 
     @Before
     public void setup() {
-        TaskRepository.clear();
-
         container = new CoreTestContainer();
-        container.setDefaultPackage();
+        container.addModule(new CoreTestModule());
         container.addModule(new Module() {
             @Override
             public String getModuleName() {
@@ -62,18 +61,13 @@ public class JsonApiRequestProcessorTest {
         task.setId(1L);
         task.setName("SomeTask");
         task.setLinksInformation(new TaskLinks());
-        TaskRepository tasks = new TaskRepository();
+        ResourceRepository<Task, Object> tasks = container.getRepository(Task.class);
         tasks.save(task);
 
         processor = new JsonApiRequestProcessor(moduleContext);
 
         requestContextBase = container.getRequestContextBase();
         requestContext = container.getRequestContext();
-    }
-
-    @After
-    public void teardown() {
-        TaskRepository.clear();
     }
 
     @Test
@@ -232,7 +226,7 @@ public class JsonApiRequestProcessorTest {
 
     @Test
     public void postTasksWithBadRequestException() throws IOException {
-        String requestBody = createRequestBody("badName"); // badName triggers an error in repository
+        String requestBody = createRequestBody(TaskRepository.BAD_REQUEST_NAME); // badName triggers an error in repository
 
         Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
         Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");

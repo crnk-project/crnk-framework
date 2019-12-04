@@ -54,7 +54,7 @@ public class RelationshipMatcherRule {
 
 	public RelationshipMatcherRule field(ResourceField sourceField) {
 		field(sourceField.getUnderlyingName());
-		source(sourceField.getParentResourceInformation().getResourceType());
+		source(sourceField.getResourceInformation().getResourceType());
 		return this;
 	}
 
@@ -85,8 +85,8 @@ public class RelationshipMatcherRule {
 	}
 
 	public boolean matches(ResourceField field) {
-		boolean matchesSourceType = nullOrMatch(sourceResourceType, field.getParentResourceInformation().getResourceType());
-		boolean matchesSourceClass = nullOrMatch(sourceResourceClass, field.getParentResourceInformation().getResourceClass(),
+		boolean matchesSourceType = nullOrMatch(sourceResourceType, field.getResourceInformation().getResourceType());
+		boolean matchesSourceClass = nullOrMatch(sourceResourceClass, field.getResourceInformation().getResourceClass(),
 				sourceMatchSubTypes);
 		boolean matchesSourceField = nullOrMatch(sourceField, field.getUnderlyingName());
 		boolean matchesTargetType = nullOrMatch(targetResourceType, field.getOppositeResourceType());

@@ -1,74 +1,88 @@
 package io.crnk.ui.presentation.element;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.data.facet.annotation.Facet;
 
-@JsonApiResource(type = "uiExplorer", resourcePath = "ui/explorer")
+@JsonApiResource(type = "uiExplorer", resourcePath = "presentation/explorer")
 public class ExplorerElement extends PresentationElement {
 
-    @Facet
-    private String serviceName;
+	@Facet
+	private String serviceName;
 
-    private String servicePath;
+	private String servicePath;
 
-    private String path;
+	private String path;
 
-    private DataTableElement table = new DataTableElement();
+	private DataTableElement table = new DataTableElement();
 
-    private QueryElement baseQuery = new QueryElement();
+	private QueryElement baseQuery = new QueryElement();
 
-    private ActionContainerElement actions = new ActionContainerElement();
+	private ActionContainerElement actions = new ActionContainerElement();
 
-    public void addAction(ActionElement action) {
-        actions.getActionIds().add(action.getId());
-        actions.getActions().put(action.getId(), action);
-    }
+	private List<PathSpec> fullTextSearchPaths = new ArrayList<>();
 
-    public String getServiceName() {
-        return serviceName;
-    }
+	public List<PathSpec> getFullTextSearchPaths() {
+		return fullTextSearchPaths;
+	}
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
-    }
+	public void setFullTextSearchPaths(List<PathSpec> fullTextSearchPaths) {
+		this.fullTextSearchPaths = fullTextSearchPaths;
+	}
 
-    public String getServicePath() {
-        return servicePath;
-    }
+	public void addAction(ActionElement action) {
+		actions.getActionIds().add(action.getId());
+		actions.getActions().put(action.getId(), action);
+	}
 
-    public void setServicePath(String servicePath) {
-        this.servicePath = servicePath;
-    }
+	public String getServiceName() {
+		return serviceName;
+	}
 
-    public String getPath() {
-        return path;
-    }
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
 
-    public void setPath(String path) {
-        this.path = path;
-    }
+	public String getServicePath() {
+		return servicePath;
+	}
 
-    public DataTableElement getTable() {
-        return table;
-    }
+	public void setServicePath(String servicePath) {
+		this.servicePath = servicePath;
+	}
 
-    public void setTable(DataTableElement table) {
-        this.table = table;
-    }
+	public String getPath() {
+		return path;
+	}
 
-    public QueryElement getBaseQuery() {
-        return baseQuery;
-    }
+	public void setPath(String path) {
+		this.path = path;
+	}
 
-    public void setBaseQuery(QueryElement baseQuery) {
-        this.baseQuery = baseQuery;
-    }
+	public DataTableElement getTable() {
+		return table;
+	}
 
-    public ActionContainerElement getActions() {
-        return actions;
-    }
+	public void setTable(DataTableElement table) {
+		this.table = table;
+	}
 
-    public void setActions(ActionContainerElement actions) {
-        this.actions = actions;
-    }
+	public QueryElement getBaseQuery() {
+		return baseQuery;
+	}
+
+	public void setBaseQuery(QueryElement baseQuery) {
+		this.baseQuery = baseQuery;
+	}
+
+	public ActionContainerElement getActions() {
+		return actions;
+	}
+
+	public void setActions(ActionContainerElement actions) {
+		this.actions = actions;
+	}
 }

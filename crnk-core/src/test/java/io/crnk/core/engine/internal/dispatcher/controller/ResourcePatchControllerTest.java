@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
@@ -19,20 +25,13 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ProjectRepository;
-import io.crnk.core.mock.repository.ScheduleRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
-import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourcePatchControllerTest extends ControllerTestBase {
 
@@ -41,7 +40,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
     @Test
     public void onGivenRequestCollectionGetShouldDenyIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("/tasks/");
+        JsonPath jsonPath = pathBuilder.build("/tasks/", queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -55,7 +54,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
     @Test
     public void onGivenRequestResourceGetShouldAcceptIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("/tasks/1");
+        JsonPath jsonPath = pathBuilder.build("/tasks/1", queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -76,7 +75,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         expectedException.expect(RuntimeException.class);
 
         // WHEN
-        JsonPath path = pathBuilder.build("/frides");
+        JsonPath path = pathBuilder.build("/frides", queryContext);
         sut.handle(path, emptyProjectQuery, null);
     }
 
@@ -87,7 +86,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Resource data = createTask();
         newTaskBody.setData(Nullable.of(data));
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
 
         // WHEN
         ResourcePostController resourcePost = new ResourcePostController();
@@ -102,7 +101,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         data = createTask();
         taskPatch.setData(Nullable.of(data));
         data.setAttribute("name", objectMapper.readTree("\"task updated\""));
-        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
+        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -122,7 +121,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
 
     @Test
     public void onRepositoryReturnNullStatusCode204MustBeReturned() {
-        ProjectRepository projectRepository = new ProjectRepository();
+        ResourceRepository<Project, Object> projectRepository = container.getRepository(Project.class);
         Project project = new Project();
         project.setId(ProjectRepository.RETURN_NULL_ON_CREATE_ID);
         project.setName("returns null on update");
@@ -134,7 +133,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         data.setId(Long.toString(ProjectRepository.RETURN_NULL_ON_CREATE_ID));
         newProjectBody.setData(Nullable.of(data));
 
-        JsonPath projectPath = pathBuilder.build("/projects/" + ProjectRepository.RETURN_NULL_ON_CREATE_ID);
+        JsonPath projectPath = pathBuilder.build("/projects/" + ProjectRepository.RETURN_NULL_ON_CREATE_ID, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -153,7 +152,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         data = createTask();
         taskPatch.setData(Nullable.of(data));
         data.setAttribute("name", objectMapper.readTree("\"task updated\""));
-        JsonPath jsonPath = pathBuilder.build("/tasks/1234567");
+        JsonPath jsonPath = pathBuilder.build("/tasks/1234567", queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -168,7 +167,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Resource data = createTask();
         requestDocument.setData(Nullable.of(data));
 
-        JsonPath postPath = pathBuilder.build("/tasks");
+        JsonPath postPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController post = new ResourcePostController();
         post.init(controllerContext);
         post.handle(postPath, emptyTaskQuery, requestDocument);
@@ -182,7 +181,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
 
         // WHEN
         try {
-            JsonPath patchPath = pathBuilder.build("/tasks/" + data.getId());
+            JsonPath patchPath = pathBuilder.build("/tasks/" + data.getId(), queryContext);
             sut.handle(patchPath, emptyTaskQuery, requestDocument);
             Assert.fail("should not be allowed to update read-only field");
         } catch (ForbiddenException e) {
@@ -198,7 +197,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         newTaskBody.setData(Nullable.of(data));
         data.setType("tasks");
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
 
         // WHEN
         ResourcePostController resourcePost = new ResourcePostController();
@@ -214,7 +213,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         taskPatch.setData(Nullable.of(data));
         data.setType("WRONG_AND_MISSING_TYPE");
         data.setAttribute("name", objectMapper.readTree("\"task updated\""));
-        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
+        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -241,7 +240,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         data.setAttribute("title", objectMapper.readTree("\"some title\""));
         data.setAttribute("body", objectMapper.readTree("\"sample body\""));
 
-        JsonPath documentsPath = pathBuilder.build("/documents");
+        JsonPath documentsPath = pathBuilder.build("/documents", queryContext);
 
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
@@ -263,7 +262,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         data.setType("memoranda");
         data.setAttribute("title", objectMapper.readTree("\"new title\""));
         data.setAttribute("body", objectMapper.readTree("\"new body\""));
-        JsonPath documentPath = pathBuilder.build("/documents/" + memorandumId);
+        JsonPath documentPath = pathBuilder.build("/documents/" + memorandumId, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -288,12 +287,12 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         task.setName("test");
         task.setProject(project);
 
-        ProjectRepository projectRepository = new ProjectRepository();
+        ResourceRepository<Project, Object> projectRepository = container.getRepository(Project.class);
         projectRepository.save(project);
-        TaskRepository taskRepository = new TaskRepository();
+        ResourceRepository<Task, Object> taskRepository = container.getRepository(Task.class);
         taskRepository.save(task);
 
-        JsonPath taskPath = pathBuilder.build("/tasks/" + task.getId());
+        JsonPath taskPath = pathBuilder.build("/tasks/" + task.getId(), queryContext);
 
         // verify relationship available
         ResourceGetController resourceGet = new ResourceGetController();
@@ -311,22 +310,21 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Document taskPatch = new Document();
         Resource data = createTask();
         data.setId(taskId.toString());
-        data.setAttribute("id", objectMapper.readTree("\"task updated\""));
         data.setAttribute("name", objectMapper.readTree("\"task updated\""));
         Relationship nulledRelationship = new Relationship();
         nulledRelationship.setData(Nullable.nullValue());
         data.getRelationships().put("project", nulledRelationship);
         taskPatch.setData(Nullable.of(data));
-        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
+        JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
         Response response = sut.handle(jsonPath, emptyTaskQuery, taskPatch);
 
         // verify attributes updated and relationship nulled
+        Task updatedTask = container.getRepository(Task.class).findOne(taskId, new QuerySpec(Task.class));
+        Assert.assertEquals(null, updatedTask.getProject());
+        Assert.assertEquals("task updated", updatedTask.getName());
         Assert.assertNotNull(response);
-        assertThat(response.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
-        assertThat(response.getDocument().getSingleData().get().getAttributes().get("name").asText()).isEqualTo("task updated");
-        assertThat(response.getDocument().getSingleData().get().getRelationships().get("project").getData().get()).isNull();
     }
 
 
@@ -335,7 +333,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         // GIVEN
         Project project = new Project();
         project.setName("test");
-        ProjectRepository projectRepository = new ProjectRepository();
+        ResourceRepository<Project, Object> projectRepository = container.getRepository(Project.class);
         projectRepository.save(project);
         assertThat(project.getId()).isNotNull();
 
@@ -343,11 +341,11 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         schedule.setId(12L);
         schedule.setName("test");
         schedule.setProjectId(project.getId());
-        ScheduleRepository scheduleRepository = new ScheduleRepositoryImpl();
+        ResourceRepository<Schedule, Object> scheduleRepository = container.getRepository(Schedule.class);
         scheduleRepository.save(schedule);
         assertThat(schedule.getId()).isNotNull();
 
-        JsonPath schedulePath = pathBuilder.build("/schedules/" + schedule.getId());
+        JsonPath schedulePath = pathBuilder.build("/schedules/" + schedule.getId(), queryContext);
 
         // verify relationship available
         ResourceGetController resourceGet = new ResourceGetController();
@@ -388,10 +386,10 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Task task = new Task();
         task.setName("test");
         task.setStatusThingId(13L);
-        TaskRepository taskRepository = new TaskRepository();
+        ResourceRepository<Task, Object> taskRepository = container.getRepository(Task.class);
         taskRepository.save(task);
 
-        JsonPath taskPath = pathBuilder.build("/tasks/" + task.getId());
+        JsonPath taskPath = pathBuilder.build("/tasks/" + task.getId(), queryContext);
 
         // try set relationship
         Document taskPatch = new Document();
@@ -424,7 +422,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         newTaskBody.setData(Nullable.of(data));
         data.setType("tasks");
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController post = new ResourcePostController();
         post.init(controllerContext);
         Response taskResponse = post.handle(taskPath, emptyTaskQuery, newTaskBody);
@@ -437,7 +435,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
                 .put("tasks", new Relationship(Collections.singletonList(new ResourceIdentifier(taskId.toString(), "tasks"))));
         newProjectBody.setData(Nullable.of(data));
 
-        JsonPath projectsPath = pathBuilder.build("/projects");
+        JsonPath projectsPath = pathBuilder.build("/projects", queryContext);
         Response projectsResponse = post.handle(projectsPath, emptyProjectQuery, newProjectBody);
         assertThat(projectsResponse.getDocument().getSingleData().get().getRelationships().get("tasks").getCollectionData()
                 .get())
@@ -450,7 +448,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Nullable<Object> emptyRelation = Nullable.of(new ArrayList<ResourceIdentifier>());
         data.getRelationships().get("tasks").setData(emptyRelation);
         projectsResponse =
-                patch.handle(pathBuilder.build("/projects/2"), emptyProjectQuery, newProjectBody);
+                patch.handle(pathBuilder.build("/projects/2", queryContext), emptyProjectQuery, newProjectBody);
         assertThat(projectsResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
         assertThat(projectsResponse.getDocument().getSingleData().get().getAttributes().get("name").asText())
                 .isEqualTo("sample project");
@@ -466,7 +464,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Document newProjectBody = new Document();
         Resource data = createProject();
         newProjectBody.setData(Nullable.of(data));
-        JsonPath taskPath = pathBuilder.build("/projects");
+        JsonPath taskPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN
         ResourcePostController resourcePost = new ResourcePostController();
@@ -482,7 +480,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
 
         Document projectPatch = new Document();
         projectPatch.setData(Nullable.of(data));
-        JsonPath jsonPath = pathBuilder.build("/projects/" + savedProject.getId());
+        JsonPath jsonPath = pathBuilder.build("/projects/" + savedProject.getId(), queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -500,7 +498,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Document newProjectBody = new Document();
         Resource data = createProject();
         newProjectBody.setData(Nullable.of(data));
-        JsonPath taskPath = pathBuilder.build("/projects");
+        JsonPath taskPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN
         ResourcePostController resourcePost = new ResourcePostController();
@@ -516,7 +514,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
 
         Document projectPatch = new Document();
         projectPatch.setData(Nullable.of(data));
-        JsonPath jsonPath = pathBuilder.build("/projects/" + savedProject.getId());
+        JsonPath jsonPath = pathBuilder.build("/projects/" + savedProject.getId(), queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -535,7 +533,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Resource data = createProject();
         data.getAttributes().remove("data");
         newProjectBody.setData(Nullable.of(data));
-        JsonPath taskPath = pathBuilder.build("/projects");
+        JsonPath taskPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN
         ResourcePostController resourcePost = new ResourcePostController();
@@ -555,7 +553,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
 
         Document projectPatch = new Document();
         projectPatch.setData(Nullable.of(data));
-        JsonPath jsonPath = pathBuilder.build("/projects/" + projectId);
+        JsonPath jsonPath = pathBuilder.build("/projects/" + projectId, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -576,7 +574,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Document newProjectBody = new Document();
         Resource data = createProject();
         newProjectBody.setData(Nullable.of(data));
-        JsonPath taskPath = pathBuilder.build("/projects");
+        JsonPath taskPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN
         ResourcePostController resourcePost = new ResourcePostController();
@@ -599,7 +597,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
 
         Document projectPatch = new Document();
         projectPatch.setData(Nullable.of(data));
-        JsonPath jsonPath = pathBuilder.build("/projects/" + projectId);
+        JsonPath jsonPath = pathBuilder.build("/projects/" + projectId, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -621,7 +619,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Document newProjectBody = new Document();
         Resource data = createProject(Long.toString(PROJECT_ID), "projects-patch-strategy");
         newProjectBody.setData(Nullable.of(data));
-        JsonPath taskPath = pathBuilder.build("/projects-patch-strategy");
+        JsonPath taskPath = pathBuilder.build("/projects-patch-strategy", queryContext);
 
         // WHEN
         ResourcePostController resourcePost = new ResourcePostController();
@@ -641,7 +639,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
 
         Document projectPatch = new Document();
         projectPatch.setData(Nullable.of(data));
-        JsonPath jsonPath = pathBuilder.build(taskPath + "/" + projectId);
+        JsonPath jsonPath = pathBuilder.build(taskPath + "/" + projectId, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -664,7 +662,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         newTaskBody.setData(Nullable.of(data));
         data.setType("tasks");
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController post = new ResourcePostController();
         post.init(controllerContext);
         Response taskResponse = post.handle(taskPath, emptyTaskQuery, newTaskBody);
@@ -677,7 +675,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
                 .put("tasks", new Relationship(Collections.singletonList(new ResourceIdentifier(taskId.toString(), "tasks"))));
         newProjectBody.setData(Nullable.of(data));
 
-        JsonPath projectsPath = pathBuilder.build("/projects");
+        JsonPath projectsPath = pathBuilder.build("/projects", queryContext);
         Response projectsResponse = post.handle(projectsPath, emptyProjectQuery, newProjectBody);
         assertThat(projectsResponse.getDocument().getSingleData().get().getRelationships().get("tasks").getCollectionData()
                 .get())
@@ -690,7 +688,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         data.getRelationships().remove("tasks");
         data.getAttributes().put("name", objectMapper.readTree("\"updated project\""));
         projectsResponse =
-                patch.handle(pathBuilder.build("/projects/2"), emptyProjectQuery, newProjectBody);
+                patch.handle(pathBuilder.build("/projects/2", queryContext), emptyProjectQuery, newProjectBody);
         assertThat(projectsResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
         assertThat(projectsResponse.getDocument().getSingleData().get().getAttributes().get("name").asText())
                 .isEqualTo("updated project");
@@ -702,7 +700,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
     @Test
     public void onGivenRequestResourcePatchShouldHandleMissingFields() throws Exception {
 
-        JsonPath complexPojoPath = pathBuilder.build("/complexpojos/1");
+        JsonPath complexPojoPath = pathBuilder.build("/complexpojos/1", queryContext);
 
         // WHEN
         ResourceGetController resourceGet = new ResourceGetController();
@@ -725,7 +723,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         data.setAttribute("containedPojo", objectMapper.readTree(rawContainedPatchData));
         data.setAttribute("updateableProperty", objectMapper.readTree("\"wasNullBefore\""));
 
-        JsonPath jsonPath = pathBuilder.build("/complexpojos/" + complexPojoId);
+        JsonPath jsonPath = pathBuilder.build("/complexpojos/" + complexPojoId, queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -761,7 +759,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         taskPatch.setData(Nullable.of(data));
         data.setType("tasks");
         data.setAttribute("name", objectMapper.readTree("\"Mary Jane\""));
-        JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId());
+        JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId(), queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 
@@ -793,7 +791,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         data.setAttribute("category", objectMapper.readTree("\"TestCategory\""));
         Document taskPatch = new Document();
         taskPatch.setData(Nullable.of(data));
-        JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId());
+        JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId(), queryContext);
         ResourcePatchController sut = new ResourcePatchController();
         sut.init(controllerContext);
 

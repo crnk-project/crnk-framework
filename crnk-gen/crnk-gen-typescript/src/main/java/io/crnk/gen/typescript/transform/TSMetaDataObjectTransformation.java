@@ -2,6 +2,7 @@ package io.crnk.gen.typescript.transform;
 
 import java.util.List;
 
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.gen.typescript.TSResourceFormat;
 import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSArrayType;
@@ -282,12 +283,12 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 			relationshipsType.getDeclaredMembers().add(field);
 			field.setParent(relationshipsType);
 		}
-		else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).isMeta()) {
+		else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).getFieldType() == ResourceFieldType.META_INFORMATION) {
 			field.setName("meta");
 			interfaceType.getDeclaredMembers().add(field);
 			field.setParent(interfaceType);
 		}
-		else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).isLinks()) {
+		else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).getFieldType() == ResourceFieldType.LINKS_INFORMATION) {
 			field.setName("links");
 			interfaceType.getDeclaredMembers().add(field);
 			field.setParent(interfaceType);

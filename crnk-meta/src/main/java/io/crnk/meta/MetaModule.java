@@ -61,27 +61,12 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 
     private DefaultResourceInformationProvider informationBuilder;
 
-
-    /**
-     * @deprecated use {@link #createClientModule()} or {@link #createServerModule(MetaModuleConfig)}
-     */
-    // make protected for CDI in the future and remove deprecation
-    @Deprecated
-    public MetaModule() {
+    protected MetaModule() {
         this(new MetaModuleConfig());
     }
 
     private MetaModule(MetaModuleConfig config) {
         this.config = config;
-    }
-
-
-    /**
-     * @deprecated use {@link #createClientModule()} or {@link #createServerModule(MetaModuleConfig)}
-     */
-    @Deprecated
-    public static MetaModule create() {
-        return new MetaModule();
     }
 
     public static MetaModule createClientModule() {
@@ -96,13 +81,6 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
     @Override
     public String getModuleName() {
         return "meta";
-    }
-
-    /**
-     * @deprecated make use of {@link MetaModuleConfig} and pass to this instance upon creation
-     */
-    public void addMetaProvider(MetaProvider provider) {
-        config.addMetaProvider(provider);
     }
 
     @Override
@@ -149,7 +127,7 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
                 new DefaultResourceFieldInformationProvider(),
                 new JacksonResourceFieldInformationProvider());
         informationProvider.init(new DefaultResourceInformationProviderContext(informationProvider, informationBuilder,
-                context.getTypeParser(), null) {
+                context.getTypeParser(), () -> context.getObjectMapper()) {
             @Override
             public ObjectMapper getObjectMapper() {
                 return context.getObjectMapper();

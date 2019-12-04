@@ -1,5 +1,13 @@
 package io.crnk.client.internal;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.client.ResponseBodyException;
@@ -11,23 +19,18 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceUpsert;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 
 class ClientResourceUpsert extends ResourceUpsert {
 
@@ -49,7 +52,7 @@ class ClientResourceUpsert extends ResourceUpsert {
         return resourceInformation.getResourceType() + "#" + idString;
     }
 
-    public void setRelations(List<Resource> resources) {
+    public void setRelations(List<Resource> resources, QueryContext queryContext) {
         for (Resource resource : resources) {
             String uid = getUID(resource);
             Object object = resourceMap.get(uid);
@@ -57,7 +60,7 @@ class ClientResourceUpsert extends ResourceUpsert {
             RegistryEntry registryEntry = context.getResourceRegistry().getEntry(resource.getType());
 
             // no need for any query parameters when doing POST/PATCH
-            QueryAdapter queryAdapter = null;
+            QueryAdapter queryAdapter = new QuerySpecAdapter(null, null, queryContext);
 
             setRelationsAsync(object, registryEntry, resource, queryAdapter, true).get();
         }
@@ -91,7 +94,7 @@ class ClientResourceUpsert extends ResourceUpsert {
         return true;
     }
 
-    public List<Object> allocateResources(List<Resource> resources) {
+    public List<Object> allocateResources(List<Resource> resources, QueryContext queryContext) {
         List<Object> objects = new ArrayList<>();
         for (Resource resource : resources) {
 
@@ -100,7 +103,8 @@ class ClientResourceUpsert extends ResourceUpsert {
 
             Object object = newEntity(resourceInformation, resource);
             setId(resource, object, resourceInformation);
-            setAttributes(resource, object, resourceInformation, new QueryContext());
+            setType(resource, object);
+            setAttributes(resource, object, resourceInformation, queryContext);
             setLinks(resource, object, resourceInformation);
             setMeta(resource, object, resourceInformation);
 
@@ -140,11 +144,14 @@ class ClientResourceUpsert extends ResourceUpsert {
 
         if (!relationship.getData().isPresent()) {
             ObjectNode links = relationship.getLinks();
+            ObjectNode meta = relationship.getMeta();
             if (links != null) {
                 // create proxy to lazy load relations
-                String fieldName = property.getKey();
+                String fieldJsonName = property.getKey();
                 ResourceInformation resourceInformation = registryEntry.getResourceInformation();
-                ResourceField field = resourceInformation.findRelationshipFieldByName(fieldName);
+                QueryContext queryContext = queryAdapter.getQueryContext();
+                ResourceField field = resourceInformation.findFieldByJsonName(fieldJsonName, queryContext.getRequestVersion());
+                PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType(), "expected {} to be a relationship", fieldJsonName);
                 Class elementType = field.getElementType();
                 Class collectionClass = field.getType();
 
@@ -159,7 +166,7 @@ class ClientResourceUpsert extends ResourceUpsert {
                     } else {
                         url = relatedNode.asText().trim();
                     }
-                    Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url);
+                    Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url, links, meta);
                     field.getAccessor().setValue(newResource, proxy);
                 }
             }
@@ -179,4 +186,9 @@ class ClientResourceUpsert extends ResourceUpsert {
     protected HttpMethod getHttpMethod() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+	protected boolean isClient() {
+		return true;
+	}
 }

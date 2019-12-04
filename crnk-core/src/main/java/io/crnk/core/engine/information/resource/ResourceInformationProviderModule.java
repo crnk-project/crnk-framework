@@ -21,7 +21,7 @@ public class ResourceInformationProviderModule extends SimpleModule {
 		DefaultResourceFieldInformationProvider defaultFieldProvider = new DefaultResourceFieldInformationProvider();
 		ResourceFieldInformationProvider jacksonFieldProvider = new JacksonResourceFieldInformationProvider();
 
-		context.addResourceInformationBuilder(
+		context.addResourceInformationProvider(
 				new DefaultResourceInformationProvider(
 						context.getPropertiesProvider(),
 						context.getModuleRegistry().getPagingBehaviors(),

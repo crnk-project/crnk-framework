@@ -1,23 +1,6 @@
 package io.crnk.ui.presentation;
 
 
-import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.meta.MetaLookup;
-import io.crnk.meta.model.resource.MetaResource;
-import io.crnk.ui.presentation.element.ActionElement;
-import io.crnk.ui.presentation.element.DataTableElement;
-import io.crnk.ui.presentation.element.ExplorerElement;
-import io.crnk.ui.presentation.element.MenuElement;
-import io.crnk.ui.presentation.element.MenuElements;
-import io.crnk.ui.presentation.element.PresentationElement;
-import io.crnk.ui.presentation.element.QueryElement;
-import io.crnk.ui.presentation.factory.DefaultDisplayElementFactory;
-import io.crnk.ui.presentation.factory.DefaultTableElementFactory;
-import io.crnk.ui.presentation.factory.PresentationBuilderUtils;
-import io.crnk.ui.presentation.factory.PresentationElementFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,131 +9,190 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.utils.Prioritizable;
+import io.crnk.meta.MetaLookup;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.ui.presentation.element.EditorElement;
+import io.crnk.ui.presentation.element.ExplorerElement;
+import io.crnk.ui.presentation.element.MenuElement;
+import io.crnk.ui.presentation.element.MenuElements;
+import io.crnk.ui.presentation.element.PresentationElement;
+import io.crnk.ui.presentation.factory.DefaultEditorFactory;
+import io.crnk.ui.presentation.factory.DefaultExplorerFactory;
+import io.crnk.ui.presentation.factory.DefaultFormFactory;
+import io.crnk.ui.presentation.factory.DefaultLabelElementFactory;
+import io.crnk.ui.presentation.factory.DefaultPlainTextElementFactory;
+import io.crnk.ui.presentation.factory.DefaultTableElementFactory;
+import io.crnk.ui.presentation.factory.PresentationElementFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PresentationManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PresentationManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PresentationManager.class);
 
-    private List<PresentationElementFactory> factories = new ArrayList<>();
+	private final HttpRequestContextProvider requestContextProvider;
 
-    private Supplier<List<PresentationService>> services;
+	private List<PresentationElementFactory> factories = new ArrayList<>();
 
-    public PresentationManager(Supplier<List<PresentationService>> services) {
-        this.services = services;
+	private Supplier<List<PresentationService>> services;
 
-        this.factories.add(new DefaultDisplayElementFactory());
-        this.factories.add(new DefaultTableElementFactory());
+	public PresentationManager(Supplier<List<PresentationService>> services, HttpRequestContextProvider requestContextProvider) {
+		this.services = services;
 
-    }
+		this.requestContextProvider = requestContextProvider;
 
-    public ExplorerElement getExplorer(String id) {
-        int index = id.lastIndexOf("-");
-        String serviceName = id.substring(0, index);
-        String resourceMetaId = id.substring(index + 1);
+		this.factories.add(new DefaultTableElementFactory());
+		this.factories.add(new DefaultExplorerFactory());
+		this.factories.add(new DefaultEditorFactory());
+		this.factories.add(new DefaultFormFactory());
+		this.factories.add(new DefaultLabelElementFactory());
+		this.factories.add(new DefaultPlainTextElementFactory());
+	}
 
-        Optional<PresentationService> optService = services.get().stream().filter(it -> it.getServiceName().equals(serviceName)).findFirst();
-        if (!optService.isPresent()) {
-            throw new ResourceNotFoundException("no presentation service found with name " + serviceName);
-        }
-        PresentationService service = optService.get();
+	public void registerFactory(PresentationElementFactory factory) {
+		factories.add(factory);
+		factories = Prioritizable.prioritze(factories);
+	}
 
-        MetaLookup lookup = service.getLookup();
-        MetaResource resource = lookup.findElement(MetaResource.class, resourceMetaId);
-        return createExplorer(service, resource);
-    }
-
-    public Map<String, ExplorerElement> getExplorers() {
-        HashMap<String, ExplorerElement> map = new HashMap<>();
-
-        for (PresentationService service : services.get()) {
-            try {
-                MetaLookup lookup = service.getLookup();
-                List<MetaResource> resources = lookup.findElements(MetaResource.class);
-                for (MetaResource resource : resources) {
-                    if (!isIgnored(resource)) {
-                        ExplorerElement explorer = createExplorer(service, resource);
-                        map.put(explorer.getId(), explorer);
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.error("failed to retrieve meta data from " + service, e);
-            }
-        }
-        return map;
-    }
-
-    private boolean isIgnored(MetaResource resource) {
-        return resource.getResourceType().startsWith("meta/");
-    }
-
-    private ExplorerElement createExplorer(PresentationService service, MetaResource resource) {
-        ExplorerElement explorerElement = new ExplorerElement();
-        explorerElement.setId(toId(service, resource));
-        explorerElement.setTable(createTable(resource));
-        explorerElement.addAction(createRefreshAction());
-        explorerElement.setPath(service.getPath() + resource.getResourcePath());
-        explorerElement.setServiceName(service.getServiceName());
-        explorerElement.setServicePath(service.getPath());
-
-        if (resource.isInsertable()) {
-            explorerElement.addAction(createPostAction());
-        }
-
-        QueryElement query = explorerElement.getBaseQuery();
-        query.setResourceType(resource.getResourceType());
-        query.setInclusions(PresentationBuilderUtils.computeIncludes(explorerElement.getTable()));
-        return explorerElement;
-    }
-
-    private String toId(PresentationService service, MetaResource resource) {
-        return service.getServiceName() + "-" + resource.getId();
-    }
+	public ExplorerElement getExplorer(String id) {
+		ResourceRef ref = findResourceRef(id);
+		return (ExplorerElement) createViewer(ref.service, ref.resource, PresentationType.EXPLORER);
+	}
 
 
-    private DataTableElement createTable(MetaResource resource) {
-        DefaultTableElementFactory builder = new DefaultTableElementFactory();
-        PresentationEnvironment env = new PresentationEnvironment();
-        env.setElement(resource);
-        env.setType(resource);
-        env.setEditable(false);
-        env.setAcceptedTypes(Arrays.asList(PresentationType.TABLE));
-        env.setFactory(this);
-        return builder.create(env);
-    }
-
-    private ActionElement createRefreshAction() {
-        ActionElement element = new ActionElement();
-        element.setId("refresh");
-        return element;
-    }
-
-    private ActionElement createPostAction() {
-        ActionElement element = new ActionElement();
-        element.setId("create");
-        return element;
-    }
+	public EditorElement getEditor(String id) {
+		ResourceRef ref = findResourceRef(id);
+		return (EditorElement) createViewer(ref.service, ref.resource, PresentationType.EDITOR);
+	}
 
 
-    private MenuElements createMenu() {
-        MenuElements menuElements = new MenuElements();
-        List<MetaResource> resources = new ArrayList<>();// getMetaLookup().findElements(MetaResource.class);
-        for (MetaResource resource : resources) {
+	class ResourceRef {
 
-            MenuElement menuElement = new MenuElement();
-            menuElement.setLabel(resource.getName());
-            menuElement.setId(resource.getResourceType());
-            menuElements.addElement(menuElement);
-        }
-        return menuElements;
-    }
+		PresentationService service;
+
+		MetaResource resource;
+	}
+
+	private ResourceRef findResourceRef(String id) {
+		int index = id.lastIndexOf("-");
+		String serviceName = id.substring(0, index);
+		String resourceMetaId = "resources." + id.substring(index + 1);
+
+		Optional<PresentationService> optService = services.get().stream().filter(it -> it.getServiceName().equals(serviceName)).findFirst();
+		if (!optService.isPresent()) {
+			throw new ResourceNotFoundException("no presentation service found with name " + serviceName);
+		}
+		PresentationService service = optService.get();
+		MetaLookup lookup = service.getLookup();
+		MetaResource resource = lookup.findElement(MetaResource.class, resourceMetaId);
+
+		int requestVersion = getRequestVersion();
+		if (!resource.getVersionRange().contains(requestVersion)) {
+			throw new ResourceNotFoundException("no presentation service found with name " + serviceName + " serving version " + requestVersion);
+		}
+
+		ResourceRef ref = new ResourceRef();
+		ref.service = service;
+		ref.resource = resource;
+		return ref;
+	}
 
 
-    public PresentationElement createElement(PresentationEnvironment env) {
-        for (PresentationElementFactory factory : factories) {
-            if (factory.accepts(env)) {
-                return factory.create(env);
-            }
-        }
+	private PresentationElement createViewer(PresentationService service, MetaResource resource, PresentationType type) {
+		prepareResource(resource);
 
-        throw new IllegalStateException("failed to setup " + env);
-    }
+		PresentationEnvironment env = createEnv(service, resource);
+		env.setAcceptedTypes(Arrays.asList(type));
+		return createElement(env);
+	}
+
+	private void prepareResource(MetaResource resource) {
+		for (MetaAttribute attribute : resource.getAttributes()) {
+			if (attribute.getParent() == null) {
+				attribute.setParent(resource);
+			}
+		}
+	}
+
+	private PresentationEnvironment createEnv(PresentationService service, MetaResource resource) {
+		PresentationEnvironment env = new PresentationEnvironment();
+		env.setEditable(false);
+		env.setElement(resource);
+		env.setType(resource);
+		env.setService(service);
+		env.setManager(this);
+		env.setRequestVersion(getRequestVersion());
+		return env;
+	}
+
+	public Map<String, EditorElement> getEditors() {
+		return (Map) getViewers(PresentationType.EDITOR);
+	}
+
+	public Map<String, ExplorerElement> getExplorers() {
+		return (Map) getViewers(PresentationType.EXPLORER);
+	}
+
+	public List<PresentationService> getServices() {
+		return services.get();
+	}
+
+	public Map<String, PresentationElement> getViewers(PresentationType type) {
+		HashMap<String, PresentationElement> map = new HashMap<>();
+		for (PresentationService service : services.get()) {
+			try {
+				MetaLookup lookup = service.getLookup();
+				List<MetaResource> resources = lookup.findElements(MetaResource.class);
+				for (MetaResource resource : resources) {
+					if (!isIgnored(resource)) {
+						PresentationElement element = createViewer(service, resource, type);
+						map.put(element.getId(), element);
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.error("failed to retrieve meta data from " + service, e);
+			}
+		}
+		return map;
+	}
+
+	private boolean isIgnored(MetaResource resource) {
+		int requestVersion = getRequestVersion();
+		return resource.getResourceType().startsWith("meta/") || resource.getRepository() == null ||
+				!resource.getRepository().isExposed() || !resource.getVersionRange().contains(requestVersion);
+	}
+
+	private int getRequestVersion() {
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+		return requestContext.getQueryContext().getRequestVersion();
+	}
+
+	private MenuElements createMenu() {
+		MenuElements menuElements = new MenuElements();
+		List<MetaResource> resources = new ArrayList<>();// getMetaLookup().findElements(MetaResource.class);
+		for (MetaResource resource : resources) {
+
+			MenuElement menuElement = new MenuElement();
+			menuElement.setLabel(resource.getName());
+			menuElement.setId(resource.getResourceType());
+			menuElements.addElement(menuElement);
+		}
+		return menuElements;
+	}
+
+
+	public PresentationElement createElement(PresentationEnvironment env) {
+		for (PresentationElementFactory factory : factories) {
+			if (factory.accepts(env)) {
+				return factory.create(env);
+			}
+		}
+
+		throw new IllegalStateException("failed to setup " + env);
+	}
 }

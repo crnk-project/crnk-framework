@@ -45,7 +45,7 @@ public abstract class ActivitiTestBase {
         boot.boot();
 
         taskRepository = (TaskResourceRepository<ApproveTask>) boot.getResourceRegistry().getEntry(ApproveTask.class)
-                .getResourceRepository().getResourceRepository();
+                .getResourceRepository().getImplementation();
     }
 
     protected Module createActivitiModule() {

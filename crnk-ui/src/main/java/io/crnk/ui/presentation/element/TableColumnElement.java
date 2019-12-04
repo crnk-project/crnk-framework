@@ -1,6 +1,6 @@
 package io.crnk.ui.presentation.element;
 
-public class TableColumnElement extends SingularValueElement {
+public class TableColumnElement extends WrapperElement {
 
     private String id;
 
@@ -11,8 +11,6 @@ public class TableColumnElement extends SingularValueElement {
     private String width;
 
     private boolean sortable;
-
-    private PresentationElement component;
 
     private PresentationElement editComponent;
 
@@ -58,14 +56,6 @@ public class TableColumnElement extends SingularValueElement {
 
     public void setSortable(boolean sortable) {
         this.sortable = sortable;
-    }
-
-    public PresentationElement getComponent() {
-        return component;
-    }
-
-    public void setComponent(PresentationElement component) {
-        this.component = component;
     }
 
     public PresentationElement getEditComponent() {

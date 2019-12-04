@@ -1,5 +1,16 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ServiceLoader;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.client.action.ActionStubFactory;
@@ -9,9 +20,11 @@ import io.crnk.client.http.HttpAdapterProvider;
 import io.crnk.client.http.apache.HttpClientAdapterProvider;
 import io.crnk.client.http.okhttp.OkHttpAdapterProvider;
 import io.crnk.client.internal.ClientDocumentMapper;
+import io.crnk.client.internal.ClientHttpRequestContext;
 import io.crnk.client.internal.ClientStubInvocationHandler;
 import io.crnk.client.internal.RelationshipRepositoryStubImpl;
 import io.crnk.client.internal.ResourceRepositoryStubImpl;
+import io.crnk.client.internal.SingletonResultFactory;
 import io.crnk.client.internal.proxy.BasicProxyFactory;
 import io.crnk.client.internal.proxy.ClientProxyFactory;
 import io.crnk.client.internal.proxy.ClientProxyFactoryContext;
@@ -33,11 +46,12 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
-import io.crnk.core.engine.internal.registry.LegacyRegistryEntry;
+import io.crnk.core.engine.internal.registry.RegistryEntryImpl;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapterImpl;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapterImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -48,20 +62,18 @@ import io.crnk.core.engine.properties.SystemPropertiesProvider;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory;
-import io.crnk.core.module.discovery.FallbackServiceDiscoveryFactory;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
+import io.crnk.core.module.internal.ModuleUtils;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
@@ -72,25 +84,10 @@ import io.crnk.core.repository.ManyRelationshipRepository;
 import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.repository.decorate.Wrapper;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiVersion;
 import io.crnk.core.resource.list.DefaultResourceList;
-import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-import io.crnk.legacy.internal.DirectResponseResourceEntry;
-import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.registry.RepositoryInstanceBuilder;
-import io.crnk.legacy.repository.LegacyRelationshipRepository;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -98,6 +95,8 @@ import java.util.ServiceLoader;
 public class CrnkClient {
 
     private static final String REST_TEMPLATE_PROVIDER_NAME = "io.crnk.spring.client.RestTemplateAdapterProvider";
+
+    private final ClientType clientType;
 
     private HttpAdapter httpAdapter;
 
@@ -121,22 +120,27 @@ public class CrnkClient {
 
     private ServiceDiscoveryFactory serviceDiscoveryFactory = new DefaultServiceDiscoveryFactory();
 
-    private JsonServiceLocator serviceLocator = new SampleJsonServiceLocator();
-
     private PropertiesProvider propertiesProvider = new SystemPropertiesProvider();
 
     private Long defaultPageLimit = null;
 
     private Long maxPageLimit = null;
 
-    private QueryContext queryContext = new QueryContext();
+    private QueryContext queryContext = new QueryContext().setRequestVersion(Integer.MAX_VALUE);
 
     private List<HttpAdapterProvider> httpAdapterProviders = new ArrayList<>();
 
     private ClientFormat format = ClientFormat.JSONAPI;
 
+    private ClientProxyFactory configuredProxyFactory;
+
     public enum ClientType {
         SIMPLE_lINKS,
+
+        /**
+         * @deprecated currently barely used, speak up if still necessary
+         */
+        @Deprecated
         OBJECT_LINKS
     }
 
@@ -149,6 +153,7 @@ public class CrnkClient {
     }
 
     public CrnkClient(ServiceUrlProvider serviceUrlProvider, ClientType clientType) {
+        this.clientType = clientType;
         if (ClassUtils.existsClass(REST_TEMPLATE_PROVIDER_NAME)) {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             Class providerClass = ClassUtils.loadClass(classLoader, REST_TEMPLATE_PROVIDER_NAME);
@@ -163,7 +168,7 @@ public class CrnkClient {
         moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
         moduleRegistry.addModule(new ClientModule());
 
-
+		moduleRegistry.setResultFactory(new SingletonResultFactory());
         moduleRegistry.addModule(new ResourceInformationProviderModule());
 
         resourceRegistry = new ClientResourceRegistry(moduleRegistry);
@@ -171,28 +176,18 @@ public class CrnkClient {
         urlBuilder = new JsonApiUrlBuilder(moduleRegistry, queryContext);
 
 
-        objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        switch (clientType) {
-            case OBJECT_LINKS:
-                initJacksonModule(true);
-                documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new PropertiesProvider() {
-                    @Override
-                    public String getProperty(String key) {
-                        if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS)) {
-                            return "true";
-                        }
-                        return null;
-                    }
-                });
-                break;
-            default:
-                initJacksonModule(false);
-                documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new NullPropertiesProvider());
-        }
-
         setProxyFactory(new BasicProxyFactory());
+    }
+
+    public int getVersion() {
+        return queryContext.getRequestVersion();
+    }
+
+    /**
+     * @param version to sent along with ACCEPT header. For more information see {@link JsonApiVersion}.
+     */
+    public void setVersion(int version) {
+        this.queryContext.setRequestVersion(version);
     }
 
     public ClientFormat getFormat() {
@@ -208,9 +203,7 @@ public class CrnkClient {
         if (serviceDiscovery == null) {
             // revert to reflection-based approach if no ServiceDiscovery is
             // found
-            FallbackServiceDiscoveryFactory fallback =
-                    new FallbackServiceDiscoveryFactory(serviceDiscoveryFactory, serviceLocator, propertiesProvider);
-            serviceDiscovery = fallback.getInstance();
+            serviceDiscovery = serviceDiscoveryFactory.getInstance();
             moduleRegistry.setServiceDiscovery(serviceDiscovery);
         }
     }
@@ -260,6 +253,7 @@ public class CrnkClient {
      * Each module can register itself for lookup by registering a ClientModuleFactory.
      */
     public void findModules() {
+        initObjectMapper();
         ServiceLoader<ClientModuleFactory> loader = ServiceLoader.load(ClientModuleFactory.class);
 
         Iterator<ClientModuleFactory> iterator = loader.iterator();
@@ -291,7 +285,10 @@ public class CrnkClient {
 
             }
         });
-        documentMapper.setProxyFactory(proxyFactory);
+        this.configuredProxyFactory = proxyFactory;
+        if (documentMapper != null) {
+            documentMapper.setProxyFactory(proxyFactory);
+        }
     }
 
 
@@ -325,9 +322,13 @@ public class CrnkClient {
         initHttpAdapter();
 
         setupPagingBehavior();
+        initObjectMapper();
+        configureObjectMapper();
         initModuleRegistry();
         initExceptionMapperRegistry();
         initResources();
+
+		moduleRegistry.getHttpRequestContextProvider().onRequestStarted(new ClientHttpRequestContext(queryContext));
 
         Optional<Module> plainJsonModule = moduleRegistry.getModules().stream().filter(it -> it.getModuleName().equals("plain-json")).findFirst();
         if (plainJsonModule.isPresent()) {
@@ -335,30 +336,64 @@ public class CrnkClient {
         }
     }
 
-    private void initHttpAdapter() {
+    protected void initObjectMapper() {
+        if (objectMapper == null) {
+            objectMapper = createDefaultObjectMapper();
+            configureObjectMapper();
+        }
+
+    }
+
+    protected ObjectMapper createDefaultObjectMapper() {
+        ObjectMapper om = new ObjectMapper();
+        om.enable(SerializationFeature.INDENT_OUTPUT);
+        return om;
+    }
+
+    protected void configureObjectMapper() {
+        initJacksonModule(clientType == ClientType.OBJECT_LINKS);
+    }
+
+    protected void initHttpAdapter() {
         if (httpAdapter == null) {
             httpAdapter = detectHttpAdapter();
         }
     }
 
-    private void initResources() {
+    protected void initResources() {
         ResourceLookup resourceLookup = moduleRegistry.getResourceLookup();
         for (Class<?> resourceClass : resourceLookup.getResourceClasses()) {
             getRepositoryForType(resourceClass);
         }
     }
 
-    private void initModuleRegistry() {
+    protected void initModuleRegistry() {
         moduleRegistry.init(objectMapper);
+
+        switch (clientType) {
+            case OBJECT_LINKS:
+                documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, key -> {
+                    if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS)) {
+                        return "true";
+                    }
+                    return null;
+                });
+                break;
+            default:
+                documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new NullPropertiesProvider());
+        }
+        if (configuredProxyFactory != null) {
+            documentMapper.setProxyFactory(configuredProxyFactory);
+        }
     }
 
-    private void initExceptionMapperRegistry() {
+    protected void initExceptionMapperRegistry() {
         ExceptionMapperLookup exceptionMapperLookup = moduleRegistry.getExceptionMapperLookup();
         exceptionMapperRegistry = new ExceptionMapperRegistryBuilder().build(exceptionMapperLookup);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private <T, I> RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
+    protected <T, I> RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
         RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
         if (entry != null) {
             return entry;
@@ -377,26 +412,25 @@ public class CrnkClient {
         }
 
         ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
-        final ResourceRepository repositoryStub = (ResourceRepository)
-                decorate(new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder));
+        DefaultRegistryEntryBuilder.contributeFields(moduleRegistry, resourceInformation);
+        ModuleUtils.adaptInformation(resourceInformation, moduleRegistry);
+
+        final ResourceRepository repositoryStub = (ResourceRepository) decorate(
+                new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder)
+        );
 
         // create interface for it!
-        RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {
-
-            @Override
-            public Object buildRepository() {
-                return repositoryStub;
-            }
-        };
         ResourceRepositoryInformation repositoryInformation =
                 new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
                         resourceInformation, new HashMap<>(), RepositoryMethodAccess.ALL, true);
-        ResourceEntry resourceEntry = new DirectResponseResourceEntry(repositoryInstanceBuilder, repositoryInformation);
-        Map<ResourceField, ResponseRelationshipEntry> relationshipEntries = new HashMap<>();
-        LegacyRegistryEntry registryEntry = new LegacyRegistryEntry(resourceEntry, relationshipEntries);
+        ResourceRepositoryAdapter resourceRepositoryAdapter = new ResourceRepositoryAdapterImpl(repositoryInformation, moduleRegistry, repositoryStub);
+        Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters = new HashMap<>();
+        RegistryEntryImpl registryEntry = new RegistryEntryImpl(resourceInformation, resourceRepositoryAdapter,
+                relationshipRepositoryAdapters,
+                moduleRegistry);
+
         registryEntry.setParentRegistryEntry(parentEntry);
-        registryEntry.initialize(moduleRegistry);
-        resourceRegistry.addEntry(resourceClass, registryEntry);
+        resourceRegistry.addEntry(registryEntry);
 
         allocateRepositoryRelations(registryEntry);
 
@@ -407,6 +441,11 @@ public class CrnkClient {
             }
         }
 
+		moduleRegistry.initOpposites(true); // client only has partial knowledge o
+        if (resourceInformation.getIdField() != null) {
+            resourceInformation.initNesting();
+        }
+
         return registryEntry;
     }
 
@@ -415,15 +454,26 @@ public class CrnkClient {
         ResourceInformation resourceInformation = registryEntry.getResourceInformation();
         List<ResourceField> relationshipFields = resourceInformation.getRelationshipFields();
         for (ResourceField relationshipField : relationshipFields) {
-            final Class<?> targetClass = relationshipField.getElementType();
-            Class sourceClass = resourceInformation.getResourceClass();
-            allocateRepositoryRelation(sourceClass, targetClass);
+            allocateRepositoryRelation(relationshipField);
         }
     }
 
     private RelationshipRepositoryAdapter allocateRepositoryRelation(Class sourceClass, Class targetClass) {
+        RegistryEntry sourceEntry = allocateRepository(sourceClass, null);
+        for (ResourceField field : sourceEntry.getResourceInformation().getRelationshipFields()) {
+            if (field.getElementType() == targetClass) {
+                return allocateRepositoryRelation(field);
+            }
+        }
+        throw new IllegalArgumentException("no relationship found between " + sourceClass + " " + targetClass);
+    }
+
+
+    private RelationshipRepositoryAdapter allocateRepositoryRelation(ResourceField field) {
         // allocate relations as well
         ClientResourceRegistry clientResourceRegistry = (ClientResourceRegistry) resourceRegistry;
+        Class<?> sourceClass = field.getResourceInformation().getImplementationClass();
+        Class<?> targetClass = field.getElementType();
         if (!clientResourceRegistry.isInitialized(sourceClass)) {
             allocateRepository(sourceClass, null);
         }
@@ -431,33 +481,18 @@ public class CrnkClient {
             allocateRepository(targetClass, null);
         }
 
-        LegacyRegistryEntry sourceEntry = (LegacyRegistryEntry) resourceRegistry.getEntry(sourceClass);
-        final LegacyRegistryEntry targetEntry = (LegacyRegistryEntry) resourceRegistry.getEntry(targetClass);
-        String targetResourceType = targetEntry.getResourceInformation().getResourceType();
-
-        Map relationshipEntries = sourceEntry.getRelationshipEntries();
-        DirectResponseRelationshipEntry relationshipEntry =
-                (DirectResponseRelationshipEntry) relationshipEntries.get(targetResourceType);
-
-        if (!relationshipEntries.containsKey(targetResourceType)) {
-
-            final Object relationshipRepositoryStub = decorate(
-                    new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder)
-            );
-            RepositoryInstanceBuilder<LegacyRelationshipRepository> relationshipRepositoryInstanceBuilder =
-                    new RepositoryInstanceBuilder(null, null) {
-
-                        @Override
-                        public Object buildRepository() {
-                            return relationshipRepositoryStub;
-                        }
-                    };
-            relationshipEntry = new DirectResponseRelationshipEntry(relationshipRepositoryInstanceBuilder);
-            relationshipEntries.put(targetResourceType, relationshipEntry);
+        RegistryEntryImpl sourceEntry = (RegistryEntryImpl) resourceRegistry.getEntry(sourceClass);
+        if (sourceEntry.hasRelationship(field)) {
+            return sourceEntry.getRelationshipRepository(field);
         }
-        Object repoInstance = relationshipEntry.getRepositoryInstanceBuilder();
 
-        return new RelationshipRepositoryAdapterImpl(null, moduleRegistry, repoInstance);
+        final Object relationshipRepositoryStub = decorate(
+                new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder)
+        );
+
+        RelationshipRepositoryAdapter adapter = new RelationshipRepositoryAdapterImpl(field, moduleRegistry, relationshipRepositoryStub);
+        sourceEntry.putRelationshipRepository(field, adapter);
+        return adapter;
     }
 
 
@@ -465,11 +500,10 @@ public class CrnkClient {
     public <R extends ResourceRepository<?, ?>> R getRepositoryForInterface(Class<R> repositoryInterfaceClass) {
         init();
         RepositoryInformationProvider informationBuilder = moduleRegistry.getRepositoryInformationBuilder();
-        PreconditionUtil.verify(informationBuilder.accept(repositoryInterfaceClass), "%s is not a valid repository interface",
-                repositoryInterfaceClass);
-        ResourceRepositoryInformation repositoryInformation = (ResourceRepositoryInformation) informationBuilder
-                .build(repositoryInterfaceClass, new DefaultRepositoryInformationProviderContext(moduleRegistry));
-        Class<?> resourceClass = repositoryInformation.getResourceInformation().get().getResourceClass();
+        PreconditionUtil.verify(informationBuilder.accept(repositoryInterfaceClass), "%s is not a valid repository interface", repositoryInterfaceClass);
+        ResourceRepositoryInformation repositoryInformation =
+                (ResourceRepositoryInformation) informationBuilder.build(repositoryInterfaceClass, new DefaultRepositoryInformationProviderContext(moduleRegistry));
+        Class<?> resourceClass = repositoryInformation.getResource().getResourceClass();
 
         Object actionStub = actionStubFactory != null ? actionStubFactory.createStub(repositoryInterfaceClass) : null;
         ResourceRepository<?, Serializable> repositoryStub = getRepositoryForType(resourceClass);
@@ -477,7 +511,7 @@ public class CrnkClient {
         ClassLoader classLoader = repositoryInterfaceClass.getClassLoader();
         InvocationHandler invocationHandler =
                 new ClientStubInvocationHandler(repositoryInterfaceClass, repositoryStub, actionStub);
-        return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, ResourceRepository.class},
+        return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, Wrapper.class, ResourceRepository.class},
                 invocationHandler);
     }
 
@@ -491,7 +525,7 @@ public class CrnkClient {
 
         RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
         ResourceRepositoryAdapter repositoryAdapter = entry.getResourceRepository();
-        return (ResourceRepository<T, I>) repositoryAdapter.getResourceRepository();
+        return (ResourceRepository<T, I>) repositoryAdapter.getImplementation();
 
     }
 
@@ -523,7 +557,8 @@ public class CrnkClient {
         ResourceInformation sourceResourceInformation =
                 new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null,
                         PagingSpec.class);
-        return (RelationshipRepository<Resource, String, Resource, String>) decorate(new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder));
+        return (RelationshipRepository<Resource, String, Resource, String>) decorate(new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation,
+                urlBuilder));
     }
 
 
@@ -545,7 +580,7 @@ public class CrnkClient {
         init();
 
         RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
-        return (RelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+        return (RelationshipRepository<T, I, D, J>) repositoryAdapter.getImplementation();
     }
 
     /**
@@ -559,7 +594,7 @@ public class CrnkClient {
         init();
 
         RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
-        return (ManyRelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+        return (ManyRelationshipRepository<T, I, D, J>) repositoryAdapter.getImplementation();
     }
 
     /**
@@ -573,14 +608,21 @@ public class CrnkClient {
         init();
 
         RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
-        return (OneRelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+        return (OneRelationshipRepository<T, I, D, J>) repositoryAdapter.getImplementation();
     }
 
     /**
      * @return objectMapper in use
      */
     public ObjectMapper getObjectMapper() {
+        initObjectMapper();
         return objectMapper;
+    }
+
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        PreconditionUtil.verify(this.objectMapper == null, "ObjectMapper already configured, consider calling SetObjectMapper earlier or and avoid multiple calls");
+        this.objectMapper = objectMapper;
+        this.configureObjectMapper();
     }
 
     /**
@@ -664,6 +706,7 @@ public class CrnkClient {
     }
 
     public ClientDocumentMapper getDocumentMapper() {
+        init();
         return documentMapper;
     }
 

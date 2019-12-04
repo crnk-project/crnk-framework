@@ -27,7 +27,7 @@ public class DocumentMapper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentMapper.class);
 
-	private final ResourceFilterDirectory resourceFilterDirectory;
+	protected final ResourceFilterDirectory resourceFilterDirectory;
 
 	private ObjectNode jsonapi;
 
@@ -44,13 +44,13 @@ public class DocumentMapper {
 	private boolean client;
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo) {
+			ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo) {
 		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, resultFactory, serverInfo, false);
 	}
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo,
-						  boolean client) {
+			ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo,
+			boolean client) {
 		this.propertiesProvider = propertiesProvider;
 		this.client = client;
 		this.resultFactory = resultFactory;
@@ -60,24 +60,28 @@ public class DocumentMapper {
 
 		this.util = newDocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 		this.resourceMapper = newResourceMapper(util, client, objectMapper);
-		this.includeLookupSetter = newIncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
+		this.includeLookupSetter = newIncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, objectMapper);
 
 		if (serverInfo != null && !serverInfo.isEmpty()) {
 			jsonapi = objectMapper.valueToTree(serverInfo);
 		}
 	}
 
-	public void setClient(boolean client){
+	public ResourceMapper getResourceMapper() {
+		return resourceMapper;
+	}
+
+	public void setClient(boolean client) {
 		this.client = client;
 	}
 
 	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
-														 PropertiesProvider propertiesProvider) {
-		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, resultFactory);
+			PropertiesProvider propertiesProvider, ObjectMapper objectMapper) {
+		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, resultFactory, objectMapper);
 	}
 
 	protected DocumentMapperUtil newDocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-													   PropertiesProvider propertiesProvider) {
+			PropertiesProvider propertiesProvider) {
 		return new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 	}
 
@@ -120,7 +124,8 @@ public class DocumentMapper {
 			if (doc.getData().isPresent()) {
 				if (doc.isMultiple()) {
 					compact(doc.getCollectionData().get());
-				} else {
+				}
+				else {
 					compact(doc.getSingleData().get());
 				}
 			}
@@ -147,11 +152,12 @@ public class DocumentMapper {
 	}
 
 	private Result<Document> addRelationDataAndInclusions(Document doc, Object entity, QueryAdapter queryAdapter,
-														  DocumentMappingConfig mappingConfig) {
+			DocumentMappingConfig mappingConfig) {
 
 		if (doc.getData().isPresent() && !client) {
 			return includeLookupSetter.processInclusions(doc, entity, queryAdapter, mappingConfig);
-		} else {
+		}
+		else {
 			return resultFactory.just(doc);
 		}
 	}
@@ -165,7 +171,8 @@ public class DocumentMapper {
 					dataList.add(resourceMapper.toData(obj, queryAdapter, resourceMappingConfig));
 				}
 				doc.setData(Nullable.of(dataList));
-			} else {
+			}
+			else {
 				doc.setData(Nullable.of(resourceMapper.toData(entity, queryAdapter, resourceMappingConfig)));
 			}
 		}
