@@ -32,6 +32,7 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.proxy.ProxyResource;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -172,6 +173,11 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
                     }
                     anyFieldAccessor.setValue(instance, attributeName, value);
                 }
+                else if (instance instanceof ProxyResource){
+	                ProxyResource proxy = (ProxyResource)instance;
+                	proxy.getAttributes().put(attributeName, valueNode.textValue());
+                }
+
             } catch (IOException e) {
                 throw new ResourceException(
                         String.format("Exception while setting %s.%s=%s due to %s", instance, attributeName, valueNode,

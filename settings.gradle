@@ -40,11 +40,12 @@ include ':crnk-gen:crnk-gen-gradle'
 include ':crnk-gen:crnk-gen-asciidoc'
 
 include ':crnk-integration-examples:jersey-example'
-include ':crnk-integration-examples:dropwizard-simple-example'
+include ':crnk-integration-examples:dropwizard-proxied-example'
 include ':crnk-integration-examples:wildfly-example'
 include ':crnk-integration-examples:spring-boot-example'
 include ':crnk-integration-examples:spring-boot-minimal-example'
 include ':crnk-integration-examples:spring-boot-microservice-example'
+include ':crnk-integration-examples:spring-boot-proxied-microservice-example'
 include ':crnk-integration-examples:dagger-vertx-example'
 
 gradle.beforeProject { Project project ->
