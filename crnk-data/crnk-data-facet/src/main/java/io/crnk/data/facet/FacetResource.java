@@ -23,10 +23,13 @@ public class FacetResource {
 
 	private String name;
 
+	/**
+	 * List of all labels sorted by their total count in descending order.
+	 */
 	private List<String> labels;
 
 	/**
-	 * Mapping of label to its value.
+	 * Mapping of label to its value. Sorted by total count in descending order.
 	 */
 	private Map<String, FacetValue> values = new HashMap<>();
 
