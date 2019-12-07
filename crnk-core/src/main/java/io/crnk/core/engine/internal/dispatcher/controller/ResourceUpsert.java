@@ -1,19 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +32,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -54,6 +39,19 @@ import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.meta.JsonLinksInformation;
 import io.crnk.core.resource.meta.JsonMetaInformation;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
@@ -72,41 +70,6 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		Resource resourceBody = (Resource) requestDocument.getData().get();
 		verifyResourceBody(resourceBody, path);
 		return resourceBody;
-	}
-
-	protected List<Resource> getRequestBodys(Document requestDocument, JsonPath path, HttpMethod method) {
-		String resourcePath = path.getRootEntry().getResourceInformation().getResourcePath();
-
-		assertRequestDocument(requestDocument, method, resourcePath);
-
-		if (!requestDocument.getData().isPresent() || requestDocument.getData().get() == null) {
-			throw new RequestBodyException(method, resourcePath, "No data field in the body.");
-		}
-
-		Object data = requestDocument.getData().get();
-		List<Resource> resourceBodies = data instanceof List ? (List<Resource>) data : Arrays.asList((Resource) data);
-		for (Resource resourceBody : resourceBodies) {
-			verifyResourceBody(resourceBody, path);
-		}
-		return resourceBodies;
-	}
-
-	protected void verifyResourceBody(Resource resourceBody, JsonPath path) {
-		assignDefaultType(resourceBody, path);
-		String resourceType = resourceBody.getType();
-		RegistryEntry bodyRegistryEntry = context.getResourceRegistry().getEntry(resourceType);
-		if (bodyRegistryEntry == null) {
-			throw new RepositoryNotFoundException(resourceType);
-		}
-	}
-
-	private void assignDefaultType(Resource resourceBody, JsonPath path) {
-		String type = resourceBody.getType();
-		if (type == null && path.getParentField() != null) {
-			resourceBody.setType(path.getParentField().getOppositeResourceType());
-		} else if (type == null) {
-			resourceBody.setType(path.getRootEntry().getResourceInformation().getResourceType());
-		}
 	}
 
 	protected Object newEntity(ResourceInformation resourceInformation, Resource dataBody) {

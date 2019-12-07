@@ -5,6 +5,7 @@ import io.crnk.client.ClientFormat;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -19,7 +20,9 @@ import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.utils.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -48,8 +51,24 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
     }
 
     @Override
-    public void delete(List<I> id) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public void delete(List<I> ids) {
+        String url = urlBuilder.buildUrl(resourceInformation, null, (QuerySpec) null);
+
+        final ObjectMapper objectMapper = client.getObjectMapper();
+        Document document = new Document();
+        ArrayList<ResourceIdentifier> resourceIdentifiers = new ArrayList<>();
+        for (Object id : ids) {
+            resourceIdentifiers.add(resourceInformation.toResourceIdentifier(id));
+        }
+        document.setData(Nullable.of(resourceIdentifiers));
+        Document transportDocument = client.getFormat().toTransportDocument(document);
+        String requestBodyValue = ExceptionUtil.wrapCatchedExceptions(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return objectMapper.writeValueAsString(transportDocument);
+            }
+        });
+        executeDelete(url, requestBodyValue);
     }
 
     @SuppressWarnings("unchecked")

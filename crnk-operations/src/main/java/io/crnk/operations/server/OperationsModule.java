@@ -261,22 +261,25 @@ public class OperationsModule implements Module {
 
             JsonPath repositoryPath = new ResourcePath(rootEntry, null);
 
-            PreconditionUtil.verifyEquals(HttpMethod.POST.toString(), method, "experimental bulk support is currently limited to POST");
+            PreconditionUtil.assertTrue(
+                method.equals(HttpMethod.POST.toString()) || method.equals(HttpMethod.DELETE.toString()) ,
+                "experimental bulk support is currently limited to POST and DELETE"
+            );
 
             Document requestBody = new Document();
             requestBody.setData(Nullable.of(operations.stream().map(it -> it.getOperation().getValue()).collect(Collectors.toList())));
-
 
             Map<String, Set<String>> parameters = new HashMap<>();
             Response response = requestDispatcher.dispatchRequest(repositoryPath.toString(), method, parameters, requestBody);
 
             boolean success = response.getHttpStatus() < 400;
+            boolean hasContent = response.getHttpStatus() != 204;
             for (int i = 0; i < operations.size(); i++) {
                 OrderedOperation orderedOperation = operations.get(i);
                 OperationResponse operationResponse = new OperationResponse();
                 operationResponse.setStatus(response.getHttpStatus());
                 if (displayOperationResponseOnSuccess || !success) {
-                    if (success) {
+                    if (success && hasContent) {
                         List<Resource> collectionData = response.getDocument().getCollectionData().get();
                         Resource responseResourceBody = collectionData.get(0);
                         operationResponse.setData(Nullable.of(responseResourceBody));
