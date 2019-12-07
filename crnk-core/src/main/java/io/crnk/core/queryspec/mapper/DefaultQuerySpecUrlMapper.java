@@ -299,7 +299,7 @@ public class DefaultQuerySpecUrlMapper
 
     protected void serializeFilters(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map, boolean isRoot, QueryContext queryContext) {
         if (jsonParser.isNested(querySpec.getFilters())) {
-            JsonNode jsonNode = jsonParser.serialize(querySpec.getFilters());
+            JsonNode jsonNode = jsonParser.serialize(resourceInformation, querySpec.getFilters(), queryContext);
             String json;
             try {
                 // we keep it rather compact without white spaces (or any line separator) to avoid complex, encoded urls

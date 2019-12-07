@@ -42,11 +42,13 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
     }
 
     @Override
-    public QueryPathSpec resolve(ResourceInformation resourceInformation, List<String> attributePath, NamingType sourceNamingType, String sourceParameter, QueryContext queryContext) {
+    public QueryPathSpec resolve(ResourceInformation sourceResourceInformation, List<String> attributePath, NamingType sourceNamingType, String sourceParameter, QueryContext queryContext) {
         if (attributePath == null) {
             // no attribute specified, query string expected, use String
             return new QueryPathSpec(String.class, null, null);
         }
+
+        ResourceInformation resourceInformation = sourceResourceInformation;
 
         ResourceRegistry resourceRegistry = ctx.getResourceRegistry();
         Type valueType = resourceInformation.getResourceClass();
@@ -121,7 +123,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
                 ErrorData errorData = ErrorData.builder()
                         .setCode("UNKNOWN_PARAMETER")
                         .setTitle("unknown parameter")
-                        .setDetail("Failed to resolve path to field '" + StringUtils.join(".", attributePath) + "' from " + resourceInformation.getResourceClass())
+                        .setDetail("Failed to resolve path to field '" + StringUtils.join(".", attributePath) + "' from " + resourceInformation)
                         .setSourceParameter(sourceParameter)
                         .setStatus(String.valueOf(HttpStatus.BAD_REQUEST_400)).build();
                 throw new BadRequestException(HttpStatus.BAD_REQUEST_400, errorData);

@@ -94,18 +94,19 @@ public class JsonFilterSpecMapper {
 	}
 
 	public boolean isJson(String value) {
-		return value.startsWith("{") && value.endsWith("}") || value.startsWith("[") && value.endsWith("]");
+		String trimmedValue = value.trim();
+		return trimmedValue.startsWith("{") && trimmedValue.endsWith("}") || trimmedValue.startsWith("[") && trimmedValue.endsWith("]");
 	}
 
 	public boolean isNested(List<FilterSpec> filterSpecs) {
 		return filterSpecs.stream().filter(it -> it.hasExpressions()).findFirst().isPresent();
 	}
 
-	public JsonNode serialize(List<FilterSpec> filterSpecs) {
-		return serialize(filterSpecs, FilterOperator.AND);
+	public JsonNode serialize(ResourceInformation resourceInformation, List<FilterSpec> filterSpecs, QueryContext queryContext) {
+		return serialize(resourceInformation, filterSpecs, FilterOperator.AND, queryContext);
 	}
 
-	private JsonNode serialize(List<FilterSpec> filterSpecs, FilterOperator operator) {
+	private JsonNode serialize(ResourceInformation resourceInformation, List<FilterSpec> filterSpecs, FilterOperator operator, QueryContext queryContext) {
 		PreconditionUtil.verify(!filterSpecs.isEmpty(), "must not be empty");
 
 		ObjectMapper objectMapper = context.getObjectMapper();
@@ -113,37 +114,43 @@ public class JsonFilterSpecMapper {
 		if (operator == FilterOperator.AND) {
 			ObjectNode objectNode = objectMapper.createObjectNode();
 			for (FilterSpec filterSpec : filterSpecs) {
-				PathSpec path = filterSpec.getPath();
-				if (!filterSpec.hasExpressions() && path.getElements().size() > 1) {
-					String firstPathElement = path.getElements().get(0);
+				PathSpec implPath = filterSpec.getPath();
+
+				// resourceInformation == null => json path already resolved before (happens for nesting)
+				PathSpec jsonPath = resourceInformation != null && implPath != null ?
+						pathResolver.resolve(resourceInformation, implPath.getElements(), QueryPathResolver.NamingType.JAVA, null, queryContext).toPathSpec()
+						: implPath;
+
+				if (!filterSpec.hasExpressions() && jsonPath.getElements().size() > 1) {
+					String firstPathElement = jsonPath.getElements().get(0);
 					FilterSpec nestedFilterSpec = filterSpec.clone();
-					nestedFilterSpec.setPath(PathSpec.of(path.getElements().subList(1, path.getElements().size())));
-					objectNode.set(firstPathElement, serializeFilter(nestedFilterSpec));
+					nestedFilterSpec.setPath(PathSpec.of(jsonPath.getElements().subList(1, jsonPath.getElements().size())));
+					objectNode.set(firstPathElement, serializeFilter(null, nestedFilterSpec, queryContext));
 				}
 				else if (filterSpec.getOperator() == FilterOperator.EQ) {
 					JsonNode jsonNode = serializeValue(filterSpec.getValue());
-					objectNode.set(path.toString(), jsonNode);
+					objectNode.set(jsonPath.toString(), jsonNode);
 				}
 				else if (filterSpec.hasExpressions()) {
-					objectNode.set(filterSpec.getOperator().toString(), serialize(filterSpec.getExpression(), filterSpec.getOperator()));
+					objectNode.set(filterSpec.getOperator().toString(), serialize(resourceInformation, filterSpec.getExpression(), filterSpec.getOperator(), queryContext));
 				}
 				else {
 					FilterSpec nestedFilterSpec = filterSpec.clone();
 					nestedFilterSpec.setOperator(FilterOperator.EQ);
-					objectNode.set(filterSpec.getOperator().toString(), serializeFilter(nestedFilterSpec));
+					objectNode.set(filterSpec.getOperator().toString(), serializeFilter(resourceInformation, nestedFilterSpec, queryContext));
 				}
 			}
 			return objectNode;
 		}
 		else {
 			ArrayNode arrayNode = objectMapper.createArrayNode();
-			filterSpecs.stream().forEach(it -> arrayNode.add(serializeFilter(it)));
+			filterSpecs.stream().forEach(it -> arrayNode.add(serializeFilter(resourceInformation, it, queryContext)));
 			return arrayNode;
 		}
 	}
 
-	private JsonNode serializeFilter(FilterSpec filterSpec) {
-		return serialize(Arrays.asList(filterSpec));
+	private JsonNode serializeFilter(ResourceInformation resourceInformation, FilterSpec filterSpec, QueryContext queryContext) {
+		return serialize(resourceInformation, Arrays.asList(filterSpec), queryContext);
 	}
 
 	private JsonNode serializeValue(Object value) {
@@ -151,9 +158,9 @@ public class JsonFilterSpecMapper {
 		return objectMapper.valueToTree(value);
 	}
 
-	private List<FilterSpec> deserialize(JsonNode jsonNode, ResourceInformation resourceInformation, PathSpec attributePath, QueryContext queryContext) {
+	private List<FilterSpec> deserialize(JsonNode jsonNode, ResourceInformation resourceInformation, PathSpec jsonAttributePath, QueryContext queryContext) {
 		if (jsonNode instanceof ArrayNode) {
-			return deserializeJsonArrayFilter((ArrayNode) jsonNode, resourceInformation, attributePath, queryContext);
+			return deserializeJsonArrayFilter((ArrayNode) jsonNode, resourceInformation, jsonAttributePath, queryContext);
 		}
 		else if (jsonNode instanceof ObjectNode) {
 			ObjectNode objectNode = (ObjectNode) jsonNode;
@@ -165,16 +172,17 @@ public class JsonFilterSpecMapper {
 				JsonNode element = objectNode.get(fieldName);
 				FilterOperator operator = findOperator(fieldName);
 				if (operator != null) {
-					filterSpecs.add(deserializeJsonOperatorFilter(operator, element, resourceInformation, attributePath, queryContext));
+					filterSpecs.add(deserializeJsonOperatorFilter(operator, element, resourceInformation, jsonAttributePath, queryContext));
 				}
 				else if (element instanceof ObjectNode) {
-					PathSpec nestedAttrPath = attributePath.append(fieldName);
+					PathSpec nestedAttrPath = jsonAttributePath.append(fieldName);
 					filterSpecs.add(FilterSpec.and(deserialize(element, resourceInformation, nestedAttrPath, queryContext)));
 				}
 				else {
-					PathSpec nestedAttrPath = attributePath.append(fieldName);
-					Object value = deserializeJsonFilterValue(resourceInformation, nestedAttrPath, element, queryContext);
-					filterSpecs.add(new FilterSpec(nestedAttrPath, FilterOperator.EQ, value));
+					PathSpec nestedJsonAttrPath = jsonAttributePath.append(fieldName);
+					QueryPathSpec resolvedImplPath = pathResolver.resolve(resourceInformation, nestedJsonAttrPath.getElements(), QueryPathResolver.NamingType.JSON, "filter", queryContext);
+					Object value = deserializeJsonFilterValue(resourceInformation, nestedJsonAttrPath, element, queryContext);
+					filterSpecs.add(new FilterSpec(resolvedImplPath.getAttributePath(), FilterOperator.EQ, value));
 				}
 			}
 			return filterSpecs;

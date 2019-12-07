@@ -2,6 +2,7 @@ package io.crnk.core.queryspec.mapper;
 
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.exception.BadRequestException;
+import io.crnk.core.queryspec.PathSpec;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -54,5 +55,9 @@ public class QueryPathSpec {
                 }
             }
         }
+    }
+
+    public PathSpec toPathSpec() {
+        return PathSpec.of(getAttributePath());
     }
 }

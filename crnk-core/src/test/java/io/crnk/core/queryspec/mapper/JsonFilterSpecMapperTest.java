@@ -3,6 +3,8 @@ package io.crnk.core.queryspec.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -19,6 +21,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +63,9 @@ public class JsonFilterSpecMapperTest {
         pathResolver.init(urlContext);
 
         objectMapper = container.getObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         mapper = new JsonFilterSpecMapper(urlContext, supportedOperators, FilterOperator.EQ, pathResolver);
     }
 
@@ -72,7 +79,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.EQ, filterSpec.getOperator());
         Assert.assertEquals("test", filterSpec.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
     }
@@ -87,7 +94,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.EQ, filterSpec.getOperator());
         Assert.assertEquals(Boolean.TRUE, filterSpec.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
         Assert.assertFalse(mapper.isNested(filterSpecs));
@@ -103,7 +110,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.EQ, filterSpec.getOperator());
         Assert.assertEquals((Long) 12L, filterSpec.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
     }
@@ -118,7 +125,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.EQ, filterSpec.getOperator());
         Assert.assertEquals(Arrays.asList(12L, 13L, 14L), filterSpec.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
     }
@@ -133,7 +140,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.NEQ, filterSpec.getOperator());
         Assert.assertEquals(Arrays.asList(12L, 13L, 14L), filterSpec.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
     }
@@ -148,7 +155,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.NEQ, filterSpec.getOperator());
         Assert.assertEquals(Arrays.asList(12L, 13L, 14L), filterSpec.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
     }
@@ -173,7 +180,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.EQ, filterSpec2.getOperator());
         Assert.assertEquals(Boolean.TRUE, filterSpec2.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertTrue(mapper.isNested(filterSpecs));
     }
@@ -193,7 +200,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.EQ, filterSpec2.getOperator());
         Assert.assertEquals(Boolean.TRUE, filterSpec2.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
     }
@@ -208,7 +215,25 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.EQ, filterSpec1.getOperator());
         Assert.assertEquals((Long) 1L, filterSpec1.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
+        checkNodeEquals(jsonNode, serializedJsonNode);
+        Assert.assertFalse(mapper.isNested(filterSpecs));
+    }
+
+
+    @Test
+    public void filterByRenamedAttributes() throws IOException {
+        OffsetDateTime now = OffsetDateTime.now(ZoneId.of("UTC"));
+        String nowString = objectMapper.writerFor(OffsetDateTime.class).writeValueAsString(now);
+        JsonNode jsonNode = objectMapper.readTree("{\"project\": {\"data\": {\"due\": " + nowString + "}} }");
+        List<FilterSpec> filterSpecs = mapper.deserialize(jsonNode, resourceInformation, queryContext);
+        Assert.assertEquals(1, filterSpecs.size());
+        FilterSpec filterSpec1 = filterSpecs.get(0);
+        Assert.assertEquals(PathSpec.of("project", "data", "dueDate"), filterSpec1.getPath());
+        Assert.assertEquals(FilterOperator.EQ, filterSpec1.getOperator());
+        Assert.assertTrue(now.isEqual( filterSpec1.getValue()));
+
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
     }
@@ -228,7 +253,7 @@ public class JsonFilterSpecMapperTest {
         Assert.assertEquals(FilterOperator.NEQ, filterSpec2.getOperator());
         Assert.assertEquals((Long) 122L, filterSpec2.getValue());
 
-        JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
+        JsonNode serializedJsonNode = mapper.serialize(resourceInformation, filterSpecs, queryContext);
         checkNodeEquals(jsonNode, serializedJsonNode);
         Assert.assertFalse(mapper.isNested(filterSpecs));
     }

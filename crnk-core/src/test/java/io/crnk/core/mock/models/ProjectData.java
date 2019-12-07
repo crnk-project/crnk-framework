@@ -1,7 +1,9 @@
 package io.crnk.core.mock.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiEmbeddable;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,12 +19,23 @@ public class ProjectData {
 
     private List<String> keywords;
 
+    @JsonProperty("due")
+    private OffsetDateTime dueDate;
+
     public List<String> getKeywords() {
         return keywords;
     }
 
     public void setKeywords(List<String> keywords) {
         this.keywords = keywords;
+    }
+
+    public OffsetDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(OffsetDateTime dueDate) {
+        this.dueDate = dueDate;
     }
 
     public ProjectStatus getStatus() {
