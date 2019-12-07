@@ -274,6 +274,26 @@ various techniques to customize the resource model:
   `delete`. Note that the repository itself must not necessarily return entity classes, but
    rather can also return a DTO.
 
+Next to modifying the set of attributes and relationships, an application may
+also want to apply more advanced filters (SQL `SUBSELECT`, `GROUP BY`, etc.).
+Thereby, it is recommended to continue following resource-oriented REST principles.
+Most notably, everything that can be sorted and filtered, should also be
+queryable. There are two typical scenarios:
+
+1. The desired complex filter is based on a single column. In this case,
+a new `FilterOperator` should be implemented just like any other existing operator
+like `EQ` and `LT`.
+
+2. The desired complex filter spans multiple columns and possibly tables.
+A basic solution can just exchange the entity for a DB view and make
+a new column available with the computed result used for filtering. Or a
+more advanced and performant solution can introduce the computed result
+as new (nested) resource. The later the advantage that the computed
+result is only evaluated when explicitly requested, either directly or through
+an inclusion. The new resources can be setup as DB view holding
+the computed result and a foreign key to the original table.
+
+
 
 ### Standalone Usage
 
