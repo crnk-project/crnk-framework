@@ -14,9 +14,14 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.BadRequestException;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
+import io.crnk.core.exception.RequestBodyNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Represents a controller contract. There can be many kinds of requests that can be send to the framework. The
@@ -89,6 +94,47 @@ public abstract class BaseController implements Controller {
 					throw new IllegalStateException("upon POST with status 201 the resource must have an ID, consider 202 otherwise");
 				}
 			}
+		}
+	}
+
+	protected List<Resource> getRequestBodys(Document requestDocument, JsonPath path, HttpMethod method) {
+		String resourcePath = path.getRootEntry().getResourceInformation().getResourcePath();
+
+		assertRequestDocument(requestDocument, method, resourcePath);
+
+		if (!requestDocument.getData().isPresent() || requestDocument.getData().get() == null) {
+			throw new RequestBodyException(method, resourcePath, "No data field in the body.");
+		}
+
+		Object data = requestDocument.getData().get();
+		List<Resource> resourceBodies = data instanceof List ? (List<Resource>) data : Arrays.asList((Resource) data);
+		for (Resource resourceBody : resourceBodies) {
+			verifyResourceBody(resourceBody, path);
+		}
+		return resourceBodies;
+	}
+
+	protected void verifyResourceBody(Resource resourceBody, JsonPath path) {
+		assignDefaultType(resourceBody, path);
+		String resourceType = resourceBody.getType();
+		RegistryEntry bodyRegistryEntry = context.getResourceRegistry().getEntry(resourceType);
+		if (bodyRegistryEntry == null) {
+			throw new RepositoryNotFoundException(resourceType);
+		}
+	}
+
+	protected void assertRequestDocument(Document requestDocument, HttpMethod method, String resourceType) {
+		if (requestDocument == null) {
+			throw new RequestBodyNotFoundException(method, resourceType);
+		}
+	}
+
+	private void assignDefaultType(Resource resourceBody, JsonPath path) {
+		String type = resourceBody.getType();
+		if (type == null && path.getParentField() != null) {
+			resourceBody.setType(path.getParentField().getOppositeResourceType());
+		} else if (type == null) {
+			resourceBody.setType(path.getRootEntry().getResourceInformation().getResourceType());
 		}
 	}
 

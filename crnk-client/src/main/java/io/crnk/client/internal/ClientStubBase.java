@@ -54,6 +54,10 @@ public class ClientStubBase {
         return execute(requestUrl, ResponseType.NONE, HttpMethod.DELETE, null);
     }
 
+    protected Object executeDelete(String requestUrl, String requestBody) {
+        return execute(requestUrl, ResponseType.NONE, HttpMethod.DELETE, requestBody);
+    }
+
     protected Object execute(String url, ResponseType responseType, HttpMethod method, String requestBody) {
         try {
 

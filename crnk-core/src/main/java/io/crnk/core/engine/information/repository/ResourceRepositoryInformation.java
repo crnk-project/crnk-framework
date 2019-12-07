@@ -12,7 +12,7 @@ public interface ResourceRepositoryInformation extends RepositoryInformation {
 
 	/**
 	 * @return information about the resources hold in this resource
-	 * @deprecated use getReosurce
+	 * @deprecated use getResource
 	 */
 	@Deprecated
 	Optional<ResourceInformation> getResourceInformation();

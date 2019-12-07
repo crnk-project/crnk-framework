@@ -1,9 +1,5 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
@@ -25,6 +21,10 @@ import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * A repository adapter for resource repository
@@ -198,7 +198,14 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
 				Serializable id = request.getId();
-				resourceRepository.delete(id);
+				if (id instanceof Collection) {
+					if (!(resourceRepository instanceof BulkResourceRepository)) {
+						throw new BadRequestException("no bulk operations implemented");
+					}
+					((BulkResourceRepository) resourceRepository).delete((List) id);
+				} else {
+					resourceRepository.delete(id);
+				}
 				return new JsonApiResponse();
 			}
 		};
