@@ -1916,6 +1916,8 @@ components:
         due:
           format: date-time
           type: string
+        image:
+          type: string
         keywords:
           items:
             type: string

@@ -10,6 +10,7 @@ export interface ProjectData {
 	keywords?: Array<string>;
 	customData?: { [key: string]: string };
 	due?: string;
+	image?: string;
 }
 export class QProjectData extends BeanPath<ProjectData> {
 	metaId = 'resources.types.projectdata';
@@ -17,4 +18,5 @@ export class QProjectData extends BeanPath<ProjectData> {
 	keywords: ArrayPath<StringPath, string> = new ArrayPath(this, 'keywords', StringPath);
 	customData: MapPath<StringPath, string> = new MapPath(this, 'customData', StringPath);
 	due: StringPath = this.createString('due');
+	image: StringPath = this.createString('image');
 }

@@ -72,6 +72,9 @@ public class OASUtils {
   public static <T> Predicate<T> not(Predicate<T> p) { return o -> !p.test(o); }
 
   public static Schema transformMetaResourceField(MetaType metaType) {
+  	if(metaType.getImplementationClass() == byte[].class){
+		return new StringSchema();
+	}
     if (metaType instanceof MetaResource) {
       return new ResourceReference((MetaResource) metaType).$ref();
     } else if (metaType instanceof MetaCollectionType) {
