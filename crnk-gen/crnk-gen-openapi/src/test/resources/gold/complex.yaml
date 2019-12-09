@@ -128,6 +128,33 @@ components:
       schema:
         example: id
         type: string
+    NoAccessTaskFields:
+      description: noAccessTask fields to include (csv)
+      in: query
+      name: fields
+      schema:
+        default: id,name
+        type: string
+    NoAccessTaskInclude:
+      description: noAccessTask relationships to include (csv)
+      in: query
+      name: include
+      schema:
+        default: ""
+        type: string
+    NoAccessTaskPrimaryKey:
+      in: path
+      name: id
+      required: true
+      schema:
+        $ref: '#/components/schemas/NoAccessTaskIdResourceAttribute'
+    NoAccessTaskSort:
+      description: noAccessTask sort order (csv)
+      in: query
+      name: sort
+      schema:
+        example: id,name
+        type: string
     PageLimit:
       description: Max number of items
       in: query
@@ -601,6 +628,30 @@ components:
         application/vnd.api+json:
           schema:
             $ref: '#/components/schemas/NestedRelatedResourcesResponseSchema'
+      description: OK
+    NoAccessTaskResourceReferenceResponse:
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/NoAccessTaskResourceReferenceResponseSchema'
+      description: OK
+    NoAccessTaskResourceReferencesResponse:
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/NoAccessTaskResourceReferencesResponseSchema'
+      description: OK
+    NoAccessTaskResourceResponse:
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/NoAccessTaskResourceResponseSchema'
+      description: OK
+    NoAccessTaskResourcesResponse:
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/NoAccessTaskResourcesResponseSchema'
       description: OK
     NoContent:
       description: No Content
@@ -1418,6 +1469,109 @@ components:
           data:
             items:
               $ref: '#/components/schemas/NestedRelatedResourceSchema'
+            type: array
+        required:
+        - data
+    NoAccessTaskIdResourceAttribute:
+      description: The JSON:API resource ID
+      format: int64
+      nullable: false
+      type: integer
+    NoAccessTaskNameResourceAttribute:
+      nullable: true
+      type: string
+    NoAccessTaskPatchResource:
+      allOf:
+      - $ref: '#/components/schemas/NoAccessTaskResourceReference'
+      - $ref: '#/components/schemas/NoAccessTaskResourcePatchAttributes'
+    NoAccessTaskPostResource:
+      allOf:
+      - $ref: '#/components/schemas/NoAccessTaskPostResourceReference'
+      - $ref: '#/components/schemas/NoAccessTaskResourcePostAttributes'
+    NoAccessTaskPostResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/NoAccessTaskIdResourceAttribute'
+        type:
+          description: The JSON:API resource type (NoAccessTask)
+          enum:
+          - NoAccessTask
+          type: string
+      required:
+      - type
+      type: object
+    NoAccessTaskResourceAttributes:
+      properties:
+        attributes:
+          properties:
+            name:
+              $ref: '#/components/schemas/NoAccessTaskNameResourceAttribute'
+          type: object
+      type: object
+    NoAccessTaskResourcePatchAttributes:
+      properties:
+        attributes:
+          properties: {}
+          type: object
+      type: object
+    NoAccessTaskResourcePostAttributes:
+      properties:
+        attributes:
+          properties: {}
+          type: object
+      type: object
+    NoAccessTaskResourceReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/NoAccessTaskIdResourceAttribute'
+        type:
+          description: The JSON:API resource type (NoAccessTask)
+          enum:
+          - NoAccessTask
+          type: string
+      required:
+      - id
+      - type
+      type: object
+    NoAccessTaskResourceReferenceResponseSchema:
+      properties:
+        data:
+          $ref: '#/components/schemas/NoAccessTaskResourceReference'
+      type: object
+    NoAccessTaskResourceReferencesResponseSchema:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/NoAccessTaskResourceReference'
+          type: array
+      type: object
+    NoAccessTaskResourceResponseSchema:
+      allOf:
+      - $ref: '#/components/schemas/Success'
+      - properties:
+          data:
+            $ref: '#/components/schemas/NoAccessTaskResourceSchema'
+        required:
+        - data
+    NoAccessTaskResourceSchema:
+      allOf:
+      - $ref: '#/components/schemas/NoAccessTaskResourceReference'
+      - $ref: '#/components/schemas/NoAccessTaskResourceAttributes'
+      - properties:
+          links:
+            type: object
+          relationships:
+            type: object
+        type: object
+      required:
+      - attributes
+    NoAccessTaskResourcesResponseSchema:
+      allOf:
+      - $ref: '#/components/schemas/Success'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/NoAccessTaskResourceSchema'
             type: array
         required:
         - data
@@ -8123,115 +8277,7 @@ paths:
           $ref: '#/components/responses/504'
         505:
           $ref: '#/components/responses/505'
-    post:
-      description: Create a ReadOnlyTask
-      parameters:
-      - in: header
-        name: Content-Type
-        required: true
-        schema:
-          default: application/vnd.api+json
-          enum:
-          - application/vnd.api+json
-          - application/json
-          type: string
-      requestBody:
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/ReadOnlyTaskPostResource'
-      responses:
-        201:
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ReadOnlyTaskResourceResponseSchema'
-          description: Created
-        202:
-          $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
-        204:
-          $ref: '#/components/responses/NoContent'
-        400:
-          $ref: '#/components/responses/400'
-        401:
-          $ref: '#/components/responses/401'
-        403:
-          $ref: '#/components/responses/403'
-        404:
-          $ref: '#/components/responses/404'
-        405:
-          $ref: '#/components/responses/405'
-        409:
-          $ref: '#/components/responses/409'
-        412:
-          $ref: '#/components/responses/412'
-        415:
-          $ref: '#/components/responses/415'
-        422:
-          $ref: '#/components/responses/422'
-        500:
-          $ref: '#/components/responses/500'
-        501:
-          $ref: '#/components/responses/501'
-        502:
-          $ref: '#/components/responses/502'
-        503:
-          $ref: '#/components/responses/503'
-        504:
-          $ref: '#/components/responses/504'
-        505:
-          $ref: '#/components/responses/505'
   /readOnlyTask/{id}:
-    delete:
-      description: Delete a ReadOnlyTask
-      parameters:
-      - in: header
-        name: Content-Type
-        required: true
-        schema:
-          default: application/vnd.api+json
-          enum:
-          - application/vnd.api+json
-          - application/json
-          type: string
-      - $ref: '#/components/parameters/ReadOnlyTaskPrimaryKey'
-      responses:
-        200:
-          description: OK
-        202:
-          $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
-        204:
-          $ref: '#/components/responses/NoContent'
-        400:
-          $ref: '#/components/responses/400'
-        401:
-          $ref: '#/components/responses/401'
-        403:
-          $ref: '#/components/responses/403'
-        404:
-          $ref: '#/components/responses/404'
-        405:
-          $ref: '#/components/responses/405'
-        409:
-          $ref: '#/components/responses/409'
-        412:
-          $ref: '#/components/responses/412'
-        415:
-          $ref: '#/components/responses/415'
-        422:
-          $ref: '#/components/responses/422'
-        500:
-          $ref: '#/components/responses/500'
-        501:
-          $ref: '#/components/responses/501'
-        502:
-          $ref: '#/components/responses/502'
-        503:
-          $ref: '#/components/responses/503'
-        504:
-          $ref: '#/components/responses/504'
-        505:
-          $ref: '#/components/responses/505'
     get:
       description: Retrieve a readOnlyTask resource
       parameters:
@@ -8250,65 +8296,6 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/ReadOnlyTaskResourceResponse'
-        202:
-          $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
-        204:
-          $ref: '#/components/responses/NoContent'
-        400:
-          $ref: '#/components/responses/400'
-        401:
-          $ref: '#/components/responses/401'
-        403:
-          $ref: '#/components/responses/403'
-        404:
-          $ref: '#/components/responses/404'
-        405:
-          $ref: '#/components/responses/405'
-        409:
-          $ref: '#/components/responses/409'
-        412:
-          $ref: '#/components/responses/412'
-        415:
-          $ref: '#/components/responses/415'
-        422:
-          $ref: '#/components/responses/422'
-        500:
-          $ref: '#/components/responses/500'
-        501:
-          $ref: '#/components/responses/501'
-        502:
-          $ref: '#/components/responses/502'
-        503:
-          $ref: '#/components/responses/503'
-        504:
-          $ref: '#/components/responses/504'
-        505:
-          $ref: '#/components/responses/505'
-    patch:
-      description: Update a ReadOnlyTask
-      parameters:
-      - in: header
-        name: Content-Type
-        required: true
-        schema:
-          default: application/vnd.api+json
-          enum:
-          - application/vnd.api+json
-          - application/json
-          type: string
-      - $ref: '#/components/parameters/ReadOnlyTaskPrimaryKey'
-      requestBody:
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/ReadOnlyTaskPatchResource'
-      responses:
-        200:
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/Info'
-          description: OK
         202:
           $ref: '#/components/responses/ReadOnlyTaskResourceReferencesResponse'
         204:

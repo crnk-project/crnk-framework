@@ -32,6 +32,7 @@ import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
+import io.crnk.test.mock.models.NoAccessTask;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
@@ -253,6 +254,16 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals(primaryKey.getElements().get(0), primaryKey.getUniqueElement());
 
 		Assert.assertEquals("12", primaryKey.toKeyString(12));
+	}
+
+	@Test
+	public void testAccessInheritanceOnResource() {
+		MetaResource meta = resourceProvider.getMeta(NoAccessTask.class);
+
+		Assert.assertFalse(meta.isReadable());
+		Assert.assertFalse(meta.isInsertable());
+		Assert.assertFalse(meta.isUpdatable());
+		Assert.assertFalse(meta.isDeletable());
 	}
 
 	@Test
