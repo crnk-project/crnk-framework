@@ -25,8 +25,18 @@ public class PresentationEnvironment {
 
 	private PresentationService service;
 
+	private int requestVersion;
+
 	public PresentationElement createElement(PresentationEnvironment env) {
 		return manager.createElement(env);
+	}
+
+	public int getRequestVersion() {
+		return requestVersion;
+	}
+
+	public void setRequestVersion(int requestVersion) {
+		this.requestVersion = requestVersion;
 	}
 
 	public MetaElement getElement() {
@@ -99,6 +109,7 @@ public class PresentationEnvironment {
 		duplicate.setAcceptedTypes(acceptedTypes);
 		duplicate.setManager(manager);
 		duplicate.setService(service);
+		duplicate.setRequestVersion(requestVersion);
 		return duplicate;
 	}
 }

@@ -19,6 +19,8 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class IncludeRelationshipLoader {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(IncludeRelationshipLoader.class);
 
 	private final ResultFactory resultFactory;
 
@@ -59,6 +63,8 @@ public class IncludeRelationshipLoader {
 	@SuppressWarnings("unchecked")
 	public Result<Set<Resource>> lookupRelatedResource(IncludeRequest request, Collection<Resource> sourceResources,
 													   ResourceField relationshipField) {
+
+		LOGGER.debug("looking up {} for {}", relationshipField, sourceResources);
 		if (sourceResources.isEmpty()) {
 			return resultFactory.just(Collections.emptySet());
 		}
@@ -82,11 +88,13 @@ public class IncludeRelationshipLoader {
 
 		Result<Set<Resource>> result = resultFactory.just(relatedResources);
 		if (!sourceResourcesWithData.isEmpty()) {
+			LOGGER.debug("fetching {} by relationship id", sourceResourcesWithData);
 			Result<Set<Resource>> lookupWithId = lookupRelatedResourcesWithId(request, sourceResourcesWithData,
 					relationshipField);
 			result = result.zipWith(lookupWithId, this::mergeList);
 		}
 		if (!sourceResourcesWithoutData.isEmpty()) {
+			LOGGER.debug("looking up relationship for {}", sourceResourcesWithData);
 			Result<Set<Resource>> lookupWithoutData = lookupRelatedResourceWithRelationship(request, sourceResourcesWithoutData,
 					relationshipField);
 			result = result.zipWith(lookupWithoutData, this::mergeList);
@@ -135,11 +143,13 @@ public class IncludeRelationshipLoader {
 			}
 		}
 
+		LOGGER.debug("fetching {}", relatedIdsToLoad);
+
 		if (!relatedIdsToLoad.isEmpty()) {
 			QueryAdapter queryAdapter = request.getQueryAdapter();
 			Result<JsonApiResponse> responseResult = oppositeResourceRepository.findAll(relatedIdsToLoad, queryAdapter);
-
 			return responseResult.map(response -> {
+				LOGGER.debug("got {}", response);
 				Collection responseList = (Collection) response.getEntity();
 				for (Object responseEntity : responseList) {
 					Resource relatedResource = request.merge(responseEntity);
@@ -181,6 +191,8 @@ public class IncludeRelationshipLoader {
 			responseMapResult = relationshipRepository.findBulkOneTargets(resourceIds, relationshipField, queryAdapter);
 		}
 		return responseMapResult.map(responseMap -> {
+			LOGGER.debug("got {}", responseMap);
+
 			Set<Resource> loadedTargets = new HashSet<>();
 			for (Resource sourceResource : sourceResources) {
 				Serializable sourceId = resourceInformation.parseIdString(sourceResource.getId());

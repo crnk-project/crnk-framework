@@ -1,7 +1,5 @@
 package io.crnk.data.jpa.integration;
 
-import io.crnk.core.resource.meta.JsonLinksInformation;
-import io.crnk.core.resource.meta.JsonMetaInformation;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -9,15 +7,17 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.resource.meta.JsonLinksInformation;
+import io.crnk.core.resource.meta.JsonMetaInformation;
 import io.crnk.data.jpa.AbstractJpaJerseyTest;
-import io.crnk.data.jpa.model.OverrideIdTestEntity;
-import io.crnk.data.jpa.model.TestEmbeddedIdEntity;
-import io.crnk.data.jpa.model.TestSubclassWithSuperclassPk;
 import io.crnk.data.jpa.model.CustomTypeTestEntity;
+import io.crnk.data.jpa.model.OverrideIdTestEntity;
 import io.crnk.data.jpa.model.RelatedEntity;
+import io.crnk.data.jpa.model.TestEmbeddedIdEntity;
 import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.model.TestIdEmbeddable;
 import io.crnk.data.jpa.model.TestMappedSuperclassWithPk;
+import io.crnk.data.jpa.model.TestSubclassWithSuperclassPk;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -312,11 +312,11 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
         // add
         TestEmbeddedIdEntity entity = new TestEmbeddedIdEntity();
-        entity.setId(new TestIdEmbeddable(13, "test"));
+        entity.setId(new TestIdEmbeddable(13, "test", true));
         entity.setLongValue(100L);
         rep.create(entity);
 
-        List<TestEmbeddedIdEntity> list = rep.findAll(new QuerySpec(TestEntity.class));
+        List<TestEmbeddedIdEntity> list = rep.findAll(new QuerySpec(TestEmbeddedIdEntity.class));
         Assert.assertEquals(1, list.size());
         TestEmbeddedIdEntity savedEntity = list.get(0);
         Assert.assertNotNull(savedEntity);
@@ -327,14 +327,14 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
         // update
         savedEntity.setLongValue(101L);
         rep.save(savedEntity);
-        list = rep.findAll(new QuerySpec(TestEntity.class));
+        list = rep.findAll(new QuerySpec(TestEmbeddedIdEntity.class));
         Assert.assertEquals(1, list.size());
         savedEntity = list.get(0);
         Assert.assertEquals(101L, savedEntity.getLongValue());
 
         // delete
         rep.delete(entity.getId());
-        list = rep.findAll(new QuerySpec(TestEntity.class));
+        list = rep.findAll(new QuerySpec(TestEmbeddedIdEntity.class));
         Assert.assertEquals(0, list.size());
     }
 

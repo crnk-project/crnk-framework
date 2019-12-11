@@ -10,7 +10,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
-@JsonApiResource(type = "meta/type")
+@JsonApiResource(type = "metaType", resourcePath = "meta/type")
 public class MetaType extends MetaElement {
 
 	@JsonIgnore

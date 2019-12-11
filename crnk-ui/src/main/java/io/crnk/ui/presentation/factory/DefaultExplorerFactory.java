@@ -84,7 +84,7 @@ public class DefaultExplorerFactory implements PresentationElementFactory {
 	}
 
 	private String toId(PresentationService service, MetaResource resource) {
-		return service.getServiceName() + "-" + resource.getId();
+		return service.getServiceName() + "-" + resource.getResourceType();
 	}
 
 
@@ -111,7 +111,7 @@ public class DefaultExplorerFactory implements PresentationElementFactory {
 	private List<PathSpec> getSearchPaths(MetaResource type) {
 		List<PathSpec> list = new ArrayList<>();
 		for (MetaAttribute attribute : type.getAttributes()) {
-			if (attribute.getNatures().contains(PresentationFullTextSearchable.META_ELEMENT_NATURE)) {
+			if (attribute.getNatures().containsKey(PresentationFullTextSearchable.META_ELEMENT_NATURE)) {
 				list.add(PathSpec.of(attribute.getName()));
 			}
 		}

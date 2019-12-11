@@ -11,6 +11,11 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.engine.dispatcher.Response;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.DocumentFilterChain;
+import io.crnk.core.engine.filter.DocumentFilterContext;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
@@ -21,6 +26,7 @@ import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.Predicate;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.query.QueryContext;
@@ -93,6 +99,39 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		this.moduleContext = context;
 		requestProcessor = new HomeHttpRequestProcessor();
 		context.addHttpRequestProcessor(requestProcessor);
+		context.addFilter(new HomeDocumentFilter());
+	}
+
+	class HomeDocumentFilter implements DocumentFilter {
+
+		@Override
+		public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
+			Response response = chain.doFilter(filterRequestContext);
+			QueryContext queryContext = filterRequestContext.getQueryAdapter().getQueryContext();
+			JsonPath jsonPath = filterRequestContext.getJsonPath();
+			if (jsonPath != null && jsonPath.isCollection() && queryContext != null) {
+				// provide listings within repositories for further sub-repositories, e.g.
+				// /api/tasks doing a listing for /api/tasks/history next to showing /api/tasks/{id}
+
+				String baseUrl = moduleContext.getModuleRegistry().getResourceRegistry().getServiceUrlProvider().getUrl();
+
+				String requestPath = queryContext.getRequestPath();
+				ObjectMapper objectMapper = moduleContext.getObjectMapper();
+				List<String> listings = list(requestPath, queryContext);
+				if (!listings.isEmpty()) {
+					Document document = response.getDocument();
+					ObjectNode links = document.getLinks();
+					if (links == null) {
+						links = objectMapper.createObjectNode();
+						document.setLinks(links);
+					}
+					for (String listing : listings) {
+						links.put(listing, UrlUtils.concat(baseUrl, requestPath, listing));
+					}
+				}
+			}
+			return response;
+		}
 	}
 
 	class HomeHttpRequestProcessor implements HttpRequestProcessor, Prioritizable {
@@ -126,16 +165,19 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 				}
 			}
 
+			QueryContext queryContext = requestContext.getQueryContext();
 			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-			JsonPath jsonPath = new PathBuilder(resourceRegistry, moduleContext.getTypeParser()).build(path);
+			PathBuilder pathBuilder = new PathBuilder(resourceRegistry, moduleContext.getTypeParser());
+			JsonPath jsonPath = pathBuilder.build(path, queryContext);
 
 			// check no repository with that path
 			if (jsonPath == null) {
 				// check there are children to display
-				QueryContext queryContext = requestContext.getQueryContext();
 				String requestPath = requestContext.getPath();
 				List<String> pathList = list(requestPath, queryContext);
-				return path.equals("/") || !pathList.isEmpty();
+				boolean accepted = path.equals("/") || !pathList.isEmpty();
+				LOGGER.debug(accepted ? "accepted to server: path={}" : "rejected since no listings available: path={}", requestPath);
+				return accepted;
 			}
 			return false;
 
@@ -144,37 +186,40 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		@Override
 		public Result<HttpResponse> processAsync(HttpRequestContext requestContext) {
 			LOGGER.debug("processing request");
-
-			QueryContext queryContext = requestContext.getQueryContext();
-			String requestPath = requestContext.getPath();
-			List<String> pathList = list(requestPath, queryContext);
-
-			HttpResponse response;
-			if (defaultFormat == HomeFormat.JSON_HOME || requestContext.accepts(JSON_HOME_CONTENT_TYPE)) {
-				LOGGER.debug("using JSON home format");
-				boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
-				response = writeJsonHome(requestContext, pathList);
-				if (acceptsHome) {
-					response.setContentType(JSON_HOME_CONTENT_TYPE);
-				}
-				else {
-					response.setContentType(JSON_CONTENT_TYPE);
-				}
-			}
-			else {
-				boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
-				LOGGER.debug("using JSON API format");
-				response = getResponse(requestContext, pathList);
-				if (jsonapi) {
-					response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-				}
-				else {
-					response.setContentType(JSON_CONTENT_TYPE);
-				}
-			}
-
 			ResultFactory resultFactory = moduleContext.getResultFactory();
-			return resultFactory.just(response);
+			boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
+			try {
+				QueryContext queryContext = requestContext.getQueryContext();
+				String requestPath = requestContext.getPath();
+				List<String> pathList = list(requestPath, queryContext);
+
+				boolean useJsonHome = defaultFormat == HomeFormat.JSON_HOME || requestContext.accepts(JSON_HOME_CONTENT_TYPE);
+				HttpResponse response;
+				if (useJsonHome) {
+					LOGGER.debug("using JSON home format");
+					boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
+					response = writeJsonHome(requestContext, pathList);
+					if (acceptsHome) {
+						response.setContentType(JSON_HOME_CONTENT_TYPE);
+					} else {
+						response.setContentType(JSON_CONTENT_TYPE);
+					}
+				} else {
+					LOGGER.debug("using JSON API format");
+					response = getResponse(requestContext, pathList);
+					if (jsonapi) {
+						response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
+					} else {
+						response.setContentType(JSON_CONTENT_TYPE);
+					}
+				}
+				return resultFactory.just(response);
+			} catch (Exception e) {
+				ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
+				Response response = exceptionMapperRegistry.toErrorResponse(e);
+				String contentType = jsonapi ? HttpHeaders.JSONAPI_CONTENT_TYPE : JSON_CONTENT_TYPE;
+				return resultFactory.just(response.toHttpResponse(moduleContext.getObjectMapper(), contentType));
+			}
 		}
 
 		@Override
@@ -218,10 +263,17 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 			}
 		}
 
-		pathSet = pathSet.stream().map(it -> getChildName(requestPath, it))
-				.filter(it -> it != null).collect(Collectors.toSet());
+		Set<String> filteredPathSet = pathSet.stream().map(it -> getChildName(requestPath, it))
+				.filter(it -> it != null)
+				.collect(Collectors.toSet());
 
-		List<String> pathList = new ArrayList<>(pathSet);
+		// favor repositories over children, e.g. list /tasks rather than /tasks/ for /tasks/history
+		List<String> pathList = new ArrayList<>();
+		filteredPathSet.stream()
+				.filter(it -> !it.endsWith("/") || !filteredPathSet.contains(UrlUtils.removeTrailingSlash(it)))
+				.forEach(pathList::add);
+
+		// sort for readability
 		Collections.sort(pathList);
 		return pathList;
 	}
@@ -231,6 +283,9 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 	}
 
 	private String getChildName(String requestPath, String it) {
+		// e.g. /tasks must provide listing for /tasks/history but non of /tasksXy
+		requestPath = UrlUtils.removeTrailingSlash(requestPath) + "/";
+
 		if (it.startsWith(requestPath)) {
 			String subPath = it.substring(requestPath.length());
 			int sep = subPath.indexOf('/');
@@ -242,15 +297,13 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 	private HttpResponse getResponse(HttpRequestContext requestContext, List<String> pathList) {
 		ObjectMapper objectMapper = moduleContext.getObjectMapper();
 
-		String baseUrl = UrlUtils.removeTrailingSlash(moduleContext.getResourceRegistry().getServiceUrlProvider().getUrl())
-				+ requestContext.getPath();
+		String listingPath = getListingPath(requestContext);
 
 		ObjectNode node = objectMapper.createObjectNode();
 		ObjectNode links = node.putObject("links");
 		for (String path : pathList) {
-			String href = baseUrl + path;
 			String id = UrlUtils.removeTrailingSlash(path);
-			links.put(id, href);
+			links.put(id, UrlUtils.concat(listingPath, path));
 		}
 
 		Map<String, String> serverInfo = moduleContext.getModuleRegistry().getServerInfo();
@@ -261,8 +314,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		}
-		catch (JsonProcessingException e) {
+		} catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -270,6 +322,10 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		response.setStatusCode(200);
 		response.setBody(json);
 		return response;
+	}
+
+	private String getListingPath(HttpRequestContext requestContext) {
+		return UrlUtils.concat(moduleContext.getResourceRegistry().getServiceUrlProvider().getUrl(), requestContext.getPath());
 	}
 
 	private HttpResponse writeJsonHome(HttpRequestContext requestContext, List<String> pathList) {
@@ -286,8 +342,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		}
-		catch (JsonProcessingException e) {
+		} catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 

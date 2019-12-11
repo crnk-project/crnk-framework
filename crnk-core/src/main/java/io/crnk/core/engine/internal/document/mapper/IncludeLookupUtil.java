@@ -95,8 +95,7 @@ public class IncludeLookupUtil {
 
             // TODO same relationship on multiple children
             for (ResourceField field : information.getRelationshipFields()) {
-                boolean existsOnSuperType =
-                        superInformation != null && superInformation.findRelationshipFieldByName(field.getJsonName()) != null;
+                boolean existsOnSuperType = superInformation != null && superInformation.findFieldByUnderlyingName(field.getUnderlyingName()) != null;
                 if (!existsOnSuperType) {
                     fields.add(field);
                 }

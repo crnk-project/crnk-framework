@@ -34,7 +34,7 @@ public class RelationshipsGetControllerTest extends ControllerTestBase {
     @Test
     public void onValidRequestShouldAcceptIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
+        JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project", queryContext);
         RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
         sut.init(controllerContext);
 
@@ -48,7 +48,7 @@ public class RelationshipsGetControllerTest extends ControllerTestBase {
     @Test
     public void onFieldRequestShouldDenyIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks/1/project");
+        JsonPath jsonPath = pathBuilder.build("tasks/1/project", queryContext);
         RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
         sut.init(controllerContext);
 
@@ -62,7 +62,7 @@ public class RelationshipsGetControllerTest extends ControllerTestBase {
     @Test
     public void onNonRelationRequestShouldDenyIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks");
+        JsonPath jsonPath = pathBuilder.build("tasks", queryContext);
         RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
         sut.init(controllerContext);
 
@@ -77,7 +77,7 @@ public class RelationshipsGetControllerTest extends ControllerTestBase {
     public void onGivenRequestLinkResourceGetShouldReturnNullData() {
         // GIVEN
 
-        JsonPath jsonPath = pathBuilder.build("/tasks/1/relationships/project");
+        JsonPath jsonPath = pathBuilder.build("/tasks/1/relationships/project", queryContext);
         RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
         sut.init(controllerContext);
 
@@ -96,7 +96,7 @@ public class RelationshipsGetControllerTest extends ControllerTestBase {
         projectRepository.save(project);
 
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("/tasks/1/relationships/project");
+        JsonPath jsonPath = pathBuilder.build("/tasks/1/relationships/project", queryContext);
         RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
         sut.init(controllerContext);
         TaskToProjectRepository relationship = (TaskToProjectRepository) container.getRepository(Task.class, "project");

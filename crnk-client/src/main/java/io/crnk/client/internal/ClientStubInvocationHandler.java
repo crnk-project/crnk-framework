@@ -1,18 +1,20 @@
 package io.crnk.client.internal;
 
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.repository.ResourceRepository;
-import io.crnk.core.resource.list.DefaultResourceList;
-import io.crnk.core.resource.list.ResourceListBase;
-import net.jodah.typetools.TypeResolver;
-
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.repository.BulkResourceRepository;
+import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.repository.decorate.Wrapper;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceListBase;
+import net.jodah.typetools.TypeResolver;
 
 public class ClientStubInvocationHandler implements InvocationHandler {
 
@@ -42,7 +44,10 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		try {
-			if (method.getDeclaringClass().isAssignableFrom(ResourceRepository.class)) {
+			if(method.getDeclaringClass().isAssignableFrom(Wrapper.class) && method.getName().equals("getWrappedObject")){
+				return repositoryStub;
+			}
+			if (method.getDeclaringClass().isAssignableFrom(ResourceRepository.class) || method.getDeclaringClass().isAssignableFrom(BulkResourceRepository.class)) {
 				// execute document method
 				return method.invoke(repositoryStub, args);
 			} else if (interfaceStubMethodMap.containsKey(method)) {

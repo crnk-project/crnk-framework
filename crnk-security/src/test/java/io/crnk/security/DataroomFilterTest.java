@@ -10,6 +10,7 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.ManyRelationshipRepository;
 import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
@@ -17,9 +18,11 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.security.SecurityConfig.Builder;
 import io.crnk.security.internal.DataRoomMatcher;
 import io.crnk.test.mock.TestModule;
+import io.crnk.test.mock.models.BulkTask;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Task;
 import io.crnk.test.mock.models.TaskStatus;
+import io.crnk.test.mock.repository.BulkInMemoryRepository;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.TaskRepository;
 import org.junit.After;
@@ -40,6 +43,8 @@ public class DataroomFilterTest {
 
     private ResourceRepository<Task, Long> tasks;
 
+    private BulkResourceRepository<BulkTask, Long> bulkTasks;
+
     private Task taskFoo;
 
     private Task taskBar;
@@ -47,6 +52,8 @@ public class DataroomFilterTest {
     private Project project;
 
     private RegistryEntry entry;
+
+    private BulkInMemoryRepository<BulkTask, Object> bulkTasksImpl;
 
     @After
     public void tearDown() {
@@ -82,7 +89,7 @@ public class DataroomFilterTest {
         Builder builder = SecurityConfig.builder();
         builder.permitAll(ResourcePermission.ALL);
         builder.setDataRoomFilter((querySpec, method, securityProvider) -> {
-            if (querySpec.getResourceClass() == Task.class) {
+            if (querySpec.getResourceClass() == Task.class || querySpec.getResourceClass() == BulkTask.class) {
                 QuerySpec clone = querySpec.clone();
                 clone.addFilter(PathSpec.of("name").filter(FilterOperator.EQ, "foo"));
                 return clone;
@@ -96,14 +103,12 @@ public class DataroomFilterTest {
 
         TestModule testModule = new TestModule();
         tasksImpl = testModule.getTasks();
+        bulkTasksImpl = testModule.getBulkTasks();
 
         project = new Project();
         project.setName("someProject");
         ProjectRepository projects = testModule.getProjects();
         projects.save(project);
-
-        taskFoo = addTask("foo", project);
-        taskBar = addTask("bar", project);
 
         CrnkBoot boot = new CrnkBoot();
         boot.addModule(securityModule);
@@ -111,9 +116,13 @@ public class DataroomFilterTest {
         boot.addModule(appModule);
         boot.boot();
 
+        taskFoo = addTask("foo", project);
+        taskBar = addTask("bar", project);
+
         entry = boot.getResourceRegistry().getEntry(Task.class);
 
-        tasks = entry.getResourceRepositoryFacade();
+        tasks = (ResourceRepository<Task, Long>) entry.getResourceRepository().getImplementation();
+        bulkTasks = (BulkResourceRepository<BulkTask, Long>) boot.getResourceRegistry().getEntry(BulkTask.class).getResourceRepository().getImplementation();
     }
 
     private Task addTask(String name, Project project) {
@@ -121,6 +130,12 @@ public class DataroomFilterTest {
         task.setName(name);
         task.setProject(project);
         tasksImpl.create(task);
+
+        BulkTask bulkTask = new BulkTask();
+        bulkTask.setId(task.getId());
+        bulkTask.setName(name);
+        bulkTasksImpl.create(bulkTask);
+
         return task;
     }
 
@@ -203,6 +218,33 @@ public class DataroomFilterTest {
         tasks.save(task);
     }
 
+
+    @Test(expected = ForbiddenException.class)
+    public void checkBulkSaveNotAllowedToChangeToNonMatched() {
+        BulkTask task = new BulkTask();
+        task.setId(taskFoo.getId());
+        task.setName("notFoo"); // => would make it get filtered
+        bulkTasks.save(Arrays.asList(task));
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void checkBulkSaveNotAllowedToChangeToMatched() {
+        // => should not have access to bar in the first place
+        // => not allowed to make it visible
+        BulkTask task = new BulkTask();
+        task.setId(taskBar.getId());
+        task.setName("foo");
+        bulkTasks.save(Arrays.asList(task));
+    }
+
+    @Test
+    public void checkBulkSaveAllowed() {
+        BulkTask task = new BulkTask();
+        task.setId(taskFoo.getId());
+        task.setName("foo");
+        bulkTasks.save(Arrays.asList(task));
+    }
+
     @Test
     public void checkCreateAllowed() {
         Task task = new Task();
@@ -219,6 +261,23 @@ public class DataroomFilterTest {
         tasks.create(task);
     }
 
+
+    @Test
+    public void checkBulkCreateAllowed() {
+        BulkTask task = new BulkTask();
+        task.setId(123L);
+        task.setName("foo");
+        bulkTasks.create(Arrays.asList(task));
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void checkBulkCreateNotAllowed() {
+        BulkTask task = new BulkTask();
+        task.setName("notFoo");
+        bulkTasks.create(Arrays.asList(task));
+    }
+
+
     @Test
     public void checkDeleteAllowed() {
         tasks.delete(taskFoo.getId());
@@ -227,6 +286,16 @@ public class DataroomFilterTest {
     @Test(expected = ForbiddenException.class)
     public void checkDeleteNotAllowed() {
         tasks.delete(taskBar.getId());
+    }
+
+    @Test
+    public void checkBulkDeleteAllowed() {
+        bulkTasks.delete(Arrays.asList(taskFoo.getId()));
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void checkBulkDeleteNotAllowed() {
+        bulkTasks.delete(Arrays.asList(taskBar.getId()));
     }
 
     @Test

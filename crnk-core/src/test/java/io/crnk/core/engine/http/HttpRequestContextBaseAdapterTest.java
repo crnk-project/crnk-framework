@@ -1,12 +1,16 @@
 package io.crnk.core.engine.http;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.IOException;
 
 public class HttpRequestContextBaseAdapterTest {
 
@@ -38,6 +42,31 @@ public class HttpRequestContextBaseAdapterTest {
         Assert.assertTrue(adapter.accepts("text/html"));
         Assert.assertFalse(adapter.accepts("application/xy"));
         Assert.assertTrue(adapter.accepts("application/json"));
+        Assert.assertEquals(-1, adapter.getQueryContext().getRequestVersion());
+    }
+
+
+    @Test
+    public void testRequestVersionInAcceptHeader() {
+        Mockito.when(base.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn("text/html,application/json;version=3");
+
+        adapter = new HttpRequestContextBaseAdapter(base);
+        Assert.assertFalse(adapter.accepts("application/xy"));
+        Assert.assertTrue(adapter.accepts("application/json"));
+        Assert.assertEquals(3, adapter.getQueryContext().getRequestVersion());
+    }
+
+    @Test
+    public void testRequestVersionAsParameter() {
+        Map<String, Set<String>> parameters = new HashMap<>();
+        parameters.put(HttpHeaders.VERSION_ACCEPT_PARAMETER, Sets.newHashSet("3"));
+        Mockito.when(base.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn("text/html,application/json");
+        Mockito.when(base.getRequestParameters()).thenReturn(parameters);
+
+        adapter = new HttpRequestContextBaseAdapter(base);
+        Assert.assertFalse(adapter.accepts("application/xy"));
+        Assert.assertTrue(adapter.accepts("application/json"));
+        Assert.assertEquals(3, adapter.getQueryContext().getRequestVersion());
     }
 
     @Test
@@ -67,7 +96,7 @@ public class HttpRequestContextBaseAdapterTest {
     @Test
     public void getRequestParameters() {
         adapter.getRequestParameters();
-        Mockito.verify(base, Mockito.times(1)).getRequestParameters();
+        Mockito.verify(base, Mockito.times(2)).getRequestParameters(); // version + this request
     }
 
     @Test

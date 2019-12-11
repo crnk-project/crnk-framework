@@ -1,5 +1,7 @@
 package io.crnk.data.jpa.query.querydsl;
 
+import javax.persistence.criteria.JoinType;
+
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
@@ -20,7 +22,7 @@ public interface QuerydslTranslationContext<T> {
 
 	<E> Expression<E> getAttribute(MetaAttributePath attrPath);
 
-	<E> EntityPath<E> getJoin(MetaAttributePath path);
+	<E> EntityPath<E> getJoin(MetaAttributePath path, JoinType defaultJoinType);
 
 	void addPredicate(Predicate predicate);
 

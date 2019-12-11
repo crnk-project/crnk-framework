@@ -1,5 +1,18 @@
 package io.crnk.gen.typescript.internal;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.IOUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -19,19 +32,6 @@ import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
 
 public class TSGenerator {
 
@@ -177,7 +177,7 @@ public class TSGenerator {
         }
         for (TSMetaTransformation transformation : transformations) {
             if (transformation.accepts(element)) {
-                LOGGER.debug("transforming type {} of type {} with {}", element.getId(), element.getClass().getSimpleName(),
+                LOGGER.warn("transforming type {} of type {} with {}", element.getId(), element.getClass().getSimpleName(),
                         transformation);
                 TSElement tsElement = transformation.transform(element, createMetaTransformationContext(), options);
                 transformedElements.add(tsElement);

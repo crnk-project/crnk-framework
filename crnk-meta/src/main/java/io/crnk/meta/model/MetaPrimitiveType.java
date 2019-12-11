@@ -2,7 +2,7 @@ package io.crnk.meta.model;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "meta/primitiveType")
+@JsonApiResource(type = "metaPrimitiveType", resourcePath = "meta/primitiveType")
 public class MetaPrimitiveType extends MetaType {
 
 	public static final String ID_STRING = "base.string";

@@ -8,6 +8,7 @@ import io.crnk.servlet.AsyncCrnkServlet;
 import io.crnk.servlet.reactive.model.SlowResourceRepository;
 import io.crnk.test.mock.ClientTestModule;
 import io.crnk.test.mock.reactive.ReactiveTestModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
@@ -29,6 +30,9 @@ public class ReactiveServletTestApplication implements ApplicationListener<Embed
 
 	private ReactiveTestModule testModule = new ReactiveTestModule();
 
+	@Autowired
+	private CrnkBoot boot;
+
 	@Override
 	public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
 		port = event.getEmbeddedServletContainer().getPort();
@@ -47,7 +51,7 @@ public class ReactiveServletTestApplication implements ApplicationListener<Embed
 
 	@Bean
 	public ReactiveServletTestContainer testContainer() {
-		return new ReactiveServletTestContainer(testModule, () -> client);
+		return new ReactiveServletTestContainer(testModule, () -> client, boot);
 	}
 
 	// tag::reactive[]

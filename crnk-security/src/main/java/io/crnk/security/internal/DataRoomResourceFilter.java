@@ -20,9 +20,9 @@ public class DataRoomResourceFilter<T, I extends Serializable> extends WrappedRe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataRoomResourceFilter.class);
 
-    private final DataRoomMatcher matcher;
+    protected final DataRoomMatcher matcher;
 
-    private ResourceRegistry resourceRegistry;
+    protected ResourceRegistry resourceRegistry;
 
 
     public DataRoomResourceFilter(ResourceRepository<T, I> wrappedRepository, DataRoomMatcher matcher) {

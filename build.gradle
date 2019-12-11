@@ -72,6 +72,10 @@ gradle.beforeProject { Project project ->
                     testCompile group: 'junit', name: 'junit', version: '4.12'
                     testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
                     testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
+                    // https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
+                    compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
+                    // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+                    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
                 }
 
                 test {
@@ -95,12 +99,12 @@ gradle.beforeProject { Project project ->
                         mavenBom 'org.glassfish.jersey:jersey-bom:2.26'
                     }
                     dependencies {
-                        dependency 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
-                        dependency 'com.fasterxml.jackson.core:jackson-annotations:2.9.6'
-                        dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.6'
-                        dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.6'
-                        dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.6'
-                        dependency 'com.fasterxml.jackson.core:jackson-core:2.9.6'
+                        dependency 'com.fasterxml.jackson.core:jackson-databind:2.9.10'
+                        dependency 'com.fasterxml.jackson.core:jackson-annotations:2.9.10'
+                        dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.10'
+                        dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.10'
+                        dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.10'
+                        dependency 'com.fasterxml.jackson.core:jackson-core:2.9.10'
 
                         dependency 'org.reflections:reflections:0.9.11'
                     }

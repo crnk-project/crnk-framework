@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.gen.asciidoc.AsciidocGeneratorConfig;
 import io.crnk.gen.base.GeneratorModule;
 import io.crnk.gen.base.GeneratorModuleConfigBase;
@@ -75,7 +76,8 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 		Set<MetaType> typeSet = new HashSet<>();
 		for (MetaResource resource : resources) {
 			for (MetaResourceField attribute : resource.getDeclaredAttributes()) {
-				if (!attribute.isAssociation() && !attribute.isLinks() && !attribute.isMeta()) {
+				if (!attribute.isAssociation() && attribute.getFieldType() != ResourceFieldType.META_INFORMATION
+						&& attribute.getFieldType() != ResourceFieldType.LINKS_INFORMATION) {
 					MetaType elementType = attribute.getType().getElementType();
 					collectTypes(typeSet, elementType);
 				}

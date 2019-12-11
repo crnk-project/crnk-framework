@@ -133,9 +133,19 @@ the create, delete and update methods. `crnk-meta` accordingly reports
 insertable, updateable, deltable for such repositories as false.
 
 
+anchor:resource_bulk_repository[]
 
+## BulkResourceRepository
 
+WARNING: Experimental and only supports POST
 
+Similar to `ResourceRepository` but takes a list of resources for `create(...)`, `save(...)` and `delete(...)`.
+Allows a repository to process multiple resources at the same time. A request can be made in two ways:
+
+- The data section of the request document must includes a collection rather than a single data item.
+- A JSON Patch request whereas multiple changes to the same repository then access the bulk methods.
+
+For more information about bulk processing can be found <<operations,here>>.
 
 
 ## Query parameters with QuerySpec

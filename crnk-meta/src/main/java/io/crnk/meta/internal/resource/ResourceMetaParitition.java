@@ -1,13 +1,5 @@
 package io.crnk.meta.internal.resource;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -20,6 +12,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.BulkResourceRepository;
 import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -37,6 +30,14 @@ import io.crnk.meta.model.resource.MetaResourceBase;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.MetaPartitionContext;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
 
 public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
@@ -88,8 +89,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 				String id = getId(entry.getResourceInformation().getResourceType());
 				if (isMeta) {
 					return id + "$meta";
-				}
-				else {
+				} else {
 					return id + "$links";
 				}
 			}
@@ -179,6 +179,11 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		resource.setName(getName(information));
 		resource.setResourceType(resourceType);
 		resource.setResourcePath(information.getResourcePath());
+		resource.setVersionRange(information.getVersionRange());
+		resource.setReadable(information.getAccess().isReadable());
+		resource.setUpdatable(information.getAccess().isPatchable());
+		resource.setInsertable(information.getAccess().isPostable());
+		resource.setDeletable(information.getAccess().isDeletable());
 		if (superMeta != null) {
 			resource.setSuperType(superMeta);
 			if (superMeta != null) {
@@ -217,8 +222,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		RegistryEntry entry = resourceRegistry.getEntry(resourceType);
 		if (idPrefix != null) {
 			return idPrefix + resourceType.replace('/', '.');
-		}
-		else {
+		} else {
 			Class<?> resourceClass = entry.getResourceInformation().getResourceClass();
 			return resourceClass.getName();
 		}
@@ -230,8 +234,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		for (int i = 0; i < resourceType.length(); i++) {
 			if (i == 0 || resourceType.charAt(i - 1) == '/') {
 				name.append(Character.toUpperCase(resourceType.charAt(i)));
-			}
-			else if (resourceType.charAt(i) != '/') {
+			} else if (resourceType.charAt(i) != '/') {
 				name.append(resourceType.charAt(i));
 			}
 		}
@@ -259,6 +262,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		if (repository instanceof ResourceRepository) {
 			setListInformationTypes(repository, meta);
 		}
+		meta.setBulk(repository instanceof BulkResourceRepository);
 		return meta;
 	}
 
@@ -297,10 +301,11 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		attr.setUnderlyingName(field.getUnderlyingName());
 
 		attr.setParent(resource, true);
+		attr.setId(resource.getId() + "." + field.getUnderlyingName());
 		attr.setName(field.getJsonName());
 		attr.setAssociation(field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP);
-		attr.setMeta(field.getResourceFieldType() == ResourceFieldType.META_INFORMATION);
-		attr.setLinks(field.getResourceFieldType() == ResourceFieldType.LINKS_INFORMATION);
+		attr.setFieldType(field.getResourceFieldType());
+		attr.setVersionRange(field.getVersionRange());
 		attr.setDerived(false);
 
 		attr.setLazy(field.getSerializeType() == SerializeType.LAZY);

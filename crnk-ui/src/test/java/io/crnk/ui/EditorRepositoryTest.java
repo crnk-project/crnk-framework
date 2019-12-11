@@ -4,6 +4,11 @@ package io.crnk.ui;
 import java.util.Arrays;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -24,11 +29,14 @@ import io.crnk.ui.presentation.repository.EditorRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class EditorRepositoryTest {
 
 
 	private UIModule uiModule;
+
+	private QueryContext queryContext;
 
 	@Before
 	public void setup() {
@@ -44,6 +52,10 @@ public class EditorRepositoryTest {
 		boot.addModule(new TestModule());
 		boot.boot();
 
+		HttpRequestContextProvider httpRequestContextProvider = boot.getModuleRegistry().getHttpRequestContextProvider();
+		httpRequestContextProvider.onRequestStarted(new HttpRequestContextBaseAdapter(Mockito.mock(HttpRequestContextBase.class)));
+		queryContext = httpRequestContextProvider.getRequestContext().getQueryContext();
+		queryContext.setRequestVersion(2);
 	}
 
 	@Test
@@ -58,7 +70,7 @@ public class EditorRepositoryTest {
 	@Test
 	public void checkFindOne() {
 		EditorRepository repository = uiModule.getEditorRepository();
-		EditorElement editor = repository.findOne("local-resources.tasks", new QuerySpec(EditorElement.class));
+		EditorElement editor = repository.findOne("local-tasks", new QuerySpec(EditorElement.class));
 		Assert.assertNotNull(editor);
 
 		Assert.assertEquals("tasks", editor.getBaseQuery().getResourceType());
@@ -81,7 +93,7 @@ public class EditorRepositoryTest {
 	@Test
 	public void checkNestedExplorerForManyRelationship() {
 		EditorRepository repository = uiModule.getEditorRepository();
-		EditorElement editor = repository.findOne("local-resources.presentationProject", new QuerySpec(EditorElement.class));
+		EditorElement editor = repository.findOne("local-presentationProject", new QuerySpec(EditorElement.class));
 
 		FormElement formElement = editor.getForm().getElements().getElements().get("tasks");
 		ExplorerElement explorer = (ExplorerElement) formElement.getComponent();
@@ -113,4 +125,41 @@ public class EditorRepositoryTest {
 
 	}
 
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void checkResourceVersionOutOfRange() {
+		queryContext.setRequestVersion(0);
+
+		EditorRepository repository = uiModule.getEditorRepository();
+		repository.findOne("local-presentationProject", new QuerySpec(EditorElement.class));
+	}
+
+	@Test
+	public void checkResourceVersionInRange() {
+		queryContext.setRequestVersion(1);
+
+		EditorRepository repository = uiModule.getEditorRepository();
+		EditorElement editor = repository.findOne("local-presentationProject", new QuerySpec(EditorElement.class));
+		Assert.assertNotNull(editor);
+	}
+
+	@Test
+	public void checkFieldVersionOutOfRange() {
+		queryContext.setRequestVersion(1);
+		EditorRepository repository = uiModule.getEditorRepository();
+		EditorElement editor = repository.findOne("local-presentationProject", new QuerySpec(EditorElement.class));
+
+		FormElements elements = editor.getForm().getElements();
+		Assert.assertEquals(Arrays.asList("id", "name", "tasks"), elements.getElementIds());
+	}
+
+	@Test
+	public void checkFieldVersionInRange() {
+		queryContext.setRequestVersion(2);
+		EditorRepository repository = uiModule.getEditorRepository();
+		EditorElement editor = repository.findOne("local-presentationProject", new QuerySpec(EditorElement.class));
+
+		FormElements elements = editor.getForm().getElements();
+		Assert.assertEquals(Arrays.asList("id", "name", "description", "tasks"), elements.getElementIds());
+	}
 }

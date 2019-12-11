@@ -109,6 +109,9 @@ use of per-request caching as the information may be accessed repeatedly for a r
 It can be obtained with `ModuleContext.getResourceFilterDirectory(...)` from the module API. For example, the `MetaModule` and
 `HomeModule` make use of `ResourceFilterDirectory` to only list authorized elements.
 
+Out of scope for `ResourceFilter` is the filtering based on data, this subject of the DataRoom Access Control
+of the next section.
+
 
 ## Dataroom Access Control
 
@@ -143,7 +146,15 @@ a particular filter. The returned `QuerySpec` is applied to all repository opera
 |Descripton
 
 |`GET`
-| Added to the caller `QuerySpec` to filter by both caller and DataRoom filters.
+| Added to the caller `QuerySpec` to filter by both caller and DataRoom filters. This will
+  remove any sensitive/undesired resources from the result. Note that it is important to
+  adapt the `QuerySpec` rather than filtering results of the query: only the former
+  efficiently supports paging (if necessary, one can workaround this a bit for the later
+  if deemed in practical by always query with offset 0 and limiting the number of pages one can request).
+  Note there is also a further subtle difference when requesting a single resource by id:
+  A `FORBIDDEN` status code is returned and a warning written to the log if the resource
+  with the requested ID does not pass DAC. It is assumed that the caller should not know
+  its ID in the first place.
 
 |`POST`
 | Verifies that the created resources matches with DataRoom filter. Checks are
@@ -162,6 +173,7 @@ IMPORTANT: When accessing relationship repositories, only one side is checked
   for performance reasons. It is assumed that `DataRoomFilter` applies proper filters to
   both sides of a relationship. For `GET` it is the target side of the relationship
   (the returned resources), for `PATCH`, `POST` and `DELETE` the modified source side.
+
 
 
 ## Adapt User Interfaces based on Authorizations

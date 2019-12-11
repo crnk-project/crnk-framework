@@ -1,5 +1,11 @@
 package io.crnk.rs;
 
+import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import io.crnk.rs.controller.SampleControllerWithPrefix;
 import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.TestModule;
@@ -11,12 +17,6 @@ import org.glassfish.jersey.test.spi.TestContainerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
-import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 
 public class UriInfoServiceUrlProviderTest extends JerseyTestBase {
 

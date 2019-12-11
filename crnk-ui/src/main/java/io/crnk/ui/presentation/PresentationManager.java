@@ -9,7 +9,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.utils.Prioritizable;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.resource.MetaResource;
@@ -32,12 +35,16 @@ public class PresentationManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PresentationManager.class);
 
+	private final HttpRequestContextProvider requestContextProvider;
+
 	private List<PresentationElementFactory> factories = new ArrayList<>();
 
 	private Supplier<List<PresentationService>> services;
 
-	public PresentationManager(Supplier<List<PresentationService>> services) {
+	public PresentationManager(Supplier<List<PresentationService>> services, HttpRequestContextProvider requestContextProvider) {
 		this.services = services;
+
+		this.requestContextProvider = requestContextProvider;
 
 		this.factories.add(new DefaultTableElementFactory());
 		this.factories.add(new DefaultExplorerFactory());
@@ -45,6 +52,11 @@ public class PresentationManager {
 		this.factories.add(new DefaultFormFactory());
 		this.factories.add(new DefaultLabelElementFactory());
 		this.factories.add(new DefaultPlainTextElementFactory());
+	}
+
+	public void registerFactory(PresentationElementFactory factory) {
+		factories.add(factory);
+		factories = Prioritizable.prioritze(factories);
 	}
 
 	public ExplorerElement getExplorer(String id) {
@@ -69,7 +81,7 @@ public class PresentationManager {
 	private ResourceRef findResourceRef(String id) {
 		int index = id.lastIndexOf("-");
 		String serviceName = id.substring(0, index);
-		String resourceMetaId = id.substring(index + 1);
+		String resourceMetaId = "resources." + id.substring(index + 1);
 
 		Optional<PresentationService> optService = services.get().stream().filter(it -> it.getServiceName().equals(serviceName)).findFirst();
 		if (!optService.isPresent()) {
@@ -78,6 +90,11 @@ public class PresentationManager {
 		PresentationService service = optService.get();
 		MetaLookup lookup = service.getLookup();
 		MetaResource resource = lookup.findElement(MetaResource.class, resourceMetaId);
+
+		int requestVersion = getRequestVersion();
+		if (!resource.getVersionRange().contains(requestVersion)) {
+			throw new ResourceNotFoundException("no presentation service found with name " + serviceName + " serving version " + requestVersion);
+		}
 
 		ResourceRef ref = new ResourceRef();
 		ref.service = service;
@@ -109,6 +126,7 @@ public class PresentationManager {
 		env.setType(resource);
 		env.setService(service);
 		env.setManager(this);
+		env.setRequestVersion(getRequestVersion());
 		return env;
 	}
 
@@ -118,6 +136,10 @@ public class PresentationManager {
 
 	public Map<String, ExplorerElement> getExplorers() {
 		return (Map) getViewers(PresentationType.EXPLORER);
+	}
+
+	public List<PresentationService> getServices() {
+		return services.get();
 	}
 
 	public Map<String, PresentationElement> getViewers(PresentationType type) {
@@ -132,8 +154,7 @@ public class PresentationManager {
 						map.put(element.getId(), element);
 					}
 				}
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				LOGGER.error("failed to retrieve meta data from " + service, e);
 			}
 		}
@@ -141,9 +162,15 @@ public class PresentationManager {
 	}
 
 	private boolean isIgnored(MetaResource resource) {
-		return resource.getResourceType().startsWith("meta/") && resource.getRepository() != null && resource.getRepository().isExposed();
+		int requestVersion = getRequestVersion();
+		return resource.getResourceType().startsWith("meta/") || resource.getRepository() == null ||
+				!resource.getRepository().isExposed() || !resource.getVersionRange().contains(requestVersion);
 	}
 
+	private int getRequestVersion() {
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+		return requestContext.getQueryContext().getRequestVersion();
+	}
 
 	private MenuElements createMenu() {
 		MenuElements menuElements = new MenuElements();

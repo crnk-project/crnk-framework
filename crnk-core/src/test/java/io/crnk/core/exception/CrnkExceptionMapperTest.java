@@ -21,7 +21,7 @@ public class CrnkExceptionMapperTest {
 		ErrorResponse response = mapper.toErrorResponse(new SampleCrnkException());
 
 		assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR_500);
-		assertThat((Iterable<?>) response.getResponse().getEntity()).hasSize(1).extracting("title", "detail")
+		assertThat((Iterable<?>) response.getResponse().getErrors()).hasSize(1).extracting("title", "detail")
 				.containsExactly(tuple(TITLE1, DETAIL1));
 	}
 

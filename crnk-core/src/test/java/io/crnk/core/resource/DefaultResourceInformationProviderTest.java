@@ -1,5 +1,13 @@
 package io.crnk.core.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNull;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Future;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -19,8 +27,6 @@ import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.MethodNotAllowedException;
-import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
-import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
@@ -52,14 +58,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNull;
-
 public class DefaultResourceInformationProviderTest {
 
     private static final String NAME_PROPERTY = "underlyingName";
@@ -74,7 +72,7 @@ public class DefaultResourceInformationProviderTest {
 
     private final ResourceInformationProviderContext context =
             new DefaultResourceInformationProviderContext(resourceInformationProvider,
-                    new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper());
+                    new DefaultInformationBuilder(new TypeParser()), new TypeParser(), () -> new ObjectMapper());
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -322,14 +320,14 @@ public class DefaultResourceInformationProviderTest {
 
     @Test
     public void shouldContainLinksInformationField() {
-        expectedException.expect(MultipleJsonApiMetaInformationException.class);
+        expectedException.expect(IllegalStateException.class);
 
         resourceInformationProvider.build(MultipleMetaInformationResource.class);
     }
 
     @Test
     public void shouldThrowExceptionOnMultipleLinksInformationFields() {
-        expectedException.expect(MultipleJsonApiLinksInformationException.class);
+        expectedException.expect(IllegalStateException.class);
 
         resourceInformationProvider.build(MultipleLinksInformationResource.class);
     }

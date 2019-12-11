@@ -58,4 +58,13 @@ public class ImmediateResultFactory implements ResultFactory {
 	public <T> Result<T> attachContext(Result<T> result, Object context) {
 		return result;
 	}
+
+	@Override
+	public <T> Result<List<T>> all(List<Result<T>> results) {
+		List<T> list = new ArrayList<>();
+		for (Result<T> result : results) {
+			list.add(result.get());
+		}
+		return just(list);
+	}
 }

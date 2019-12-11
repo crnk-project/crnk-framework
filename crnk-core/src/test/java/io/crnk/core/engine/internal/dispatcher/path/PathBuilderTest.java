@@ -1,13 +1,11 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.internal.resource.NestedResourceTest;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Task;
@@ -23,273 +21,330 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class PathBuilderTest {
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
-	private PathBuilder pathBuilder;
+    private PathBuilder pathBuilder;
 
-	@Before
-	public void prepare() {
-		SimpleModule notExposedModule = new SimpleModule("notExposed");
-		notExposedModule.addRepository(new NotExposedRepository());
+    private QueryContext queryContext = new QueryContext().setRequestVersion(0);
 
-		CoreTestContainer container = new CoreTestContainer();
-		container.addModule(new CoreTestModule());
-		container.addModule(notExposedModule);
-		container.boot();
+    @Before
+    public void prepare() {
+        SimpleModule notExposedModule = new SimpleModule("notExposed");
+        notExposedModule.addRepository(new NotExposedRepository());
+        notExposedModule.addRepository(new NestedResourceTest.TestRepository());
+        notExposedModule.addRepository(new NestedResourceTest.OneNestedRepository());
+        notExposedModule.addRepository(new NestedResourceTest.ManyNestedRepository());
+        notExposedModule.addRepository(new NestedResourceTest.OneGrandchildRepository());
+        notExposedModule.addRepository(new NestedResourceTest.ManyGrandchildrenRepository());
 
-		pathBuilder = new PathBuilder(container.getResourceRegistry(), container.getBoot().getModuleRegistry().getTypeParser());
+        CoreTestContainer container = new CoreTestContainer();
+        container.addModule(new CoreTestModule());
+        container.addModule(notExposedModule);
+        container.boot();
 
-		RegistryEntry entry = container.getEntry(Task.class);
-		ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
-		repositoryInformation.getActions().put("someRepositoryAction", Mockito.mock(RepositoryAction.class));
-		repositoryInformation.getActions().put("someResourceAction", Mockito.mock(RepositoryAction.class));
-	}
+        pathBuilder = new PathBuilder(container.getResourceRegistry(), container.getBoot().getModuleRegistry().getTypeParser());
 
-	@JsonApiExposed(false)
-	public static class NotExposedRepository extends InMemoryResourceRepository<NotExposedResource, String> {
+        RegistryEntry entry = container.getEntry(Task.class);
+        ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
+        repositoryInformation.getActions().put("someRepositoryAction", Mockito.mock(RepositoryAction.class));
+        repositoryInformation.getActions().put("someResourceAction", Mockito.mock(RepositoryAction.class));
+    }
 
-		public NotExposedRepository() {
-			super(NotExposedResource.class);
-		}
-	}
+    @JsonApiExposed(false)
+    public static class NotExposedRepository extends InMemoryResourceRepository<NotExposedResource, String> {
 
-	@JsonApiResource(type = "notExposed")
-	public static class NotExposedResource {
+        public NotExposedRepository() {
+            super(NotExposedResource.class);
+        }
+    }
 
-		@JsonApiId
-		private String id;
+    @JsonApiResource(type = "notExposed")
+    public static class NotExposedResource {
 
-		public String getId() {
-			return id;
-		}
+        @JsonApiId
+        private String id;
 
-		public void setId(String id) {
-			this.id = id;
-		}
-	}
+        public String getId() {
+            return id;
+        }
 
-	@Test
-	public void onEmptyPathReturnsNull() {
-		// GIVEN
-		String path = "/";
+        public void setId(String id) {
+            this.id = id;
+        }
+    }
 
-		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+    @Test
+    public void onEmptyPathReturnsNull() {
+        // GIVEN
+        String path = "/";
 
-		// THEN
-		assertThat(jsonPath).isNull();
-	}
+        // WHEN
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
 
-	@Test
-	public void onFlatResourcePathShouldReturnFlatPath() {
-		// GIVEN
-		String path = "/tasks/";
+        // THEN
+        assertThat(jsonPath).isNull();
+    }
 
-		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+    @Test
+    public void onFlatResourcePathShouldReturnFlatPath() {
+        // GIVEN
+        String path = "/tasks/";
 
-		// THEN
-		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
-		assertThat(jsonPath.isCollection()).isTrue();
-		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks");
-	}
+        // WHEN
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
 
-	@Test
-	public void onFlatResourceInstancePathShouldReturnFlatPath() {
-		// GIVEN
-		String path = "/tasks/1";
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+        assertThat(jsonPath.isCollection()).isTrue();
+        assertThat(jsonPath.toGroupPath()).isEqualTo("tasks");
+    }
 
-		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+    @Test
+    public void onFlatResourceInstancePathShouldReturnFlatPath() {
+        // GIVEN
+        String path = "/tasks/1";
 
-		// THEN
-		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
-		assertThat(jsonPath.getId()).isEqualTo(1L);
-		assertThat(jsonPath.isCollection()).isFalse();
-		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}");
-	}
+        // WHEN
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
 
-	@Test
-	public void onRepositoryActionShouldActionPath() {
-		// GIVEN
-		String path = "/tasks/someRepositoryAction";
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+        assertThat(jsonPath.getId()).isEqualTo(1L);
+        assertThat(jsonPath.isCollection()).isFalse();
+        assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}");
+    }
 
-		// WHEN
-		ActionPath jsonPath = (ActionPath) pathBuilder.build(path);
+    @Test
+    public void onRepositoryActionShouldActionPath() {
+        // GIVEN
+        String path = "/tasks/someRepositoryAction";
 
-		// THEN
-		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
-		Assert.assertEquals("someRepositoryAction", jsonPath.getActionName());
-		Assert.assertNull(jsonPath.getIds());
-		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/someRepositoryAction");
-	}
+        // WHEN
+        ActionPath jsonPath = (ActionPath) pathBuilder.build(path, queryContext);
 
-	@Test
-	public void onResourceActionShouldActionPath() {
-		// GIVEN
-		String path = "/tasks/123/someResourceAction";
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+        Assert.assertEquals("someRepositoryAction", jsonPath.getActionName());
+        Assert.assertNull(jsonPath.getIds());
+        assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/someRepositoryAction");
+    }
 
-		// WHEN
-		ActionPath jsonPath = (ActionPath) pathBuilder.build(path);
+    @Test
+    public void onResourceActionShouldActionPath() {
+        // GIVEN
+        String path = "/tasks/123/someResourceAction";
 
-		// THEN
-		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
-		Assert.assertEquals("someResourceAction", jsonPath.getActionName());
-		Assert.assertEquals(123L, jsonPath.getId());
-		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/someResourceAction");
-	}
+        // WHEN
+        ActionPath jsonPath = (ActionPath) pathBuilder.build(path, queryContext);
+
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+        Assert.assertEquals("someResourceAction", jsonPath.getActionName());
+        Assert.assertEquals(123L, jsonPath.getId());
+        assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/someResourceAction");
+    }
 
 
-	@Test
-	public void onNestedResourcePathShouldReturnNestedPath() {
-		// GIVEN
-		String path = "/tasks/1/project";
+    @Test
+    public void onNestedResourcePathShouldReturnNestedPath() {
+        // GIVEN
+        String path = "/tasks/1/project";
 
-		// WHEN
-		FieldPath jsonPath = (FieldPath) pathBuilder.build(path);
+        // WHEN
+        FieldPath jsonPath = (FieldPath) pathBuilder.build(path, queryContext);
 
-		// THEN
-		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
-		Assert.assertEquals(1L, jsonPath.getId());
-		Assert.assertEquals("project", jsonPath.getField().getJsonName());
-		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/project");
-	}
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+        Assert.assertEquals(1L, jsonPath.getId());
+        Assert.assertEquals("project", jsonPath.getField().getJsonName());
+        assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/project");
+    }
 
-	@Test
-	public void onNestedResourceInstancePathShouldThrowException() {
-		// GIVEN
-		String path = "/tasks/1/project/2";
+    @Test
+    public void onNestedResourceInstancePathShouldThrowException() {
+        // GIVEN
+        String path = "/tasks/1/project/2";
 
-		// THEN
-		expectedException.expect(BadRequestException.class);
+        // THEN
+        expectedException.expect(BadRequestException.class);
 
-		// WHEN
-		pathBuilder.build(path);
-	}
+        // WHEN
+        pathBuilder.build(path, queryContext);
+    }
 
-	@Test
-	public void onNestedResourceRelationshipPathShouldReturnNestedPath() {
-		// GIVEN
-		String path = "/tasks/1/relationships/project/";
+    @Test
+    public void onNestedResourceRelationshipPathShouldReturnNestedPath() {
+        // GIVEN
+        String path = "/tasks/1/relationships/project/";
 
-		// WHEN
-		RelationshipsPath jsonPath = (RelationshipsPath) pathBuilder.build(path);
+        // WHEN
+        RelationshipsPath jsonPath = (RelationshipsPath) pathBuilder.build(path, queryContext);
 
-		// THEN
-		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
-		Assert.assertEquals(1L, jsonPath.getId());
-		Assert.assertEquals("project", jsonPath.getRelationship().getJsonName());
-		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/relationships/project");
-	}
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+        Assert.assertEquals(1L, jsonPath.getId());
+        Assert.assertEquals("project", jsonPath.getRelationship().getJsonName());
+        assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/relationships/project");
+    }
 
-	@Test
-	public void onNonRelationshipFieldShouldThrowException() {
-		// GIVEN
-		String path = "/tasks/1/relationships/name/";
+    @Test
+    public void onNonRelationshipFieldShouldThrowException() {
+        // GIVEN
+        String path = "/tasks/1/relationships/name/";
 
-		// THEN
-		expectedException.expect(BadRequestException.class);
+        // THEN
+        expectedException.expect(BadRequestException.class);
 
-		// WHEN
-		pathBuilder.build(path);
-	}
+        // WHEN
+        pathBuilder.build(path, queryContext);
+    }
 
-	@Test
-	public void onRelationshipFieldInRelationshipsShouldThrowException() {
-		// GIVEN
-		String path = "/users/1/relationships/projects";
+    @Test
+    public void onRelationshipFieldInRelationshipsShouldThrowException() {
+        // GIVEN
+        String path = "/users/1/relationships/projects";
 
-		// THEN
-		expectedException.expect(BadRequestException.class);
-		expectedException.expectMessage("projects");
+        // THEN
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("projects");
 
-		// WHEN
-		pathBuilder.build(path);
-	}
+        // WHEN
+        pathBuilder.build(path, queryContext);
+    }
 
-	@Test
-	public void onNestedWrongResourceRelationshipPathShouldThrowException() {
-		// GIVEN
-		String path = "/tasks/1/relationships/";
+    @Test
+    public void onNestedWrongResourceRelationshipPathShouldThrowException() {
+        // GIVEN
+        String path = "/tasks/1/relationships/";
 
-		// THEN
-		expectedException.expect(BadRequestException.class);
+        // THEN
+        expectedException.expect(BadRequestException.class);
 
-		// WHEN
-		pathBuilder.build(path);
-	}
+        // WHEN
+        pathBuilder.build(path, queryContext);
+    }
 
-	@Test
-	public void onRelationshipsPathWithIdShouldThrowException() {
-		// GIVEN
-		String path = "/tasks/1/relationships/project/1";
+    @Test
+    public void onRelationshipsPathWithIdShouldThrowException() {
+        // GIVEN
+        String path = "/tasks/1/relationships/project/1";
 
-		// THEN
-		expectedException.expect(BadRequestException.class);
+        // THEN
+        expectedException.expect(BadRequestException.class);
 
-		// WHEN
-		pathBuilder.build(path);
-	}
+        // WHEN
+        pathBuilder.build(path, queryContext);
+    }
 
-	@Test
-	public void onNonExistingFieldShouldThrowException() {
-		// GIVEN
-		String path = "/tasks/1/nonExistingField/";
+    @Test
+    public void onNonExistingFieldShouldThrowException() {
+        // GIVEN
+        String path = "/tasks/1/nonExistingField/";
 
-		// THEN
-		expectedException.expect(BadRequestException.class);
-		expectedException.expectMessage("nonExistingField");
+        // THEN
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("nonExistingField");
 
-		// WHEN
-		pathBuilder.build(path);
-	}
+        // WHEN
+        pathBuilder.build(path, queryContext);
+    }
 
-	@Test
-	public void onNonExistingResourceShouldThrowException() {
-		String path = "/nonExistingResource";
-		Assert.assertNull(pathBuilder.build(path));
-	}
 
-	@Test
-	public void onResourceStaringWithRelationshipsShouldThrowException() {
-		String path = "/relationships";
-		Assert.assertNull(pathBuilder.build(path));
-	}
+    @Test
+    public void singularSingularNestedRelationshipPath() {
+        // GIVEN
+        String path = "/test/1/oneNested/";
 
-	@Test
-	public void onMultipleResourceInstancesPathShouldReturnCollectionPath() {
-		// GIVEN
-		String path = "/tasks/1,2";
+        // WHEN
+        ResourcePath jsonPath = (ResourcePath) pathBuilder.build(path, queryContext);
 
-		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("oneNested");
+        Assert.assertEquals("1", jsonPath.getId());
+        Assert.assertEquals("oneNested", jsonPath.getParentField().getUnderlyingName());
+        assertThat(jsonPath.toGroupPath()).isEqualTo("test/{id}/oneNested");
+    }
 
-		// THEN
-		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
-		Assert.assertEquals(Arrays.asList(1L, 2L), jsonPath.getIds());
-		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}");
-	}
+    @Test
+    public void checkMultivaluedRelationshipPath() {
+        // GIVEN
+        String path = "/test/1/manyNested/";
 
-	@Test
-	public void onUrlEncodedMultipleResourceInstancesPathShouldReturnCollectionPath() {
-		// GIVEN
-		String path = "/tasks/1%2C2";
+        // WHEN
+        FieldPath jsonPath = (FieldPath) pathBuilder.build(path, queryContext);
 
-		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("test");
+        Assert.assertEquals("1", jsonPath.getId());
+        Assert.assertEquals("manyNested", jsonPath.getField().getUnderlyingName());
+        assertThat(jsonPath.toGroupPath()).isEqualTo("test/{id}/manyNested");
+    }
 
-		// THEN
-		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
-		Assert.assertEquals(Arrays.asList(1L, 2L), jsonPath.getIds());
-	}
+    @Test
+    public void checkMultivaluedRelationshipIdPath() {
+        // GIVEN
+        String path = "/test/1/manyNested/2";
 
-	@Test
-	public void ignoreEntriesNotBeingExposed() {
-		String path = "/notExposed/1/";
-		JsonPath jsonPath = pathBuilder.build(path);
-		Assert.assertNull(jsonPath);
-	}
+        // WHEN
+        ResourcePath jsonPath = (ResourcePath) pathBuilder.build(path, queryContext);
+
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("manyNested");
+        Assert.assertEquals("1-2", jsonPath.getId().toString());
+        Assert.assertEquals("manyNested", jsonPath.getParentField().getUnderlyingName());
+        assertThat(jsonPath.toGroupPath()).isEqualTo("test/{id}/manyNested/{id}");
+    }
+
+    @Test
+    public void onNonExistingResourceShouldThrowException() {
+        String path = "/nonExistingResource";
+        Assert.assertNull(pathBuilder.build(path, queryContext));
+    }
+
+    @Test
+    public void onResourceStaringWithRelationshipsShouldThrowException() {
+        String path = "/relationships";
+        Assert.assertNull(pathBuilder.build(path, queryContext));
+    }
+
+    @Test
+    public void onMultipleResourceInstancesPathShouldReturnCollectionPath() {
+        // GIVEN
+        String path = "/tasks/1,2";
+
+        // WHEN
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
+
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+        Assert.assertEquals(Arrays.asList(1L, 2L), jsonPath.getIds());
+        assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}");
+    }
+
+    @Test
+    public void onUrlEncodedMultipleResourceInstancesPathShouldReturnCollectionPath() {
+        // GIVEN
+        String path = "/tasks/1%2C2";
+
+        // WHEN
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
+
+        // THEN
+        assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+        Assert.assertEquals(Arrays.asList(1L, 2L), jsonPath.getIds());
+    }
+
+    @Test
+    public void ignoreEntriesNotBeingExposed() {
+        String path = "/notExposed/1/";
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
+        Assert.assertNull(jsonPath);
+    }
 }

@@ -23,7 +23,6 @@ import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.UrlUtils;
 
 /**
  * Allows to connect a client to a server directly in memory without HTTP communication. Useful to write
@@ -107,6 +106,11 @@ public class InMemoryHttpAdapter implements HttpAdapter {
 		}
 
 		@Override
+		public Set<String> getRequestHeaderNames() {
+			return request.getHeadersNames();
+		}
+
+		@Override
 		public String getRequestHeader(String name) {
 			return request.getHeaderValue(name);
 		}
@@ -129,8 +133,7 @@ public class InMemoryHttpAdapter implements HttpAdapter {
 					}
 				}
 				return parameters;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new IllegalStateException("failed to parse url: " + request.getUrl(), e);
 			}
 		}
@@ -144,7 +147,7 @@ public class InMemoryHttpAdapter implements HttpAdapter {
 			if (sep != -1) {
 				path = path.substring(0, sep);
 			}
-			return UrlUtils.removeLeadingSlash(path);
+			return path;
 		}
 
 		@Override

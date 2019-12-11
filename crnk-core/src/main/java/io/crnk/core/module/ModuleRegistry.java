@@ -13,6 +13,7 @@ import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpStatusBehavior;
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.NamingStrategy;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
@@ -22,6 +23,8 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
@@ -48,6 +51,7 @@ import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
+import io.crnk.core.module.internal.ModuleUtils;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
@@ -82,6 +86,10 @@ public class ModuleRegistry {
 
     private Map<String, String> serverInfo;
 
+    private DocumentMapper documentMapper;
+
+    private DocumentMappingConfig documentMappingConfig = DocumentMappingConfig.create();
+
     public QueryAdapterBuilder getQueryAdapterBuilder() {
         return queryAdapterBuilder;
     }
@@ -102,6 +110,18 @@ public class ModuleRegistry {
 
     public ObjectMapper getObjectMapper() {
         return objectMapper;
+    }
+
+    public void setDocumentMapper(DocumentMapper documentMapper) {
+        this.documentMapper = documentMapper;
+    }
+
+    public DocumentMappingConfig getDocumentMappingConfig() {
+        return documentMappingConfig;
+    }
+
+    public List<NamingStrategy> getNamingStrategies() {
+        return aggregatedModule.getNamingStrategies();
     }
 
     enum InitializedState {
@@ -134,7 +154,7 @@ public class ModuleRegistry {
 
     private RequestDispatcher requestDispatcher;
 
-    private HttpRequestContextProvider httpRequestContextProvider = new HttpRequestContextProvider(() -> getResultFactory());
+    private HttpRequestContextProvider httpRequestContextProvider = new HttpRequestContextProvider(() -> getResultFactory(), this);
 
     private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
@@ -195,6 +215,7 @@ public class ModuleRegistry {
      * @param module module
      */
     public void addModule(Module module) {
+        checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
         LOGGER.debug("adding module {}", module);
         module.setupModule(new ModuleContextImpl(module));
         modules.add(module);
@@ -270,7 +291,7 @@ public class ModuleRegistry {
             InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
             DefaultResourceInformationProviderContext context =
                     new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,
-                            objectMapper);
+                            () -> objectMapper);
             resourceInformationProvider.init(context);
         }
         return resourceInformationProvider;
@@ -503,21 +524,22 @@ public class ModuleRegistry {
             }
         }
 
-        initOpposites();
+        initOpposites(false);
         initNesting();
     }
 
-    private void initOpposites() {
-
+    @Deprecated // not official API, to be moved at some point
+    public void initOpposites(boolean allowMissing) {
         Collection<RegistryEntry> entries = resourceRegistry.getEntries();
         for (RegistryEntry entry : entries) {
             ResourceInformation resourceInformation = entry.getResourceInformation();
             for (ResourceField field : resourceInformation.getRelationshipFields()) {
                 String oppositeName = field.getOppositeName();
                 if (oppositeName != null) {
+                    if (allowMissing && !resourceRegistry.hasEntry(field.getOppositeResourceType())) {
+                        continue;
+                    }
                     RegistryEntry oppositeEntry = resourceRegistry.getEntry(field.getOppositeResourceType());
-                    PreconditionUtil.verify(oppositeEntry != null, "unable to find opposite resource '%s' for field %s", field.getOppositeResourceType(), field);
-
                     ResourceField oppositeField = oppositeEntry.getResourceInformation().findFieldByUnderlyingName(oppositeName);
                     PreconditionUtil.verify(oppositeField != null, "unable to find opposite field '%s' for field %s", oppositeName, field);
 
@@ -578,6 +600,7 @@ public class ModuleRegistry {
             PreconditionUtil.verify(resourceInformationProvider.accept(resourceClass),
                     "make sure resource type %s is a valid resource, e.g. annotated with @JsonApiResource", resourceClass);
             ResourceInformation information = resourceInformationProvider.build(resourceClass);
+            ModuleUtils.adaptInformation(information, this);
             PreconditionUtil.verify(parentEntry.getResourceInformation().getResourcePath().equals(information.getResourcePath()),
                     "resource type %s without repository implementation must specify a @JsonApiResource.resourcePath matching "
                             + "one of its parent repositories",
@@ -606,6 +629,7 @@ public class ModuleRegistry {
         entryBuilder.fromImplementation(repository);
         RegistryEntry entry = entryBuilder.build();
         if (entry != null) {
+            ModuleUtils.adaptInformation(entry.getResourceInformation(), this);
             resourceRegistry.addEntry(entry);
         }
     }
@@ -919,6 +943,11 @@ public class ModuleRegistry {
         }
 
         @Override
+        public DocumentMapper getDocumentMapper() {
+            return documentMapper;
+        }
+
+        @Override
         public void setResultFactory(ResultFactory resultFactory) {
             ModuleRegistry.this.setResultFactory(resultFactory);
         }
@@ -1018,6 +1047,16 @@ public class ModuleRegistry {
         public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
             checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
             aggregatedModule.addHttpStatusBehavior(httpStatusBehavior);
+        }
+
+        @Override
+        public List<NamingStrategy> getNamingStrategies() {
+            return aggregatedModule.getNamingStrategies();
+        }
+
+        @Override
+        public void addNamingStrategy(NamingStrategy namingStrategy) {
+            aggregatedModule.addNamingStrategy(namingStrategy);
         }
 
         @Override

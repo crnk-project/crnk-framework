@@ -54,6 +54,11 @@ public class JaxrsRequestContext extends DefaultHttpRequestContextBase {
 	}
 
 	@Override
+	public Set<String> getRequestHeaderNames() {
+		return requestContext.getHeaders().keySet();
+	}
+
+	@Override
 	public String getRequestHeader(String name) {
 		return requestContext.getHeaderString(name);
 	}
@@ -86,8 +91,7 @@ public class JaxrsRequestContext extends DefaultHttpRequestContextBase {
 				}
 				buffer.flush();
 				requestBody = Nullable.of(buffer.toByteArray());
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
@@ -138,8 +142,7 @@ public class JaxrsRequestContext extends DefaultHttpRequestContextBase {
 		String path;
 		if (webPathPrefix != null && basePath.startsWith(webPathPrefix)) {
 			path = basePath.substring(webPathPrefix.length());
-		}
-		else {
+		} else {
 			path = basePath;
 		}
 		return path == null || path.isEmpty() ? "/" : path;

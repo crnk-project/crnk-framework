@@ -1,5 +1,8 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import io.crnk.core.engine.dispatcher.Response;
@@ -16,6 +19,7 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
+import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.repository.response.JsonApiResponse;
 
 public class ResourcePostController extends ResourceUpsert {
@@ -36,39 +40,50 @@ public class ResourcePostController extends ResourceUpsert {
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
 		RegistryEntry endpointRegistryEntry = jsonPath.getRootEntry();
-		Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
-		RegistryEntry registryEntry = getRegistryEntry(requestResource.getType());
-		logger.debug("using registry entry {}", registryEntry);
-		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
-		verifyTypes(HttpMethod.POST, endpointRegistryEntry, registryEntry);
+		List<Resource> resourceBodies = getRequestBodys(requestDocument, jsonPath, HttpMethod.POST);
+		ResultFactory resultFactory = context.getResultFactory();
+
+		List<Result<Object>> entityResults = new ArrayList<>();
+		Set<String> loadedRelationshipNames = new HashSet<>();
+		for (Resource resourceBody : resourceBodies) {
+			RegistryEntry registryEntry = getRegistryEntry(resourceBody.getType());
+			logger.debug("using registry entry {}", registryEntry);
+			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+			verifyTypes(HttpMethod.POST, endpointRegistryEntry, registryEntry);
+
+			loadedRelationshipNames.addAll(getLoadedRelationshipNames(resourceBody));
+
+			QueryContext queryContext = queryAdapter.getQueryContext();
+			if (Resource.class.equals(resourceInformation.getImplementationClass())) {
+				entityResults.add(resultFactory.just(resourceBody));
+			}
+			else {
+				Object entity = newEntity(resourceInformation, resourceBody);
+				setId(resourceBody, entity, resourceInformation);
+				setType(resourceBody, entity);
+				setAttributes(resourceBody, entity, resourceInformation, queryContext);
+				setMeta(resourceBody, entity, resourceInformation);
+				setLinks(resourceBody, entity, resourceInformation);
+				Result zipped = setRelationsAsync(entity, registryEntry, resourceBody, queryAdapter, false);
+				entityResults.add(zipped.map(it -> entity));
+			}
+		}
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository();
+		Result<List<Object>> result = resultFactory.all(entityResults);
 
-		Set<String> loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
-
-		QueryContext queryContext = queryAdapter.getQueryContext();
-		Result<JsonApiResponse> response;
-		if (Resource.class.equals(resourceInformation.getImplementationClass())) {
-			response = resourceRepository.create(requestResource, queryAdapter);
-		}
-		else {
-			Object entity = newEntity(resourceInformation, requestResource);
-			setId(requestResource, entity, resourceInformation);
-			setAttributes(requestResource, entity, resourceInformation, queryContext);
-			setMeta(requestResource, entity, resourceInformation);
-			setLinks(requestResource, entity, resourceInformation);
-			Result zipped =
-					setRelationsAsync(entity, registryEntry, requestResource, queryAdapter, false);
-			response = zipped.merge(it -> resourceRepository.create(entity, queryAdapter));
-		}
-
-		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create()
+		Result<JsonApiResponse> response = result.merge(entities -> resourceRepository.create(collectionOrSingleton(entities), queryAdapter));
+		DocumentMappingConfig mappingConfig = context.getMappingConfig().clone()
 				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
 		DocumentMapper documentMapper = this.context.getDocumentMapper();
 
 		return response
 				.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig))
 				.map(this::toResponse);
+	}
+
+	private Object collectionOrSingleton(List<Object> entities) {
+		return entities.size() == 1 ? entities.get(0) : entities;
 	}
 
 	private Response toResponse(Document responseDocument) {

@@ -9,8 +9,6 @@ import io.crnk.client.TransportException;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
-import io.crnk.core.resource.meta.JsonLinksInformation;
-import io.crnk.core.resource.meta.JsonMetaInformation;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.error.ErrorResponse;
@@ -19,7 +17,11 @@ import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.meta.JsonLinksInformation;
+import io.crnk.core.resource.meta.JsonMetaInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,10 @@ public class ClientStubBase {
         return execute(requestUrl, ResponseType.NONE, HttpMethod.DELETE, null);
     }
 
+    protected Object executeDelete(String requestUrl, String requestBody) {
+        return execute(requestUrl, ResponseType.NONE, HttpMethod.DELETE, requestBody);
+    }
+
     protected Object execute(String url, ResponseType responseType, HttpMethod method, String requestBody) {
         try {
 
@@ -67,7 +73,13 @@ public class ClientStubBase {
             if (method == HttpMethod.POST || method == HttpMethod.PATCH) {
                 request.header("Content-Type", format.getContentType());
             }
-            request.header("Accept", format.getAcceptType());
+            String accept = format.getAcceptType();
+            int version = client.getVersion();
+            PreconditionUtil.verify(version >= 0, "version not specified");
+            if (version != Integer.MAX_VALUE) {
+                accept += "; " + HttpHeaders.VERSION_ACCEPT_PARAMETER + "=" + version;
+            }
+            request.header("Accept", accept);
 
             HttpAdapterResponse response = request.execute();
 
@@ -90,7 +102,8 @@ public class ClientStubBase {
                     Document document = objectMapper.readValue(body, format.getDocumentClass());
 
                     ClientDocumentMapper documentMapper = client.getDocumentMapper();
-                    return documentMapper.fromDocument(document, responseType == ResponseType.RESOURCES);
+                    QueryContext queryContext = client.getQueryContext();
+                    return documentMapper.fromDocument(document, responseType == ResponseType.RESOURCES, queryContext);
                 }
             }
             return null;

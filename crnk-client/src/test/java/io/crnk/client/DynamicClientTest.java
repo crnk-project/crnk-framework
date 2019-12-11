@@ -1,5 +1,9 @@
 package io.crnk.client;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.InternalServerErrorException;
@@ -10,10 +14,6 @@ import io.crnk.core.resource.list.ResourceList;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class DynamicClientTest extends AbstractClientTest {
@@ -87,7 +87,8 @@ public class DynamicClientTest extends AbstractClientTest {
 		try {
 			repository.setRelation(source, "13", "parent");
 			Assert.fail();
-		} catch (InternalServerErrorException e) {
+		}
+		catch (InternalServerErrorException e) {
 			// ok
 		}
 	}

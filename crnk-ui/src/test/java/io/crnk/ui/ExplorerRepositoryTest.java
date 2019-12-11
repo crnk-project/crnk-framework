@@ -1,9 +1,15 @@
 package io.crnk.ui;
 
 
+import java.util.Arrays;
 import java.util.List;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -20,11 +26,14 @@ import io.crnk.ui.presentation.repository.ExplorerRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class ExplorerRepositoryTest {
 
 
 	private UIModule uiModule;
+
+	private QueryContext queryContext;
 
 	@Before
 	public void setup() {
@@ -39,6 +48,10 @@ public class ExplorerRepositoryTest {
 		boot.addModule(new TestModule());
 		boot.boot();
 
+		HttpRequestContextProvider httpRequestContextProvider = boot.getModuleRegistry().getHttpRequestContextProvider();
+		httpRequestContextProvider.onRequestStarted(new HttpRequestContextBaseAdapter(Mockito.mock(HttpRequestContextBase.class)));
+		queryContext = httpRequestContextProvider.getRequestContext().getQueryContext();
+		queryContext.setRequestVersion(2);
 	}
 
 	@Test
@@ -52,7 +65,7 @@ public class ExplorerRepositoryTest {
 	@Test
 	public void checkFindOne() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
-		ExplorerElement explorer = repository.findOne("local-resources.tasks", new QuerySpec(ExplorerElement.class));
+		ExplorerElement explorer = repository.findOne("local-tasks", new QuerySpec(ExplorerElement.class));
 		Assert.assertNotNull(explorer);
 
 		Assert.assertEquals("tasks", explorer.getBaseQuery().getResourceType());
@@ -74,7 +87,7 @@ public class ExplorerRepositoryTest {
 	@Test
 	public void checkFullTextSearch() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
-		ExplorerElement explorer = repository.findOne("local-resources.presentationTask", new QuerySpec(ExplorerElement.class));
+		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
 
 		List<PathSpec> fullTextSearchPaths = explorer.getFullTextSearchPaths();
 		Assert.assertEquals(1, fullTextSearchPaths.size());
@@ -82,9 +95,16 @@ public class ExplorerRepositoryTest {
 	}
 
 	@Test
+	public void checkId() {
+		ExplorerRepository repository = uiModule.getExplorerRepository();
+		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
+		Assert.assertEquals("local-presentationTask", explorer.getId());
+	}
+
+	@Test
 	public void checkLabels() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
-		ExplorerElement explorer = repository.findOne("local-resources.presentationTask", new QuerySpec(ExplorerElement.class));
+		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
 
 		TableColumnElement projectColumn = explorer.getTable().getColumns().getElements().get("project");
 		LabelElement element = (LabelElement) projectColumn.getComponent();
@@ -97,10 +117,48 @@ public class ExplorerRepositoryTest {
 	@Test
 	public void checkNumberColumn() {
 		ExplorerRepository repository = uiModule.getExplorerRepository();
-		ExplorerElement explorer = repository.findOne("local-resources.presentationTask", new QuerySpec(ExplorerElement.class));
+		ExplorerElement explorer = repository.findOne("local-presentationTask", new QuerySpec(ExplorerElement.class));
 
 		TableColumnElement projectColumn = explorer.getTable().getColumns().getElements().get("priority");
 		PlainTextElement element = (PlainTextElement) projectColumn.getComponent();
 		Assert.assertEquals("number", element.getComponentId());
+	}
+
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void checkResourceVersionOutOfRange() {
+		queryContext.setRequestVersion(0);
+
+		ExplorerRepository repository = uiModule.getExplorerRepository();
+		repository.findOne("local-presentationProject", new QuerySpec(ExplorerElement.class));
+	}
+
+	@Test
+	public void checkResourceVersionInRange() {
+		queryContext.setRequestVersion(1);
+
+		ExplorerRepository repository = uiModule.getExplorerRepository();
+		ExplorerElement explorer = repository.findOne("local-presentationProject", new QuerySpec(ExplorerElement.class));
+		Assert.assertNotNull(explorer);
+	}
+
+	@Test
+	public void checkFieldVersionOutOfRange() {
+		queryContext.setRequestVersion(1);
+		ExplorerRepository repository = uiModule.getExplorerRepository();
+		ExplorerElement explorer = repository.findOne("local-presentationProject", new QuerySpec(ExplorerElement.class));
+
+		TableColumnsElement elements = explorer.getTable().getColumns();
+		Assert.assertEquals(Arrays.asList("id", "name"), elements.getElementIds());
+	}
+
+	@Test
+	public void checkFieldVersionInRange() {
+		queryContext.setRequestVersion(2);
+		ExplorerRepository repository = uiModule.getExplorerRepository();
+		ExplorerElement explorer = repository.findOne("local-presentationProject", new QuerySpec(ExplorerElement.class));
+
+		TableColumnsElement elements = explorer.getTable().getColumns();
+		Assert.assertEquals(Arrays.asList("id", "name", "description"), elements.getElementIds());
 	}
 }

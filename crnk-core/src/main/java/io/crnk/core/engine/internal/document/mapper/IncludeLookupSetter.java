@@ -122,6 +122,8 @@ public class IncludeLookupSetter {
         if (requiresRelationData) {
 
             Collection<Resource> unpopulatedResourceList = request.filterProcessed(resourceList, resourceField);
+
+            LOGGER.debug("found {} unpopulated resources", unpopulatedResourceList.size());
             if (!unpopulatedResourceList.isEmpty()) {
 
                 // only handle resources from the proper subtype where the
@@ -134,6 +136,8 @@ public class IncludeLookupSetter {
 
                 Result<Set<Resource>> populatedResult;
                 if (!includeRelationship && resourceField.hasIdField()) {
+                    LOGGER.debug("extracting from idField");
+
                     // fill in @JsonApiRelationId into Relationship where possible
                     fetchRelationFromEntity(request, resourcesWithField, resourceField,
                             false, false, includeRelationship);
@@ -142,6 +146,8 @@ public class IncludeLookupSetter {
                     // nothing to do
                     populatedResult = resultFactory.just(Collections.emptySet());
                 } else if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_ALWAYS) {
+                    LOGGER.debug("using LookupIncludeBehavior.AUTOMATICALLY_ALWAYS");
+
                     // fill in @JsonApiRelationId into Relationship where possible
                     fetchRelationFromEntity(request, resourcesWithField, resourceField,
                             false, false, includeRelationship);
@@ -149,6 +155,8 @@ public class IncludeLookupSetter {
                     // lookup resources by making repository calls
                     populatedResult = relationshipLoader.lookupRelatedResource(request, resourcesWithField, resourceField);
                 } else if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL) {
+                    LOGGER.debug("using LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL");
+
                     // try to populate from entities
                     Set<Resource> extractedResources =
                             fetchRelationFromEntity(request, resourcesWithField, resourceField, true, true, includeRelationship);
@@ -156,10 +164,13 @@ public class IncludeLookupSetter {
                     // do lookups where relationship data is null
                     Collection<Resource> resourcesForLookup =
                             util.findResourcesWithoutRelationshipToLoad(resourcesWithField, resourceField, request);
+                    LOGGER.debug("found {} from resource, {} remaining for lookup", extractedResources.size(), resourcesForLookup.size());
 
                     populatedResult = relationshipLoader.lookupRelatedResource(request, resourcesForLookup, resourceField)
                             .map(lookedupResources -> util.union(lookedupResources, extractedResources));
                 } else {
+                    LOGGER.debug("using LookupIncludeBehavior.NONE");
+
                     // do not do any lookups
                     populatedResult = resultFactory.just(fetchRelationFromEntity(request, resourcesWithField, resourceField,
                             false, true, includeRelationship));

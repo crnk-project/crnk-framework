@@ -1,42 +1,34 @@
 package io.crnk.core.engine.internal.http;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpResponse;
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.controller.Controller;
 import io.crnk.core.engine.internal.dispatcher.path.ActionPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
-import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.module.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase implements HttpRequestProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonApiRequestProcessor.class);
-
 
     public JsonApiRequestProcessor(Module.ModuleContext moduleContext) {
         super(moduleContext);
@@ -63,7 +55,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
         boolean acceptsAny = acceptsJsonApi || requestContext.acceptsAny();
 
         boolean acceptsPlainJson = acceptsAny || (acceptPlainJson && requestContext.accepts("application/json"));
-        LOGGER.debug("accepting request as JSON-API: {}", acceptPlainJson);
+        LOGGER.debug("HTTP Accept header matches: {}", acceptPlainJson);
         return acceptsPlainJson;
     }
 
@@ -93,16 +85,16 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
         boolean acceptHeaderMatch = matchesAcceptHeader(context, acceptingPlainJson);
         if (acceptHeaderMatch) {
             boolean contentTypeHeaderMatch = matchesContentTypeHeader(context, acceptingPlainJson);
-            JsonPath jsonPath = getJsonPath(context);
+            JsonPath jsonPath = helper.getJsonPath(context);
             if (jsonPath == null) {
-                LOGGER.debug("request not served since no matching repository defined for {}", context.getPath());
+                LOGGER.debug("not accepted since no matching repository defined for path={}", context.getPath());
                 return false;
             }
             if (!contentTypeHeaderMatch) {
-                LOGGER.warn("request not served due to content-type header mismatch, " + HttpHeaders.JSONAPI_CONTENT_TYPE + " missing?");
+                LOGGER.warn("not accepted due to content-type header mismatch, " + HttpHeaders.JSONAPI_CONTENT_TYPE + " missing?");
                 return false;
             }
-            LOGGER.debug("request {} accepted", jsonPath);
+            LOGGER.debug("accepted to server request: path={}", jsonPath);
             return true;
         }
         return false;
@@ -117,13 +109,14 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 
         String method = requestContext.getMethod();
         ResultFactory resultFactory = moduleContext.getResultFactory();
-        String path = requestContext.getPath();
-        JsonPath jsonPath = getJsonPath(requestContext);
+
+        JsonPath jsonPath = helper.getJsonPath(requestContext);
         LOGGER.debug("processing JSON API request path={}, method={}", jsonPath, method);
         Map<String, Set<String>> parameters = requestContext.getRequestParameters();
 
         if (jsonPath instanceof ActionPath) {
             // inital implementation, has to improve
+            String path = requestContext.getPath();
             RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
             requestDispatcher.dispatchAction(path, method, parameters);
             return null;
@@ -160,9 +153,9 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
                                          Document requestDocument, QueryContext queryContext) {
         try {
             ResultFactory resultFactory = moduleContext.getResultFactory();
-            ResourceInformation resourceInformation = getRequestedResource(jsonPath);
-            QueryAdapterBuilder queryAdapterBuilder = moduleContext.getModuleRegistry().getQueryAdapterBuilder();
-            QueryAdapter queryAdapter = queryAdapterBuilder.build(resourceInformation, parameters, queryContext);
+            QueryAdapter queryAdapter = helper.toQueryAdapter(parameters, jsonPath, queryContext);
+
+            LOGGER.debug("using requestVersion={}", queryContext.getRequestVersion());
 
             if (resultFactory instanceof ImmediateResultFactory) {
                 LOGGER.debug("processing synchronously");
@@ -192,21 +185,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
     }
 
     private Response toErrorResponse(Throwable e) {
-        ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
-        Optional<ExceptionMapper> exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
-        if (!exceptionMapper.isPresent()) {
-            LOGGER.error("failed to process request, unknown exception thrown", e);
-
-            // we do not propagate causes because we do not know the nature of the error.
-            // one could consider hiding the message as well
-            e = new InternalServerErrorException(e.getMessage());
-            exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
-            PreconditionUtil
-                    .assertTrue("no exception mapper for InternalServerErrorException found", exceptionMapper.isPresent());
-        } else {
-            LOGGER.debug("dispatching exception to mapper", e);
-        }
-        return exceptionMapper.get().toErrorResponse(e).toResponse();
+        return moduleContext.getExceptionMapperRegistry().toErrorResponse(e);
     }
 
     protected DocumentFilterChain getFilterChain(JsonPath jsonPath, String method) {
@@ -215,5 +194,6 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
         return new DocumentFilterChainImpl(moduleContext, controller);
 
     }
+
 
 }

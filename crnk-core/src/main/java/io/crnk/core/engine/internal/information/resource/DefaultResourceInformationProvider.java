@@ -1,12 +1,11 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
@@ -14,13 +13,13 @@ import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiVersion;
 import io.crnk.core.utils.Prioritizable;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * A builder which creates ResourceInformation instances of a specific class. It
@@ -69,22 +68,10 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
     public ResourceInformation build(Class<?> resourceClass, boolean allowNonResourceBaseClass) {
         ResourceFieldAccess resourceAccess = getResourceAccess(resourceClass);
 
-        List<ResourceField> resourceFields = getResourceFields(resourceClass);
-
-        for (ResourceField resourceField : resourceFields) {
-            ResourceFieldImpl impl = (ResourceFieldImpl) resourceField;
-            impl.setAccess(impl.getAccess().and(resourceAccess));
-        }
+        List<ResourceField> resourceFields = getResourceFields(resourceClass, resourceAccess);
 
         String resourceType = getResourceType(resourceClass, allowNonResourceBaseClass);
         String resourcePath = getResourcePath(resourceClass, allowNonResourceBaseClass);
-
-        Optional<JsonPropertyOrder> propertyOrder = ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class);
-        if (propertyOrder.isPresent()) {
-            JsonPropertyOrder propertyOrderAnnotation = propertyOrder.get();
-            Collections.sort(resourceFields,
-                    new FieldOrderedComparator(propertyOrderAnnotation.value(), propertyOrderAnnotation.alphabetic()));
-        }
 
         DefaultResourceInstanceBuilder<?> instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 
@@ -100,30 +87,21 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
                 resourceClass, resourceType, resourcePath, superResourceType, instanceBuilder, resourceFields,
                 pagingSpec);
         information.setAccess(resourceAccess);
+        information.setVersionRange(getVersionRange(resourceClass));
         if (!allowNonResourceBaseClass && information.getIdField() == null) {
             throw new ResourceIdNotFoundException(resourceClass.getCanonicalName());
         }
         return information;
     }
 
-    private ResourceFieldAccess getResourceAccess(Class<?> resourceClass) {
-        boolean sortable = true;
-        boolean filterable = true;
-        boolean postable = true;
-        boolean deletable = true;
-        boolean patchable = true;
-        boolean readable = true;
-        JsonApiResource annotation = resourceClass.getAnnotation(JsonApiResource.class);
+    private VersionRange getVersionRange(Class<?> resourceClass) {
+        JsonApiVersion annotation = resourceClass.getAnnotation(JsonApiVersion.class);
         if (annotation != null) {
-            sortable = annotation.sortable();
-            filterable = annotation.filterable();
-            postable = annotation.postable();
-            deletable = annotation.deletable();
-            patchable = annotation.patchable();
-            readable = annotation.readable();
+            return VersionRange.of(annotation.min(), annotation.max());
         }
-        return new ResourceFieldAccess(readable, postable, patchable, deletable, sortable, filterable);
+        return VersionRange.UNBOUNDED;
     }
+
 
     @Override
     public String getResourceType(Class<?> resourceClass) {

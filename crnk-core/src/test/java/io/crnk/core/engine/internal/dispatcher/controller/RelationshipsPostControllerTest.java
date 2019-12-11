@@ -53,7 +53,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
     @Test
     public void onValidRequestShouldAcceptIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
+        JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project", queryContext);
         RelationshipsPostController sut = new RelationshipsPostController();
         sut.init(controllerContext);
 
@@ -67,7 +67,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
     @Test
     public void onNonRelationRequestShouldDenyIt() {
         // GIVEN
-        JsonPath jsonPath = pathBuilder.build("tasks");
+        JsonPath jsonPath = pathBuilder.build("tasks", queryContext);
         RelationshipsPostController sut = new RelationshipsPostController();
         sut.init(controllerContext);
 
@@ -80,7 +80,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
 
     @Test(expected = RequestBodyNotFoundException.class)
     public void onMissingBodyThrowException() {
-        JsonPath savedTaskPath = pathBuilder.build("/tasks/1/relationships/project");
+        JsonPath savedTaskPath = pathBuilder.build("/tasks/1/relationships/project", queryContext);
         RelationshipsPostController sut = new RelationshipsPostController();
         sut.init(controllerContext);
 
@@ -96,7 +96,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         Document newTaskBody = new Document();
         newTaskBody.setData(Nullable.of(createTask()));
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -114,7 +114,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         Document newProjectBody = new Document();
         newProjectBody.setData(Nullable.of(createProject()));
 
-        JsonPath projectPath = pathBuilder.build("/projects");
+        JsonPath projectPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN -- adding a project
         Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery,
@@ -134,7 +134,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         Document newTaskToProjectBody = new Document();
         newTaskToProjectBody.setData(Nullable.of(createProject(Long.toString(projectId))));
 
-        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
+        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project", queryContext);
         RelationshipsPostController sut = new RelationshipsPostController();
         sut.init(controllerContext);
 
@@ -163,7 +163,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         Resource data = createUser();
         newUserBody.setData(Nullable.of(data));
 
-        JsonPath taskPath = pathBuilder.build("/users");
+        JsonPath taskPath = pathBuilder.build("/users", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -183,7 +183,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         newProjectBody.setData(Nullable.of(data));
         data.setType("projects");
 
-        JsonPath projectPath = pathBuilder.build("/projects");
+        JsonPath projectPath = pathBuilder.build("/projects", queryContext);
 
         // WHEN -- adding a project
         Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, newProjectBody);
@@ -205,7 +205,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         data.setType("projects");
         data.setId(projectId.toString());
 
-        JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
+        JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects", queryContext);
         RelationshipsPostController sut = new RelationshipsPostController();
         sut.init(controllerContext);
 
@@ -227,7 +227,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         Resource data = createTask();
         newTaskBody.setData(Nullable.of(data));
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
 
@@ -245,7 +245,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         Document newTaskToProjectBody = new Document();
         newTaskToProjectBody.setData(Nullable.nullValue());
 
-        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
+        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project", queryContext);
         RelationshipsPostController sut = new RelationshipsPostController();
         sut.init(controllerContext);
 
@@ -268,7 +268,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         Resource data = createTask();
         newTaskBody.setData(Nullable.of(data));
 
-        JsonPath taskPath = pathBuilder.build("/tasks");
+        JsonPath taskPath = pathBuilder.build("/tasks", queryContext);
 
         ResourcePostController resourcePost = new ResourcePostController();
         resourcePost.init(controllerContext);
@@ -294,7 +294,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
                         "tasks"),
                 new ResourceIdentifier(taskIdThree.toString(), "tasks"))));
         newProjectBody.setData(Nullable.of(data));
-        JsonPath projectPolymorphicTypePath = pathBuilder.build("/" + type);
+        JsonPath projectPolymorphicTypePath = pathBuilder.build("/" + type, queryContext);
 
         // WHEN
         Response projectResponse =
@@ -327,7 +327,7 @@ public class RelationshipsPostControllerTest extends ControllerTestBase {
         Document body = new Document();
         ResourceIdentifier id = new ResourceIdentifier("13", "things");
         body.setData(Nullable.of(id));
-        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/statusThing");
+        JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/statusThing", queryContext);
         RelationshipsPostController sut = new RelationshipsPostController();
         sut.init(controllerContext);
 

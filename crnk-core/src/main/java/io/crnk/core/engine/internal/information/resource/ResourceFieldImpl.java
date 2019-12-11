@@ -7,6 +7,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonIncludeStrategy;
@@ -58,6 +59,8 @@ public class ResourceFieldImpl implements ResourceField {
 
     private boolean mappedBy;
 
+    private VersionRange versionRange = VersionRange.UNBOUNDED;
+
     public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
                              Type genericType, String oppositeResourceType) {
         this(jsonName, underlyingName, resourceFieldType, type, genericType,
@@ -87,6 +90,13 @@ public class ResourceFieldImpl implements ResourceField {
         this.idAccessor = idAccessor;
         this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
         this.patchStrategy = patchStrategy;
+
+        if (resourceFieldType != ResourceFieldType.LINKS_INFORMATION) {
+            PreconditionUtil.verify(!jsonName.equals("links"), "cannot name none-@JsonLinksInformation field `links`");
+        }
+        if (resourceFieldType != ResourceFieldType.META_INFORMATION) {
+            PreconditionUtil.verify(!jsonName.equals("meta"), "cannot name none-@JsonMetanformation field `meta`");
+        }
     }
 
     public void setMappedBy(boolean mappedBy) {
@@ -117,10 +127,6 @@ public class ResourceFieldImpl implements ResourceField {
     }
 
     /**
-     * See also
-     * {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically}
-     * }
-     *
      * @return if lookup should be performed
      */
     public LookupIncludeBehavior getLookupIncludeBehavior() {
@@ -178,12 +184,12 @@ public class ResourceFieldImpl implements ResourceField {
             return false;
         }
         ResourceFieldImpl that = (ResourceFieldImpl) o;
-        return Objects.equals(jsonName, that.jsonName) && resourceInformation == that.resourceInformation;
+        return Objects.equals(underlyingName, that.underlyingName) && resourceInformation == that.resourceInformation;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(jsonName, resourceInformation);
+        return Objects.hash(underlyingName, resourceInformation);
     }
 
     /**
@@ -263,6 +269,9 @@ public class ResourceFieldImpl implements ResourceField {
             }
         }
         this.resourceInformation = resourceInformation;
+
+        PreconditionUtil.verify(!jsonName.equals("id") || resourceFieldType == ResourceFieldType.ID,
+                "only ID fields can be named 'id' for %s, consider adding @JsonApiId, ignoring it with @JsonIgnore or renaming it with @JsonProperty", resourceInformation );
     }
 
     public void setRelationshipRepositoryBehavior(RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
@@ -350,5 +359,14 @@ public class ResourceFieldImpl implements ResourceField {
     @Override
     public PatchStrategy getPatchStrategy() {
         return patchStrategy;
+    }
+
+    @Override
+    public VersionRange getVersionRange() {
+        return versionRange;
+    }
+
+    public void setVersionRange(VersionRange versionRange) {
+        this.versionRange = versionRange;
     }
 }

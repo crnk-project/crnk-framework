@@ -7,6 +7,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 
@@ -38,7 +39,7 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 
 	private Path path;
 
-	private ConstraintViolationImpl(ResourceRegistry resourceRegistry, ErrorData errorData) {
+	private ConstraintViolationImpl(ResourceRegistry resourceRegistry, ErrorData errorData, QueryContext queryContext) {
 		this.errorData = errorData;
 
 		Map<String, Object> meta = this.errorData.getMeta();
@@ -58,19 +59,19 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 
 		String sourcePointer = errorData.getSourcePointer();
 		if (sourcePointer != null && resourceClass != null) {
-			path = toPath(sourcePointer);
+			path = toPath(sourcePointer, queryContext);
 		}
 	}
 
-	public static ConstraintViolationImpl fromError(ResourceRegistry resourceRegistry, ErrorData error) {
-		return new ConstraintViolationImpl(resourceRegistry, error);
+	public static ConstraintViolationImpl fromError(ResourceRegistry resourceRegistry, ErrorData error, QueryContext queryContext) {
+		return new ConstraintViolationImpl(resourceRegistry, error, queryContext);
 	}
 
 	public ErrorData getErrorData() {
 		return errorData;
 	}
 
-	private Path toPath(String sourcePointer) { //NOSONAR
+	private Path toPath(String sourcePointer, QueryContext queryContext) { //NOSONAR
 		String[] elements = sourcePointer.split("\\/");
 
 		LinkedList<NodeImpl> nodes = new LinkedList<>();
@@ -114,7 +115,7 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 			} else {
 				// we don't have any meta-information about nested objects (https://github.com/crnk-project/crnk-framework/issues/399) yet,
 				// therefore we're not attempting to find the property name, as soon as we're in a nested object.
-				String propertyName = type == resourceClass ? findPropertyNameByJsonName(element) : element;
+				String propertyName = type == resourceClass ? findPropertyNameByJsonName(element, queryContext) : element;
 				nodes.add(new NodeImpl(propertyName));
 
 				// follow attribute
@@ -125,8 +126,8 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 		return new PathImpl(nodes);
 	}
 
-	private String findPropertyNameByJsonName(String jsonName) {
-		ResourceField field = resourceInformation.findAttributeFieldByName(jsonName);
+	private String findPropertyNameByJsonName(String jsonName, QueryContext queryContext) {
+		ResourceField field = resourceInformation.findFieldByJsonName(jsonName, queryContext.getRequestVersion());
 		return field != null ? field.getUnderlyingName() : jsonName;
 	}
 

@@ -11,6 +11,7 @@
 		<class>io.crnk.data.jpa.model.AnnotationMappedSubtypeEntity</class>
 		<class>io.crnk.data.jpa.model.AnnotationMappedSuperclassEntity</class>
 		<class>io.crnk.data.jpa.model.OneToOneTestEntity</class>
+		<class>io.crnk.data.jpa.model.RelationIdEntity</class>
 		<class>io.crnk.data.jpa.model.RelatedEntity</class>
 		<class>io.crnk.data.jpa.model.TestEntity</class>
 		<class>io.crnk.data.jpa.model.OtherRelatedEntity</class>

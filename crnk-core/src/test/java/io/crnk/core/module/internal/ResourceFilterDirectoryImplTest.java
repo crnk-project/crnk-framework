@@ -1,5 +1,8 @@
 package io.crnk.core.module.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterContext;
@@ -16,13 +19,11 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.ImmediateResultFactory;
+import io.crnk.core.module.ModuleRegistry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ResourceFilterDirectoryImplTest {
 
@@ -48,8 +49,11 @@ public class ResourceFilterDirectoryImplTest {
     public void setup() {
         queryContext = new QueryContext();
 
+		resourceRegistry = Mockito.mock(ResourceRegistry.class);
         resultFactory = new ImmediateResultFactory();
-        requestContextProvider = new HttpRequestContextProvider(() -> resultFactory);
+		ModuleRegistry moduleRegistry = Mockito.mock(ModuleRegistry.class);
+		Mockito.when(moduleRegistry.getResourceRegistry()).thenReturn(resourceRegistry);
+		requestContextProvider = new HttpRequestContextProvider(() -> resultFactory, moduleRegistry);
 
         filter = Mockito.mock(ResourceFilter.class);
         filters.add(filter);
@@ -57,7 +61,6 @@ public class ResourceFilterDirectoryImplTest {
         resourceInformation = Mockito.mock(ResourceInformation.class);
         resourceField = Mockito.mock(ResourceField.class);
         Mockito.when(resourceField.getAccess()).thenReturn(new ResourceFieldAccess(true, true, true, true, true, true));
-        resourceRegistry = Mockito.mock(ResourceRegistry.class);
 
         directory = new ResourceFilterDirectoryImpl(filters, requestContextProvider, resourceRegistry);
     }
@@ -207,6 +210,7 @@ public class ResourceFilterDirectoryImplTest {
         RegistryEntry projectsEntry = Mockito.mock(RegistryEntry.class);
         Mockito.when(projectsEntry.getResourceInformation()).thenReturn(projectsInformation);
         Mockito.when(resourceRegistry.getEntry(Mockito.eq("projects"))).thenReturn(projectsEntry);
+        Mockito.when(resourceRegistry.hasEntry(Mockito.eq("projects"))).thenReturn(true);
 
         // forbid related resource
         Mockito.when(filter.filterResource(Mockito.any(ResourceFilterContext.class), Mockito.eq(projectsInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);

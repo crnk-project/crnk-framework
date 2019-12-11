@@ -2,7 +2,7 @@ package io.crnk.meta.model;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "meta/primaryKey")
+@JsonApiResource(type = "metaPrimaryKey", resourcePath = "meta/primaryKey")
 public class MetaPrimaryKey extends MetaKey {
 
 	private boolean generated;

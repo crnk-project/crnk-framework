@@ -12,18 +12,19 @@ import java.util.Set;
 
 public interface RequestDispatcher {
 
-	Optional<Result<HttpResponse>> process(HttpRequestContextBase requestContextBase) throws IOException;
+    Optional<Result<HttpResponse>> process(HttpRequestContextBase requestContextBase) throws IOException;
 
-	/**
-	 * @deprecated make use of JsonApiRequestProcessor
-	 */
-	@Deprecated
-	Response dispatchRequest(String jsonPath, String method, Map<String, Set<String>> parameters,
-							 Document requestBody);
+    /**
+     * @deprecated make use of JsonApiRequestProcessor
+     */
+    @Deprecated
+    Response dispatchRequest(String jsonPath, String method, Map<String, Set<String>> parameters,
+                             Document requestBody);
 
-	/**
-	 * @deprecated make use of JsonApiRequestProcessor
-	 */
-	@Deprecated
-	void dispatchAction(String jsonPath, String method, Map<String, Set<String>> parameters);
+    /**
+     * @deprecated make use of JsonApiRequestProcessor
+     */
+    @Deprecated
+    void dispatchAction(String jsonPath, String method, Map<String, Set<String>> parameters);
+
 }

@@ -3,6 +3,7 @@ package io.crnk.core.engine.registry;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.resource.annotations.JsonApiVersion;
 
 /**
  * ${@link ResourceRegistryPart} implementation if a number of convenience methods used and exposed
@@ -13,7 +14,12 @@ public interface ResourceRegistry extends ResourceRegistryPart {
     RegistryEntry findEntry(Class<?> resourceClass);
 
     /**
-     * @param resourceInformation
+     * @return entry matching the given resource, accoutring for the {@link Class}, {@link io.crnk.core.resource.annotations.JsonApiId},
+     * {@link io.crnk.core.engine.document.Resource}.
+     */
+    RegistryEntry findEntry(Object resource);
+
+    /**
      * @return url for the given resourceInformation. Depending on the ServiceUrlProvider setup, a request must be active
      * to invoke this method (to obtain domain/host information).
      */
@@ -46,7 +52,14 @@ public interface ResourceRegistry extends ResourceRegistryPart {
 
 
     /**
-     * @param resourceInformation
+     * Retrieves the path of the type and identifier
+     *
+     * @param id Identifier
+     * @return complete path of provided resource in case it's a registered resource
+     */
+    String getResourcePath(ResourceInformation resourceInformation, Object id);
+
+    /**
      * @return url for the given resourceInformation. Depending on the ServiceUrlProvider setup, a request must be active
      * to invoke this method (to obtain domain/host information).
      */
@@ -85,4 +98,11 @@ public interface ResourceRegistry extends ResourceRegistryPart {
     ResourceInformation getBaseResourceInformation(String resourceType);
 
     ServiceUrlProvider getServiceUrlProvider();
+
+    /**
+     * @return latest version within repository or 0 if no versioning in place. For more information
+     * see {@link JsonApiVersion}
+     */
+    int getLatestVersion();
+
 }
