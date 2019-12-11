@@ -56,7 +56,6 @@ public class FieldResourcePost extends ResourceUpsert {
 		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
 		ResourceInformation bodyResourceInformation = bodyRegistryEntry.getResourceInformation();
 
-
 		Serializable id = jsonPath.getId();
 		ResourceField relationshipField = fieldPath.getField();
 
@@ -69,13 +68,13 @@ public class FieldResourcePost extends ResourceUpsert {
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		QueryContext queryContext = queryAdapter.getQueryContext();
-		Object entity = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
+		Object entity = buildNewResource(bodyRegistryEntry, resourceBody, relationshipResourceType);
 
-		setId(resourceBody, entity, relationshipResourceInformation);
+		setId(resourceBody, entity, bodyResourceInformation);
 		setType(resourceBody, entity);
-		setAttributes(resourceBody, entity, relationshipResourceInformation, queryContext);
-		setMeta(resourceBody, entity, relationshipResourceInformation);
-		setLinks(resourceBody, entity, relationshipResourceInformation);
+		setAttributes(resourceBody, entity, bodyResourceInformation, queryContext);
+		setMeta(resourceBody, entity, bodyResourceInformation);
+		setLinks(resourceBody, entity, bodyResourceInformation);
 
 		Result<JsonApiResponse> createdResource = setRelationsAsync(entity, bodyRegistryEntry, resourceBody, queryAdapter, false)
 				.merge(it -> resourceRepository.create(entity, queryAdapter));

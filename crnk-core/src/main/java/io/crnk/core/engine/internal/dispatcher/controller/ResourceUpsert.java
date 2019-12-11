@@ -210,12 +210,10 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 
 	Object buildNewResource(RegistryEntry registryEntry, Resource dataBody, String resourceName) {
+		RegistryEntry relationshipRegistryEntry = context.getResourceRegistry().getEntry(resourceName);
+		
 		PreconditionUtil.verify(dataBody != null, "No data field in the body.");
-		PreconditionUtil.verify(resourceName.equals(dataBody.getType()),
-				"Inconsistent type definition between path and body: body type: " +
-						"%s, request type: %s",
-				dataBody.getType(),
-				resourceName);
+		verifyTypes(HttpMethod.POST, relationshipRegistryEntry, registryEntry);
 
 		ResourceInstanceBuilder<Object> instanceBuilder = registryEntry.getResourceInformation().getInstanceBuilder();
 		Object entity = instanceBuilder.buildResource(dataBody);

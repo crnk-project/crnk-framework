@@ -291,6 +291,9 @@ public class ResourceInformation {
 						parentAttribute.getName(), implementationClass);
 
 				((ResourceFieldImpl) parentField).setIdField(parentAttribute.getName(), parentAttribute.getImplementationClass(), parentIdAccessor);
+				if(null == ((ResourceFieldImpl)parentField).getOppositeName() && shouldBeNested()) {
+					((ResourceFieldImpl)parentField).setOppositeName(resourcePath);
+				}
 			}
 
 			return true;

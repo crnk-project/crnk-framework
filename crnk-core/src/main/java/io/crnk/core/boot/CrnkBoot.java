@@ -240,6 +240,7 @@ public class CrnkBoot {
 	private void setupRepositories(ResourceRegistryPart rootPart) {
 		for (RegistryEntry entry : moduleRegistry.getRegistryEntries()) {
 			rootPart.addEntry(entry);
+			entry.getResourceInformation().initNesting();
 		}
 	}
 
