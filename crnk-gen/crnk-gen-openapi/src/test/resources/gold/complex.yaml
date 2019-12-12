@@ -1500,6 +1500,10 @@ components:
       required:
       - type
       type: object
+    NoAccessTaskPostResources:
+      items:
+        $ref: '#/components/schemas/NoAccessTaskPostResource'
+      type: array
     NoAccessTaskResourceAttributes:
       properties:
         attributes:
