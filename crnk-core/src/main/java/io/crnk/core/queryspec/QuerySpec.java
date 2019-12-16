@@ -108,10 +108,10 @@ public class QuerySpec {
 
     /**
      * Evaluates this querySpec against the provided list in memory. It supports
-     * sorting, filter and paging.
-     * <p>
-     * TODO currently ignores relations and inclusions, has room for
-     * improvements
+     * sorting, filter and paging. Inclusions and field sets are implemented by
+     * the underlying Crnk engine, no special implementation necssary (other non-in-memory
+     * repositories may want to optimize here to avoid fetching unnecssary data from the
+     * backing data store).
      *
      * @param <T>       the type of resources in this Iterable
      * @param resources resources
