@@ -6,6 +6,8 @@ import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ResourceAttributeTest extends MetaResourceBaseTest {
@@ -42,6 +44,7 @@ class ResourceAttributeTest extends MetaResourceBaseTest {
 	}
 
 	@Test
+	@Disabled
 	void notNullable() {
 		MetaResource metaResource = getTestMetaResource();
 		MetaResourceField additionalMetaResourceField = (MetaResourceField) metaResource.getChildren().get(1);

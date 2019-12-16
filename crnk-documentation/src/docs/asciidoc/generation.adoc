@@ -72,7 +72,8 @@ buildscript {
 apply plugin: 'crnk-gen'
 crnkGen {
     runtime {
-        configuration = 'openapiGenRuntime'
+        // Gradle classpath configuration to use
+        configuration = 'runtime'
     }
 
     // fork generation into new process to have clean environment
@@ -148,7 +149,8 @@ buildscript {
 apply plugin: 'crnk-gen'
 crnkGen {
     runtime {
-        configuration = 'typescriptGenRuntime'
+        // Gradle classpath configuration to use
+        configuration = 'runtime'
     }
 
     // fork generation into new process to have clean environment
@@ -189,12 +191,27 @@ the generation:
 
 ## Gradle customizations
 
+
 Internally the Crnk Gradle plugin supports multiple ways of looking up the set of available resources and repositories
-to generate.
-The simplest way is by scanning the classpath for @JsonApiResource-annotated classes. More elaborate setups
-can also launch an application (e.g. with Spring or CDI) and extract the information from the running application.
-While the former is simpler to setup, the later can deal with all border cases like a repository being backed
-by something different than a @JsonApiResource-annotated class. For Spring this looks like:
+to generate. The simplest way is by scanning the classpath for `@JsonApiResource`-annotated classes.
+The classpath for scanning can be set through the use of a regular Gradle configuration object, for example:
+
+[source]
+----
+crnkGen{
+	runtime {
+		configuration = 'runtime'
+	}
+
+	...
+}
+crnkGen.init()
+----
+
+More elaborate setups can also launch an application (e.g. with Spring or CDI) and extract the information
+from the running application. While the former is simpler to setup, the later can deal with all border cases
+like a repository being backed by something different than a `@JsonApiResource`-annotated class. Such a
+Spring setup looks like:
 
 [source]
 ----
@@ -202,7 +219,7 @@ crnkGen{
 
     // launch a Spring application to extract information about available resources
 	runtime {
-		configuration = 'typescriptGenRuntime'
+		configuration = 'runtime'
         spring {
         	profile = 'test'
         	configuration = 'io.crnk.example.ExampleApplication'
@@ -216,9 +233,9 @@ crnkGen{
 crnkGen.init()
 ----
 
-Typically a test profile is used to bring the Spring application up in order to then extract the repositories for generation.
-
-
+Typically a test profile can used to bring the Spring application up as unit tests are supposed to be
+self-contained and allow the application to boot up. The repositories are then retrieved from the
+Spring dependency injection container.
 
 
 
