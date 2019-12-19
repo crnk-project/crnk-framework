@@ -848,8 +848,8 @@ public class ModuleRegistry {
 
         @SuppressWarnings("rawtypes")
         @Override
-        public Set<ExceptionMapper> getExceptionMappers() {
-            Set<ExceptionMapper> set = new HashSet<ExceptionMapper>();
+        public List<ExceptionMapper> getExceptionMappers() {
+            List<ExceptionMapper> set = new ArrayList<>();
             for (ExceptionMapperLookup lookup : lookups) {
                 set.addAll(lookup.getExceptionMappers());
             }
