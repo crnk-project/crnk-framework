@@ -5,6 +5,7 @@ import io.crnk.core.engine.information.repository.RelationshipRepositoryInformat
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.information.resource.EmbeddableInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DefaultInformationBuilder implements InformationBuilder {
 
@@ -254,6 +256,53 @@ public class DefaultInformationBuilder implements InformationBuilder {
         }
     }
 
+    public class DefaultEmbeddableInformation implements EmbeddableInformationBuilder {
+
+        private Type implementationType;
+
+        private List<DefaultField> fields = new ArrayList<>();
+
+        public EmbeddableInformation build() {
+            EmbeddableInformation information = new EmbeddableInformation(implementationType, fields.stream().map(it -> it.build()).collect(Collectors.toList()));
+            return information;
+        }
+
+        @Override
+        public void from(EmbeddableInformation information) {
+            implementationType = information.getImplementationType();
+            for (ResourceField fromField : information.getFields()) {
+                DefaultField field = new DefaultField();
+                field.from(fromField);
+                fields.add(field);
+            }
+        }
+
+        @Override
+        public DefaultField addField() {
+            DefaultField field = new DefaultField();
+            fields.add(field);
+            return field;
+        }
+
+        @Override
+        public DefaultField addField(String name, ResourceFieldType type, Class<?> clazz) {
+            DefaultField field = new DefaultField();
+            field.jsonName(name);
+            field.underlyingName(name);
+            field.type(clazz);
+            field.genericType(clazz);
+            field.fieldType(type);
+            fields.add(field);
+            return field;
+        }
+
+        @Override
+        public EmbeddableInformationBuilder implementationType(Type implementationType) {
+            this.implementationType = implementationType;
+            return this;
+        }
+    }
+
     public class DefaultField implements FieldInformationBuilder {
 
         private String jsonName;
@@ -294,6 +343,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
         private boolean mappedBy;
 
+        private DefaultEmbeddableInformation embeddedTypeBuilder;
+
         @Override
         public void from(ResourceField field) {
             jsonName = field.getJsonName();
@@ -307,6 +358,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
             jsonIncludeStrategy = field.getJsonIncludeStrategy();
             versionRange = field.getVersionRange();
             mappedBy = field.isMappedBy();
+            embeddedTypeBuilder = toBuilder(field.getEmbeddedType());
             if (fieldType == ResourceFieldType.RELATIONSHIP) {
                 relationshipRepositoryBehavior = field.getRelationshipRepositoryBehavior();
                 oppositeResourceType = field.getOppositeResourceType();
@@ -319,6 +371,18 @@ public class DefaultInformationBuilder implements InformationBuilder {
                 }
             }
             patchStrategy = field.getPatchStrategy();
+        }
+
+        private DefaultEmbeddableInformation toBuilder(EmbeddableInformation type) {
+            if (type == null) {
+                return null;
+            }
+            embeddedTypeBuilder = new DefaultEmbeddableInformation();
+            embeddedTypeBuilder.implementationType(type.getImplementationType());
+            for(ResourceField field : type.getFields()){
+                embeddedTypeBuilder.addField().from(field);
+            }
+            return embeddedTypeBuilder;
         }
 
 
@@ -338,6 +402,9 @@ public class DefaultInformationBuilder implements InformationBuilder {
                     access, idName, idType, idAccessor, relationshipRepositoryBehavior, this.patchStrategy);
             impl.setMappedBy(mappedBy);
             impl.setVersionRange(versionRange);
+            if (embeddedTypeBuilder != null) {
+                impl.setEmbeddedType(embeddedTypeBuilder.build());
+            }
             if (accessor != null) {
                 impl.setAccessor(accessor);
             }
@@ -378,6 +445,16 @@ public class DefaultInformationBuilder implements InformationBuilder {
                 this.genericType = type;
             }
             return this;
+        }
+
+        @Override
+        public EmbeddableInformationBuilder embeddedType(Class<?> type) {
+            genericType(type);
+            if (embeddedTypeBuilder == null) {
+                embeddedTypeBuilder = new DefaultEmbeddableInformation();
+                embeddedTypeBuilder.implementationType(type);
+            }
+            return embeddedTypeBuilder;
         }
 
         @Override

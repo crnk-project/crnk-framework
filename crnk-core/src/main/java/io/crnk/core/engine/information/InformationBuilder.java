@@ -3,6 +3,7 @@ package io.crnk.core.engine.information;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.information.resource.EmbeddableInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
@@ -71,6 +72,18 @@ public interface InformationBuilder {
 
     }
 
+    interface EmbeddableInformationBuilder {
+
+        void from(EmbeddableInformation information);
+
+        FieldInformationBuilder addField();
+
+        FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);
+
+        EmbeddableInformationBuilder implementationType(Type implementationType);
+
+    }
+
     interface FieldInformationBuilder {
 
         ResourceField build();
@@ -87,6 +100,8 @@ public interface InformationBuilder {
         FieldInformationBuilder name(String name);
 
         FieldInformationBuilder type(Class<?> type);
+
+        EmbeddableInformationBuilder embeddedType(Class<?> type);
 
         FieldInformationBuilder genericType(Type genericType);
 

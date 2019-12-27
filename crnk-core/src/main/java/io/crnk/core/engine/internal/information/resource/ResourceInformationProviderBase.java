@@ -93,7 +93,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         return new ResourceFieldAccess(readable, postable, patchable, deletable, sortable, filterable);
     }
 
-    protected List<ResourceField> getResourceFields(Class<?> resourceClass, ResourceFieldAccess resourceAccess) {
+    protected List<ResourceField> getResourceFields(Class<?> resourceClass, ResourceFieldAccess resourceAccess, boolean embedded) {
         BeanInformation beanDesc = BeanInformation.get(resourceClass);
         List<String> attributeNames = beanDesc.getAttributeNames();
         List<ResourceField> fields = new ArrayList<>();
@@ -103,7 +103,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             if (!isIgnored(attributeDesc)) {
                 InformationBuilder informationBuilder = context.getInformationBuilder();
                 InformationBuilder.FieldInformationBuilder fieldBuilder = informationBuilder.createResourceField();
-                buildResourceField(beanDesc, attributeDesc, fieldBuilder);
+                buildResourceField(beanDesc, embedded, attributeDesc, fieldBuilder);
                 fields.add(fieldBuilder.build());
             } else if (attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent()) {
                 relationIdFields.add(attributeDesc.getName());
@@ -139,14 +139,15 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
     }
 
-    protected void buildResourceField(BeanInformation beanDesc, BeanAttributeInformation attributeDesc, InformationBuilder.FieldInformationBuilder
+    protected void buildResourceField(BeanInformation beanDesc, boolean embedded, BeanAttributeInformation attributeDesc, InformationBuilder.FieldInformationBuilder
             fieldBuilder) {
         fieldBuilder.underlyingName(attributeDesc.getName());
-        ResourceFieldType fieldType = getFieldType(attributeDesc);
+        ResourceFieldType fieldType = getFieldType(attributeDesc, embedded);
         fieldBuilder.jsonName(getJsonName(attributeDesc, fieldType));
 
+        ResourceFieldAccess access = getAccess(attributeDesc, fieldType);
         fieldBuilder.fieldType(fieldType);
-        fieldBuilder.access(getAccess(attributeDesc, fieldType));
+        fieldBuilder.access(access);
         fieldBuilder.patchStrategy(getPatchStrategy(attributeDesc));
         fieldBuilder.jsonIncludeStrategy(getJsonIncludeStrategy(attributeDesc));
         fieldBuilder.serializeType(getSerializeType(attributeDesc, fieldType));
@@ -203,6 +204,13 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             }
 
             fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc, idAttribute != null));
+        }
+
+        if (isEmbeddedType(attributeDesc)) {
+            Class elementType = ClassUtils.getRawType(ClassUtils.getElementType(attributeDesc.getImplementationType()));
+            InformationBuilder.EmbeddableInformationBuilder embBuilder = fieldBuilder.embeddedType(elementType);
+            List<ResourceField> embFields = getResourceFields(elementType, access, true);
+            embFields.forEach(field -> embBuilder.addField().from(field));
         }
     }
 
@@ -280,6 +288,15 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             }
         }
         return JsonIncludeStrategy.DEFAULT;
+    }
+
+    protected boolean isEmbeddedType(BeanAttributeInformation attributeDesc) {
+        for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+            if (fieldInformationProvider.isEmbeddedType(attributeDesc)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc, boolean hasIdField) {
@@ -426,11 +443,16 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         return strategy;
     }
 
-    private ResourceFieldType getFieldType(BeanAttributeInformation attributeDesc) {
+    private ResourceFieldType getFieldType(BeanAttributeInformation attributeDesc, boolean embedded) {
         for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
             Optional<ResourceFieldType> fieldType = fieldInformationProvider.getFieldType(attributeDesc);
             if (fieldType.isPresent()) {
-                return fieldType.get();
+                ResourceFieldType type = fieldType.get();
+                if(embedded && ResourceFieldType.RELATIONSHIP == type){
+                    // nested relationships not supported and treated as regular attributes
+                    return ResourceFieldType.ATTRIBUTE;
+                }
+                return type;
             }
         }
         return ResourceFieldType.ATTRIBUTE;

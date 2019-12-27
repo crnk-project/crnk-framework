@@ -1,18 +1,11 @@
 package io.crnk.core.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNull;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.information.resource.EmbeddableInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -31,6 +24,7 @@ import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.ProjectData;
 import io.crnk.core.mock.models.ProjectPatchStrategy;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
@@ -57,6 +51,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Future;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNull;
 
 public class DefaultResourceInformationProviderTest {
 
@@ -403,6 +405,24 @@ public class DefaultResourceInformationProviderTest {
         ResourceInformation resourceInformation = resourceInformationProvider.build(JsonApiRelationTypeCustomGetMethod.class);
 
         assertNull(resourceInformation.getRelationshipFields().get(0).getIdType());
+    }
+
+    @Test
+    public void holdsSingularEmbeddedObject() {
+        ResourceInformation resourceInformation = resourceInformationProvider.build(Project.class);
+        ResourceField dataField = resourceInformation.findFieldByUnderlyingName("data");
+        EmbeddableInformation embeddedType = dataField.getEmbeddedType();
+        Assert.assertNotNull(embeddedType);
+
+        Assert.assertEquals(ProjectData.class, embeddedType.getImplementationClass());
+
+        List<ResourceField> fields = embeddedType.getFields();
+        Assert.assertEquals(5, fields.size());
+
+        ResourceField statusField = embeddedType.findFieldByUnderlyingName("status");
+        EmbeddableInformation statusType = statusField.getEmbeddedType();
+        Assert.assertNotNull(statusType);
+        Assert.assertEquals(2, statusType.getFields().size());
     }
 
     @Test

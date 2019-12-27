@@ -98,8 +98,8 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
                     new JpaResourceInformationProvider(new NullPropertiesProvider()) {
 
                         @Override
-                        protected List<ResourceField> getResourceFields(Class clazz, ResourceFieldAccess resourceAccess) {
-                            List<ResourceField> fields = super.getResourceFields(clazz, resourceAccess);
+                        protected List<ResourceField> getResourceFields(Class clazz, ResourceFieldAccess resourceAccess, boolean embedded) {
+                            List<ResourceField> fields = super.getResourceFields(clazz, resourceAccess, embedded);
 
                             if (clazz == CountryEntity.class) {
                                 List<String> languages = Arrays.asList("en", "de");
