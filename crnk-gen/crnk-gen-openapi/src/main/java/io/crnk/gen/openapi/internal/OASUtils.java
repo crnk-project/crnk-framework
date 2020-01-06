@@ -1,9 +1,5 @@
 package io.crnk.gen.openapi.internal;
 
-import java.math.BigDecimal;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.gen.openapi.internal.schemas.ResourceReference;
 import io.crnk.meta.model.MetaArrayType;
@@ -30,6 +26,10 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.media.UUIDSchema;
+
+import java.math.BigDecimal;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class OASUtils {
 
@@ -167,11 +167,11 @@ public class OASUtils {
     return keyPath.toString();
   }
 
-  public static String getNestedPath(MetaResource metaResource, MetaResource relatedMetaResource) {
-    return getResourcePath(metaResource) + getResourcesPath(relatedMetaResource);
+  public static String getNestedPath(MetaResource metaResource, MetaResourceField metaResourceField) {
+    return getResourcePath(metaResource) + "/" + metaResourceField.getName();
   }
 
-  public static String getRelationshipsPath(MetaResource metaResource, MetaResource relatedMetaResource) {
-    return getResourcePath(metaResource) + "/relationships" + getResourcesPath(relatedMetaResource);
+  public static String getRelationshipsPath(MetaResource metaResource, MetaResourceField metaResourceField) {
+    return getResourcePath(metaResource) + "/relationships/" + metaResourceField.getName();
   }
 }

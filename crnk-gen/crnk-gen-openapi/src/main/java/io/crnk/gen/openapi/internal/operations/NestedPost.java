@@ -42,6 +42,6 @@ public class NestedPost extends AbstractNestedMutateOperation implements OASOper
 
   @Override
   public String path() {
-    return OASUtils.getNestedPath(metaResource, relatedMetaResource);
+    return OASUtils.getNestedPath(metaResource, metaResourceField);
   }
 }

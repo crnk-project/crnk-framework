@@ -59,6 +59,6 @@ class NestedPatchTest extends NestedOperationsBaseTest {
   @Test
   void path() {
     NestedPatch NestedPatch = new NestedPatch(metaResource, metaResourceField, relatedMetaResource);
-    Assert.assertEquals("/ResourcePath/{id}/RelatedResourcePath", NestedPatch.path());
+    Assert.assertEquals("/ResourcePath/{id}/someRelatedResource", NestedPatch.path());
   }
 }
