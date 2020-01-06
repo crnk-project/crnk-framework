@@ -6,7 +6,11 @@
     "version" : "0.1.0"
   },
   "servers" : [ {
-    "url" : "/"
+    "url" : "http://prodserver/event/",
+    "description" : "Production server (uses live data)"
+  }, {
+    "url" : "http://devserver/event/",
+    "description" : "Sandbox server (uses develop data)"
   } ],
   "paths" : {
     "/simpleTasks" : {
