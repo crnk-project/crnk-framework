@@ -59,6 +59,6 @@ class NestedGetTest extends NestedOperationsBaseTest {
   @Test
   void path() {
     NestedGet NestedGet = new NestedGet(metaResource, metaResourceField, relatedMetaResource);
-    Assert.assertEquals("/ResourcePath/{id}/RelatedResourcePath", NestedGet.path());
+    Assert.assertEquals("/ResourcePath/{id}/someRelatedResource", NestedGet.path());
   }
 }

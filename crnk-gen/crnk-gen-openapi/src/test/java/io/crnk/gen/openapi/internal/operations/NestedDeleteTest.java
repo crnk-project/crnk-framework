@@ -59,6 +59,6 @@ class NestedDeleteTest extends NestedOperationsBaseTest {
   @Test
   void path() {
     NestedDelete NestedDelete = new NestedDelete(metaResource, metaResourceField, relatedMetaResource);
-    Assert.assertEquals("/ResourcePath/{id}/RelatedResourcePath", NestedDelete.path());
+    Assert.assertEquals("/ResourcePath/{id}/someRelatedResource", NestedDelete.path());
   }
 }
