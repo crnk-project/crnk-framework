@@ -25,4 +25,7 @@ paths:
         type: http
         uri: /api/public/todo/simpleTasks/{TaskId}
 servers:
-- url: /
+- description: Production server (uses live data)
+  url: http://prodserver/event/
+- description: Sandbox server (uses develop data)
+  url: http://devserver/event/
