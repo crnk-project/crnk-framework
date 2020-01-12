@@ -6,6 +6,7 @@ import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
@@ -45,7 +46,14 @@ public class QuerySpec {
         if (resourceClass != Resource.class) {
             this.resourceClass = resourceClass;
         }
-        this.resourceType = resourceType;
+        if (resourceType == null) {
+			JsonApiResource annotation = resourceClass.getAnnotation(JsonApiResource.class);
+			if (annotation != null) {
+				this.resourceType = annotation.type();
+			}
+		} else {
+			this.resourceType = resourceType;
+		}
         this.pagingSpec = new OffsetLimitPagingSpec();
     }
 
