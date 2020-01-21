@@ -2,11 +2,14 @@ package io.crnk.core.mock.repository;
 
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.models.TaskLinks;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.LinksRepository;
 import io.crnk.core.repository.MetaRepository;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.RelationshipRepositoryBase;
+import io.crnk.core.resource.links.DefaultLink;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
@@ -26,13 +29,9 @@ public class TaskToProjectRepository extends RelationshipRepositoryBase<Task, Lo
         return matcher;
     }
 
-
     @Override
     public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec, LinksInformation current) {
-        return new LinksInformation() {
-
-            public String name = "value";
-        };
+    	return new TaskLinksInformation();
     }
 
     @Override

@@ -25,9 +25,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.PathSpec;
-import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.core.resource.links.RelatedLinksInformation;
-import io.crnk.core.resource.links.SelfLinksInformation;
+import io.crnk.core.resource.links.*;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -118,12 +116,16 @@ public class DocumentMapperUtil {
 		}
 	}
 
-	public String getRelationshipLink(Resource resource, ResourceField field, boolean related) {
+	public Link getRelationshipLink(Resource resource, ResourceField field, boolean related) {
 		ObjectNode links = resource.getLinks();
 
 		// use self link from url, whatever it source might be
-		String resourceUrl = serializerUtil.getLinks(links, "self");
-		return resourceUrl + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field.getJsonName();
+		Link resourceLink = serializerUtil.getLinks(links, "self");
+		if (resourceLink == null) {
+			return null;
+		}
+		resourceLink.setHref(resourceLink.getHref() + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field.getJsonName());
+		return resourceLink;
 	}
 
 	public List<ResourceIdentifier> toResourceIds(Collection<?> entities) {
@@ -187,28 +189,28 @@ public class DocumentMapperUtil {
 	protected static class DefaultSelfRelatedLinksInformation implements SelfLinksInformation, RelatedLinksInformation {
 
 		@JsonInclude(Include.NON_EMPTY)
-		private String related;
+		private Link related;
 
 		@JsonInclude(Include.NON_EMPTY)
-		private String self;
+		private Link self;
 
 		@Override
-		public String getRelated() {
+		public Link getRelated() {
 			return related;
 		}
 
 		@Override
-		public void setRelated(String related) {
+		public void setRelated(Link related) {
 			this.related = related;
 		}
 
 		@Override
-		public String getSelf() {
+		public Link getSelf() {
 			return self;
 		}
 
 		@Override
-		public void setSelf(String self) {
+		public void setSelf(Link self) {
 			this.self = self;
 		}
 

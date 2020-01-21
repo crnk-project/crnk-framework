@@ -90,11 +90,11 @@ public abstract class InformationAccessTestBase {
 		querySpec.setLimit(1L);
 		ResourceList<Project> list = projectRepo.findAll(querySpec);
 		ProjectsLinksInformation lnksInformation = list.getLinks(ProjectsLinksInformation.class);
-		Assert.assertEquals("testLink", lnksInformation.getLinkValue());
+		Assert.assertEquals("testLink", lnksInformation.getLinkValue().getHref());
 		Project project = list.get(0);
 		ProjectLinks projectLinks = project.getLinks();
 		Assert.assertNotNull(projectLinks);
-		Assert.assertEquals("someLinkValue", projectLinks.getValue());
+		Assert.assertEquals("someLinkValue", projectLinks.getValue().getHref());
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public abstract class InformationAccessTestBase {
 		Project createdProject = projectRepo.create(project);
 		Assert.assertEquals(project.getName(), createdProject.getName());
 		ProjectLinks createdLinks = createdProject.getLinks();
-		Assert.assertEquals("linksValue...", createdLinks.getValue());
+		Assert.assertEquals("linksValue...", createdLinks.getValue().getHref());
 	}
 
 	@Test
@@ -127,6 +127,6 @@ public abstract class InformationAccessTestBase {
 		Project updatedProject = projectRepo.save(project);
 		Assert.assertEquals(project.getName(), updatedProject.getName());
 		ProjectLinks updatedLinks = updatedProject.getLinks();
-		Assert.assertEquals("patch...", updatedLinks.getValue());
+		Assert.assertEquals("patch...", updatedLinks.getValue().getHref());
 	}
 }

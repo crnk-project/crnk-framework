@@ -107,6 +107,6 @@ public class ClientResourceUpsertTest {
 		Task task = new Task();
 		ResourceInformation resourceInformation = boot.getResourceRegistry().getEntry(Task.class).getResourceInformation();
 		upsert.setLinks(resource, task, resourceInformation);
-		Assert.assertEquals("linksValue", task.getLinksInformation().value);
+		Assert.assertEquals("linksValue", task.getLinksInformation().value.getHref());
 	}
 }

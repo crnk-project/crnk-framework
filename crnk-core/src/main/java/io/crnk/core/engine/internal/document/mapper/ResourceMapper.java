@@ -15,6 +15,7 @@ import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.resource.annotations.JsonIncludeStrategy;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -197,14 +198,14 @@ public class ResourceMapper {
             if (addRelationship) {
                 ObjectNode relationshipLinks = objectMapper.createObjectNode();
                 if (mappingConfig.getSerializeSelfRelationshipLinks()) {
-                    String selfUrl = util.getRelationshipLink(resource, field, false);
-                    if (selfUrl != null) {
-                        serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+                    Link selfLink = util.getRelationshipLink(resource, field, false);
+                    if (selfLink != null) {
+                        serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfLink);
                     }
                 }
-                String relatedUrl = util.getRelationshipLink(resource, field, true);
-                if (relatedUrl != null) {
-                    serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
+                Link relatedLink = util.getRelationshipLink(resource, field, true);
+                if (relatedLink != null) {
+                    serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedLink);
                     relationship.setLinks(relationshipLinks);
                 }
             }

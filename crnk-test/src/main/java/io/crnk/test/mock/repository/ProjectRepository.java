@@ -6,10 +6,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.LinksRepository;
 import io.crnk.core.repository.MetaRepository;
 import io.crnk.core.repository.ResourceRepository;
-import io.crnk.core.resource.links.DefaultPagedLinksInformation;
-import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.core.resource.links.RelatedLinksInformation;
-import io.crnk.core.resource.links.SelfLinksInformation;
+import io.crnk.core.resource.links.*;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
@@ -123,39 +120,39 @@ public class ProjectRepository implements ResourceRepository<Project, Long>, Met
 
     public static class ProjectsLinksInformation extends DefaultPagedLinksInformation implements SelfLinksInformation, RelatedLinksInformation {
 
-        private String linkValue;
+        private Link linkValue;
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private String self;
+        private Link self;
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private String related;
+        private Link related;
 
-        public String getLinkValue() {
+        public Link getLinkValue() {
             return linkValue;
         }
 
         public void setLinkValue(String linkValue) {
-            this.linkValue = linkValue;
+            this.linkValue = new DefaultLink(linkValue);
         }
 
         @Override
-        public String getSelf() {
+        public Link getSelf() {
             return self;
         }
 
         @Override
-        public void setSelf(String self) {
+        public void setSelf(Link self) {
             this.self = self;
         }
 
         @Override
-        public String getRelated() {
+        public Link getRelated() {
             return related;
         }
 
         @Override
-        public void setRelated(String related) {
+        public void setRelated(Link related) {
             this.related = related;
         }
     }

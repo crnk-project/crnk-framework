@@ -61,10 +61,10 @@ public class HasNextBasedPagedLinksInformationTest extends AbstractQuerySpecTest
         Assert.assertTrue(metaInformation.getHasMoreResources());
 
         PagedLinksInformation linksInformation = (PagedLinksInformation) results.getLinksInformation();
-        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2", linksInformation.getFirst());
+        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2", linksInformation.getFirst().getHref());
         Assert.assertNull(linksInformation.getLast());
-        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2", linksInformation.getPrev());
-        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2&page[offset]=4", linksInformation.getNext());
+        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2", linksInformation.getPrev().getHref());
+        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2&page[offset]=4", linksInformation.getNext().getHref());
     }
 
     @Test
@@ -94,10 +94,10 @@ public class HasNextBasedPagedLinksInformationTest extends AbstractQuerySpecTest
         Assert.assertTrue(metaInformation.getHasMoreResources());
 
         PagedLinksInformation linksInformation = (PagedLinksInformation) results.getLinksInformation();
-        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=3", linksInformation.getFirst());
+        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=3", linksInformation.getFirst().getHref());
         Assert.assertNull(linksInformation.getLast());
         Assert.assertNull(linksInformation.getPrev());
-        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=3&page[offset]=3", linksInformation.getNext());
+        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=3&page[offset]=3", linksInformation.getNext().getHref());
     }
 
     @Test
@@ -110,9 +110,9 @@ public class HasNextBasedPagedLinksInformationTest extends AbstractQuerySpecTest
         Assert.assertFalse(metaInformation.getHasMoreResources());
 
         PagedLinksInformation linksInformation = (PagedLinksInformation) results.getLinksInformation();
-        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=4", linksInformation.getFirst());
+        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=4", linksInformation.getFirst().getHref());
         Assert.assertNull(linksInformation.getLast());
-        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=4", linksInformation.getFirst());
+        Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=4", linksInformation.getFirst().getHref());
         Assert.assertNull(linksInformation.getNext());
     }
 
