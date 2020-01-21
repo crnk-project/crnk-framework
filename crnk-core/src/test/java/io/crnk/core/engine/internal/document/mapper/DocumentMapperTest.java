@@ -19,7 +19,9 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.links.DefaultLink;
 import io.crnk.core.resource.links.DefaultSelfLinksInformation;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.utils.Nullable;
@@ -61,9 +63,9 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 	public static class TaskLinks implements LinksInformation {
 
-		public String self = "something";
+		public Link self = new DefaultLink("something");
 
-		public String someLink = "link";
+		public Link someLink = new DefaultLink("link");
 
 	}
 
@@ -146,7 +148,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	@Test
 	public void testCustomSelfLinks() {
 		TaskLinks links = new TaskLinks();
-		links.self = "http://something.else.net/api/tasks/3";
+		links.self = new DefaultLink("http://something.else.net/api/tasks/3");
 		Task task = createTask(2, "sample task");
 		task.setLinksInformation(links);
 
@@ -203,7 +205,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Task task = createTask(2, "sample task");
 
 		TestLinksInformation links = new TestLinksInformation();
-		links.value = "linksValue";
+		links.value = new DefaultLink("linksValue");
 
 		TestMetaInformation meta = new TestMetaInformation();
 		meta.value = "metaValue";
@@ -220,7 +222,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	@Test
 	public void testResourceInformation() {
 		TestLinksInformation links = new TestLinksInformation();
-		links.value = "linksValue";
+		links.value = new DefaultLink("linksValue");
 
 		TestMetaInformation meta = new TestMetaInformation();
 		meta.value = "metaValue";
@@ -562,15 +564,15 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 	public static class TestLinksInformation implements LinksInformation {
 
-		public String value;
+		public Link value;
 
-		public String getValue() {
+		public Link getValue() {
 			return value;
 		}
 
 		// used to test the LinksInformationSerializer -> should not be serialized
 		@JsonIgnore
-		public String getOtherValue() {
+		public Link getOtherValue() {
 			return null;
 		}
 	}

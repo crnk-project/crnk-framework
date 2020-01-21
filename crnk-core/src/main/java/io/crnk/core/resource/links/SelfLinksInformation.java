@@ -2,8 +2,11 @@ package io.crnk.core.resource.links;
 
 public interface SelfLinksInformation extends LinksInformation {
 
-	String getSelf();
+	Link getSelf();
 
-	void setSelf(String self);
+	void setSelf(Link self);
 
+	default void setSelf(String self) {
+		setSelf(new DefaultLink(self));
+	}
 }

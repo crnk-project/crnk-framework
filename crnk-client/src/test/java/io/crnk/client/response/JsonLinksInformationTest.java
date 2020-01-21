@@ -35,7 +35,7 @@ public class JsonLinksInformationTest {
 		JsonLinksInformation info = new JsonLinksInformation(node, mapper);
 
 		Task.TaskLinks meta = info.as(Task.TaskLinks.class);
-		Assert.assertEquals("test", meta.value);
+		Assert.assertEquals("test", meta.value.getHref());
 	}
 
 	@Test

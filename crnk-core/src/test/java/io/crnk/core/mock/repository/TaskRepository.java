@@ -7,7 +7,9 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.LinksRepository;
 import io.crnk.core.repository.MetaRepository;
 import io.crnk.core.repository.ResourceRepositoryBase;
+import io.crnk.core.resource.links.DefaultLink;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
@@ -74,10 +76,7 @@ public class TaskRepository extends ResourceRepositoryBase<Task, Long>
 
     @Override
     public LinksInformation getLinksInformation(Collection<Task> resources, QuerySpec queryParams, LinksInformation current) {
-        return new LinksInformation() {
-
-            public String name = "value";
-        };
+    	return new TaskLinksInformation();
     }
 
     @Override

@@ -2,8 +2,11 @@ package io.crnk.core.resource.links;
 
 public interface RelatedLinksInformation extends LinksInformation {
 
-	String getRelated();
+	Link getRelated();
 
-	void setRelated(String related);
+	void setRelated(Link related);
 
+	default void setRelated(String related) {
+		setRelated(new DefaultLink(related));
+	}
 }

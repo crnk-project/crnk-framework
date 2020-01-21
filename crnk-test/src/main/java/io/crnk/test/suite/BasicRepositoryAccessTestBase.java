@@ -484,7 +484,7 @@ public abstract class BasicRepositoryAccessTestBase {
         Assert.assertEquals(project1.getId(), relProjects.get(0).getId());
         ProjectRepository.ProjectsLinksInformation projectLinks = relProjects.getLinks(ProjectRepository.ProjectsLinksInformation.class);
         ProjectRepository.ProjectsMetaInformation projecsMeta = relProjects.getMeta(ProjectRepository.ProjectsMetaInformation.class);
-        Assert.assertEquals("linkValue", projectLinks.getLinkValue());
+        Assert.assertEquals("linkValue", projectLinks.getLinkValue().getHref());
         Assert.assertEquals("metaValue", projecsMeta.getMetaValue());
         // TODO HTTP DELETE method with payload not supported? at least in
         // Jersey
@@ -522,9 +522,9 @@ public abstract class BasicRepositoryAccessTestBase {
         ResourceList<Project> projects = queriedTask.getProjects();
         Assert.assertEquals(2, projects.size());
         ProjectRepository.ProjectsLinksInformation relationLinks = projects.getLinks(ProjectRepository.ProjectsLinksInformation.class);
-        Assert.assertEquals("linkValue", relationLinks.getLinkValue());
-        Assert.assertTrue(relationLinks.getSelf().endsWith("/tasks/3/relationships/projects"));
-        Assert.assertTrue(relationLinks.getRelated().endsWith("/tasks/3/projects"));
+        Assert.assertEquals("linkValue", relationLinks.getLinkValue().getHref());
+        Assert.assertTrue(relationLinks.getSelf().getHref().endsWith("/tasks/3/relationships/projects"));
+        Assert.assertTrue(relationLinks.getRelated().getHref().endsWith("/tasks/3/projects"));
         ProjectRepository.ProjectsMetaInformation relationMeta = projects.getMeta(ProjectRepository.ProjectsMetaInformation.class);
         Assert.assertEquals("metaValue", relationMeta.getMetaValue());
     }

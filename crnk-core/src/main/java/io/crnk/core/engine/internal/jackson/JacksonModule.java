@@ -52,9 +52,7 @@ public class JacksonModule implements Module {
 				new Version(1, 0, 0, null, null, null));
 		simpleModule.addSerializer(new ErrorDataSerializer());
 		simpleModule.addDeserializer(ErrorData.class, new ErrorDataDeserializer());
-		if (serializeLinksAsObjects) {
-			simpleModule.addSerializer(new LinksInformationSerializer());
-		}
+		simpleModule.addSerializer(new LinksInformationSerializer(serializeLinksAsObjects));
 
 		return simpleModule;
 	}

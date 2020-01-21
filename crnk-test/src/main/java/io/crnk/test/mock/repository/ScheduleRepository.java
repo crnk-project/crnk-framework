@@ -3,7 +3,9 @@ package io.crnk.test.mock.repository;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.resource.links.DefaultLink;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
@@ -70,7 +72,7 @@ public interface ScheduleRepository extends ResourceRepository<Schedule, Long> {
 
 	class ScheduleListLinks extends DefaultPagedLinksInformation implements LinksInformation {
 
-		public String name = "value";
+		public Link name = new DefaultLink("value");
 	}
 
 	class ScheduleListMeta extends DefaultPagedMetaInformation {
