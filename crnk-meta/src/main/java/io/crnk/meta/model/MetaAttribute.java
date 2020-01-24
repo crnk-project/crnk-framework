@@ -1,5 +1,12 @@
 package io.crnk.meta.model;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -9,14 +16,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-
-@JsonApiResource(type = "meta/attribute")
+@JsonApiResource(type = "metaAttribute", resourcePath = "meta/attribute")
 public class MetaAttribute extends MetaElement {
 
 	@JsonApiRelation(serialize = SerializeType.LAZY, lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
@@ -32,6 +32,8 @@ public class MetaAttribute extends MetaElement {
 
 	@JsonIgnore
 	private Field field;
+
+	private String underlyingName;
 
 	private boolean derived;
 
@@ -57,6 +59,8 @@ public class MetaAttribute extends MetaElement {
 
 	private boolean readable;
 
+	private boolean owner;
+
 	@JsonApiRelation(serialize = SerializeType.LAZY)
 	private MetaAttribute oppositeAttribute;
 
@@ -64,15 +68,15 @@ public class MetaAttribute extends MetaElement {
 		if (field == null || readMethod == null) {
 			MetaDataObject parent = getParent();
 			Class<?> beanClass = parent.getImplementationClass();
-			String name = getName();
+			String name = getUnderlyingName() == null ? getName() : getUnderlyingName();
 
 			this.field = ClassUtils.findClassField(beanClass, name);
 			this.readMethod = ClassUtils.findGetter(beanClass, name);
 
-			PreconditionUtil.assertFalse("no getter or field found ", field == null && readMethod == null);
-
-			Class<?> rawType = field != null ? field.getType() : readMethod.getReturnType();
-			writeMethod = ClassUtils.findSetter(beanClass, name, rawType);
+			if(field != null ||readMethod != null) {
+				Class<?> rawType = field != null ? field.getType() : readMethod.getReturnType();
+				writeMethod = ClassUtils.findSetter(beanClass, name, rawType);
+			}
 		}
 	}
 
@@ -172,13 +176,13 @@ public class MetaAttribute extends MetaElement {
 		this.version = version;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void addValue(Object dataObject, Object value) {
 		Collection col = (Collection) getValue(dataObject);
 		col.add(value);
 	}
 
-	@SuppressWarnings({"rawtypes"})
+	@SuppressWarnings({ "rawtypes" })
 	public void removeValue(Object dataObject, Object value) {
 		Collection col = (Collection) getValue(dataObject);
 		col.remove(value);
@@ -216,6 +220,19 @@ public class MetaAttribute extends MetaElement {
 			annotations.addAll(Arrays.asList(writeMethod.getAnnotations()));
 		}
 		return annotations;
+	}
+
+	/**
+	 * @return true if the property is the owning side of a bi-directional association.
+	 * In case of JPA annotations and @JsonApiRelation, it is the one NOT specifying a
+	 * mappedBy.
+	 */
+	public boolean isOwner() {
+		return owner;
+	}
+
+	public void setOwner(boolean owner) {
+		this.owner = owner;
 	}
 
 	public boolean isPrimaryKeyAttribute() {
@@ -275,5 +292,13 @@ public class MetaAttribute extends MetaElement {
 
 	public void setLob(boolean blob) {
 		this.lob = blob;
+	}
+
+	public String getUnderlyingName() {
+		return underlyingName;
+	}
+
+	public void setUnderlyingName(String underlyingName) {
+		this.underlyingName = underlyingName;
 	}
 }

@@ -5,16 +5,16 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.util.Relation;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.BulkRelationshipRepositoryV2;
+import io.crnk.core.repository.BulkRelationshipRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.legacy.repository.annotations.JsonApiFindManyTargets;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, Long, Task, Long> {
+public class UserToTaskRepository implements BulkRelationshipRepository<User, Long, Task, Long> {
 
 	private static final ConcurrentMap<Relation<User>, Integer> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
@@ -31,7 +31,7 @@ public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, 
 	}
 
 	@Override
-	public void setRelations(User source, Iterable<Long> targetIds, String fieldName) {
+	public void setRelations(User source, Collection<Long> targetIds, String fieldName) {
 		removeRelations(fieldName);
 		if (targetIds != null) {
 			for (Long targetId : targetIds) {
@@ -41,14 +41,14 @@ public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, 
 	}
 
 	@Override
-	public void addRelations(User source, Iterable<Long> targetIds, String fieldName) {
+	public void addRelations(User source, Collection<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			THREAD_LOCAL_REPOSITORY.put(new Relation<>(source, targetId, fieldName), 0);
 		}
 	}
 
 	@Override
-	public void removeRelations(User source, Iterable<Long> targetIds, String fieldName) {
+	public void removeRelations(User source, Collection<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			Iterator<Relation<User>> iterator = THREAD_LOCAL_REPOSITORY.keySet().iterator();
 			while (iterator.hasNext()) {
@@ -71,7 +71,7 @@ public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, 
 	}
 
 	@Override
-	public MultivaluedMap<Long, Task> findTargets(Iterable<Long> sourceIds, String fieldName, QuerySpec querySpec) {
+	public MultivaluedMap<Long, Task> findTargets(Collection<Long> sourceIds, String fieldName, QuerySpec querySpec) {
 		MultivaluedMap<Long, Task> map = new MultivaluedMap<>();
 		for (Long sourceId : sourceIds) {
 			map.addAll(sourceId, findManyTargets(sourceId, fieldName, querySpec));
@@ -82,7 +82,7 @@ public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, 
 	@Override
 	public Task findOneTarget(Long sourceId, String fieldName, QuerySpec querySpec) {
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
-			if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
+			if (relation.getSource().getLoginId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
 				Task project = new Task();
 				project.setId((Long) relation.getTargetId());
 				return project;
@@ -91,11 +91,11 @@ public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, 
 		return null;
 	}
 
-	@JsonApiFindManyTargets
+	@Override
 	public ResourceList<Task> findManyTargets(Long sourceId, String fieldName, QuerySpec querySpec) {
 		ResourceList<Task> projects = new DefaultResourceList<>();
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
-			if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
+			if (relation.getSource().getLoginId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
 				Task project = new Task();
 				project.setId((Long) relation.getTargetId());
 				projects.add(project);

@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BeanUtilsTest {
 
 	@Test
-	public void onNullValueShouldReturnNull() throws Exception {
+	public void onNullValueShouldReturnNull() {
 		// GIVEN
 		PropertyUtilsTest.Bean bean = new PropertyUtilsTest.Bean();
 
@@ -19,7 +19,7 @@ public class BeanUtilsTest {
 	}
 
 	@Test
-	public void onNonNullNullValueShouldReturnStringifiedProperty() throws Exception {
+	public void onNonNullNullValueShouldReturnStringifiedProperty() {
 		// GIVEN
 		PropertyUtilsTest.Bean bean = new PropertyUtilsTest.Bean();
 		bean.setBooleanPrimitivePropertyWithMutators(true);

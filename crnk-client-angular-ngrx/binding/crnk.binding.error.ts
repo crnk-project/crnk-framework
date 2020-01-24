@@ -27,7 +27,7 @@ export interface ErrorEntry {
 	template: `
 		<div *ngFor="let error of controlErrors">
 			<ng-container [ngTemplateOutlet]="template"
-						  [ngOutletContext]="{errorCode: error.code, errorData: error.data}"></ng-container>
+						  [ngTemplateOutletContext]="{errorCode: error.code, errorData: error.data}"></ng-container>
 		</div>
 	`,
 })
@@ -130,7 +130,7 @@ export class ControlErrorsComponent implements OnDestroy {
 	template: `
 		<div *ngFor="let error of pathErrors">
 			<ng-container [ngTemplateOutlet]="template"
-						  [ngOutletContext]="{errorCode: error.code, errorData: error.data}"></ng-container>
+						  [ngTemplateOutletContext]="{errorCode: error.code, errorData: error.data}"></ng-container>
 		</div>
 	`,
 })

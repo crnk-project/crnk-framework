@@ -1,32 +1,69 @@
 package io.crnk.core.engine.http;
 
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.result.Result;
+import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.utils.Supplier;
 
 public class HttpRequestContextProvider {
 
-	private ThreadLocal<HttpRequestContext> threadLocal = new ThreadLocal<>();
+
+	private final ModuleRegistry moduleRegistry;
+
+	private Supplier<ResultFactory> resultFactory;
 
 	private ServiceUrlProvider serviceUrlProvider = new ServiceUrlProvider() {
 		@Override
 		public String getUrl() {
-			HttpRequestContext request = threadLocal.get();
+			HttpRequestContext request = getRequestContext();
 			if (request == null) {
-				throw new IllegalStateException("HttpRequestContext not available, make sure to call onRequestStarted in advance");
+				return null;
 			}
 			return request.getBaseUrl();
 		}
 	};
 
-	public HttpRequestContext getRequestContext() {
-		return threadLocal.get();
+	public HttpRequestContextProvider(Supplier<ResultFactory> resultFactory, ModuleRegistry moduleRegistry) {
+		this.resultFactory = resultFactory;
+		this.moduleRegistry = moduleRegistry;
 	}
+
+	/**
+	 * Warning! this method can only be used in a non-reactive setting or while the reactive request is being setup!
+	 */
+	public HttpRequestContext getRequestContext() {
+		return (HttpRequestContext) resultFactory.get().getThreadContext();
+	}
+
+	/**
+	 * Safe method to get HttpRequestContext in traditional and reactive settings. In a reactive setting it will make use of the
+	 * subscriber context of Reactor.
+	 */
+	public Result<HttpRequestContext> getRequestContextResult() {
+		return (Result) resultFactory.get().getContext();
+	}
+
 
 	public void onRequestStarted(HttpRequestContext request) {
-		threadLocal.set(request);
+		resultFactory.get().setThreadContext(request);
+
+		QueryContext queryContext = request.getQueryContext();
+		queryContext.initializeDefaults(moduleRegistry.getResourceRegistry());
 	}
 
+
+
+	public boolean hasThreadRequestContext() {
+		return resultFactory.get().hasThreadContext();
+	}
+
+	/**
+	 * Warning: in a reactive setting the request may not really be finished.
+	 */
 	public void onRequestFinished() {
-		threadLocal.remove();
+		resultFactory.get().clearContext();
 	}
 
 	public ServiceUrlProvider getServiceUrlProvider() {
@@ -35,5 +72,10 @@ public class HttpRequestContextProvider {
 
 	public void setServiceUrlProvider(ServiceUrlProvider serviceUrlProvider) {
 		this.serviceUrlProvider = serviceUrlProvider;
+	}
+
+	public <T> Result<T> attach(Result<T> result) {
+		HttpRequestContext requestContext = this.getRequestContext();
+		return resultFactory.get().attachContext(result, requestContext);
 	}
 }

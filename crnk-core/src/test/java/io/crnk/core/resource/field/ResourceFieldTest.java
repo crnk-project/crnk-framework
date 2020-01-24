@@ -1,32 +1,24 @@
 package io.crnk.core.resource.field;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
-import io.crnk.core.mock.models.Task;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
-import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceFieldTest {
 
 
 	@Test
-	public void testResourceIdEqualsContract() throws NoSuchFieldException {
+	public void testResourceIdEqualsContract() {
 		EqualsVerifier.forClass(ResourceFieldImpl.class).suppress(Warning.NONFINAL_FIELDS, Warning.REFERENCE_EQUALITY).withPrefabValues(ResourceInformation.class, Mockito.mock
 				(ResourceInformation.class), Mockito.mock(ResourceInformation.class)
 		).usingGetClass().verify();
@@ -110,7 +102,7 @@ public class ResourceFieldTest {
 						annotations, new ResourceFieldAccess(true, true, true, true));
 
 		ResourceInformation parent = Mockito.mock(ResourceInformation.class);
-		Mockito.when(parent.getResourceType()).thenReturn("type");
+		Mockito.when(parent.getResourcePath()).thenReturn("type");
 		Mockito.when(parent.toString()).thenReturn("parent");
 		Mockito.when(parent.getResourceClass()).thenReturn((Class) Task.class);
 		sut.setResourceInformation(parent);
@@ -141,20 +133,19 @@ public class ResourceFieldTest {
 	private static class WithLazyFieldClass {
 
 		@JsonProperty("sth")
-		@JsonApiToMany
+		@JsonApiRelation
 		private String value;
 	}
 
 	private static class WithLazyFieldAndInclusionByDefaultClass {
 
-		@JsonApiIncludeByDefault
-		@JsonApiToMany
+		@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 		private String value;
 	}
 
 	private static class WithToManyEagerFieldClass {
 
-		@JsonApiToMany(lazy = false)
+		@JsonApiRelation(serialize = SerializeType.EAGER)
 		private String value;
 	}
 

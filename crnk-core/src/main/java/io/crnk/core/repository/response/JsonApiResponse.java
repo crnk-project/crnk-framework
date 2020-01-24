@@ -55,4 +55,9 @@ public class JsonApiResponse {
 		this.errors = errors;
 		return this;
 	}
+
+	@Override
+	public String toString() {
+		return "JsonApiResponse[data=" + entity + ", errors=" + errors + "]";
+	}
 }

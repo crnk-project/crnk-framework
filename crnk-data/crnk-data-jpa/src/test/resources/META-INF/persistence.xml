@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+			 version="2.0"
+			 xs:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+			 xmlns="http://java.sun.com/xml/ns/persistence">
+	<persistence-unit name="TEST" transaction-type="RESOURCE_LOCAL">
+
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+
+		<class>io.crnk.data.jpa.model.AnnotationMappedSubtypeEntity</class>
+		<class>io.crnk.data.jpa.model.AnnotationMappedSuperclassEntity</class>
+		<class>io.crnk.data.jpa.model.OneToOneTestEntity</class>
+		<class>io.crnk.data.jpa.model.RelationIdEntity</class>
+		<class>io.crnk.data.jpa.model.RelatedEntity</class>
+		<class>io.crnk.data.jpa.model.TestEntity</class>
+		<class>io.crnk.data.jpa.model.OtherRelatedEntity</class>
+		<class>io.crnk.data.jpa.model.JpaTransientTestEntity</class>
+		<class>io.crnk.data.jpa.model.AnnotationTestEntity</class>x
+		<class>io.crnk.data.jpa.model.BasicAttributesTestEntity</class>
+		<class>io.crnk.data.jpa.model.CollectionAttributesTestEntity</class>
+		<class>io.crnk.data.jpa.model.CountryEntity</class>
+		<class>io.crnk.data.jpa.model.CountryTranslationEntity</class>
+		<class>io.crnk.data.jpa.model.FieldOnlyEntity</class>
+		<class>io.crnk.data.jpa.model.JoinedTableBaseEntity</class>
+		<class>io.crnk.data.jpa.model.JoinedTableChildEntity</class>
+		<class>io.crnk.data.jpa.model.LangEntity</class>
+		<class>io.crnk.data.jpa.model.ManyToManyOppositeEntity</class>
+		<class>io.crnk.data.jpa.model.ManyToManyTestEntity</class>
+		<class>io.crnk.data.jpa.model.NamingTestEntity</class>
+		<class>io.crnk.data.jpa.model.OtherRelatedEntity</class>
+		<class>io.crnk.data.jpa.model.OneToOneOppositeEntity</class>
+		<class>io.crnk.data.jpa.model.RenamedTestEntity</class>
+		<class>io.crnk.data.jpa.model.SequenceEntity</class>
+		<class>io.crnk.data.jpa.model.SingleTableBaseEntity</class>
+		<class>io.crnk.data.jpa.model.SingleTableChildEntity</class>
+		<class>io.crnk.data.jpa.model.TablePerClassBaseEntity</class>
+		<class>io.crnk.data.jpa.model.TablePerClassChildEntity</class>
+		<class>io.crnk.data.jpa.model.TestMappedSuperclass</class>
+		<class>io.crnk.data.jpa.model.TestMappedSuperclassWithPk</class>
+		<class>io.crnk.data.jpa.model.TestSubclassWithSuperclassPk</class>
+		<class>io.crnk.data.jpa.model.UuidTestEntity</class>
+		<class>io.crnk.data.jpa.model.VersionedEntity</class>
+		<class>io.crnk.data.jpa.model.WriteOnlyAttributeTestEntity</class>
+		<class>io.crnk.data.jpa.model.TestEmbeddedIdEntity</class>
+		<class>io.crnk.data.jpa.model.MethodAnnotatedEntity</class>
+		<class>io.crnk.data.jpa.model.CustomTypeTestEntity</class>
+		<class>io.crnk.data.jpa.model.OverrideIdTestEntity</class>
+
+		<properties>
+			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />
+			<property name="javax.persistence.jdbc.url" value="jdbc:h2:mem" />
+			<property name="javax.persistence.jdbc.user" value="sa" />
+
+			<property name="hibernate.generate_statistics" value="true" />
+			<property name="hibernate.id.new_generator_mappings" value="true" />
+			<property name="hibernate.dialect" value="H2" />
+			<property name="hibernate.format_sql" value="false" />
+			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.hbm2ddl.auto" value="drop-and-create" />
+			<property name="hibernate.validator.autoregister_listeners" value="true" />
+		</properties>
+	</persistence-unit>
+</persistence>

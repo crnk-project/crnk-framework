@@ -1,17 +1,17 @@
 package io.crnk.client.http;
 
 import io.crnk.client.CrnkClient;
-import io.crnk.client.QuerySpecClientTest;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListener;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
+import io.crnk.client.suite.RepositoryAccessClientTest;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.test.mock.models.Task;
 import okhttp3.OkHttpClient;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class OkHttpClientTest extends QuerySpecClientTest {
+public class OkHttpClientTest extends RepositoryAccessClientTest {
 
 	private OkHttpAdapterListener listener;
 

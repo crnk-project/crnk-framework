@@ -1,13 +1,13 @@
 package io.crnk.core.engine.internal.jackson;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapperUtil;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
+
+import java.io.IOException;
 
 /**
  * Serializes top-level Errors object.
@@ -23,7 +23,7 @@ public class ErrorDataSerializer extends JsonSerializer<ErrorData> {
 	public static final String DETAIL = "detail";
 	public static final String SOURCE = "source";
 	public static final String POINTER = "pointer";
-	public static final String PARAMETER = "legacy";
+	public static final String PARAMETER = "parameter";
 	public static final String META = "meta";
 
 	private static void writeMeta(ErrorData errorData, JsonGenerator gen) throws IOException {

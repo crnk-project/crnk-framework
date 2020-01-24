@@ -17,9 +17,9 @@ public class DefaultServiceDiscoveryFactory implements ServiceDiscoveryFactory {
 		Iterator<ServiceDiscovery> iterator = loader.iterator();
 		if (iterator.hasNext()) {
 			ServiceDiscovery discovery = iterator.next();
-			PreconditionUtil.assertFalse("expected unique ServiceDiscovery implementation, got: " + loader, iterator.hasNext());
+			PreconditionUtil.verify(!iterator.hasNext(), "expected unique ServiceDiscovery implementation, got: %s", loader);
 			return discovery;
 		}
-		return null;
+		return new EmptyServiceDiscovery();
 	}
 }

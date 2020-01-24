@@ -1,13 +1,14 @@
 package io.crnk.meta.internal.typed;
 
+import java.lang.reflect.Type;
+
+import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.MetaFilter;
-
-import java.lang.reflect.Type;
 
 public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<MetaDataObject> implements MetaFilter {
 
@@ -38,7 +39,8 @@ public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<
 		if (element instanceof MetaAttribute && element.getParent().getClass() == getMetaClass()) {
 			MetaAttribute attr = (MetaAttribute) element;
 			MetaDataObject parent = attr.getParent();
-			Type implementationType = PropertyUtils.getPropertyType(parent.getImplementationClass(), attr.getName());
+			BeanInformation beanInformation = BeanInformation.get(parent.getImplementationClass());
+			Type implementationType = beanInformation.getAttribute(attr.getName()).getType();
 			MetaElement metaType = context.allocate(implementationType);
 			attr.setType(metaType.asType());
 		}
@@ -52,7 +54,7 @@ public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<
 	}
 
 	@Override
-	public MetaElement adjustForRequest(MetaElement element) {
+	public MetaElement adjustForRequest(MetaElement element, QueryContext queryContext) {
 		return element;
 	}
 }

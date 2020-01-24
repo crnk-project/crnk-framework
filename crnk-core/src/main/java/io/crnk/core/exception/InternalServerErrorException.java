@@ -8,8 +8,11 @@ public class InternalServerErrorException extends CrnkMappableException {  // NO
 	private static final String TITLE = "INTERNAL_SERVER_ERROR";
 
 	public InternalServerErrorException(String message) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR_500, ErrorData.builder().setTitle(TITLE).setDetail(message)
-				.setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR_500)).build());
+		super(HttpStatus.INTERNAL_SERVER_ERROR_500,
+				ErrorData.builder()
+						.setTitle(TITLE)
+						.setDetail(message)
+						.setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR_500)).build());
 	}
 
 	public InternalServerErrorException(int httpStatus, ErrorData errorData) {

@@ -1,9 +1,6 @@
 package io.crnk.client.ngrx.gen;
 
 
-import java.io.File;
-import java.io.IOException;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.gen.typescript.TSGeneratorConfig;
@@ -11,6 +8,10 @@ import io.crnk.gen.typescript.internal.TSGenerator;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
 
 public class GeneratorExecutor {
 
@@ -28,6 +29,7 @@ public class GeneratorExecutor {
 		config.getNpm().setPackagingEnabled(false);
 		config.getNpm().setPackageName("@crnk/angular-ngrx");
 		config.getNpm().getPackageMapping().put(MetaElement.class.getPackage().getName(), "@crnk/angular-ngrx/meta");
+		config.setExcludes(new HashSet<>());
 
 		MetaModule metaModule = MetaModule.create();
 		metaModule.addMetaProvider(new ResourceMetaProvider());
@@ -40,8 +42,7 @@ public class GeneratorExecutor {
 		TSGenerator generator = new TSGenerator(outputDir, metaModule.getLookup(), config);
 		try {
 			generator.run();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}

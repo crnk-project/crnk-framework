@@ -1,90 +1,162 @@
 package io.crnk.test.mock.models;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
-@JsonApiResource(type = "schedules")
+import java.util.*;
+
+@JsonApiResource(type = "schedule", resourcePath = "schedules")
 public class Schedule {
 
-	@JsonApiId
-	private Long id;
+    @JsonApiId
+    private Long id;
 
-	private String name;
+    private String name;
 
-	@JsonApiToOne(lazy = false)
-	private Task task;
+    @JsonProperty("description")
+    private String desc;
 
-	@JsonApiToOne(lazy = true)
-	private Task lazyTask;
+    @JsonApiRelation(mappedBy = "schedule")
+    @JsonProperty("taskSet")
+    private Set<Task> tasks;
 
-	@JsonApiToMany(opposite = "schedule")
-	private Set<Task> tasks = Collections.emptySet();
+    @JsonApiRelationId
+    private Long projectId;
 
-	@JsonApiToMany(opposite = "schedule")
-	private List<Task> tasksList = Collections.emptyList();
+    @JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
+    private Project project;
 
-	private boolean delayed;
+    @JsonApiRelationId
+    private List<Long> projectIds = new ArrayList<>();
 
-	public boolean isDelayed() {
-		return delayed;
-	}
+    @JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
+    private List<Project> projects = new ArrayList<>();
 
-	public void setDelayed(boolean delayed) {
-		this.delayed = delayed;
-	}
+    @JsonApiRelation(serialize = SerializeType.EAGER)
+    private ScheduleStatus status;
 
-	public Long getId() {
-		return id;
-	}
+    @JsonIgnore
+    private Map<String, Object> anyFields = new LinkedHashMap<>();
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private boolean delayed;
 
-	public String getName() {
-		return name;
-	}
+    private Map<String, String> customData;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public ScheduleStatus getStatus() {
+        return status;
+    }
 
-	public Task getTask() {
-		return task;
-	}
+    public void setStatus(ScheduleStatus status) {
+        this.status = status;
+    }
 
-	public void setTask(Task task) {
-		this.task = task;
-	}
+    public boolean isDelayed() {
+        return delayed;
+    }
 
-	public Task getLazyTask() {
-		return lazyTask;
-	}
+    public void setDelayed(boolean delayed) {
+        this.delayed = delayed;
+    }
 
-	public void setLazyTask(Task lazyTask) {
-		this.lazyTask = lazyTask;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Set<Task> getTasks() {
-		return tasks;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setTasks(Set<Task> tasks) {
-		this.tasks = tasks;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public List<Task> getTasksList() {
-		return tasksList;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setTasksList(List<Task> tasksList) {
-		this.tasksList = tasksList;
-	}
 
+    public Set<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public List<Long> getProjectIds() {
+        return projectIds;
+    }
+
+    public void setProjectIds(List<Long> projectIds) {
+        this.projectIds = projectIds;
+        this.projects = null;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
+
+        if (projects != null) {
+            List<Long> ids = new ArrayList<>();
+            for (Project project : projects) {
+                ids.add(project.getId());
+            }
+            this.projectIds = ids;
+        } else {
+            projectIds = null;
+        }
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public Map<String, String> getCustomData() {
+        return customData;
+    }
+
+    public void setCustomData(Map<String, String> customData) {
+        this.customData = customData;
+    }
+
+    @JsonAnyGetter
+    public Map<String,Object> getAnyFields() {
+        return anyFields;
+    }
+
+    @JsonAnySetter
+    public void setAnyFields(String name, Object value) {
+        anyFields.put(name, value);
+    }
 }

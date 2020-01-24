@@ -1,16 +1,18 @@
 package io.crnk.meta.internal.typed;
 
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.meta.internal.MetaUtils;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.meta.internal.MetaUtils;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
 
 public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> implements TypedMetaElementFactory {
 
@@ -24,35 +26,42 @@ public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> imple
 	protected void createAttributes(T meta) {
 		Class<?> implClass = meta.getImplementationClass();
 
-		List<Field> fields = ClassUtils.getClassFields(implClass);
-		List<Method> getters = ClassUtils.getClassGetters(implClass);
+		BeanInformation beanInformation = BeanInformation.get(implClass);
 
-		Map<String, Field> fieldMap = toFieldMap(fields);
-		Map<String, Method> getterMap = toGetterMethodMap(getters);
+		for (String name : beanInformation.getAttributeNames()) {
+			BeanAttributeInformation attrInformation = beanInformation.getAttribute(name);
+			if (attrInformation.getGetter() != null && !isIgnored(attrInformation)) {
+				if (!attrInformation.isDeclaredHere() && !attrInformation.isConcretion()) {
+					continue; // same information is contained in super type
+				}
 
-		List<String> propertyNames = getOrderedPropertyNames(fields, getters, fieldMap);
-		for (String name : propertyNames) {
-			Method getterMethod = getterMap.get(name);
-			if (getterMethod == null) {
-				continue;
+				String metaName = getMetaName(attrInformation);
+				try {
+					MetaAttribute attribute = createAttribute(meta, attrInformation, MetaUtils.firstToLower(metaName));
+					attribute.setReadMethod(attrInformation.getGetter());
+					attribute.setWriteMethod(attrInformation.getSetter());
+
+					attribute.setSortable(true);
+					attribute.setFilterable(true);
+					if (attrInformation.getSetter() != null) {
+						attribute.setInsertable(true);
+						attribute.setUpdatable(true);
+					}
+
+					initAttribute(attribute);
+				}
+				catch (Exception e) {
+					throw new IllegalStateException(
+							"failed to create attribute " + implClass.getName() + "." + name + " with metaName=" + metaName, e);
+				}
 			}
-			Method setterMethod = ClassUtils.findSetter(implClass, name, getterMethod.getReturnType());
-			if (getterMethod.getDeclaringClass() != implClass) {
-				continue; // contained in super type
-			}
-			MetaAttribute attribute = createAttribute(meta, MetaUtils.firstToLower(name));
-			attribute.setReadMethod(getterMethod);
-			attribute.setWriteMethod(setterMethod);
-
-			attribute.setSortable(true);
-			attribute.setFilterable(true);
-			if (setterMethod != null) {
-				attribute.setInsertable(true);
-				attribute.setUpdatable(true);
-			}
-
-			initAttribute(attribute);
 		}
+	}
+
+	protected abstract String getMetaName(BeanAttributeInformation attrInformation);
+
+	protected boolean isIgnored(BeanAttributeInformation information) {
+		return false;
 	}
 
 	protected void initAttribute(MetaAttribute attribute) {
@@ -89,7 +98,7 @@ public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> imple
 		return map;
 	}
 
-	protected MetaAttribute createAttribute(T metaDataObject, String name) {
+	protected MetaAttribute createAttribute(T metaDataObject, BeanAttributeInformation attrInformation, String name) {
 		MetaAttribute attr = new MetaAttribute();
 		attr.setName(MetaUtils.firstToLower(name));
 		attr.setParent(metaDataObject, true);

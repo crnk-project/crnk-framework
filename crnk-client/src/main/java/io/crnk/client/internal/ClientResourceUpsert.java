@@ -3,14 +3,12 @@ package io.crnk.client.internal;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.client.ResponseBodyException;
 import io.crnk.client.internal.proxy.ClientProxyFactory;
@@ -21,185 +19,176 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceUpsert;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
-import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+import io.crnk.core.engine.result.Result;
+import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 
 class ClientResourceUpsert extends ResourceUpsert {
 
-	private ClientProxyFactory proxyFactory;
+    private ClientProxyFactory proxyFactory;
 
-	private Map<String, Object> resourceMap = new HashMap<>();
+    private Map<String, Object> resourceMap = new HashMap<>();
 
-	public ClientResourceUpsert(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser, ObjectMapper objectMapper, DocumentMapper documentMapper, ClientProxyFactory proxyFactory) {
-		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, (List)Collections.emptyList());
-		this.proxyFactory = proxyFactory;
-	}
+    public ClientResourceUpsert(ClientProxyFactory proxyFactory) {
+        this.proxyFactory = proxyFactory;
+    }
 
-	public String getUID(ResourceIdentifier id) {
-		return id.getType() + "#" + id.getId();
-	}
+    public String getUID(ResourceIdentifier id) {
+        return id.getType() + "#" + id.getId();
+    }
 
-	public String getUID(RegistryEntry entry, Serializable id) {
-		return entry.getResourceInformation().getResourceType() + "#" + id;
-	}
+    public String getUID(RegistryEntry entry, Serializable id) {
+        ResourceInformation resourceInformation = entry.getResourceInformation();
+        String idString = resourceInformation.toIdString(id);
+        return resourceInformation.getResourceType() + "#" + idString;
+    }
 
-	public void setRelations(List<Resource> resources) {
-		for (Resource resource : resources) {
-			String uid = getUID(resource);
-			Object object = resourceMap.get(uid);
+    public void setRelations(List<Resource> resources, QueryContext queryContext) {
+        for (Resource resource : resources) {
+            String uid = getUID(resource);
+            Object object = resourceMap.get(uid);
 
-			RegistryEntry registryEntry = resourceRegistry.getEntry(resource.getType());
+            RegistryEntry registryEntry = context.getResourceRegistry().getEntry(resource.getType());
 
-			// no need for any query parameters when doing POST/PATCH
-			QueryAdapter queryAdapter = null;
+            // no need for any query parameters when doing POST/PATCH
+            QueryAdapter queryAdapter = new QuerySpecAdapter(null, null, queryContext);
 
-			// no in use on the client side
-			RepositoryMethodParameterProvider parameterProvider = null;
+            setRelationsAsync(object, registryEntry, resource, queryAdapter, true).get();
+        }
+    }
 
-			setRelations(object, registryEntry, resource, queryAdapter, parameterProvider, true);
-		}
-	}
+    /**
+     * Get relations from includes section or create a remote proxy
+     */
+    @Override
+    protected Result<Object> fetchRelated(RegistryEntry entry, Serializable relationId, QueryAdapter queryAdapter) {
 
-	/**
-	 * Get relations from includes section or create a remote proxy
-	 */
-	@Override
-	protected Object fetchRelatedObject(RegistryEntry entry, Serializable relationId, RepositoryMethodParameterProvider parameterProvider, QueryAdapter queryAdapter) {
+        ResultFactory resultFactory = context.getResultFactory();
 
-		String uid = getUID(entry, relationId);
-		Object relatedResource = resourceMap.get(uid);
-		if (relatedResource != null) {
-			return relatedResource;
-		}
-		ResourceInformation resourceInformation = entry.getResourceInformation();
-		Class<?> resourceClass = resourceInformation.getResourceClass();
-		return proxyFactory.createResourceProxy(resourceClass, relationId);
-	}
+        String uid = getUID(entry, relationId);
+        Object relatedResource = resourceMap.get(uid);
+        if (relatedResource != null) {
+            return resultFactory.just(relatedResource);
+        }
+        ResourceInformation resourceInformation = entry.getResourceInformation();
+        Class<?> resourceClass = resourceInformation.getResourceClass();
+        return resultFactory.just(proxyFactory.createResourceProxy(resourceClass, relationId));
+    }
 
-	public List<Object> allocateResources(List<Resource> resources) {
-		List<Object> objects = new ArrayList<>();
-		for (Resource resource : resources) {
+    @Override
+    protected boolean decideSetRelationObjectField(RegistryEntry entry, Serializable relationId, ResourceField field) {
+        return !field.hasIdField() || resourceMap.containsKey(getUID(entry, relationId));
+    }
 
-			RegistryEntry registryEntry = getRegistryEntry(resource.getType());
-			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+    @Override
+    protected boolean decideSetRelationObjectsField(ResourceField relationshipField) {
+        return true;
+    }
 
-			Object object = newResource(resourceInformation, resource);
-			setId(resource, object, resourceInformation);
-			setAttributes(resource, object, resourceInformation);
-			setLinks(resource, object, resourceInformation);
-			setMeta(resource, object, resourceInformation);
+    public List<Object> allocateResources(List<Resource> resources, QueryContext queryContext) {
+        List<Object> objects = new ArrayList<>();
+        for (Resource resource : resources) {
 
-			objects.add(object);
+            RegistryEntry registryEntry = getRegistryEntry(resource.getType());
+            ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 
-			String uid = getUID(resource);
-			resourceMap.put(uid, object);
-		}
-		return objects;
-	}
+            Object object = newEntity(resourceInformation, resource);
+            setId(resource, object, resourceInformation);
+            setType(resource, object);
+            setAttributes(resource, object, resourceInformation, queryContext);
+            setLinks(resource, object, resourceInformation);
+            setMeta(resource, object, resourceInformation);
 
-	protected void setLinks(Resource dataBody, Object instance, ResourceInformation resourceInformation) {
-		ResourceField linksField = resourceInformation.getLinksField();
-		if (dataBody.getLinks() != null && linksField != null) {
-			JsonNode linksNode = dataBody.getLinks();
-			Class<?> linksClass = linksField.getType();
-			ObjectReader linksMapper = objectMapper.readerFor(linksClass);
-			try {
-				Object links = linksMapper.readValue(linksNode);
-				linksField.getAccessor().setValue(instance, links);
-			} catch (IOException e) {
-				throw new ResponseBodyException("failed to parse links information", e);
-			}
-		}
-	}
+            objects.add(object);
 
-	protected void setMeta(Resource dataBody, Object instance, ResourceInformation resourceInformation) {
-		ResourceField metaField = resourceInformation.getMetaField();
-		if (dataBody.getMeta() != null && metaField != null) {
-			JsonNode metaNode = dataBody.getMeta();
+            String uid = getUID(resource);
+            resourceMap.put(uid, object);
+        }
+        return objects;
+    }
 
-			Class<?> metaClass = metaField.getType();
+    @Override
+    public boolean isAcceptable(JsonPath jsonPath, String method) {
+        // no in use on client side, consider refactoring ResourceUpsert to
+        // separate from controllers
+        throw new UnsupportedOperationException();
+    }
 
-			ObjectReader metaMapper = objectMapper.readerFor(metaClass);
-			try {
-				Object meta = metaMapper.readValue(metaNode);
-				metaField.getAccessor().setValue(instance, meta);
-			} catch (IOException e) {
-				throw new ResponseBodyException("failed to parse links information", e);
-			}
+    @Override
+    public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
+        // no in use on client side, consider refactoring ResourceUpsert to
+        // separate from controllers
+        throw new UnsupportedOperationException();
 
-		}
-	}
+    }
 
-	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
-		// no in use on client side, consider refactoring ResourceUpsert to
-		// separate from controllers
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    protected RuntimeException newBodyException(String message, IOException e) {
+        throw new ResponseBodyException(message, e);
+    }
 
-	@Override
-	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document document) {
-		// no in use on client side, consider refactoring ResourceUpsert to
-		// separate from controllers
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry,
+                                                      Map.Entry<String, Relationship> property, QueryAdapter queryAdapter) {
 
-	@Override
-	protected void setRelationsField(Object newResource, RegistryEntry registryEntry, Map.Entry<String, Relationship> property, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
+        Relationship relationship = property.getValue();
 
-		Relationship relationship = property.getValue();
+        if (!relationship.getData().isPresent()) {
+            ObjectNode links = relationship.getLinks();
+            ObjectNode meta = relationship.getMeta();
+            if (links != null) {
+                // create proxy to lazy load relations
+                String fieldJsonName = property.getKey();
+                ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+                QueryContext queryContext = queryAdapter.getQueryContext();
+                ResourceField field = resourceInformation.findFieldByJsonName(fieldJsonName, queryContext.getRequestVersion());
+                PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType(), "expected {} to be a relationship", fieldJsonName);
+                Class elementType = field.getElementType();
+                Class collectionClass = field.getType();
 
-		if (!relationship.getData().isPresent()) {
-			ObjectNode links = relationship.getLinks();
-			if (links != null) {
-				// create proxy to lazy load relations
-				String fieldName = property.getKey();
-				ResourceInformation resourceInformation = registryEntry.getResourceInformation();
-				ResourceField field = resourceInformation.findRelationshipFieldByName(fieldName);
-				Class elementType = field.getElementType();
-				Class collectionClass = field.getType();
+                JsonNode relatedNode = links.get("related");
+                if (relatedNode != null) {
+                    String url = null;
+                    if (relatedNode.has(SerializerUtil.HREF)) {
+                        JsonNode hrefNode = relatedNode.get(SerializerUtil.HREF);
+                        if (hrefNode != null) {
+                            url = hrefNode.asText().trim();
+                        }
+                    } else {
+                        url = relatedNode.asText().trim();
+                    }
+                    Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url, links, meta);
+                    field.getAccessor().setValue(newResource, proxy);
+                }
+            }
+            return Optional.empty();
+        } else {
+            // set elements
+            return super.setRelationsFieldAsync(newResource, registryEntry, property, queryAdapter);
+        }
+    }
 
-				JsonNode relatedNode = links.get("related");
-				if (relatedNode != null) {
-					String url = null;
-					if (relatedNode.has(SerializerUtil.HREF)) {
-						JsonNode hrefNode = relatedNode.get(SerializerUtil.HREF);
-						if (hrefNode != null) {
-							url = hrefNode.asText().trim();
-						}
-					}
-					else {
-						url = relatedNode.asText().trim();
-					}
-					Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url);
-					field.getAccessor().setValue(newResource, proxy);
-				}
-			}
-		} else {
-			// set elements
-			super.setRelationsField(newResource, registryEntry, property, queryAdapter, parameterProvider);
-		}
-	}
+    @Override
+    protected boolean checkAccess() {
+        return false;
+    }
 
-	@Override
-	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field) {
-		// nothing to verify during deserialization on client-side
-		// there is only a need to check field access when receiving resources
-		// on the server-side client needs all the data he gets from the server
+    @Override
+    protected HttpMethod getHttpMethod() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+	protected boolean isClient() {
 		return true;
-	}
-
-	@Override
-	protected HttpMethod getHttpMethod() {
-		throw new UnsupportedOperationException();
 	}
 }

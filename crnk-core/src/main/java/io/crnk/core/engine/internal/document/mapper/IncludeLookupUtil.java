@@ -11,273 +11,298 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.IncludeRelationSpec;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.legacy.queryParams.include.Inclusion;
-import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class IncludeLookupUtil {
 
-	private ResourceRegistry resourceRegistry;
+    private ResourceRegistry resourceRegistry;
 
 
-	private IncludeBehavior includeBehavior;
+    private IncludeBehavior includeBehavior;
 
-	public IncludeLookupUtil(ResourceRegistry resourceRegistry, IncludeBehavior includeBehavior) {
-		this.resourceRegistry = resourceRegistry;
-		this.includeBehavior = includeBehavior;
-	}
+    public IncludeLookupUtil(ResourceRegistry resourceRegistry, IncludeBehavior includeBehavior) {
+        this.resourceRegistry = resourceRegistry;
+        this.includeBehavior = includeBehavior;
+    }
 
+    public static List<Serializable> getIds(Collection<Resource> resources, ResourceInformation resourceInformation) {
+        List<Serializable> ids = new ArrayList<>();
+        for (Resource resource : resources) {
+            if (resource.getId() != null) {
+                Serializable id = resourceInformation.parseIdString(resource.getId());
+                ids.add(id);
+            }
+        }
+        return ids;
+    }
 
-	public static LookupIncludeBehavior getGlolbalLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
-		if (propertiesProvider == null) {
-			return LookupIncludeBehavior.DEFAULT;
-		}
-		
-		// determine system property for include look up
-		String includeAutomaticallyString = propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY);
-		String includeAutomaticallyOverwriteString =
-				propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE);
-		
-		if ((includeAutomaticallyString != null) || (includeAutomaticallyOverwriteString != null)) {
-			boolean includeAutomatically = Boolean.parseBoolean(includeAutomaticallyString);
-			boolean includeAutomaticallyOverwrite = Boolean.parseBoolean(includeAutomaticallyOverwriteString);
-	
-			if (includeAutomaticallyOverwrite) {
-				return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-			} else if (includeAutomatically) {
-				return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
-			}
-		}
-		
-		return LookupIncludeBehavior.DEFAULT;
-	}
+    public static LookupIncludeBehavior getGlobalLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
+        if (propertiesProvider == null) {
+            return LookupIncludeBehavior.DEFAULT;
+        }
 
-	public static IncludeBehavior getIncludeBehavior(PropertiesProvider propertiesProvider) {
-		String property = propertiesProvider != null ? propertiesProvider.getProperty(CrnkProperties.INCLUDE_BEHAVIOR) : null;
-		if (property == null || property.isEmpty()) {
-			return IncludeBehavior.PER_TYPE;
-		}
-		return IncludeBehavior.valueOf(property.toUpperCase());
-	}
+        String strDefaultLookupBehavior = propertiesProvider.getProperty(CrnkProperties.DEFAULT_LOOKUP_BEHAVIOR);
+        if (strDefaultLookupBehavior != null) {
+            return LookupIncludeBehavior.valueOf(strDefaultLookupBehavior);
+        }
 
-	public Set<ResourceField> getRelationshipFields(Collection<Resource> resources) {
-		Set<ResourceField> fields = new HashSet<>();
+        return LookupIncludeBehavior.DEFAULT;
+    }
 
-		Set<String> processedTypes = new HashSet<>();
+    public static IncludeBehavior getIncludeBehavior(PropertiesProvider propertiesProvider) {
+        String property = propertiesProvider != null ? propertiesProvider.getProperty(CrnkProperties.INCLUDE_BEHAVIOR) : null;
+        if (property == null || property.isEmpty()) {
+            return IncludeBehavior.PER_TYPE;
+        }
+        return IncludeBehavior.valueOf(property.toUpperCase());
+    }
 
-		for (Resource resource : resources) {
-			process(resource.getType(), processedTypes, fields);
-		}
+    public Set<ResourceField> getRelationshipFields(Collection<Resource> resources) {
+        Set<ResourceField> fields = new HashSet<>();
 
-		return fields;
-	}
+        Set<String> processedTypes = new HashSet<>();
 
-	private void process(String type, Set<String> processedTypes, Set<ResourceField> fields) {
-		if (!processedTypes.contains(type)) {
-			processedTypes.add(type);
+        for (Resource resource : resources) {
+            process(resource.getType(), processedTypes, fields);
+        }
 
-			RegistryEntry entry = resourceRegistry.getEntry(type);
-			ResourceInformation information = entry.getResourceInformation();
+        return fields;
+    }
 
-			ResourceInformation superInformation = getSuperInformation(information);
-			if (superInformation != null) {
-				process(superInformation.getResourceType(), processedTypes, fields);
-			}
+    private void process(String type, Set<String> processedTypes, Set<ResourceField> fields) {
+        if (!processedTypes.contains(type)) {
+            processedTypes.add(type);
 
-			// TODO same relationship on multiple children
-			for (ResourceField field : information.getRelationshipFields()) {
-				boolean existsOnSuperType =
-						superInformation != null && superInformation.findRelationshipFieldByName(field.getJsonName()) != null;
-				if (!existsOnSuperType) {
-					fields.add(field);
-				}
-			}
-		}
-	}
+            RegistryEntry entry = resourceRegistry.getEntry(type);
+            ResourceInformation information = entry.getResourceInformation();
 
-	private ResourceInformation getSuperInformation(ResourceInformation information) {
-		String superclass = information.getSuperResourceType();
-		if (superclass == null) {
-			return null;
-		}
-		boolean hasSuperType = resourceRegistry.hasEntry(superclass);
-		return hasSuperType ? resourceRegistry.getEntry(superclass).getResourceInformation() : null;
-	}
+            ResourceInformation superInformation = getSuperInformation(information);
+            if (superInformation != null) {
+                process(superInformation.getResourceType(), processedTypes, fields);
+            }
 
-	public List<Resource> filterByType(Collection<Resource> resources, ResourceInformation resourceInformation) {
-		List<Resource> results = new ArrayList<>();
-		for (Resource resource : resources) {
-			if (isInstance(resourceInformation, resource)) {
-				results.add(resource);
-			}
-		}
-		return results;
-	}
+            // TODO same relationship on multiple children
+            for (ResourceField field : information.getRelationshipFields()) {
+                boolean existsOnSuperType = superInformation != null && superInformation.findFieldByUnderlyingName(field.getUnderlyingName()) != null;
+                if (!existsOnSuperType) {
+                    fields.add(field);
+                }
+            }
+        }
+    }
 
-	private boolean isInstance(ResourceInformation desiredResourceInformation, Resource resource) {
-		if (desiredResourceInformation.getResourceType().equals(resource.getType())) {
-			return true;
-		}
+    private ResourceInformation getSuperInformation(ResourceInformation information) {
+        String superclass = information.getSuperResourceType();
+        if (superclass == null) {
+            return null;
+        }
+        boolean hasSuperType = resourceRegistry.hasEntry(superclass);
+        return hasSuperType ? resourceRegistry.getEntry(superclass).getResourceInformation() : null;
+    }
 
-		// TODO proper ResourceInformation API
-		ResourceInformation actualResourceInformation = resourceRegistry.getEntry(resource.getType()).getResourceInformation();
-		ResourceInformation superInformation = actualResourceInformation;
-		while ((superInformation = getSuperInformation(superInformation)) != null) {
-			if (superInformation.equals(desiredResourceInformation)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public List<Resource> filterByType(Collection<Resource> resources, ResourceInformation resourceInformation) {
+        List<Resource> results = new ArrayList<>();
+        for (Resource resource : resources) {
+            if (isInstance(resourceInformation, resource)) {
+                results.add(resource);
+            }
+        }
+        return results;
+    }
 
-	public boolean isInclusionRequested(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
-		if (queryAdapter == null || queryAdapter.getIncludedRelations() == null
-				|| queryAdapter.getIncludedRelations().getParams() == null) {
-			return false;
-		}
+    private boolean isInstance(ResourceInformation desiredResourceInformation, Resource resource) {
+        if (desiredResourceInformation.getResourceType().equals(resource.getType())) {
+            return true;
+        }
 
-		if (queryAdapter instanceof QuerySpecAdapter) {
-			return isInclusionRequestedForQueryspec(queryAdapter, fieldPath);
-		} else {
-			return isInclusionRequestedForQueryParams(queryAdapter, fieldPath);
-		}
-	}
+        // TODO proper ResourceInformation API
+        ResourceInformation actualResourceInformation = resourceRegistry.getEntry(resource.getType()).getResourceInformation();
+        ResourceInformation superInformation = actualResourceInformation;
+        while ((superInformation = getSuperInformation(superInformation)) != null) {
+            if (superInformation.equals(desiredResourceInformation)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	private boolean isInclusionRequestedForQueryspec(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
-		QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
-		if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
-			return contains(querySpec, toPathList(fieldPath, 0));
-		} else {
-			for (int i = fieldPath.size() - 1; i >= 0; i--) {
-				List<String> path = toPathList(fieldPath, i);
+    public boolean isInclusionRequested(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
+        if (queryAdapter.isEmpty() || queryAdapter.getIncludedRelations() == null || queryAdapter.getIncludedRelations() == null) {
+            return false;
+        }
 
-				// TODO subtyping not properly supported
-				ResourceInformation rootInformation = fieldPath.get(i).getParentResourceInformation();
-				QuerySpec rootQuerySpec = querySpec.getQuerySpec(rootInformation.getResourceClass());
-				if (rootQuerySpec != null && contains(rootQuerySpec, path)) {
-					return true;
-				}
-			}
-			return contains(querySpec, toPathList(fieldPath, 0));
-		}
-	}
+        if (queryAdapter instanceof QuerySpecAdapter) {
+            return isInclusionRequestedForQueryspec(queryAdapter, fieldPath);
+        } else {
+            return isInclusionRequestedForQueryParams(queryAdapter, fieldPath);
+        }
+    }
 
-	private boolean isInclusionRequestedForQueryParams(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
-		Map<String, IncludedRelationsParams> params = queryAdapter.getIncludedRelations().getParams();
+    private boolean isInclusionRequestedForQueryspec(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
+        QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
+        if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
+            return contains(querySpec, toPathList(fieldPath, 0));
+        } else {
+            for (int i = fieldPath.size() - 1; i >= 0; i--) {
+                List<String> path = toPathList(fieldPath, i);
 
-		// we have to possibilities for inclusion: by type or dot notation
-		for (int i = fieldPath.size() - 1; i >= 0; i--) {
-			String path = toPath(fieldPath, i);
-			ResourceInformation rootInformation = fieldPath.get(i).getParentResourceInformation();
-			IncludedRelationsParams includedRelationsParams = params.get(rootInformation.getResourceType());
-			if (includedRelationsParams != null && contains(includedRelationsParams, path)) {
-				return true;
-			}
-		}
-		return false;
-	}
+                // TODO subtyping not properly supported
+                ResourceInformation rootInformation = fieldPath.get(i).getResourceInformation();
+                QuerySpec rootQuerySpec = querySpec.getQuerySpec(rootInformation);
+                if (rootQuerySpec != null && contains(rootQuerySpec, path)) {
+                    return true;
+                }
+            }
+            return contains(querySpec, toPathList(fieldPath, 0));
+        }
+    }
 
-	private boolean contains(IncludedRelationsParams includedRelationsParams, String path) {
-		String pathPrefix = path + ".";
-		for (Inclusion inclusion : includedRelationsParams.getParams()) {
-			if (inclusion.getPath().equals(path) || inclusion.getPath().startsWith(pathPrefix)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    private boolean isInclusionRequestedForQueryParams(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
+        Map<String, Set<PathSpec>> params = queryAdapter.getIncludedRelations();
 
-	private boolean contains(QuerySpec querySpec, List<String> path) {
-		for (IncludeRelationSpec inclusion : querySpec.getIncludedRelations()) {
-			if (inclusion.getAttributePath().equals(path) || startsWith(inclusion, path)) {
-				return true;
-			}
-		}
-		return false;
-	}
+        // we have to possibilities for inclusion: by type or dot notation
+        for (int i = fieldPath.size() - 1; i >= 0; i--) {
+            String path = toPath(fieldPath, i);
+            ResourceInformation rootInformation = fieldPath.get(i).getResourceInformation();
+            Set<PathSpec> includedRelationsParams = params.get(rootInformation.getResourceType());
+            if (includedRelationsParams != null && contains(includedRelationsParams, path)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	private boolean startsWith(IncludeRelationSpec inclusion, List<String> path) {
-		return inclusion.getAttributePath().size() > path.size() && inclusion.getAttributePath().subList(0, path.size())
-				.equals(path);
-	}
+    private boolean contains(Set<PathSpec> includedRelationsParams, String path) {
+        String pathPrefix = path + ".";
+        for (PathSpec inclusion : includedRelationsParams) {
+            if (inclusion.toString().equals(path) || inclusion.toString().startsWith(pathPrefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	private String toPath(List<ResourceField> fieldPath, int offset) {
-		StringBuilder builder = new StringBuilder();
-		for (int i = offset; i < fieldPath.size(); i++) {
-			ResourceField field = fieldPath.get(i);
-			if (builder.length() > 0) {
-				builder.append(".");
-			}
-			builder.append(field.getJsonName());
-		}
-		return builder.toString();
-	}
+    private boolean contains(QuerySpec querySpec, List<String> path) {
+        for (IncludeRelationSpec inclusion : querySpec.getIncludedRelations()) {
+            if (inclusion.getAttributePath().equals(path) || startsWith(inclusion, path)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	private List<String> toPathList(List<ResourceField> fieldPath, int offset) {
-		List<String> builder = new ArrayList<>();
-		List<String> result = builder;
-		for (int i = offset; i < fieldPath.size(); i++) {
-			ResourceField field = fieldPath.get(i);
-			result.add(field.getJsonName());
-		}
-		return result;
-	}
+    private boolean startsWith(IncludeRelationSpec inclusion, List<String> path) {
+        return inclusion.getAttributePath().size() > path.size() && inclusion.getAttributePath().subList(0, path.size())
+                .equals(path);
+    }
 
-	public List<Resource> sub(Collection<Resource> resourcesWithField, Collection<Resource> resourcesForLookup) {
-		List<Resource> result = new ArrayList<>(resourcesWithField);
-		result.removeAll(resourcesForLookup);
-		return result;
-	}
+    private String toPath(List<ResourceField> fieldPath, int offset) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = offset; i < fieldPath.size(); i++) {
+            ResourceField field = fieldPath.get(i);
+            if (builder.length() > 0) {
+                builder.append(".");
+            }
+            builder.append(field.getUnderlyingName());
+        }
+        return builder.toString();
+    }
 
-	public List<Resource> filterByLoadedRelationship(List<Resource> resources, ResourceField resourceField) {
-		List<Resource> results = new ArrayList<>();
-		for (Resource resource : resources) {
-			if (resource.getRelationships().get(resourceField.getJsonName()) != null) {
-				results.add(resource);
-			}
-		}
-		return results;
-	}
+    private List<String> toPathList(List<ResourceField> fieldPath, int offset) {
+        List<String> builder = new ArrayList<>();
+        List<String> result = builder;
+        for (int i = offset; i < fieldPath.size(); i++) {
+            ResourceField field = fieldPath.get(i);
+            result.add(field.getUnderlyingName());
+        }
+        return result;
+    }
 
-	public Set<ResourceIdentifier> toIds(Set<Resource> resources) {
-		Set<ResourceIdentifier> results = new HashSet<>();
-		for (Resource resource : resources) {
-			results.add(resource.toIdentifier());
-		}
-		return results;
-	}
+    public List<Resource> sub(Collection<Resource> resourcesWithField, Collection<Resource> resourcesForLookup) {
+        List<Resource> result = new ArrayList<>(resourcesWithField);
+        result.removeAll(resourcesForLookup);
+        return result;
+    }
 
-	public List<ResourceIdentifier> toIds(List<Resource> resources) {
-		List<ResourceIdentifier> results = new ArrayList<>();
-		for (Resource resource : resources) {
-			results.add(resource.toIdentifier());
-		}
-		return results;
-	}
+    public List<Resource> filterByLoadedRelationship(List<Resource> resources, ResourceField resourceField) {
+        List<Resource> results = new ArrayList<>();
+        for (Resource resource : resources) {
+            if (resource.getRelationships().get(resourceField.getJsonName()) != null) {
+                results.add(resource);
+            }
+        }
+        return results;
+    }
 
-	public Set<Resource> union(Collection<Resource> set0, Collection<Resource> set1) {
-		Map<ResourceIdentifier, Resource> map = new HashMap<>();
-		for (Resource resource : set0) {
-			map.put(resource.toIdentifier(), resource);
-		}
-		for (Resource resource : set1) {
-			map.put(resource.toIdentifier(), resource);
-		}
-		return new HashSet<>(map.values());
-	}
+    public Set<ResourceIdentifier> toIds(Set<Resource> resources) {
+        Set<ResourceIdentifier> results = new HashSet<>();
+        for (Resource resource : resources) {
+            results.add(resource.toIdentifier());
+        }
+        return results;
+    }
 
-	public List<Resource> findResourcesWithoutRelationshipData(List<Resource> resources, ResourceField resourceField) {
-		List<Resource> results = new ArrayList<>();
-		for (Resource resource : resources) {
-			Relationship relationship = resource.getRelationships().get(resourceField.getJsonName());
-			if (!relationship.getData().isPresent()) {
-				results.add(resource);
-			}
-		}
-		return results;
-	}
+    public List<ResourceIdentifier> toIds(List<Resource> resources) {
+        List<ResourceIdentifier> results = new ArrayList<>();
+        for (Resource resource : resources) {
+            results.add(resource.toIdentifier());
+        }
+        return results;
+    }
+
+    public Set<Resource> union(Collection<Resource> set0, Collection<Resource> set1) {
+        Map<ResourceIdentifier, Resource> map = new HashMap<>();
+        for (Resource resource : set0) {
+            map.put(resource.toIdentifier(), resource);
+        }
+        for (Resource resource : set1) {
+            map.put(resource.toIdentifier(), resource);
+        }
+        return new HashSet<>(map.values());
+    }
+
+    public List<Resource> findResourcesWithoutRelationshipToLoad(List<Resource> resources, ResourceField resourceField,
+                                                                 IncludeRequest includeRequest) {
+        List<Resource> results = new ArrayList<>();
+        for (Resource resource : resources) {
+            Relationship relationship = resource.getRelationships().get(resourceField.getJsonName());
+            if (!relationship.getData().isPresent() || !isLoaded(relationship, includeRequest)) {
+                results.add(resource);
+            }
+        }
+        return results;
+    }
+
+    private boolean isLoaded(Relationship relationship, IncludeRequest includeRequest) {
+        for (ResourceIdentifier id : relationship.getCollectionData().get()) {
+            if (!includeRequest.containsResource(id)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public ResourceIdentifier idToResourceId(ResourceInformation resourceInformation, Object objectId) {
+        if (objectId == null) {
+            return null;
+        }
+        if (objectId instanceof ResourceIdentifier) {
+            return (ResourceIdentifier) objectId;
+        } else {
+            String strId = resourceInformation.toIdString(objectId);
+            return new ResourceIdentifier(strId, resourceInformation.getResourceType());
+        }
+    }
 }

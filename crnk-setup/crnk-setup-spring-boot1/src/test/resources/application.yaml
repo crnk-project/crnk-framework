@@ -1,0 +1,24 @@
+crnk:
+  domain-name: http://localhost:8080
+  path-prefix: /api
+
+  jpa:
+    enabled: true
+    expose-all: true
+    query-factory: CRITERIA
+
+  security:
+    enabled: false
+
+  ui:
+    enabled: true
+
+  meta:
+    enabled: true
+    list-resources: true
+
+  validation:
+    enabled: true
+
+  home:
+    enabled: true

@@ -1,13 +1,10 @@
 package io.crnk.operations;
 
-import java.util.List;
-import java.util.UUID;
-
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.operations.client.OperationsCall;
 import io.crnk.operations.client.OperationsClient;
 import io.crnk.operations.model.MovieEntity;
@@ -18,6 +15,9 @@ import io.crnk.operations.server.OperationFilterContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
+import java.util.UUID;
 
 public class OperationsExceptionTest extends AbstractOperationsTest {
 
@@ -47,7 +47,7 @@ public class OperationsExceptionTest extends AbstractOperationsTest {
 		Assert.assertEquals(HttpStatus.PRECONDITION_FAILED_412, insertCall.getResponse(1).getStatus());
 
 		QuerySpec querySpec = new QuerySpec(PersonEntity.class);
-		ResourceRepositoryV2<PersonEntity, UUID> personRepo = client.getRepositoryForType(PersonEntity.class);
+		ResourceRepository<PersonEntity, UUID> personRepo = client.getRepositoryForType(PersonEntity.class);
 		List<PersonEntity> list = personRepo.findAll(querySpec);
 		Assert.assertEquals(0, list.size());
 	}
@@ -71,8 +71,7 @@ public class OperationsExceptionTest extends AbstractOperationsTest {
 		try {
 			insertCall.execute();
 			Assert.fail();
-		}
-		catch (InternalServerErrorException e) {
+		} catch (InternalServerErrorException e) {
 			// ok
 		}
 	}

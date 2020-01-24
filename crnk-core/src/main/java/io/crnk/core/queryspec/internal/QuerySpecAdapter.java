@@ -1,19 +1,15 @@
 package io.crnk.core.queryspec.internal;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.IncludeFieldSpec;
 import io.crnk.core.queryspec.IncludeRelationSpec;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.legacy.queryParams.DefaultQueryParamsConverter;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.queryParams.include.Inclusion;
-import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
-import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
-import io.crnk.legacy.queryParams.params.TypedParams;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,106 +18,140 @@ import java.util.Set;
 
 public class QuerySpecAdapter implements QueryAdapter {
 
-	private QuerySpec querySpec;
+    private final QueryContext queryContext;
 
-	private ResourceRegistry resourceRegistry;
+    private QuerySpec querySpec;
 
-	public QuerySpecAdapter(QuerySpec querySpec, ResourceRegistry resourceRegistry) {
-		this.querySpec = querySpec;
-		this.resourceRegistry = resourceRegistry;
-	}
+    private ResourceRegistry resourceRegistry;
 
-	public QuerySpec getQuerySpec() {
-		return querySpec;
-	}
+    private boolean compactMode;
 
-	@Override
-	public TypedParams<IncludedRelationsParams> getIncludedRelations() {
-		Map<String, IncludedRelationsParams> params = new HashMap<>();
-		addRelations(params, querySpec);
-		for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
-			addRelations(params, relatedSpec);
-		}
-		return new TypedParams<>(params);
-	}
+    private boolean isSelfLink;
 
-	private void addRelations(Map<String, IncludedRelationsParams> params, QuerySpec spec) {
-		if (!spec.getIncludedRelations().isEmpty()) {
-			Set<Inclusion> set = new HashSet<>();
-			for (IncludeRelationSpec relation : spec.getIncludedRelations()) {
-				set.add(new Inclusion(StringUtils.join(".", relation.getAttributePath())));
-			}
-			params.put(getResourceType(spec), new IncludedRelationsParams(set));
-		}
-	}
+    public QuerySpecAdapter(QuerySpec querySpec, ResourceRegistry resourceRegistry, QueryContext queryContext) {
+        this.querySpec = querySpec;
+        this.resourceRegistry = resourceRegistry;
+        this.queryContext = queryContext;
+        if (queryContext != null && queryContext.getRequestPath() != null) {
+            this.isSelfLink = queryContext.getRequestPath().contains("/relationships");
+        }
+    }
 
-	private String getResourceType(QuerySpec spec) {
-		if (spec.getResourceType() != null) {
-			return spec.getResourceType();
-		}
-		RegistryEntry entry = resourceRegistry.getEntry(spec.getResourceClass());
-		ResourceInformation resourceInformation = entry.getResourceInformation();
-		return resourceInformation.getResourceType();
-	}
+    public QuerySpec getQuerySpec() {
+        return querySpec;
+    }
 
-	@Override
-	public TypedParams<IncludedFieldsParams> getIncludedFields() {
-		Map<String, IncludedFieldsParams> params = new HashMap<>();
-		addFields(params, querySpec);
-		for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
-			addFields(params, relatedSpec);
-		}
-		return new TypedParams<>(params);
-	}
+    @Override
+    public Map<String, Set<PathSpec>> getIncludedRelations() {
+        Map<String, Set<PathSpec>> params = new HashMap<>();
+        if (querySpec != null) {
+            addRelations(params, querySpec);
+            for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
+                addRelations(params, relatedSpec);
+            }
+        }
+        return params;
+    }
 
-	private void addFields(Map<String, IncludedFieldsParams> params, QuerySpec spec) {
-		if (!spec.getIncludedFields().isEmpty()) {
-			Set<String> set = new HashSet<>();
-			for (IncludeFieldSpec relation : spec.getIncludedFields()) {
-				set.add(StringUtils.join(".", relation.getAttributePath()));
-			}
-			params.put(getResourceType(spec), new IncludedFieldsParams(set));
-		}
-	}
+    private void addRelations(Map<String, Set<PathSpec>> params, QuerySpec spec) {
+        if (!spec.getIncludedRelations().isEmpty()) {
+            Set<PathSpec> set = new HashSet<>();
+            for (IncludeRelationSpec relation : spec.getIncludedRelations()) {
+                set.add(relation.getPath());
+            }
+            params.put(getResourceType(spec), set);
+        }
+    }
 
-	@Override
-	public ResourceInformation getResourceInformation() {
-		return resourceRegistry.getEntry(getResourceType(querySpec)).getResourceInformation();
-	}
+    private String getResourceType(QuerySpec spec) {
+        if (spec.getResourceType() != null) {
+            return spec.getResourceType();
+        }
+        RegistryEntry entry = resourceRegistry.getEntry(spec.getResourceClass());
+        ResourceInformation resourceInformation = entry.getResourceInformation();
+        return resourceInformation.getResourceType();
+    }
 
-	@Override
-	public Long getLimit() {
-		return querySpec.getLimit();
-	}
+    @Override
+    public Map<String, Set<PathSpec>> getIncludedFields() {
+        Map<String, Set<PathSpec>> params = new HashMap<>();
+        if (querySpec != null) {
+            addFields(params, querySpec);
+            for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
+                addFields(params, relatedSpec);
+            }
+        }
+        return params;
+    }
 
-	@Override
-	public void setLimit(Long limit) {
-		querySpec.setLimit(limit);
-	}
+    private void addFields(Map<String, Set<PathSpec>> params, QuerySpec spec) {
+        if (!spec.getIncludedFields().isEmpty()) {
+            Set<PathSpec> set = new HashSet<>();
+            for (IncludeFieldSpec relation : spec.getIncludedFields()) {
+                set.add(relation.getPath());
+            }
+            params.put(getResourceType(spec), set);
+        }
+    }
 
-	@Override
-	public long getOffset() {
-		return querySpec.getOffset();
-	}
+    @Override
+    public ResourceInformation getResourceInformation() {
+        return resourceRegistry.getEntry(getResourceType(querySpec)).getResourceInformation();
+    }
 
-	@Override
-	public void setOffset(long offset) {
-		querySpec.setOffset(offset);
-	}
+    @Override
+    public ResourceRegistry getResourceRegistry() {
+        return resourceRegistry;
+    }
 
-	@Override
-	public QueryAdapter duplicate() {
-		return new QuerySpecAdapter(querySpec.duplicate(), resourceRegistry);
-	}
+    @Override
+    public QueryContext getQueryContext() {
+        return queryContext;
+    }
 
-	@Override
-	public QueryParams toQueryParams() {
-		DefaultQueryParamsConverter converter = new DefaultQueryParamsConverter(resourceRegistry);
-		return converter.fromParams(getResourceInformation().getResourceClass(), getQuerySpec());
-	}
+    @Override
+    public QueryAdapter duplicate() {
+        QuerySpecAdapter adapter = new QuerySpecAdapter(querySpec != null ? querySpec.clone() : null, resourceRegistry, queryContext);
+        adapter.setCompactMode(compactMode);
+        return adapter;
+    }
 
-	@Override
-	public QuerySpec toQuerySpec() {
-		return getQuerySpec();
-	}
+    @Override
+    public QuerySpec toQuerySpec() {
+        return getQuerySpec();
+    }
+
+    @Override
+    public boolean getCompactMode() {
+        return compactMode;
+    }
+
+    @Override
+    public void setPagingSpec(final PagingSpec pagingSpec) {
+        querySpec.setPaging(pagingSpec);
+    }
+
+    @Override
+    public PagingSpec getPagingSpec() {
+        return querySpec.getPaging();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return querySpec == null;
+    }
+
+    public void setCompactMode(boolean compactMode) {
+        this.compactMode = compactMode;
+    }
+
+    @Override
+    public String toString() {
+        return querySpec.toString();
+    }
+
+    @Override
+    public boolean isSelfLink() {
+        return isSelfLink;
+    }
 }

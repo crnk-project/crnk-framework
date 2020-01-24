@@ -1,9 +1,12 @@
 package io.crnk.core.mock.models;
 
-import io.crnk.core.resource.annotations.*;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 @JsonApiResource(type = "eager-projects")
 public class ProjectEager {
@@ -13,11 +16,10 @@ public class ProjectEager {
 
 	private String name;
 
-	@JsonApiToOne
+	@JsonApiRelation
 	private Task task;
 
-	@JsonApiToMany
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private List<Task> tasks = new ArrayList<>();
 
 	public List<Task> getTasks() {

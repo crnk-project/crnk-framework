@@ -2,54 +2,50 @@ import com.moowork.gradle.node.npm.NpmTask
 
 apply plugin: 'com.moowork.node'
 
-apply plugin:'java'
+apply plugin: 'java'
 
-dependencies{
-	compile project(':crnk-core')
-	testCompile project(':crnk-test')
+dependencies {
+    compile project(':crnk-core')
+    compile project(':crnk-data:crnk-data-facet')
+    compile project(':crnk-meta')
+    compileOnly project(':crnk-home')
+    testCompile project(':crnk-test')
+    testCompile project(':crnk-home')
 }
 
 sourceSets {
-	main {
-		resources {
-			srcDirs "src/main/resources", "build/npm"
-		}
-	}
+    main {
+        resources {
+            srcDirs "src/main/resources", "build/npm"
+        }
+    }
 }
 
 ext {
-	NG_BUILD_ARGS = ['--environment', 'prod', '--target', 'production', '--no-progress']
+    NG_BUILD_ARGS = ['--environment', 'prod', '--target', 'production', '--no-progress']
 }
 
 node {
-	version = '6.10.3'
-	npmVersion = '5.1.0'
-	download = true
+    version = '6.10.3'
+    npmVersion = '5.1.0'
+    download = true
 }
 
 task npmRunBuild(type: NpmTask) {
-	dependsOn npmInstall
+    dependsOn npmInstall
 
-	npmCommand = ['run', 'build']
-	args = ['--', '--base-href', './'] + NG_BUILD_ARGS
-	inputs.dir 'src'
-	inputs.files 'angular-cli.json', 'package.json'
-	outputs.dir 'build/npm/io/crnk/ui'
+    npmCommand = ['run', 'build']
+    args = ['--', '--base-href', './'] + NG_BUILD_ARGS
+    inputs.dir 'src/app'
+    inputs.dir 'src/assets'
+    inputs.dir 'src/environments'
+    inputs.files 'angular-cli.json', 'package.json'
+    outputs.dir 'build/npm/io/crnk/ui'
 }
 
 tasks.processResources.dependsOn 'npmRunBuild'
 
-task war(type: War) {
-	group = 'Build'
-	description = 'Generates a war archive.'
-	dependsOn 'npmRunBuild'
-
-	from { 'build/npm/io/crnk/ui' }
-	webInf { from 'src/WEB-INF' }
-}
-tasks.assemble.dependsOn 'war'
-
 clean {
-	delete 'build/npm'
+    delete 'build/npm'
 }
 

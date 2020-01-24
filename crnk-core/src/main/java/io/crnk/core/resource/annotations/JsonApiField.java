@@ -1,6 +1,10 @@
 package io.crnk.core.resource.annotations;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Allows to configure the supported features of a field.
@@ -36,4 +40,15 @@ public @interface JsonApiField {
 	 * @return true if the attribute can be read with a GET request.
 	 */
 	boolean readable() default true;
+
+	/**
+	 * @return true if the attribute can be deleted with a DELETE request. Only applicable to
+	 *  multi-valued relationships.
+	 */
+	boolean deletable() default true;
+
+	/**
+	 * @return Patch strategy.
+	 */
+	PatchStrategy patchStrategy() default PatchStrategy.DEFAULT;
 }

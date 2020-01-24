@@ -2,7 +2,12 @@ package io.crnk.operations.internal;
 
 import io.crnk.core.engine.internal.utils.CompareUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 public class GraphUtils {
 

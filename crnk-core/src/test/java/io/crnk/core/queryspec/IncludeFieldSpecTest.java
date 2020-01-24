@@ -1,9 +1,9 @@
 package io.crnk.core.queryspec;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 public class IncludeFieldSpecTest {
 
@@ -15,7 +15,7 @@ public class IncludeFieldSpecTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testThrowExceptionOnNullArgument() {
-		new IncludeFieldSpec(null);
+		new IncludeFieldSpec((PathSpec) null);
 	}
 
 	@Test
@@ -42,5 +42,13 @@ public class IncludeFieldSpecTest {
 		Assert.assertNotEquals(spec2, spec3);
 		Assert.assertNotEquals(spec3, spec2);
 		Assert.assertNotEquals(spec1, rel);
+	}
+
+	@Test
+	public void testClone() {
+		IncludeFieldSpec spec = new IncludeFieldSpec(Arrays.asList("sortAttr"));
+		IncludeFieldSpec duplicate = spec.clone();
+		Assert.assertNotSame(spec, duplicate);
+		Assert.assertNotSame(spec.getAttributePath(), duplicate.getAttributePath());
 	}
 }

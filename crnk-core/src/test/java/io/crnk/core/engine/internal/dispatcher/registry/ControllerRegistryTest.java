@@ -1,15 +1,13 @@
 package io.crnk.core.engine.internal.dispatcher.registry;
 
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.exception.MethodNotFoundException;
-import io.crnk.core.mock.MockConstants;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.resource.registry.ResourceRegistryTest;
+import io.crnk.core.exception.BadRequestException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,31 +15,32 @@ import org.junit.rules.ExpectedException;
 
 public class ControllerRegistryTest {
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-	private ResourceRegistry resourceRegistry;
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+    private ResourceRegistry resourceRegistry;
+    private PathBuilder pathBuilder;
+    private QueryContext queryContext = new QueryContext().setRequestVersion(0);
 
-	@Before
-	public void prepare() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
-		boot.boot();
-		resourceRegistry = boot.getResourceRegistry();
-	}
+    @Before
+    public void prepare() {
+        CoreTestContainer container = new CoreTestContainer();
+        container.addModule(new CoreTestModule());
+        container.boot();
+        resourceRegistry = container.getResourceRegistry();
+        pathBuilder = new PathBuilder(resourceRegistry, container.getModuleRegistry().getTypeParser());
+    }
 
-	@Test
-	public void onUnsupportedRequestRegisterShouldThrowError() {
-		// GIVEN
-		PathBuilder pathBuilder = new PathBuilder(resourceRegistry);
-		JsonPath jsonPath = pathBuilder.build("/tasks/");
-		String requestType = "PATCH";
-		ControllerRegistry sut = new ControllerRegistry(null);
+    @Test
+    public void onUnsupportedRequestRegisterShouldThrowError() {
+        // GIVEN
+        JsonPath jsonPath = pathBuilder.build("/tasks/", queryContext);
+        String requestType = "PATCH";
+        ControllerRegistry sut = new ControllerRegistry(null);
 
-		// THEN
-		expectedException.expect(MethodNotFoundException.class);
+        // THEN
+        expectedException.expect(BadRequestException.class);
 
-		// WHEN
-		sut.getController(jsonPath, requestType);
-	}
+        // WHEN
+        sut.getController(jsonPath, requestType);
+    }
 }

@@ -4,22 +4,15 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.module.Module;
 
 public class JacksonModule implements Module {
 
 	private static final String JSON_API_JACKSON_MODULE_NAME = "crnk";
 
-	final ObjectMapper objectMapper;
-	private final boolean serializeLinksAsObjects;
+	private final ObjectMapper objectMapper;
 
-	public JacksonModule(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-		this.serializeLinksAsObjects = false;
-	}
+	private final boolean serializeLinksAsObjects;
 
 	public JacksonModule(ObjectMapper objectMapper, boolean serializeLinksAsObjects) {
 		this.objectMapper = objectMapper;
@@ -34,15 +27,6 @@ public class JacksonModule implements Module {
 	@Override
 	public void setupModule(ModuleContext context) {
 		objectMapper.registerModule(createJacksonModule(serializeLinksAsObjects));
-
-		DefaultResourceFieldInformationProvider defaultFieldProvider = new DefaultResourceFieldInformationProvider();
-		ResourceFieldInformationProvider jacksonFieldProvider = new JacksonResourceFieldInformationProvider();
-
-		// TODO move somewhere else and make use of a SerializerExtension
-		context.addResourceInformationBuilder(new DefaultResourceInformationProvider(
-			context.getPropertiesProvider(),
-			defaultFieldProvider,
-			jacksonFieldProvider));
 	}
 
 
@@ -60,8 +44,7 @@ public class JacksonModule implements Module {
 	 * Adds the {@link LinksInformationSerializer} if <code>serializeLinksAsObjects</code> is set to <code>true</code>.
 	 *
 	 * @param serializeLinksAsObjects flag which decides whether the {@link LinksInformationSerializer} should be added as
-	 * additional serializer or not.
-	 *
+	 *                                additional serializer or not.
 	 * @return {@link com.fasterxml.jackson.databind.Module} with custom serializers
 	 */
 	public static SimpleModule createJacksonModule(boolean serializeLinksAsObjects) {
@@ -72,6 +55,7 @@ public class JacksonModule implements Module {
 		if (serializeLinksAsObjects) {
 			simpleModule.addSerializer(new LinksInformationSerializer());
 		}
+
 		return simpleModule;
 	}
 }

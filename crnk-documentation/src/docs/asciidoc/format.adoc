@@ -1,0 +1,68 @@
+anchor:format[]
+
+
+# Formats
+
+By default Crnk follows the JSON:API specification to establish a REST endpoint. This chapter outlines the support
+for formats other than JSON:API.
+
+anchor:format_plain[]
+
+## Plain JSON
+
+The relationships and inclusions mechanisms of JSON:API allow to built powerful applications. But
+sometimes those advanced features can also make simpler applications harder to write.
+For example, clients do not have direct access to relationships, but rather have the resolve them through their
+identifiers.
+
+`crnk-format-plain-json` hosts the `PlainJsonFormatModule` that allows to setup a simpler,
+non-JSON:API format. The module can be applied both to CrnkBoot and CrnkClient. An example looks like:
+
+[source]
+.http://localhost:8080/tasks/12
+----
+{
+  "data" : {
+    "id" : "12",
+    "type" : "tasks",
+    "name" : "someTask",
+    "schedule" : {
+      "data" : null,
+      "links" : {
+        "self" : "http://localhost:8080/tasks/12/relationships/schedule",
+        "related" : "http://localhost:8080/tasks/12/schedule"
+      }
+    },
+    "project" : {
+      "data" : {
+        "id" : "1",
+        "type" : "projects",
+        "name" : "someProject"
+      },
+      "links" : {
+        "self" : "http://localhost:8080/tasks/12/relationships/project",
+        "related" : "http://localhost:8080/tasks/12/project"
+      }
+    }
+  }
+}
+----
+
+Most notably the project relationship is directly inlined within the task. And a resource is written in a more flat manner without the
+`attributes` and `relationships` containers. Contributions to add more flexibility to the module are always welcome.
+
+Note that the JSON:API endpoint remains fully functional. The HTTP `Accept` and `Content-Type` headers are used to select
+the format. As such, the Crnk client continues to make use of the JSON:API format. Related to this there is
+a `format` attribute for
+the Typescript generator to select the desired format for generation:
+
+[source]
+----
+crnkGen{
+
+  typescript{
+    ...
+    format = 'PLAINJSON' // or 'JSONAPI'
+  }
+}
+----

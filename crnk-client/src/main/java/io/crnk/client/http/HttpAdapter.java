@@ -6,8 +6,10 @@ import java.util.concurrent.TimeUnit;
 
 public interface HttpAdapter {
 
-	HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody);
+    void addListener(HttpAdapterListener listener);
 
-	void setReceiveTimeout(int timeout, TimeUnit unit);
+    HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody);
+
+    void setReceiveTimeout(int timeout, TimeUnit unit);
 
 }

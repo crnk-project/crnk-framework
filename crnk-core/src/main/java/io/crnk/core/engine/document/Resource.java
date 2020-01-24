@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 
@@ -16,19 +17,19 @@ import io.crnk.core.resource.meta.MetaContainer;
  * <p/>
  * http://jsonapi.org/format/#document-resource-objects
  */
-public class Resource extends ResourceIdentifier implements MetaContainer, LinksContainer {
-
-	@JsonInclude(Include.NON_EMPTY)
-	private Map<String, JsonNode> attributes = new HashMap<>();
-
-	@JsonInclude(Include.NON_EMPTY)
-	private Map<String, Relationship> relationships = new HashMap<>();
+public class Resource extends ResourceIdentifier implements MetaContainer, LinksContainer, ResourceTypeHolder {
 
 	@JsonInclude(Include.NON_EMPTY)
 	private ObjectNode links;
 
 	@JsonInclude(Include.NON_EMPTY)
 	private ObjectNode meta;
+
+	@JsonInclude(Include.NON_EMPTY)
+	private Map<String, JsonNode> attributes = new HashMap<>();
+
+	@JsonInclude(Include.NON_EMPTY)
+	private Map<String, Relationship> relationships = new HashMap<>();
 
 	@Override
 	public ObjectNode getLinks() {
@@ -86,6 +87,7 @@ public class Resource extends ResourceIdentifier implements MetaContainer, Links
 				&& Objects.equals(id, other.id) && Objects.equals(type, other.type);
 	}
 
+	@Override
 	public ResourceIdentifier toIdentifier() {
 		return new ResourceIdentifier(getId(), getType());
 	}

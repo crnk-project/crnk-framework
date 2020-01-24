@@ -2,26 +2,39 @@ apply plugin: 'java'
 
 dependencies {
 	compile project(':crnk-core')
+	compile project(':crnk-reactive')
 
-	compile group: 'junit', name: 'junit', version: '4.12'
-	compile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
-	compile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
+	compile "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+	compile "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
+	compile "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+	compile "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
 
-	compile group: 'com.fasterxml.jackson.jaxrs', name: 'jackson-jaxrs-json-provider', version: '2.9.0'
-	compile group: 'org.glassfish.jersey.core', name: 'jersey-common', version: '2.25.1'
+	compile 'org.mockito:mockito-core:2.18.3'
+	compile 'org.assertj:assertj-core:3.9.1'
 
-	compile group: 'org.glassfish.jersey.test-framework.providers', name: 'jersey-test-framework-provider-jetty', version: '2.25.1'
-	compile group: 'org.glassfish.jersey.test-framework', name: 'jersey-test-framework-core', version: '2.25.1'
-	compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.1.1.v20140108'
+	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
+	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-	compile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.2'
-	compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
-	compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
-	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
-	compile group: 'org.glassfish.jersey.ext', name: 'jersey-proxy-client', version: '2.25.1'
-	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.25.1'
-	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.25.1'
-	compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.4.1'
-	compile group: 'org.reflections', name: 'reflections', version: '0.9.9'
-	compile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '1.7.2'
+	compile 'org.eclipse.jetty:jetty-server:9.4.9.v20180320'
+	compile 'org.eclipse.jetty:jetty-security:9.4.9.v20180320'
+
+	compile 'io.rest-assured:rest-assured:3.0.2'
+	compile 'ch.qos.logback:logback-classic:1.2.3'
+	compile 'org.slf4j:jcl-over-slf4j:1.7.9'
+	compile 'org.slf4j:jul-to-slf4j:1.7.25'
+
+	compile 'javax.ws.rs:javax.ws.rs-api:2.1'
+
+	compile 'org.glassfish.jersey.ext:jersey-proxy-client'
+	compile 'org.glassfish.jersey.core:jersey-client'
+	compile 'org.glassfish.jersey.media:jersey-media-json-jackson'
+	compile 'org.glassfish.jersey.inject:jersey-hk2'
+	compile 'org.glassfish.jersey.core:jersey-common'
+	compile 'org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-jetty'
+	compile 'org.glassfish.jersey.test-framework:jersey-test-framework-core'
+
+	compile 'org.apache.httpcomponents:httpclient:4.5.2'
+	compile 'com.squareup.okhttp3:okhttp:3.4.1'
+	compile 'org.reflections:reflections'
+	compile 'nl.jqno.equalsverifier:equalsverifier:1.7.2'
 }

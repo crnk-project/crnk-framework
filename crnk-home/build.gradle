@@ -3,10 +3,9 @@ apply plugin: 'java'
 dependencies {
 
 	compile project(':crnk-core')
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.0'
 
 	testCompile project(':crnk-test')
+	testCompile project(':crnk-meta')
 	testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
 	testCompile group: 'net.javacrumbs.json-unit', name: 'json-unit-fluent', version: '1.5.3'
 	testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '1.7.2'

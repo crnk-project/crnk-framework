@@ -2,7 +2,11 @@ package io.crnk.core.resource.annotations;
 
 import io.crnk.core.engine.parser.TypeParser;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Defines a field which will be used as an identifier of a resource. It must be assigned to a field which implements

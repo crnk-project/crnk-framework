@@ -1,12 +1,12 @@
 package io.crnk.core.engine.repository;
 
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -32,9 +32,9 @@ public class ResourceRepositoryBaseTest {
 
 	@Before
 	public void setup() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.setPropertiesProvider(new PropertiesProvider() {
+		CoreTestContainer container = new CoreTestContainer();
+		container.addModule(new CoreTestModule());
+		container.getBoot().setPropertiesProvider(new PropertiesProvider() {
 			@Override
 			public String getProperty(String key) {
 				if (key.equals(CrnkProperties.RETURN_404_ON_NULL)) {
@@ -43,10 +43,11 @@ public class ResourceRepositoryBaseTest {
 				return null;
 			}
 		});
-		boot.boot();
+		container.boot();
+
 
 		repository = new TestRepository();
-		repository.setResourceRegistry(boot.getResourceRegistry());
+		repository.setResourceRegistry(container.getResourceRegistry());
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
@@ -54,17 +55,17 @@ public class ResourceRepositoryBaseTest {
 		repository.findOne(-1, new QuerySpec(Task.class));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void saveNotSupported() {
 		repository.save(null);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void createNotSupported() {
 		repository.create(null);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void deleteNotSupported() {
 		repository.delete(null);
 	}

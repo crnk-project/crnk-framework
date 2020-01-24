@@ -4,7 +4,7 @@ import io.crnk.core.boot.CrnkProperties;
 
 /**
  * Determines how to deal with field that cannot be changed upon a PATCH or POST
- * request. See also {@link JsonApiField}, {@link JsonProperty} and
+ * request. See also {@link io.crnk.core.resource.annotations.JsonApiField}, {@link com.fasterxml.jackson.annotation.JsonProperty} and
  * {@value CrnkProperties#RESOURCE_FIELD_IMMUTABLE_WRITE_BEHAVIOR}} for more
  * information.
  */
@@ -17,7 +17,7 @@ public enum ResourceFieldImmutableWriteBehavior {
 	IGNORE,
 
 	/**
-	 * Throws a {@link BadRequestException} when attempting to change an
+	 * Throws a {@link io.crnk.core.exception.BadRequestException} when attempting to change an
 	 * field with a POST and PATCH request that cannot be changed.
 	 */
 	FAIL

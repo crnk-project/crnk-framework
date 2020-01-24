@@ -1,35 +1,35 @@
 package io.crnk.meta;
 
-import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.internal.JaxrsModule;
-import io.crnk.test.mock.TestModule;
+import io.crnk.test.TestContainer;
 import org.junit.Before;
 
 public abstract class AbstractMetaTest {
 
-	protected CrnkBoot boot;
 
-	protected MetaLookup lookup;
+	protected MetaLookupImpl lookup;
 
 	protected ResourceMetaProvider resourceProvider;
 
+	protected TestContainer container;
+
 	@Before
 	public void setup() {
-		boot = new CrnkBoot();
-		boot.addModule(new JaxrsModule(null));
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
-		boot.addModule(new TestModule());
-		boot.addModule(new io.crnk.test.mock.dynamic.DynamicModule());
+		container = new TestContainer();
+		container.getBoot().getCoreModule()
+				.setDefaultRepositoryInformationProvider(new JaxrsModule.JaxrsResourceRepositoryInformationProvider());
+		container.addModule(new JaxrsModule(null));
+		container.addTestModule();
+		container.addModule(new io.crnk.test.mock.dynamic.DynamicModule());
 		configure();
-		boot.boot();
+		container.boot();
 
 		resourceProvider = new ResourceMetaProvider();
 
-		lookup = new MetaLookup();
+		lookup = new MetaLookupImpl();
 		lookup.addProvider(resourceProvider);
-		lookup.setModuleContext(boot.getModuleRegistry().getContext());
+		lookup.setModuleContext(container.getModuleRegistry().getContext());
 		lookup.initialize();
 	}
 

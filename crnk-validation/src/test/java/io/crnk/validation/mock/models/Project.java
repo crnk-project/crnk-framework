@@ -1,14 +1,20 @@
 package io.crnk.validation.mock.models;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.validation.mock.ComplexValid;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.validation.mock.ComplexValid;
 
 @JsonApiResource(type = "projects")
 @ComplexValid
@@ -18,20 +24,24 @@ public class Project {
 	private Long id;
 
 	@NotNull
+	@JsonProperty("renamed-name")
 	private String name;
 
 	private String description;
 
 	@Valid
+	@JsonProperty("renamed-data")
 	private ProjectData data;
 
 	@Valid
+	@JsonProperty("data-list")
 	private List<ProjectData> dataList = new ArrayList<>();
 
 	@Valid
 	private Set<ProjectData> dataSet = new HashSet<>();
 
 	@Valid
+	@JsonProperty("data-map")
 	private Map<String, ProjectData> dataMap = new HashMap<>();
 
 	@Size(min = 0, max = 3)
@@ -40,11 +50,11 @@ public class Project {
 	@NotNull
 	private Map<String, String> attributes = new HashMap<>();
 
-	@JsonApiToMany
+	@JsonApiRelation
 	@Valid
 	private List<Task> tasks = new ArrayList<>();
 
-	@JsonApiToMany
+	@JsonApiRelation
 	@Valid
 	private Task task;
 

@@ -19,8 +19,9 @@ public class SerializerUtil {
 
 	/**
 	 * Constructor takes a flag to decide whether links should be serialized as JSON objects or not.
+	 *
 	 * @param serializeLinksAsObjects if set to <code>true</code>, links will be serialized as JSON objects,<br />
-	 * 			otherwise as simple JSON attributes.
+	 * otherwise as simple JSON attributes.
 	 */
 	public SerializerUtil(boolean serializeLinksAsObjects) {
 		this.serializeLinksAsObjects = serializeLinksAsObjects;
@@ -31,20 +32,33 @@ public class SerializerUtil {
 			ObjectNode linkNode = objectMapper.createObjectNode();
 			linkNode.put(HREF, url);
 			node.set(fieldName, linkNode);
-		}
-		else {
+		} else {
 			node.put(fieldName, url);
 		}
 		return node;
 	}
+
+
+	public String getLinks(ObjectNode node, String fieldName) {
+		JsonNode linkNode = node != null ? node.get(fieldName) : null;
+		if (linkNode != null) {
+			if (serializeLinksAsObjects) {
+				JsonNode hrefNode = linkNode.get(HREF);
+				return hrefNode != null ? hrefNode.textValue() : null;
+			} else {
+				return linkNode.textValue();
+			}
+		}
+		return null;
+	}
+
 
 	public void serializeLink(JsonGenerator gen, String fieldName, String url) throws IOException {
 		if (serializeLinksAsObjects) {
 			gen.writeObjectFieldStart(fieldName);
 			gen.writeStringField(HREF, url);
 			gen.writeEndObject();
-		}
-		else {
+		} else {
 			gen.writeStringField(fieldName, url);
 		}
 	}
@@ -57,7 +71,7 @@ public class SerializerUtil {
 		return readStringIfExists(fieldName, jsonNode);
 	}
 
-	public static String readStringIfExists(String fieldName, JsonNode jsonNode) throws IOException {
+	public static String readStringIfExists(String fieldName, JsonNode jsonNode) {
 		JsonNode node = jsonNode.get(fieldName);
 		if (node != null) {
 			return node.asText();

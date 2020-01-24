@@ -148,7 +148,7 @@ public class WrappedList<T> implements List<T> {
 		this.list = list;
 	}
 
-	public List<T> getWrappedList(){
+	public List<T> getWrappedList() {
 		return list;
 	}
 }

@@ -1,23 +1,54 @@
 package io.crnk.meta;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.meta.model.*;
-import io.crnk.meta.model.resource.*;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.meta.model.MetaArrayType;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaAttributePath;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaEnumType;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaSetType;
+import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.resource.MetaJsonObject;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceAction;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
+import io.crnk.meta.model.resource.MetaResourceField;
+import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
-import io.crnk.test.mock.models.*;
+import io.crnk.test.mock.models.NoAccessTask;
+import io.crnk.test.mock.models.Project;
+import io.crnk.test.mock.models.Schedule;
+import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.models.TaskStatus;
+import io.crnk.test.mock.models.TaskSubType;
+import io.crnk.test.mock.models.VersionedTask;
+import io.crnk.test.mock.models.types.ProjectData;
 import io.crnk.test.mock.repository.ScheduleRepository;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.*;
 
 public class ResourceMetaProviderTest extends AbstractMetaTest {
 
-	private MetaLookup lookup;
+	private MetaLookupImpl lookup;
 
 	private ResourceMetaProvider resourceProvider;
 
@@ -27,8 +58,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 		resourceProvider = new ResourceMetaProvider();
 
-		lookup = new MetaLookup();
-		lookup.setModuleContext(boot.getModuleRegistry().getContext());
+		lookup = new MetaLookupImpl();
+		lookup.setModuleContext(container.getModuleRegistry().getContext());
 		lookup.addProvider(resourceProvider);
 		lookup.initialize();
 	}
@@ -42,20 +73,23 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("setId", idAttr.getWriteMethod().getName());
 
 		Schedule schedule = new Schedule();
-		schedule.setTasksList(new ArrayList<Task>());
+		schedule.setTasks(new HashSet<>());
 		schedule.setId(13L);
 		Assert.assertEquals(13L, idAttr.getValue(schedule));
 
 		idAttr.setValue(schedule, 14L);
 		Assert.assertEquals(14L, schedule.getId().longValue());
 
-		MetaAttribute listAttr = meta.getAttribute("tasksList");
+		// TODO meta ttribute & renaming
+		/*
+		MetaAttribute listAttr = meta.getAttribute("taskSet");
 		Task task = new Task();
 		task.setId(12L);
 		listAttr.addValue(schedule, task);
-		Assert.assertEquals(1, schedule.getTasksList().size());
+		Assert.assertEquals(1, schedule.getTasks().size());
 		listAttr.removeValue(schedule, task);
-		Assert.assertEquals(0, schedule.getTasksList().size());
+		Assert.assertEquals(0, schedule.getTasks().size());
+		 */
 	}
 
 	@Test
@@ -65,13 +99,22 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertNull(meta.getVersionAttribute());
 	}
 
+
+	@Test
+	public void checkUseOfJsonNaming() {
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
+		// this is the json name, not java (desc)!
+		MetaAttribute attr = meta.getAttribute("description");
+		Assert.assertNotNull(attr);
+	}
+
 	@Test
 	public void resolvePath() {
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
-		MetaAttributePath metaAttributes = meta.resolvePath(Arrays.asList("task", "name"));
+		MetaAttributePath metaAttributes = meta.resolvePath(Arrays.asList("project", "name"));
 		Assert.assertEquals(2, metaAttributes.length());
-		Assert.assertEquals("task", metaAttributes.getElement(0).getName());
+		Assert.assertEquals("project", metaAttributes.getElement(0).getName());
 		Assert.assertEquals("name", metaAttributes.getElement(1).getName());
 	}
 
@@ -121,26 +164,45 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testPreserveAttributeOrder() {
-		ResourceInformation resourceInformation =
-				boot.getResourceRegistry().getEntryForClass(Schedule.class).getResourceInformation();
+		ResourceInformation resourceInformation = container.getEntry(Schedule.class).getResourceInformation();
 		List<ResourceField> fields = resourceInformation.getFields();
 		Assert.assertEquals("id", fields.get(0).getUnderlyingName());
 		Assert.assertEquals("name", fields.get(1).getUnderlyingName());
-		Assert.assertEquals("task", fields.get(2).getUnderlyingName());
-		Assert.assertEquals("lazyTask", fields.get(3).getUnderlyingName());
-		Assert.assertEquals("tasks", fields.get(4).getUnderlyingName());
-		Assert.assertEquals("tasksList", fields.get(5).getUnderlyingName());
-		Assert.assertEquals("delayed", fields.get(6).getUnderlyingName());
+		Assert.assertEquals("desc", fields.get(2).getUnderlyingName());
+		Assert.assertEquals("tasks", fields.get(3).getUnderlyingName());
+		Assert.assertEquals("project", fields.get(4).getUnderlyingName());
+		Assert.assertEquals("projects", fields.get(5).getUnderlyingName());
+		Assert.assertEquals("status", fields.get(6).getUnderlyingName());
+		Assert.assertEquals("delayed", fields.get(7).getUnderlyingName());
+		Assert.assertEquals("customData", fields.get(8).getUnderlyingName());
 
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		List<? extends MetaAttribute> attributes = meta.getAttributes();
 		Assert.assertEquals("id", attributes.get(0).getName());
 		Assert.assertEquals("name", attributes.get(1).getName());
-		Assert.assertEquals("task", attributes.get(2).getName());
-		Assert.assertEquals("lazyTask", attributes.get(3).getName());
-		Assert.assertEquals("tasks", attributes.get(4).getName());
-		Assert.assertEquals("tasksList", attributes.get(5).getName());
-		Assert.assertEquals("delayed", attributes.get(6).getName());
+		Assert.assertEquals("description", attributes.get(2).getName());
+		Assert.assertEquals("taskSet", attributes.get(3).getName());
+		Assert.assertEquals("project", attributes.get(4).getName());
+		Assert.assertEquals("projects", attributes.get(5).getName());
+		Assert.assertEquals("status", attributes.get(6).getName());
+		Assert.assertEquals("delayed", attributes.get(7).getName());
+		Assert.assertEquals("customData", attributes.get(8).getName());
+	}
+
+	@Test
+	public void testUnderlyingNameForNestedObject() {
+		MetaDataObject meta = resourceProvider.getMeta(ProjectData.class);
+		MetaAttribute attribute = meta.getAttribute("due");
+		Assert.assertEquals("due", attribute.getName());
+		Assert.assertEquals("dueDate", attribute.getUnderlyingName());
+	}
+
+	@Test
+	public void testUnderlyingNameForResource() {
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
+		MetaAttribute attribute = meta.getAttribute("taskSet");
+		Assert.assertEquals("taskSet", attribute.getName());
+		Assert.assertEquals("tasks", attribute.getUnderlyingName());
 	}
 
 	@Test
@@ -157,7 +219,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	@Test
 	public void testRegularFieldNullable() {
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
-		MetaAttribute taskField = meta.getAttribute("task");
+		MetaAttribute taskField = meta.getAttribute("project");
 		Assert.assertTrue(taskField.isNullable());
 	}
 
@@ -195,17 +257,38 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	}
 
 	@Test
+	public void testAccessInheritanceOnResource() {
+		MetaResource meta = resourceProvider.getMeta(NoAccessTask.class);
+
+		Assert.assertFalse(meta.isReadable());
+		Assert.assertFalse(meta.isInsertable());
+		Assert.assertFalse(meta.isUpdatable());
+		Assert.assertFalse(meta.isDeletable());
+	}
+
+	@Test
 	public void testResourceProperties() {
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
-		Assert.assertEquals("schedules", meta.getResourceType());
-		Assert.assertEquals("Schedules", meta.getName());
-		Assert.assertEquals("resources.schedules", meta.getId());
+		Assert.assertEquals("schedule", meta.getResourceType());
+		Assert.assertEquals("Schedule", meta.getName());
+		Assert.assertEquals("resources.schedule", meta.getId());
 
 		Assert.assertEquals(Schedule.class, meta.getImplementationClass());
 		Assert.assertEquals(Schedule.class, meta.getImplementationType());
 		Assert.assertNull(meta.getParent());
 		Assert.assertTrue(meta.getSubTypes().isEmpty());
+	}
+
+	@Test
+	public void testRenamedOppositeRelationship() {
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
+		MetaAttribute taskSetAttr = meta.getAttribute("taskSet");
+		Assert.assertEquals("taskSet", taskSetAttr.getName());
+		MetaAttribute oppositeAttribute = taskSetAttr.getOppositeAttribute();
+		Assert.assertNotNull(oppositeAttribute);
+		Assert.assertEquals("schedule", oppositeAttribute.getName());
+		Assert.assertSame(taskSetAttr, oppositeAttribute.getOppositeAttribute());
 	}
 
 	@Test
@@ -216,8 +299,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("linksInformation", attr.getName());
 		Assert.assertEquals("resources.tasks.linksInformation", attr.getId());
 		Assert.assertFalse(attr.isLazy());
-		Assert.assertFalse(attr.isMeta());
-		Assert.assertTrue(attr.isLinks());
+		Assert.assertTrue(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
 		Assert.assertNull(attr.getOppositeAttribute());
 		Assert.assertEquals(Task.TaskLinks.class, attr.getType().getImplementationClass());
 	}
@@ -230,18 +312,30 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("metaInformation", attr.getName());
 		Assert.assertEquals("resources.tasks.metaInformation", attr.getId());
 		Assert.assertFalse(attr.isLazy());
-		Assert.assertTrue(attr.isMeta());
-		Assert.assertFalse(attr.isLinks());
+		Assert.assertTrue(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
 		Assert.assertNull(attr.getOppositeAttribute());
 		Assert.assertEquals(Task.TaskMeta.class, attr.getType().getImplementationClass());
 	}
 
 	@Test
-	public void testRelatedData() {
+	public void testNestedObject() {
 		MetaResource meta = resourceProvider.getMeta(Project.class);
 		MetaAttribute data = meta.getAttribute("data");
 		MetaType type = data.getType();
 		Assert.assertEquals("resources.types.projectdata", type.getId());
+	}
+
+
+	@Test
+	public void testNestedAttributeRenaming() {
+		MetaResource meta = resourceProvider.getMeta(Project.class);
+		MetaAttribute data = meta.getAttribute("data");
+		MetaJsonObject type = (MetaJsonObject) data.getType();
+		Assert.assertEquals("resources.types.projectdata", type.getId());
+
+		Assert.assertFalse(type.hasAttribute("dueDate"));
+		Assert.assertNotNull(type.getAttribute("due"));
+
 	}
 
 
@@ -252,8 +346,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("name");
 		Assert.assertEquals("name", attr.getName());
 		Assert.assertFalse(attr.isLazy());
-		Assert.assertFalse(attr.isMeta());
-		Assert.assertFalse(attr.isLinks());
+		Assert.assertFalse(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
+		Assert.assertFalse(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
 		Assert.assertFalse(attr.isAssociation());
 
 		Assert.assertTrue(attr.isSortable());
@@ -337,8 +431,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("schedule", attr.getName());
 		Assert.assertEquals("resources.tasks.schedule", attr.getId());
 		Assert.assertFalse(attr.isLazy());
-		Assert.assertFalse(attr.isMeta());
-		Assert.assertFalse(attr.isLinks());
+		Assert.assertFalse(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
+		Assert.assertFalse(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
 		Assert.assertTrue(attr.isAssociation());
 		Assert.assertNotNull(attr.getOppositeAttribute());
 		Assert.assertNotNull("tasks", attr.getOppositeAttribute().getName());
@@ -354,15 +448,17 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	public void testMultiValuedSetRelation() {
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
-		MetaResourceField attr = (MetaResourceField) meta.getAttribute("tasks");
-		Assert.assertEquals("tasks", attr.getName());
-		Assert.assertEquals("resources.schedules.tasks", attr.getId());
+		MetaResourceField attr = (MetaResourceField) meta.getAttribute("taskSet");
+		Assert.assertEquals("taskSet", attr.getName());
+		Assert.assertEquals("resources.schedule.tasks", attr.getId());
 		Assert.assertTrue(attr.isLazy());
-		Assert.assertFalse(attr.isMeta());
-		Assert.assertFalse(attr.isLinks());
+		Assert.assertFalse(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
+		Assert.assertFalse(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
 		Assert.assertTrue(attr.isAssociation());
+		Assert.assertFalse(attr.isOwner());
 		Assert.assertNotNull(attr.getOppositeAttribute());
-		Assert.assertNotNull("tasks", attr.getOppositeAttribute().getName());
+		Assert.assertTrue(attr.getOppositeAttribute().isOwner());
+		Assert.assertNotNull("taskSet", attr.getOppositeAttribute().getName());
 		Assert.assertEquals(Set.class, attr.getType().getImplementationClass());
 		Assert.assertEquals(Task.class, attr.getType().getElementType().getImplementationClass());
 		Assert.assertTrue(attr.getType().getClass().getName(), attr.getType() instanceof MetaSetType);
@@ -375,14 +471,16 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	}
 
 	@Test
+	@Ignore
 	public void testMultiValuedListRelation() {
 		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("projects");
-		Assert.assertFalse(attr.isMeta());
-		Assert.assertFalse(attr.isLinks());
+		Assert.assertFalse(attr.getFieldType() == ResourceFieldType.META_INFORMATION);
+		Assert.assertFalse(attr.getFieldType() == ResourceFieldType.LINKS_INFORMATION);
 		Assert.assertTrue(attr.isAssociation());
-		Assert.assertEquals(List.class, attr.getType().getImplementationClass());
+		Assert.assertTrue(attr.isOwner());
+		Assert.assertEquals(ResourceList.class, attr.getType().getImplementationClass());
 		Assert.assertEquals(Project.class, attr.getType().getElementType().getImplementationClass());
 		Assert.assertTrue(attr.getType() instanceof MetaListType);
 
@@ -399,19 +497,14 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		MetaResource resourceMeta = resourceProvider.getMeta(Schedule.class);
 		MetaResourceRepository meta = (MetaResourceRepository) lookup.getMetaById().get(resourceMeta.getId() + "$repository");
 		Assert.assertEquals(resourceMeta, meta.getResourceType());
+		Assert.assertTrue(meta.isExposed());
 		Assert.assertNotNull(meta.getListLinksType());
 		Assert.assertNotNull(meta.getListMetaType());
 		Assert.assertEquals(ScheduleRepository.ScheduleListLinks.class, meta.getListLinksType().getImplementationClass());
 		Assert.assertEquals(ScheduleRepository.ScheduleListMeta.class, meta.getListMetaType().getImplementationClass());
 
 		List<MetaElement> children = new ArrayList<>(meta.getChildren());
-		Collections.sort(children, new Comparator<MetaElement>() {
-
-			@Override
-			public int compare(MetaElement o1, MetaElement o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
+		Collections.sort(children, Comparator.comparing(MetaElement::getName));
 		Assert.assertEquals(9, children.size());
 
 		MetaResourceAction repositoryActionMeta = (MetaResourceAction) children.get(1);
@@ -440,5 +533,27 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		}
 	}
 
+	@Test
+	public void testVersioning() {
+		MetaResource resourceMeta = resourceProvider.getMeta(VersionedTask.class);
+		Assert.assertEquals(0, resourceMeta.getVersionRange().getMin());
+		Assert.assertEquals(5, resourceMeta.getVersionRange().getMax());
 
+		List<MetaResourceField> fields = (List<MetaResourceField>) resourceMeta.getAttributes();
+		Assert.assertEquals(4, fields.size());
+
+		MetaResourceField idField = fields.get(0);
+		MetaResourceField nameField = fields.get(1);
+		MetaResourceField completedField = fields.get(2);
+		MetaResourceField newCompletedField = fields.get(3);
+		Assert.assertEquals("id", idField.getName());
+		Assert.assertEquals("name", nameField.getName());
+		Assert.assertEquals("completed", completedField.getName());
+		Assert.assertEquals("completed", newCompletedField.getName());
+
+		Assert.assertEquals(1, completedField.getVersionRange().getMin());
+		Assert.assertEquals(3, completedField.getVersionRange().getMax());
+		Assert.assertEquals(5, newCompletedField.getVersionRange().getMin());
+		Assert.assertEquals(Integer.MAX_VALUE, newCompletedField.getVersionRange().getMax());
+	}
 }

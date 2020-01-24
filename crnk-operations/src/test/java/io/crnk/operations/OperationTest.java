@@ -10,13 +10,13 @@ public class OperationTest {
 
 
 	@Test
-	public void testEquals() throws NoSuchFieldException {
+	public void testEquals() {
 		EqualsVerifier.forClass(Operation.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 
 	}
 
 	@Test
-	public void testHashCode() throws NoSuchFieldException {
+	public void testHashCode() {
 		Operation op1 = new Operation("a", "b", new Resource());
 		Operation op2 = new Operation("a", "b", new Resource());
 		Operation op3 = new Operation("x", "b", new Resource());

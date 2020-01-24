@@ -6,53 +6,68 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.resource.meta.JsonLinksInformation;
+import io.crnk.core.resource.meta.JsonMetaInformation;
+
 public class CollectionInvocationHandler implements InvocationHandler, ObjectProxy {
 
-	private Collection<?> collection;
+    private final ObjectNode links;
 
-	private String url;
+    private final ObjectNode meta;
 
-	private Class<?> resourceClass;
+    private Collection<?> collection;
 
-	private ClientProxyFactoryContext context;
+    private String url;
 
-	private boolean useSet;
+    private Class<?> resourceClass;
 
-	public CollectionInvocationHandler(Class<?> resourceClass, String url, ClientProxyFactoryContext context, boolean useSet) {
-		this.url = url;
-		this.resourceClass = resourceClass;
-		this.context = context;
-		this.useSet = useSet;
-	}
+    private ClientProxyFactoryContext context;
 
-	@Override
-	public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		if (method.getDeclaringClass() == Object.class || method.getDeclaringClass() == ObjectProxy.class) {
-			return method.invoke(this, args);
-		}
-		if (collection == null) {
-			collection = context.getCollection(resourceClass, url);
+    private boolean useSet;
 
-			// convert list to set
-			if (useSet) {
-				collection = new HashSet<>(collection);
-			}
-		}
-		try {
-			return method.invoke(collection, args);
-		}
-		catch (InvocationTargetException e) { // NO SONAR ok this way
-			throw e.getCause();
-		}
-	}
+    public CollectionInvocationHandler(Class<?> resourceClass, String url, ClientProxyFactoryContext context, boolean useSet, ObjectNode links, ObjectNode meta) {
+        this.url = url;
+        this.resourceClass = resourceClass;
+        this.context = context;
+        this.useSet = useSet;
+        this.links = links;
+        this.meta = meta;
+    }
 
-	@Override
-	public String getUrl() {
-		return url;
-	}
+    @Override
+    public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (method.getName().equals("getMeta")) {
+            return meta != null ? new JsonMetaInformation(meta, context.getModuleRegistry().getObjectMapper()) : null;
+        }
+        if (method.getName().equals("getLinks")) {
+            return links != null ? new JsonLinksInformation(links, context.getModuleRegistry().getObjectMapper()) : null;
+        }
+        if (method.getDeclaringClass() == Object.class || method.getDeclaringClass() == ObjectProxy.class) {
+            return method.invoke(this, args);
+        }
+        if (collection == null) {
+            collection = context.getCollection(resourceClass, url);
 
-	@Override
-	public boolean isLoaded() {
-		return collection != null;
-	}
+            // convert list to set
+            if (useSet) {
+                collection = new HashSet<>(collection);
+            }
+        }
+        try {
+            return method.invoke(collection, args);
+        } catch (InvocationTargetException e) { // NO SONAR ok this way
+            throw e.getCause();
+        }
+    }
+
+    @Override
+    public String getUrl() {
+        return url;
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return collection != null;
+    }
 }

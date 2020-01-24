@@ -1,24 +1,29 @@
 package io.crnk.home;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.RepositoryFilter;
-import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
+import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpResponse;
+import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.test.mock.ClassTestUtils;
+import io.crnk.test.mock.TestModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
 
 public class HomeModuleTest {
 
@@ -28,13 +33,87 @@ public class HomeModuleTest {
 
 	@Before
 	public void setup() {
-		this.module = Mockito.spy(HomeModule.create());
+		this.module = Mockito.spy(HomeModule.create(HomeFormat.JSON_HOME));
 		boot = new CrnkBoot();
 		boot.addModule(module);
+		boot.addModule(new TestModule());
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.test.mock", new SampleJsonServiceLocator
-				()));
 		boot.boot();
+	}
+
+
+	@Test
+	public void checkAccepts() {
+		HttpRequestContextBase context = Mockito.mock(HttpRequestContextBase.class);
+		Mockito.when(context.getMethod()).thenReturn("GET");
+		Mockito.when(context.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn(HttpHeaders.JSON_CONTENT_TYPE);
+		HttpRequestProcessor requestProcessor = module.getRequestProcessor();
+		HttpRequestContextBaseAdapter contextAdapter = new HttpRequestContextBaseAdapter(context);
+
+		Mockito.when(context.getPath()).thenReturn("/");
+		Assert.assertTrue(requestProcessor.accepts(contextAdapter));
+
+		Mockito.when(context.getPath()).thenReturn("/doesNotExists");
+		Assert.assertFalse(requestProcessor.accepts(contextAdapter));
+
+		Mockito.when(context.getPath()).thenReturn("/tasks");
+		Assert.assertFalse(requestProcessor.accepts(contextAdapter));
+	}
+
+	@Test
+	public void checkErrorHandling() {
+		HttpRequestContextBase context = Mockito.mock(HttpRequestContextBase.class);
+		Mockito.when(context.getMethod()).thenReturn("GET");
+		Mockito.when(context.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn(HttpHeaders.JSON_CONTENT_TYPE);
+		HttpRequestProcessor requestProcessor = module.getRequestProcessor();
+
+		HomeModuleExtension extension = new HomeModuleExtension() {
+			protected List<String> getPaths() {
+				throw new BadRequestException("test error");
+			}
+		};
+		module.setExtensions(Arrays.asList(extension));
+
+		HttpRequestContextBaseAdapter contextAdapter = new HttpRequestContextBaseAdapter(context);
+		HttpResponse response = requestProcessor.processAsync(contextAdapter).get();
+		Assert.assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusCode());
+	}
+
+
+	@Test
+	public void checkListingOfChildRepositories() throws IOException {
+		// e.g. /api/tasks/history/
+		HttpRequestContextBase context = Mockito.mock(HttpRequestContextBase.class);
+		Mockito.when(context.getMethod()).thenReturn("GET");
+		Mockito.when(context.getPath()).thenReturn("/tasks");
+		Mockito.when(context.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn(HttpHeaders.JSON_CONTENT_TYPE);
+		HttpRequestContextBaseAdapter contextAdapter = new HttpRequestContextBaseAdapter(context);
+
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpResponse response = requestDispatcher.process(contextAdapter).get().get();
+
+		ObjectReader reader = boot.getObjectMapper().readerFor(Document.class);
+		Document document = reader.readValue(response.getBody());
+
+		ObjectNode links = document.getLinks();
+		Assert.assertNotNull(links);
+		JsonNode history = links.get("history");
+		Assert.assertNotNull(history);
+		Assert.assertEquals("http://localhost/tasks/history", history.asText());
+	}
+
+	@Test
+	public void checkNotAcceptedDueToPathFilter() {
+		module.addPathFilter(httpRequestContext -> false);
+
+		HttpRequestContextBase context = Mockito.mock(HttpRequestContextBase.class);
+		Mockito.when(context.getMethod()).thenReturn("GET");
+		Mockito.when(context.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn(HttpHeaders.JSON_CONTENT_TYPE);
+		Mockito.when(context.getPath()).thenReturn("/");
+		HttpRequestContextBaseAdapter contextAdapter = new HttpRequestContextBaseAdapter(context);
+
+		HttpRequestProcessor requestProcessor = module.getRequestProcessor();
+		Assert.assertFalse(requestProcessor.accepts(contextAdapter));
 	}
 
 	@Test
@@ -49,44 +128,6 @@ public class HomeModuleTest {
 	}
 
 	@Test
-	public void testWithAnyRequest() throws IOException {
-		testHomeJsonReturned(true);
-	}
-
-
-	@Test
-	public void testWithHomeRequest() throws IOException {
-		testHomeJsonReturned(false);
-	}
-
-	private void testHomeJsonReturned(boolean anyRequest) throws IOException {
-		ArgumentCaptor<Integer> statusCaptor = ArgumentCaptor.forClass(Integer.class);
-		ArgumentCaptor<byte[]> responseCaptor = ArgumentCaptor.forClass(byte[].class);
-
-		HttpRequestContextBase requestContextBase = Mockito.mock(HttpRequestContextBase.class);
-
-		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept"))
-				.thenReturn(anyRequest ? "*" : HomeModule.JSON_HOME_CONTENT_TYPE);
-
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
-		requestDispatcher.process(requestContextBase);
-
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(statusCaptor.capture(), responseCaptor.capture());
-		String expectedContentType = anyRequest ? HomeModule.JSON_CONTENT_TYPE : HomeModule.JSON_HOME_CONTENT_TYPE;
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponseHeader("Content-Type", expectedContentType);
-		Assert.assertEquals(200, (int) statusCaptor.getValue());
-
-		String json = new String(responseCaptor.getValue());
-		JsonNode response = boot.getObjectMapper().reader().readTree(json);
-
-		JsonNode resourcesNode = response.get("resources");
-		JsonNode usersNode = resourcesNode.get("tag:tasks");
-		Assert.assertEquals("/tasks/", usersNode.get("href").asText());
-	}
-
-	@Test
 	public void testNonRootRequestNotTouchedForDifferentUrl() throws IOException {
 		HttpRequestContextBase requestContextBase = Mockito.mock(HttpRequestContextBase.class);
 
@@ -96,9 +137,9 @@ public class HomeModuleTest {
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
 
 		// execute
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
-		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), (byte[]) Mockito.anyObject());
+		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.any(HttpResponse.class));
 	}
 
 	@Test
@@ -109,9 +150,9 @@ public class HomeModuleTest {
 		Mockito.when(requestContextBase.getPath()).thenReturn("/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("application/doesNotExists");
 
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
-		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), (byte[]) Mockito.anyObject());
+		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.any(HttpResponse.class));
 	}
 
 

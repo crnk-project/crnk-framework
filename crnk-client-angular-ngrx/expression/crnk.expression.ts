@@ -8,6 +8,8 @@
  *     <li>{@link Path}: property member access</li>
  * </ul>
  */
+import {toQueryPath} from '../binding';
+
 export interface Expression<T> {
 
 	/**
@@ -69,6 +71,10 @@ export interface Path<T> extends Expression<T> {
 	 */
 	getSourcePointer(): String;
 
+	/**
+	 * @returns {string} path used for sorting and filtering (excludes any 'relationships' and 'attributes' in the path)
+	 */
+	toQueryPath(): string;
 }
 
 export const OPERATION_EQ = 'EQ';
@@ -189,9 +195,14 @@ export class ExpressionFactory {
 		}
 	}
 
-	public static concat(value0: string, value1: string) {
+	static concat(parent: Expression<any>, value1: string) {
+		const value0 = parent != null ? parent.toString() : null;
 		if (value0) {
-			return value0 + '.' + value1;
+			if (parent instanceof MapPath || parent instanceof ArrayPath) {
+				return value0 + '[' + value1 + ']';
+			} else {
+				return value0 + '.' + value1;
+			}
 		}
 		if (value1) {
 			return value1;
@@ -223,9 +234,6 @@ export class BooleanConstant extends BooleanExpression implements Constant<boole
 		return this.value.toString();
 	}
 }
-
-
-
 
 
 function toSourcePointerInternal(path: string, resource: any) {
@@ -308,9 +316,8 @@ export class BeanPath<T> extends SimpleExpression<T> implements Path<T> {
 
 	toString(): string {
 		if (this.parentPath) {
-			const parentString = this.parentPath.toString();
-			if (parentString !== null) {
-				return ExpressionFactory.concat(parentString, this.property);
+			if (this.parentPath !== null) {
+				return ExpressionFactory.concat(this.parentPath, this.property);
 			}
 		}
 		return this.property;
@@ -339,6 +346,10 @@ export class BeanPath<T> extends SimpleExpression<T> implements Path<T> {
 	getSourcePointer(): string {
 		return toSourcePointerInternal(this.toString(), this.parentPath.getResource());
 	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
+	}
 }
 
 
@@ -357,7 +368,7 @@ export class StringPath extends StringExpression implements Path<string> {
 	}
 
 	toString(): string {
-		return ExpressionFactory.concat(this.parent.toString(), this.property);
+		return ExpressionFactory.concat(this.parent, this.property);
 	}
 
 	isPath(): boolean {
@@ -383,7 +394,107 @@ export class StringPath extends StringExpression implements Path<string> {
 	getSourcePointer(): string {
 		return toSourcePointerInternal(this.toString(), this.parent.getResource());
 	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
+	}
 }
+
+
+export class ArrayPath<Q extends Expression<T>, T> extends SimpleExpression<Array<T>> implements Path<Array<T>> {
+
+	constructor(private parent: BeanPath<any>, private property: string, private _referenceType: new (...args: any[]) => Q) {
+		super();
+	}
+
+	public getElement(index: number): Q {
+		return new this._referenceType(this, index);
+	}
+
+	toString(): string {
+		return ExpressionFactory.concat(this.parent, this.property);
+	}
+
+	isPath(): boolean {
+		return true;
+	}
+
+	isConstant(): boolean {
+		return false;
+	}
+
+	getValue() {
+		return doGetValue(this.parent, this.property);
+	}
+
+	setValue(newValue) {
+		return doSetValue(this.parent, this.property, newValue);
+	}
+
+	toFormName(): string {
+		return toFormNameInternal(this as Path<any>, this.parent.getResource());
+	}
+
+	getResource() {
+		return this.parent.getResource();
+	}
+
+	getSourcePointer(): string {
+		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
+	}
+}
+
+export class MapPath<Q extends Expression<T>, T> extends SimpleExpression<Array<T>> implements Path<Array<T>> {
+
+	constructor(private parent: BeanPath<any>, private property: string, private _referenceType: new (...args: any[]) => Q) {
+		super();
+	}
+
+	public getElement(key: any): Q {
+		return new this._referenceType(this, key);
+	}
+
+	toString(): string {
+		return ExpressionFactory.concat(this.parent, this.property);
+	}
+
+	isPath(): boolean {
+		return true;
+	}
+
+	isConstant(): boolean {
+		return false;
+	}
+
+	getValue() {
+		return doGetValue(this.parent, this.property);
+	}
+
+	setValue(newValue) {
+		return doSetValue(this.parent, this.property, newValue);
+	}
+
+	toFormName(): string {
+		return toFormNameInternal(this as Path<any>, this.parent.getResource());
+	}
+
+	getResource() {
+		return this.parent.getResource();
+	}
+
+	getSourcePointer(): string {
+		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
+	}
+}
+
 
 function doGetValue(parent: Path<any>, property: string) {
 	const parentValue = parent.getValue();
@@ -427,7 +538,7 @@ export class NumberPath extends NumberExpression implements Path<number> {
 	}
 
 	toString(): string {
-		return ExpressionFactory.concat(this.parent.toString(), this.property);
+		return ExpressionFactory.concat(this.parent, this.property);
 	}
 
 	isPath(): boolean {
@@ -452,6 +563,10 @@ export class NumberPath extends NumberExpression implements Path<number> {
 
 	getSourcePointer(): string {
 		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
 	}
 }
 
@@ -471,7 +586,7 @@ export class BooleanPath extends BooleanExpression implements Path<boolean> {
 	}
 
 	toString(): string {
-		return ExpressionFactory.concat(this.parent.toString(), this.property);
+		return ExpressionFactory.concat(this.parent, this.property);
 	}
 
 	isPath(): boolean {
@@ -496,6 +611,10 @@ export class BooleanPath extends BooleanExpression implements Path<boolean> {
 
 	getSourcePointer(): string {
 		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
 	}
 }
 

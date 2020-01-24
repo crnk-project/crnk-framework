@@ -1,13 +1,19 @@
 package io.crnk.core.queryspec;
 
-import io.crnk.core.engine.internal.utils.CompareUtils;
-
+import java.lang.reflect.Type;
 import java.util.Collection;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.crnk.core.engine.internal.utils.CompareUtils;
+import io.crnk.core.exception.BadRequestException;
+import io.crnk.core.queryspec.mapper.QueryParameter;
 
 /**
  * Filter operator used to compare attributes to values by {@link FilterSpec}.
  */
-public abstract class FilterOperator {
+@JsonSerialize(using = ToStringSerializer.class)
+public class FilterOperator {
 
 	/**
 	 * Boolean and
@@ -22,6 +28,31 @@ public abstract class FilterOperator {
 	};
 
 	/**
+	 * Selection of facet for nested filtering
+	 */
+	public static final FilterOperator SELECT = new FilterOperator("SELECT") {
+
+		@Override
+		public boolean matches(Object value1, Object value2) {
+			throw new UnsupportedOperationException(); // handle differently
+		}
+
+	};
+
+	/**
+	 * Grouping based on facet
+	 */
+	public static final FilterOperator GROUP = new FilterOperator("GROUP") {
+
+		@Override
+		public boolean matches(Object value1, Object value2) {
+			throw new UnsupportedOperationException(); // handle differently
+		}
+
+	};
+
+
+	/**
 	 * Like operation. In case of in-memory filtering it makes use of "%" as
 	 * wildcard and is case-insenstive.
 	 * <p>
@@ -31,31 +62,39 @@ public abstract class FilterOperator {
 	public static final FilterOperator LIKE = new FilterOperator("LIKE") {
 
 		@Override
-		public boolean matches(Object value1, Object value2) {
-			if (value2 == null) {
+		public Type getFilterType(QueryParameter queryParameter, Type attributeType) {
+			return String.class;
+		}
+
+		@Override
+		public boolean matches(Object value, Object likePattern) {
+			if (likePattern == null) {
+				throw new BadRequestException("LIKE pattern cannot be null");
+			}
+			if (value == null) {
 				return false;
 			}
-			String text = value1.toString();
+			String text = value.toString();
 
 			// translate queryterm to a regex pattern
-			char[] queryTerm = value2.toString().toCharArray();
+			char[] queryTerm = likePattern.toString().toCharArray();
 
-			StringBuilder pattern = new StringBuilder();
-			pattern.append(".*");
+			StringBuilder regex = new StringBuilder();
+			regex.append(".*");
 			String escapedCharacters = "[\\^$.|?*+()";
 			for (char c : queryTerm) {
 				if (escapedCharacters.contains(Character.toString(c))) {
-					pattern.append('\\');
-					pattern.append(c);
+					regex.append('\\');
+					regex.append(c);
 				} else if (c == '%') {
-					pattern.append(".*");
+					regex.append(".*");
 				} else {
-					pattern.append(Character.toLowerCase(c));
+					regex.append(Character.toLowerCase(c));
 				}
 			}
-			pattern.append(".*");
+			regex.append(".*");
 
-			return text.toLowerCase().matches(pattern.toString());
+			return text.toLowerCase().matches(regex.toString());
 		}
 
 	};
@@ -124,7 +163,7 @@ public abstract class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1.compareTo(c2) <= 0;
+			return c1 != null && c1 != null && c1.compareTo(c2) <= 0;
 		}
 
 	};
@@ -139,7 +178,7 @@ public abstract class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1.compareTo(c2) > 0;
+			return c1 != null && c1 != null && c1.compareTo(c2) > 0;
 		}
 	};
 
@@ -153,7 +192,7 @@ public abstract class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1.compareTo(c2) >= 0;
+			return c1 != null && c1 != null && c1.compareTo(c2) >= 0;
 		}
 	};
 
@@ -211,6 +250,18 @@ public abstract class FilterOperator {
 	 * @param value2 second value
 	 * @return true if matches
 	 */
-	public abstract boolean matches(Object value1, Object value2);
+	public  boolean matches(Object value1, Object value2){
+		throw new UnsupportedOperationException("not implemented");
+	}
 
+	/**
+	 * Typically the type of a filter parameter and the type of an attribute match. But some operators like LIKE have a type oder
+	 * than Enum (such as String for LIKE).
+	 *
+	 * @param attributeType type of the attribute to be filtered
+	 * @return type of the filter parameter.
+	 */
+	public Type getFilterType(QueryParameter queryParameter, Type attributeType) {
+		return attributeType;
+	}
 }

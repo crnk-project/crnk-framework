@@ -5,41 +5,51 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
-import io.crnk.core.module.Module;
+import io.crnk.core.module.InitializingModule;
 
 import java.util.List;
 
 // tag::docs[]
-public class DynamicModule implements Module {
+public class DynamicModule implements InitializingModule {
 
-	@Override
-	public String getModuleName() {
-		return "dynamic";
-	}
+    private ModuleContext context;
 
-	@Override
-	public void setupModule(ModuleContext context) {
+    @Override
+    public String getModuleName() {
+        return "dynamic";
+    }
 
-		for (int i = 0; i < 2; i++) {
-			RegistryEntryBuilder builder = context.newRegistryEntryBuilder();
+    @Override
+    public void setupModule(ModuleContext context) {
+        this.context = context;
+    }
 
-			String resourceType = "dynamic" + i;
-			RegistryEntryBuilder.ResourceRepository resourceRepository = builder.resourceRepository();
-			resourceRepository.instance(new DynamicResourceRepository(resourceType));
+    @Override
+    public void init() {
+        for (int i = 0; i < 2; i++) {
+            RegistryEntryBuilder builder = context.newRegistryEntryBuilder();
 
-			RegistryEntryBuilder.RelationshipRepository relationshipRepository = builder.relationshipRepository(resourceType);
-			relationshipRepository.instance(new DynamicRelationshipRepository(resourceType));
+            String resourceType = "dynamic" + i;
+            RegistryEntryBuilder.ResourceRepositoryEntryBuilder resourceRepository = builder.resourceRepository();
+            resourceRepository.instance(new DynamicResourceRepository(resourceType));
 
-			InformationBuilder.Resource resource = builder.resource();
-			resource.resourceType(resourceType);
-			resource.resourceClass(Resource.class);
-			resource.addField("id", ResourceFieldType.ID, String.class);
-			resource.addField("value", ResourceFieldType.ATTRIBUTE, String.class);
-			resource.addField("parent", ResourceFieldType.RELATIONSHIP, Resource.class).oppositeResourceType(resourceType).oppositeName("children");
-			resource.addField("children", ResourceFieldType.RELATIONSHIP, List.class).oppositeResourceType(resourceType).oppositeName("parent");
+            RegistryEntryBuilder.RelationshipRepositoryEntryBuilder parentRepository = builder.relationshipRepositoryForField("parent");
+            parentRepository.instance(new DynamicRelationshipRepository(resourceType));
+            RegistryEntryBuilder.RelationshipRepositoryEntryBuilder childrenRepository = builder.relationshipRepositoryForField("children");
+            childrenRepository.instance(new DynamicRelationshipRepository(resourceType));
 
-			context.addRegistryEntry(builder.build());
-		}
-	}
+            InformationBuilder.ResourceInformationBuilder resource = builder.resource();
+            resource.resourceType(resourceType);
+            resource.implementationType(Resource.class);
+            resource.addField("id", ResourceFieldType.ID, String.class);
+            resource.addField("value", ResourceFieldType.ATTRIBUTE, String.class);
+            resource.addField("parent", ResourceFieldType.RELATIONSHIP, Resource.class).oppositeResourceType(resourceType)
+                    .oppositeName("children");
+            resource.addField("children", ResourceFieldType.RELATIONSHIP, List.class).oppositeResourceType(resourceType)
+                    .oppositeName("parent");
+
+            context.addRegistryEntry(builder.build());
+        }
+    }
 }
 // end::docs[]

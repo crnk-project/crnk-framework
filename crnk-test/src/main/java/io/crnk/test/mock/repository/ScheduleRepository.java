@@ -1,5 +1,14 @@
 package io.crnk.test.mock.repository;
 
+import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.resource.links.DefaultPagedLinksInformation;
+import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.list.ResourceListBase;
+import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
+import io.crnk.test.mock.models.Schedule;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -7,21 +16,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.core.resource.links.DefaultPagedLinksInformation;
-import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.core.resource.list.ResourceListBase;
-import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.test.mock.models.Schedule;
-
 // tag::annotation[]
 @Path("schedules")
 @Produces(HttpHeaders.JSONAPI_CONTENT_TYPE)
 // end::annotation[]
 // tag::doc[]
-public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long> {
+public interface ScheduleRepository extends ResourceRepository<Schedule, Long> {
 	// end::doc[]
 
 	// tag::services[]
@@ -73,7 +73,7 @@ public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long>
 		public String name = "value";
 	}
 
-	class ScheduleListMeta implements MetaInformation {
+	class ScheduleListMeta extends DefaultPagedMetaInformation {
 
 		public String name = "value";
 

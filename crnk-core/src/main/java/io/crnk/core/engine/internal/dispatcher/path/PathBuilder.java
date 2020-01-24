@@ -1,195 +1,297 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
+import io.crnk.core.engine.information.repository.RepositoryAction;
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.StringUtils;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.ResourceException;
-import io.crnk.core.exception.ResourceFieldNotFoundException;
+import io.crnk.core.exception.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Builder responsible for parsing URL path.
  */
 public class PathBuilder {
-	public static final String SEPARATOR = "/";
-	public static final String RELATIONSHIP_MARK = "relationships";
 
-	private final ResourceRegistry resourceRegistry;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PathBuilder.class);
 
-	public PathBuilder(ResourceRegistry resourceRegistry) {
-		this.resourceRegistry = resourceRegistry;
-	}
+    public static final String SEPARATOR = "/";
 
-	private static PathIds createPathIds(String idsString) {
-		List<String> pathIds = Arrays.asList(idsString.split(PathIds.ID_SEPARATOR_PATTERN));
-		return new PathIds(pathIds);
-	}
+    public static final String RELATIONSHIP_MARK = "relationships";
 
-	private static String[] splitPath(String path) {
-		if (path.startsWith(SEPARATOR)) {
-			path = path.substring(1);
-		}
-		if (path.endsWith(SEPARATOR)) {
-			path = path.substring(0, path.length());
-		}
-		return path.split(SEPARATOR);
-	}
+    private final ResourceRegistry resourceRegistry;
 
-	/**
-	 * Creates a path using the provided JsonPath structure.
-	 *
-	 * @param jsonPath JsonPath structure to be parsed
-	 * @return String representing structure provided in the input
-	 */
-	public static String build(JsonPath jsonPath) {
-		List<String> urlParts = new LinkedList<>();
+    private final TypeParser parser;
 
-		JsonPath currentJsonPath = jsonPath;
-		String pathPart;
-		do {
-			if (currentJsonPath instanceof RelationshipsPath) {
-				pathPart = RELATIONSHIP_MARK + SEPARATOR + currentJsonPath.getElementName();
-			} else if (currentJsonPath instanceof FieldPath) {
-				pathPart = currentJsonPath.getElementName();
-			} else {
-				pathPart = currentJsonPath.getElementName();
-				if (currentJsonPath.getIds() != null) {
-					pathPart += SEPARATOR + mergeIds(currentJsonPath.getIds());
-				}
-			}
-			urlParts.add(pathPart);
+    public PathBuilder(ResourceRegistry resourceRegistry, TypeParser parser) {
+        this.resourceRegistry = resourceRegistry;
+        this.parser = parser;
+    }
 
-			currentJsonPath = currentJsonPath.getParentResource();
-		} while (currentJsonPath != null);
-		Collections.reverse(urlParts);
+    private static List<Serializable> parseIds(String idsString, ResourceInformation resourceInformation) {
+        String[] strPathIds = idsString.split(JsonPath.ID_SEPARATOR_PATTERN);
 
-		return SEPARATOR + StringUtils.join(SEPARATOR, urlParts) + SEPARATOR;
-	}
+        List<Serializable> pathIds = new ArrayList<>();
+        for (String strPathId : strPathIds) {
+            pathIds.add(resourceInformation.parseIdString(strPathId));
+        }
 
-	private static String mergeIds(PathIds ids) {
-		return StringUtils.join(PathIds.ID_SEPARATOR, ids.getIds());
-	}
+        return pathIds;
+    }
 
-	/**
-	 * Parses path provided by the application. The path provided cannot contain neither hostname nor protocol. It
-	 * can start or end with slash e.g. <i>/tasks/1/</i> or <i>tasks/1</i>.
-	 *
-	 * @param path Path to be parsed
-	 * @return doubly-linked list which represents path given at the input
-	 */
-	public JsonPath build(String path) {
-		String[] strings = splitPath(path);
-		if (strings.length == 0 || (strings.length == 1 && "".equals(strings[0]))) {
-			return null;
-		}
+    private List<Serializable> parseNestedIds(String idsString, Serializable parentId, ResourceField parentField) {
+        String[] strPathIds = idsString.split(JsonPath.ID_SEPARATOR_PATTERN);
 
-		JsonPath previousJsonPath = null, currentJsonPath = null;
-		PathIds pathIds;
-		boolean relationshipMark;
-		String elementName;
-		String actionName;
+        ResourceInformation resourceInformation = parentField.getResourceInformation();
+        Class<?> idType = resourceInformation.getIdField().getType();
 
-		int currentElementIdx = 0;
-		while (currentElementIdx < strings.length) {
-			elementName = null;
-			pathIds = null;
-			actionName = null;
-			relationshipMark = false;
+        ResourceFieldAccessor nestedIdAccessor = resourceInformation.getChildIdAccessor();
+        ResourceFieldAccessor parentIdAccessor = resourceInformation.getParentIdAccessor();
 
-			if (RELATIONSHIP_MARK.equals(strings[currentElementIdx])) {
-				relationshipMark = true;
-				currentElementIdx++;
-			}
+        List<Serializable> pathIds = new ArrayList<>();
+        for (String strPathId : strPathIds) {
+            Serializable nestedId = (Serializable) ClassUtils.newInstance(idType);
+            Object childId = parser.parse(strPathId, nestedIdAccessor.getImplementationClass());
+            parentIdAccessor.setValue(nestedId, parentId);
+            nestedIdAccessor.setValue(nestedId, childId);
+            pathIds.add(nestedId);
+        }
 
-			RegistryEntry entry = null;
-			if (currentElementIdx < strings.length && !RELATIONSHIP_MARK.equals(strings[currentElementIdx])) {
-				elementName = strings[currentElementIdx];
+        return pathIds;
+    }
 
-				// support "/" in resource type to group repositories
-				StringBuilder potentialResourceType = new StringBuilder();
-				for (int i = 0; currentElementIdx + i < strings.length; i++) {
-					if (potentialResourceType.length() > 0) {
-						potentialResourceType.append("/");
-					}
-					potentialResourceType.append(strings[currentElementIdx + i]);
-					entry = resourceRegistry.getEntry(potentialResourceType.toString());
-					if (entry != null) {
-						currentElementIdx += i;
-						elementName = potentialResourceType.toString();
-						break;
-					}
-				}
+    private static String[] splitPath(String path) {
+        if (path.startsWith(SEPARATOR)) {
+            path = path.substring(1);
+        }
+        if (path.endsWith(SEPARATOR)) {
+            path = path;
+        }
+        return path.split(SEPARATOR);
+    }
 
-				currentElementIdx++;
-			}
+    /**
+     * Parses path provided by the application. The path provided cannot contain neither hostname nor protocol. It
+     * can start or end with slash e.g. <i>/tasks/1/</i> or <i>tasks/1</i>.
+     *
+     * @param path Path to be parsed
+     * @return doubly-linked list which represents path given at the input
+     */
+    public JsonPath build(String path, QueryContext queryContext) {
+        String[] pathElements = splitPath(path);
+        if (pathElements.length == 0 || (pathElements.length == 1 && "".equals(pathElements[0]))) {
+            LOGGER.debug("requested root path: {}", path);
+            return null;
+        }
+        return parseResourcePath(new LinkedList<>(Arrays.asList(pathElements)), queryContext);
+    }
 
-			if (currentElementIdx < strings.length && entry != null && entry.getRepositoryInformation().getActions().containsKey(strings[currentElementIdx])) {
-				// repository action
-				actionName = strings[currentElementIdx];
-				currentElementIdx++;
-			} else if (currentElementIdx < strings.length && !RELATIONSHIP_MARK.equals(strings[currentElementIdx])) {
-				// ids
-				pathIds = createPathIds(strings[currentElementIdx]);
-				currentElementIdx++;
+    private JsonPath parseResourcePath(LinkedList<String> pathElements, QueryContext queryContext) {
+        RegistryEntry rootEntry = getRootEntry(pathElements);
+        if (rootEntry == null) {
+            return null;
+        }
+        if (pathElements.isEmpty()) {
+            LOGGER.debug("resource path to root entry found: {}", rootEntry);
+            return new ResourcePath(rootEntry, null);
+        }
+        Map<String, RepositoryAction> actions = rootEntry.getRepositoryInformation().getActions();
+        if (actions.containsKey(pathElements.peek())) {
+            String pathElement = pathElements.pop();
+            return new ActionPath(rootEntry, null, pathElement);
+        }
+        return parseIdPath(rootEntry, pathElements, queryContext);
+    }
 
-				if (currentElementIdx < strings.length && entry != null && entry.getRepositoryInformation().getActions().containsKey(strings[currentElementIdx])) {
-					// resource action
-					actionName = strings[currentElementIdx];
-					currentElementIdx++;
-				}
-			}
+    private JsonPath parseIdPath(RegistryEntry entry, LinkedList<String> pathElements, QueryContext queryContext) {
+        String pathElement = pathElements.pop();
+        List<Serializable> ids = parseIds(pathElement, entry.getResourceInformation());
+        return parseFieldPath(entry, ids, pathElements, queryContext);
+    }
 
-			if (previousJsonPath != null) {
-				currentJsonPath = getNonResourcePath(previousJsonPath, elementName, relationshipMark);
-				if (pathIds != null) {
-					throw new ResourceException("RelationshipsPath and FieldPath cannot contain ids");
-				}
-			} else if (entry != null && !relationshipMark) {
-				currentJsonPath = new ResourcePath(elementName);
-			} else {
-				return null;
-			}
+    private JsonPath parseFieldPath(RegistryEntry entry, List<Serializable> ids, LinkedList<String> pathElements, QueryContext queryContext) {
+        if (pathElements.isEmpty()) {
+            LOGGER.debug("resource path for {} with ids {} found", entry, ids);
+            return new ResourcePath(entry, ids);
+        }
 
-			if (pathIds != null) {
-				currentJsonPath.setIds(pathIds);
-			}
-			if (actionName != null) {
-				ActionPath actionPath = new ActionPath(actionName);
-				actionPath.setParentResource(currentJsonPath);
-				currentJsonPath = actionPath;
-			}
-			if (previousJsonPath != null) {
-				currentJsonPath.setParentResource(previousJsonPath);
-			}
-			previousJsonPath = currentJsonPath;
-		}
+        Map<String, RepositoryAction> actions = entry.getRepositoryInformation().getActions();
+        if (actions.containsKey(pathElements.peek())) {
+            String pathElement = pathElements.pop();
+            LOGGER.debug("action path {} for {} with ids {} found", pathElement, entry, ids);
+            return new ActionPath(entry, ids, pathElement);
+        }
 
-		return currentJsonPath;
-	}
+        String fieldName = pathElements.pop();
 
-	private JsonPath getNonResourcePath(JsonPath previousJsonPath, String elementName, boolean relationshipMark) {
-		String previousElementName = previousJsonPath.getElementName();
-		RegistryEntry previousEntry = resourceRegistry.getEntry(previousElementName);
+        if (fieldName.equals(RELATIONSHIP_MARK)) {
+            if (pathElements.isEmpty()) {
+                throw new BadRequestException("invalid url, relationships fragment must be followed by name");
+            }
+            fieldName = pathElements.poll();
 
-		ResourceInformation resourceInformation = previousEntry.getResourceInformation();
+            entry = findSelfOrSubtypeByField(entry, fieldName, queryContext);
+            ResourceField field = entry.getResourceInformation().findFieldByJsonName(fieldName, queryContext.getRequestVersion());
+            if (field == null) {
+                throw new BadRequestException("invalid url, requested field not found: " + fieldName);
+            }
+            if(field.getResourceFieldType() != ResourceFieldType.RELATIONSHIP){
+                throw new BadRequestException("invalid url, requested field is not a relationship: " + fieldName);
+            }
 
-		List<ResourceField> resourceFields = resourceInformation.getRelationshipFields();
-		for (ResourceField field : resourceFields) {
-			if (field.getJsonName().equals(elementName)) {
-				if (relationshipMark) {
-					return new RelationshipsPath(elementName);
-				} else {
-					return new FieldPath(elementName);
-				}
-			}
-		}
-		//TODO: Throw different exception? element name can be null..
-		throw new ResourceFieldNotFoundException(elementName);
-	}
+            if (!pathElements.isEmpty()) {
+                throw new BadRequestException("invalid url, cannot add further url fragments after relationship name");
+            }
+            LOGGER.debug("relationship path {} for {} with ids {} found", field, entry, ids);
+            return new RelationshipsPath(entry, ids, field);
+        }
+
+        entry = findSelfOrSubtypeByField(entry, fieldName, queryContext);
+        ResourceField field = entry.getResourceInformation().findFieldByJsonName(fieldName, queryContext.getRequestVersion());
+        if (field == null) {
+            throw new BadRequestException("field not found: " + fieldName);
+        }
+        if (pathElements.isEmpty()) {
+            if (isNestedField(field) && !field.isCollection()) {
+                RegistryEntry nestedEntry = getNestedEntry(field);
+                ResourcePath path = new ResourcePath(nestedEntry, ids);
+                path.addParentField(field);
+                return path;
+            }
+            LOGGER.debug("field path {} for {} with ids {} found", field, entry, ids);
+            return new FieldPath(entry, ids, field);
+        }
+
+        if (field.getResourceFieldType() != ResourceFieldType.RELATIONSHIP || field.getOppositeName() == null) {
+            LOGGER.debug("cannot process field={} is not a relationship with an opposite field", field);
+            throw new BadRequestException("invalid url, cannot add further url fragements after field");
+        }
+
+        RegistryEntry oppositeEntry = resourceRegistry.getEntry(field.getOppositeResourceType());
+        ResourceInformation oppositeInformation = oppositeEntry.getResourceInformation();
+        ResourceField oppositeField = oppositeInformation.findFieldByJsonName(field.getOppositeName(), queryContext.getRequestVersion());
+        PreconditionUtil.verify(oppositeField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP,
+                "expected opposite field {} of {} to be a relationship", oppositeField, field);
+        if (!oppositeInformation.isNested()) {
+            LOGGER.debug("cannot process field={} because opposite={} is not an nested resource", field, oppositeInformation);
+            throw new BadRequestException("invalid url, cannot specify ID of related resource");
+        }
+
+        PreconditionUtil.verify(oppositeField != null, "nested resource must specify opposite on relationship from parent to child, got null for %s", field);
+
+        List<Serializable> nestedIds;
+        if (field.isCollection()) {
+            PreconditionUtil.verify(ids.size() == 1, "cannot follow multiple ids along nested path");
+            Serializable parentId = ids.get(0);
+
+            // nested many-relationship must specify a nested id
+            String strNestedId = pathElements.poll();
+            nestedIds = parseNestedIds(strNestedId, parentId, oppositeField);
+        } else {
+            nestedIds = ids;
+        }
+
+        JsonPath jsonPath = parseFieldPath(oppositeEntry, nestedIds, pathElements, queryContext);
+        if (jsonPath != null) {
+            jsonPath.addParentField(field);
+        }
+        return jsonPath;
+    }
+
+    private RegistryEntry findSelfOrSubtypeByField(RegistryEntry entry, String jsonName, QueryContext queryContext) {
+        if (entry.getResourceInformation().findFieldByJsonName(jsonName, queryContext.getRequestVersion()) == null) {
+            // consider introducing RegistyEntry.getSubTypes in the future
+            for (RegistryEntry someEntry : resourceRegistry.getEntries()) {
+                ResourceInformation resourceInformation = someEntry.getResourceInformation();
+                ResourceField field = resourceInformation.findFieldByJsonName(jsonName, queryContext.getRequestVersion());
+                if (field != null && someEntry.isParent(entry)) {
+                    RegistryEntry parentEntry = someEntry.getParentRegistryEntry();
+                    while (parentEntry != null && parentEntry.getResourceInformation().findFieldByJsonName(jsonName, queryContext.getRequestVersion()) != null) {
+                        someEntry = parentEntry;
+                    }
+                    return someEntry;
+                }
+            }
+        }
+        return entry; // may not contain the field in case of errorous request
+    }
+
+    private boolean isNestedField(ResourceField field) {
+        if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
+            RegistryEntry oppositeType = resourceRegistry.getEntry(field.getOppositeResourceType());
+            String oppositeName = field.getOppositeName();
+            PreconditionUtil.verify(oppositeType != null, "opposite type %s not found for %s", field.getOppositeResourceType(), field.getUnderlyingName());
+            ResourceInformation oppositeResourceInformation = oppositeType.getResourceInformation();
+            if (oppositeName != null && oppositeResourceInformation.isNested()) {
+                return oppositeResourceInformation.getParentField().getUnderlyingName().equals(oppositeName);
+            }
+        }
+        return false;
+    }
+
+    private RegistryEntry getNestedEntry(ResourceField field) {
+        PreconditionUtil.verify(field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP, "not a relationship");
+        RegistryEntry oppositeType = resourceRegistry.getEntry(field.getOppositeResourceType());
+        ResourceInformation resourceInformation = oppositeType.getResourceInformation();
+        PreconditionUtil.verify(resourceInformation.isNested(), "not a nested relationship");
+        return oppositeType;
+    }
+
+    private RegistryEntry getRootEntry(LinkedList<String> pathElements) {
+        StringBuilder potentialResourcePath = new StringBuilder(pathElements.pop());
+
+        RegistryEntry matchedEntry;
+        while (true) {
+            matchedEntry = getEntryByPath(potentialResourcePath.toString());
+
+            if (matchedEntry != null) {
+                LOGGER.debug("registry entry found for: {}", potentialResourcePath);
+            } else {
+                LOGGER.debug("no registry entry found for: {}", potentialResourcePath);
+            }
+
+            if (pathElements.isEmpty() || pathElements.peek().equals(RELATIONSHIP_MARK)) {
+                return matchedEntry; // maybe found or null
+            }
+
+            // compute next potential path
+            String pathElement = pathElements.peek();
+            if (potentialResourcePath.length() > 0) {
+                potentialResourcePath.append("/");
+            }
+            potentialResourcePath.append(pathElement);
+            if (matchedEntry != null && getEntryByPath(potentialResourcePath.toString()) == null) {
+                // no more match, return found entry
+                return matchedEntry;
+            }
+            pathElements.poll();
+        }
+    }
+
+
+    private RegistryEntry getEntryByPath(String path) {
+        RegistryEntry entry = resourceRegistry.getEntryByPath(path);
+        if (entry != null) {
+            ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
+            if (repositoryInformation == null || !repositoryInformation.isExposed()) {
+                return null;
+            }
+        }
+        return entry;
+    }
 }

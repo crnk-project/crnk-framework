@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 public class StringUtilsTest {
 
 	@Test
-	public void onSingleElementShouldReturnTheSameValue() throws Exception {
+	public void onSingleElementShouldReturnTheSameValue() {
 		// GIVEN
 		String string = "hello world";
 		List<String> values = Collections.singletonList(string);
@@ -27,7 +27,7 @@ public class StringUtilsTest {
 	}
 
 	@Test
-	public void onTwoElementsShouldReturnJoinedValues() throws Exception {
+	public void onTwoElementsShouldReturnJoinedValues() {
 		// GIVEN
 		List<String> values = Arrays.asList("hello", "world");
 
@@ -39,7 +39,7 @@ public class StringUtilsTest {
 	}
 
 	@Test
-	public void onIsBlankValues() throws Exception {
+	public void onIsBlankValues() {
 		assertTrue(StringUtils.isBlank(null));
 		assertTrue(StringUtils.isBlank(""));
 		assertTrue(StringUtils.isBlank(" "));
@@ -48,12 +48,12 @@ public class StringUtilsTest {
 	}
 
 	@Test
-	public void onJoinOfNulls() throws Exception {
+	public void onJoinOfNulls() {
 		Assert.assertEquals("null,null", StringUtils.join(",", Arrays.asList(null, null)));
 	}
 
 	@Test
-	public void checkDecapitalize() throws Exception {
+	public void checkDecapitalize() {
 		Assert.assertEquals("", StringUtils.decapitalize(""));
 		Assert.assertEquals("test", StringUtils.decapitalize("Test"));
 		Assert.assertEquals("someTest", StringUtils.decapitalize("SomeTest"));

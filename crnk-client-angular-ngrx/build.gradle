@@ -3,59 +3,63 @@ apply plugin: 'com.moowork.node'
 apply plugin: 'java'
 
 sourceSets {
-	gen {
-		java
-	}
+    gen {
+        java
+    }
 }
 
 dependencies {
-	genCompile project(':crnk-meta')
-	genCompile project(':crnk-gen-typescript')
+    genCompile project(':crnk-meta')
+    genCompile project(':crnk-gen-typescript')
 
-	genCompile 'com.google.guava:guava:18.0'
+    genCompile 'com.google.guava:guava:18.0'
 }
 
 ClassLoader getClassLoader(Configuration config) {
-	ArrayList urls = new ArrayList()
-	config.files.each { File file ->
-		urls += file.toURI().toURL()
-	}
-	urls += sourceSets.gen.output.classesDir.toURI().toURL()
+    ArrayList urls = new ArrayList()
+    config.files.each { File file ->
+        urls += file.toURI().toURL()
+    }
+    urls += sourceSets.gen.output.classesDirs.singleFile.toURI().toURL()
 
-	def bootstrapClassLoader = ClassLoader.getSystemClassLoader().getParent()
-	return new URLClassLoader(urls.toArray(new URL[0]), bootstrapClassLoader)
+    def bootstrapClassLoader = ClassLoader.getSystemClassLoader().getParent()
+    return new URLClassLoader(urls.toArray(new URL[0]), bootstrapClassLoader)
 }
 
 task generateMetaStubs {
-	def outputDir = file("${projectDir}")
-	def genConfig = configurations.getByName("genRuntime")
-	inputs.files genConfig.asFileTree
-	outputs.dir outputDir
-	dependsOn tasks.compileGenJava
-	doLast({
-		def genClassLoader = getClassLoader(genConfig)
-		def executor = genClassLoader.loadClass("io.crnk.client.ngrx.gen.GeneratorExecutor").newInstance()
-		executor.run(outputDir)
-	})
+    def outputDir = file("${projectDir}")
+    outputs.dir outputDir
+    dependsOn tasks.compileGenJava
+    doLast({
+        def genConfig = configurations.getByName("genRuntime")
+        def genClassLoader = getClassLoader(genConfig)
+        def executor = genClassLoader.loadClass("io.crnk.client.ngrx.gen.GeneratorExecutor").newInstance()
+        executor.run(outputDir)
+    })
+}
+
+afterEvaluate {
+    def genConfig = configurations.getByName("genRuntime")
+    generateMetaStubs.inputs.files genConfig.asFileTree.getFiles()
 }
 
 def isProductionBuild = System.env.NEXUS_DEPLOY_USER != null
 if (isProductionBuild) {
-	ext {
-		NG_BUILD_ARGS = ['--environment', 'prod', '--target', 'production']
-		NG_E2E_ARGS = NG_BUILD_ARGS
-	}
+    ext {
+        NG_BUILD_ARGS = ['--environment', 'prod', '--target', 'production']
+        NG_E2E_ARGS = NG_BUILD_ARGS
+    }
 } else {
-	ext {
-		NG_BUILD_ARGS = []
-		NG_E2E_ARGS = NG_BUILD_ARGS
-	}
+    ext {
+        NG_BUILD_ARGS = []
+        NG_E2E_ARGS = NG_BUILD_ARGS
+    }
 }
 
 node {
-	version = '6.10.3'
-	npmVersion = '5.0.3'
-	download = true
+    version = '6.10.3'
+    npmVersion = '5.0.3'
+    download = true
 }
 
 def npmStagingDir = file("${buildDir}/npm")
@@ -66,93 +70,93 @@ npmInstall.outputs.dir(file('node_modules'))
 
 
 def inputFileTree = fileTree('.') {
-	include 'package.json'
-	include 'package-lock.json'
-	include 'tsconfig.json'
-	include 'tsconfig.dist.json'
-	include 'binding/**'
-	include 'expression/**'
-	include 'meta/**'
-	include 'query/**'
-	include 'stub/**'
-	include 'test/**'
+    include 'package.json'
+    include 'package-lock.json'
+    include 'tsconfig.json'
+    include 'tsconfig.dist.json'
+    include 'binding/**'
+    include 'expression/**'
+    include 'meta/**'
+    include 'query/**'
+    include 'stub/**'
+    include 'test/**'
 }
 
 task npmRunBuild(type: NpmTask) {
-	group 'node'
+    group 'node'
 
-	dependsOn tasks.generateMetaStubs
-	dependsOn tasks.npmInstall
+    dependsOn tasks.generateMetaStubs
+    dependsOn tasks.npmInstall
 
-	npmCommand = ['run', 'build']
-	inputs.files inputFileTree
+    npmCommand = ['run', 'build']
+    inputs.files inputFileTree
 
-	// We need this since the version is added to package.json during the build
-	inputs.property 'version', project.version
+    // We need this since the version is added to package.json during the build
+    inputs.property 'version', project.version
 
-	outputs.dir npmStagingDir
+    outputs.dir npmStagingDir
 
-	// always do package.json in same task to have proper up-to-date checks
-	// and properly updated version timestamps
-	def packageInputFile = file("package.json")
-	def packageOutputFile = file("${npmStagingDir}/package.json")
-	doLast {
-		def packageJson = new groovy.json.JsonSlurper().parseText(packageInputFile.text)
-		packageJson['version'] = project.version
-		def jsonOutput = new groovy.json.JsonOutput()
-		packageOutputFile.createNewFile()
-		packageOutputFile.write jsonOutput.prettyPrint(jsonOutput.toJson(packageJson))
+    // always do package.json in same task to have proper up-to-date checks
+    // and properly updated version timestamps
+    def packageInputFile = file("package.json")
+    def packageOutputFile = file("${npmStagingDir}/package.json")
+    doLast {
+        def packageJson = new groovy.json.JsonSlurper().parseText(packageInputFile.text)
+        packageJson['version'] = project.version
+        def jsonOutput = new groovy.json.JsonOutput()
+        packageOutputFile.createNewFile()
+        packageOutputFile.write jsonOutput.prettyPrint(jsonOutput.toJson(packageJson))
 
-		project.copy({
-			from(
-					file('.npmrc'),
-					file('README.md')
-			)
-			into npmStagingDir
-		})
-	}
+        project.copy({
+            from(
+                    file('.npmrc'),
+                    file('README.md')
+            )
+            into npmStagingDir
+        })
+    }
 }
 
 
 task testKarma(type: NpmTask) {
-	group 'verification'
-	dependsOn npmRunBuild
+    group 'verification'
+    dependsOn npmRunBuild
 
-	inputs.files inputFileTree
-	outputs.dir "${buildDir}/test/log/karma"
+    inputs.files inputFileTree
+    outputs.dir "${buildDir}/test/log/karma"
 
-	npmCommand = ['run', 'test:unit']
-	group = 'node'
+    npmCommand = ['run', 'test:unit']
+    group = 'node'
 }
 
 task lint(type: NpmTask) {
-	group 'verification'
-	dependsOn npmRunBuild
+    group 'verification'
+    dependsOn npmRunBuild
 
-	inputs.files inputFileTree
+    inputs.files inputFileTree
 
-	npmCommand = ['run', 'lint']
-	group = 'node'
+    npmCommand = ['run', 'lint']
+    group = 'node'
 
-	// output file needed for up-to-date check
-	def lintMarkerFile = file("${buildDir}/lint.timestamp")
-	outputs.files lintMarkerFile
-	doLast {
-		lintMarkerFile.createNewFile()
-		lintMarkerFile.write Long.toString(System.currentTimeMillis())
-	}
+    // output file needed for up-to-date check
+    def lintMarkerFile = file("${buildDir}/lint.timestamp")
+    outputs.files lintMarkerFile
+    doLast {
+        lintMarkerFile.createNewFile()
+        lintMarkerFile.write Long.toString(System.currentTimeMillis())
+    }
 }
 
 // not yet in use
 task coverallsNpm(type: NpmTask) {
-	group 'verification'
-	dependsOn npmRunBuild
+    group 'verification'
+    dependsOn npmRunBuild
 
-	inputs.files inputFileTree
-	outputs.dir 'coverage'
+    inputs.files inputFileTree
+    outputs.dir 'coverage'
 
-	npmCommand = ['run', 'coveralls']
-	group = 'node'
+    npmCommand = ['run', 'coveralls']
+    group = 'node'
 }
 
 check.dependsOn testKarma
@@ -160,20 +164,20 @@ check.dependsOn lint
 // check.dependsOn coverallsNpm
 
 task npmCacheVerify(type: NpmTask) {
-	npmCommand = ['cache', 'verify']
-	group = 'node'
+    npmCommand = ['cache', 'verify']
+    group = 'node'
 }
 
 tasks.assemble.dependsOn 'npmRunBuild'
 
 clean.doFirst {
-	delete "${projectDir}/node_modules/"
+    // too inefficient: delete "${projectDir}/node_modules/"
 }
 
 task publishNpmPackage(type: NpmTask, dependsOn: [npmRunBuild]) {
-	group = 'publishing'
-	workingDir = npmStagingDir
-	npmCommand = ['publish']
+    group = 'publishing'
+    workingDir = npmStagingDir
+    npmCommand = ['publish']
 }
 
 // tasks.publish.dependsOn publishNpmPackage

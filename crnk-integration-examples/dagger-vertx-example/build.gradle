@@ -1,0 +1,157 @@
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
+import proguard.gradle.ProGuardTask
+
+apply plugin: 'java'
+sourceSets {
+    shrinked
+}
+
+configurations {
+    shrinked.extendsFrom compile
+    shrinked.extendsFrom runtime
+}
+
+buildscript {
+    dependencies {
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
+
+        classpath 'net.sf.proguard:proguard-gradle:6.0.3'
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'build/generated/source/apt/main'
+        }
+    }
+}
+
+dependencies {
+    compile project(':crnk-setup:crnk-setup-vertx')
+    compile project(':crnk-home')
+    compile project(':crnk-security')
+    compile project(':crnk-data:crnk-data-facet')
+    compile project(':crnk-data:crnk-data-jpa')
+    compile project(':crnk-validation')
+    compile project(':crnk-format:crnk-format-plain-json')
+
+    compile 'javax:javaee-api:7.0'
+    compile 'org.hibernate:hibernate-validator:5.2.1.Final'
+    compile 'org.hibernate:hibernate-core:5.2.10.Final'
+    compile 'org.hibernate:hibernate-entitymanager:5.2.10.Final'
+    compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+    compile 'com.h2database:h2:1.4.187'
+
+    compile 'io.vertx:vertx-auth-common:3.7.1'
+
+    // add in the future
+    // compile project(':crnk-meta')
+    // compile project(':crnk-operations')
+    // compile project(':crnk-ui')
+    // compile project(':crnk-validation')
+
+    compile 'ch.qos.logback:logback-classic:1.2.3'
+    compile 'javax.inject:javax.inject:1'
+    compile 'com.google.dagger:dagger:2.16'
+
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
+}
+
+// https://github.com/immutables/immutables/issues/134 issues with incremental compilation
+compileJava {
+    options.incremental = false
+}
+def generatedSrcRoot = file("${buildDir}/generated/source/apt/main")
+task deleteGeneratedSources(type: Delete) {
+    delete generatedSrcRoot
+}
+tasks.withType(JavaCompile) { it.dependsOn('deleteGeneratedSources') }
+
+// shrinking requires Java 10
+if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+
+    task proguard(type: ProGuardTask) {
+        dependsOn jar
+        configuration 'proguard.txt'
+
+        injars "$buildDir/libs/dagger-vertx-example-${version}.jar"
+        injars configurations.compile.files
+        outjars "$buildDir/libs/dagger-vertx-example-min-${version}.jar"
+    }
+
+    apply plugin: 'application'
+    distributions {
+        main {
+            main {
+                contents {
+                    from { proguard.outputs.files } {
+                        into 'lib'
+                    }
+                    include "**/dagger-vertx-example"
+                    include "**/dagger-vertx-example.bat"
+                    include "**/*-min-*.jar"
+                }
+            }
+        }
+    }
+
+
+    apply plugin: 'com.bmuschko.docker-java-application'
+
+    startScripts {
+        dependsOn proguard
+        classpath = files(proguard.outputs.files.singleFile)
+    }
+
+
+    mainClassName = 'io.crnk.example.vertx.AppMain'
+
+    dockerDistTar {
+        environmentVariable('JAVA_HOME', '/opt/java/openjdk/jdk-10.0.1+10')
+    }
+
+    docker {
+        javaApplication {
+            baseImage = 'adoptopenjdk/openjdk10-openj9:nightly'
+            maintainer = '"remo@adnovum.ch"'
+            ports = [8080]
+            tag = "crnk/example-dagger-vertx:$project.version"
+        }
+
+        registryCredentials {
+            email = 'remo@adnovum.ch'
+            username = dockerHubUser
+            password = dockerHubPass
+        }
+    }
+
+    task dockerCreateContainer(type: DockerCreateContainer) {
+        dependsOn dockerBuildImage
+        targetImageId { dockerBuildImage.getImageId() }
+        portBindings = ['8080:8080']
+    }
+
+    task dockerStartContainer(type: DockerStartContainer) {
+        dependsOn dockerCreateContainer
+        targetContainerId { dockerCreateContainer.getContainerId() }
+    }
+
+    task dockerStopContainer(type: DockerStopContainer) {
+        targetContainerId { dockerCreateContainer.getContainerId() }
+    }
+
+    task dockerRemoveContainer(type: DockerRemoveContainer) {
+        dependsOn dockerStopContainer
+        targetContainerId { dockerCreateContainer.getContainerId() }
+    }
+
+    task runMin(type: JavaExec) {
+        dependsOn proguard
+        classpath = files(proguard.outputs.files.singleFile)
+        main = 'io.crnk.example.vertx.VertxApplication'
+    }
+}

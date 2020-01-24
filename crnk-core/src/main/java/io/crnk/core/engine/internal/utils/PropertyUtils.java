@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.utils;
 
+import io.crnk.core.exception.RepositoryMethodException;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,9 +11,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-import io.crnk.core.exception.RepositoryMethodException;
 
 /**
  * <p>
@@ -38,7 +39,7 @@ public class PropertyUtils {
 	 * <li>From class getters, an appropriate getter with name of the desired one is used</li>
 	 * </ol>
 	 *
-	 * @param bean bean to be accessed
+	 * @param bean  bean to be accessed
 	 * @param field bean's fieldName
 	 * @return bean's property value
 	 */
@@ -47,8 +48,7 @@ public class PropertyUtils {
 
 		try {
 			return INSTANCE.getPropertyValue(bean, field);
-		}
-		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			throw handleReflectionException(bean.getClass(), field, e);
 		}
 	}
@@ -58,7 +58,7 @@ public class PropertyUtils {
 	 * Similar to {@link PropertyUtils#getPropertyClass(Class, List)} but returns the property class.
 	 *
 	 * @param beanClass bean to be accessed
-	 * @param field bean's fieldName
+	 * @param field     bean's fieldName
 	 * @return bean's property class
 	 */
 	public static Class<?> getPropertyClass(Class<?> beanClass, String field) {
@@ -69,7 +69,7 @@ public class PropertyUtils {
 	 * Similar to {@link PropertyUtils#getPropertyClass(Class, List)} but returns the property class.
 	 *
 	 * @param beanClass bean to be accessed
-	 * @param field bean's fieldName
+	 * @param field     bean's fieldName
 	 * @return bean's property class
 	 */
 	public static Type getPropertyType(Class<?> beanClass, String field) {
@@ -80,7 +80,7 @@ public class PropertyUtils {
 	 * Similar to {@link PropertyUtils#getProperty(Object, String)} but returns the property value for the tail of the given
 	 * property path.
 	 *
-	 * @param bean bean to be accessed
+	 * @param bean         bean to be accessed
 	 * @param propertyPath property path
 	 * @return value
 	 */
@@ -98,8 +98,7 @@ public class PropertyUtils {
 					result.add(getProperty(currentElem, propertyName));
 				}
 				current = result;
-			}
-			else {
+			} else {
 				// follow single-valued property
 				current = getProperty(current, propertyName);
 			}
@@ -111,7 +110,7 @@ public class PropertyUtils {
 	 * Similar to {@link PropertyUtils#getPropertyClass(Class, String)} but returns the property class for the tail of the given
 	 * property path.
 	 *
-	 * @param clazz bean to be accessed
+	 * @param clazz        bean to be accessed
 	 * @param propertyPath bean's fieldName
 	 * @return property class
 	 */
@@ -146,7 +145,7 @@ public class PropertyUtils {
 	 * List}</li>
 	 * </ul>
 	 *
-	 * @param bean bean to be accessed
+	 * @param bean  bean to be accessed
 	 * @param field bean's fieldName
 	 * @param value value to be set
 	 */
@@ -155,8 +154,7 @@ public class PropertyUtils {
 
 		try {
 			INSTANCE.setPropertyValue(bean, field, value);
-		}
-		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			throw handleReflectionException(bean.getClass(), field, e);
 		}
 	}
@@ -192,17 +190,19 @@ public class PropertyUtils {
 	private Object getPropertyValue(Object bean, String fieldName)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
+		if (bean instanceof Map) {
+			return ((Map) bean).get(fieldName);
+		}
+
 		Field foundField = findField(bean.getClass(), fieldName);
 		if (foundField != null) {
 			if (!Modifier.isPublic(foundField.getModifiers())) {
 				Method getter = getGetter(bean.getClass(), foundField.getName());
 				return getter.invoke(bean);
-			}
-			else {
+			} else {
 				return foundField.get(bean);
 			}
-		}
-		else {
+		} else {
 			Method getter = findGetter(bean.getClass(), fieldName);
 			checkGetterNotNull(getter, bean.getClass(), fieldName);
 			return getter.invoke(bean);
@@ -221,8 +221,7 @@ public class PropertyUtils {
 		Field foundField = findField(beanClass, fieldName);
 		if (foundField != null) {
 			return foundField.getType();
-		}
-		else {
+		} else {
 			Method getter = findGetter(beanClass, fieldName);
 			checkGetterNotNull(getter, beanClass, fieldName);
 			return getter.getReturnType();
@@ -233,8 +232,7 @@ public class PropertyUtils {
 		Field foundField = findField(beanClass, fieldName);
 		if (foundField != null) {
 			return foundField.getGenericType();
-		}
-		else {
+		} else {
 			Method getter = findGetter(beanClass, fieldName);
 			checkGetterNotNull(getter, beanClass, fieldName);
 			return getter.getGenericReturnType();
@@ -263,12 +261,11 @@ public class PropertyUtils {
 		return null;
 	}
 
-	private Method getGetter(Class<?> beanClass, String fieldName) throws NoSuchMethodException {
+	private Method getGetter(Class<?> beanClass, String fieldName) {
 		Method getter = ClassUtils.findGetter(beanClass, fieldName);
 		if (getter != null) {
 			return getter;
-		}
-		else {
+		} else {
 			throw new RepositoryMethodException(
 					String.format("Unable to find accessor method for %s.%s", beanClass.getName(), fieldName));
 		}
@@ -281,13 +278,15 @@ public class PropertyUtils {
 		if (foundField != null) {
 			if (!Modifier.isPublic(foundField.getModifiers())) {
 				Method setter = getSetter(bean, foundField.getName(), foundField.getType());
-				setter.invoke(bean, prepareValue(value, setter.getParameterTypes()[0]));
-			}
-			else {
+				try {
+					setter.invoke(bean, prepareValue(value, setter.getParameterTypes()[0]));
+				} catch (IllegalArgumentException e) {
+					throw new IllegalStateException(setter.toString() + " with value " + value, e);
+				}
+			} else {
 				foundField.set(bean, prepareValue(value, foundField.getType()));
 			}
-		}
-		else {
+		} else {
 			Method getter = findGetter(bean.getClass(), fieldName);
 			checkGetterNotNull(getter, bean.getClass(), fieldName);
 			String getterFieldName = ClassUtils.getGetterFieldName(getter);
@@ -296,13 +295,12 @@ public class PropertyUtils {
 		}
 	}
 
-	private Method getSetter(Object bean, String fieldName, Class<?> fieldType) throws NoSuchMethodException {
+	private Method getSetter(Object bean, String fieldName, Class<?> fieldType) {
 		Class<? extends Object> beanClass = bean.getClass();
 		Method setter = ClassUtils.findSetter(beanClass, fieldName, fieldType);
 		if (setter != null) {
 			return setter;
-		}
-		else {
+		} else {
 			throw new RepositoryMethodException(
 					String.format("Unable to find accessor method for %s.%s", beanClass.getName(), fieldName));
 		}

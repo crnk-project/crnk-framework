@@ -1,24 +1,32 @@
 package io.crnk.core.engine.registry;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 
 public interface ResourceRegistryPart {
 
-	RegistryEntry addEntry(RegistryEntry entry);
+    RegistryEntry addEntry(RegistryEntry entry);
 
-	boolean hasEntry(Class<?> clazz);
+    boolean hasEntry(Class<?> clazz);
 
-	boolean hasEntry(String resourceType);
+    boolean hasEntry(Type type);
 
-	RegistryEntry getEntry(String resourceType);
+    boolean hasEntry(String resourceType);
 
-	Collection<RegistryEntry> getResources();
+    RegistryEntry getEntry(String resourceType);
 
-	RegistryEntry getEntry(Class<?> clazz);
+    Collection<RegistryEntry> getEntries();
 
-	void addListener(ResourceRegistryPartListener listener);
+    RegistryEntry getEntry(Class<?> clazz);
 
-	void removeListener(ResourceRegistryPartListener listener);
+    RegistryEntry getEntry(Type type);
 
+    RegistryEntry getEntryByPath(String resourcePath);
+
+    void addListener(ResourceRegistryPartListener listener);
+
+    void removeListener(ResourceRegistryPartListener listener);
+
+    int getLatestVersion();
 }

@@ -1,23 +1,36 @@
 package io.crnk.core.module;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.filter.*;
+import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.information.NamingStrategy;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
+import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 
 /**
@@ -41,16 +54,22 @@ public interface Module {
 	 */
 	void setupModule(ModuleContext context);
 
+
 	/**
 	 * Interface Crnk exposes to modules for purpose of registering
 	 * extended functionality.
 	 */
 	interface ModuleContext {
 
+		DocumentMapper getDocumentMapper();
+
+		/**
+		 * Sets the ResultFactory used. Can only be called once by all modules!
+		 */
+		void setResultFactory(ResultFactory resultFactory);
+
 		/**
 		 * Adds the given extension
-		 *
-		 * @param extension
 		 */
 		void addExtension(ModuleExtension extension);
 
@@ -81,7 +100,7 @@ public interface Module {
 		 *
 		 * @param resourceInformationProvider resource information builder
 		 */
-		void addResourceInformationBuilder(ResourceInformationProvider resourceInformationProvider);
+		void addResourceInformationProvider(ResourceInformationProvider resourceInformationProvider);
 
 		/**
 		 * Register the given {@link RepositoryInformationProvider} in Crnk.
@@ -89,6 +108,13 @@ public interface Module {
 		 * @param RepositoryInformationBuilder resource information builder
 		 */
 		void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider);
+
+		/**
+		 * Add the given {@link PagingBehavior} to the module
+		 *
+		 * @param pagingBehavior the paging behavior
+		 */
+		void addPagingBehavior(PagingBehavior pagingBehavior);
 
 		/**
 		 * Register the given {@link ResourceLookup} in Crnk.
@@ -108,27 +134,6 @@ public interface Module {
 		 * Adds the given repository for the given type.
 		 */
 		void addRepository(Object repository);
-
-		/**
-		 * Adds the given repository for the given type.
-		 *
-		 * @param resourceClass resource class
-		 * @param repository    resource
-		 * @deprecated use {@link #addRepository(Object)}
-		 */
-		@Deprecated
-		void addRepository(Class<?> resourceClass, Object repository);
-
-		/**
-		 * Adds the given resource for the given source and target type.
-		 *
-		 * @param sourceResourceClass source resource class
-		 * @param targetResourceClass target resource class
-		 * @param repository          resource
-		 * @deprecated use {@link #addRepository(Object)}
-		 */
-		@Deprecated
-		void addRepository(Class<?> sourceResourceClass, Class<?> targetResourceClass, Object repository);
 
 		/**
 		 * Adds a new exception mapper lookup.
@@ -153,22 +158,19 @@ public interface Module {
 
 		/**
 		 * Adds a repository filter to intercept repository calls.
-		 *
-		 * @param filter
 		 */
 		void addRepositoryFilter(RepositoryFilter filter);
 
 		/**
 		 * Adds a resource filter to manage access to resources and fields.
-		 *
-		 * @param filter
 		 */
 		void addResourceFilter(ResourceFilter filter);
 
+
+		void addResourceFieldContributor(ResourceFieldContributor contributor);
+
 		/**
 		 * Adds a repository decorator to intercept repository calls.
-		 *
-		 * @param RepositoryDecoratorFactory decorator
 		 */
 		void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decorator);
 
@@ -220,5 +222,19 @@ public interface Module {
 		ResourceFilterDirectory getResourceFilterDirectory();
 
 		void addResourceModificationFilter(ResourceModificationFilter filter);
+
+		ResultFactory getResultFactory();
+
+		List<DocumentFilter> getDocumentFilters();
+
+		void addRepositoryAdapterFactory(RepositoryAdapterFactory repositoryAdapterFactory);
+
+		ModuleRegistry getModuleRegistry();
+
+		void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior);
+
+		List<NamingStrategy> getNamingStrategies();
+
+		void addNamingStrategy(NamingStrategy namingStrategy);
 	}
 }

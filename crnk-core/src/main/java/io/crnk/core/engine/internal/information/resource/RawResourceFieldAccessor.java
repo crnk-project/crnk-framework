@@ -1,5 +1,8 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -7,9 +10,6 @@ import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-
-import java.io.IOException;
-import java.util.Map;
 
 public class RawResourceFieldAccessor implements io.crnk.core.engine.information.resource.ResourceFieldAccessor {
 
@@ -48,7 +48,7 @@ public class RawResourceFieldAccessor implements io.crnk.core.engine.information
 			case META_INFORMATION:
 				return toObject(resource.getMeta());
 			default:
-				PreconditionUtil.assertEquals("invalid type", fieldType, ResourceFieldType.LINKS_INFORMATION);
+				PreconditionUtil.verifyEquals(fieldType, ResourceFieldType.LINKS_INFORMATION, "invalid type");
 				return toObject(resource.getLinks());
 		}
 	}
@@ -68,6 +68,11 @@ public class RawResourceFieldAccessor implements io.crnk.core.engine.information
 	@Override
 	public void setValue(Object resource, Object fieldValue) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Class getImplementationClass() {
+		return type;
 	}
 
 }

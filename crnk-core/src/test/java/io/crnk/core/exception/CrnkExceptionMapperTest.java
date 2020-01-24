@@ -16,12 +16,12 @@ public class CrnkExceptionMapperTest {
 	private static final String DETAIL1 = "detail1";
 
 	@Test
-	public void shouldMapToErrorResponse() throws Exception {
+	public void shouldMapToErrorResponse() {
 		CrnkExceptionMapper mapper = new CrnkExceptionMapper();
 		ErrorResponse response = mapper.toErrorResponse(new SampleCrnkException());
 
 		assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR_500);
-		assertThat((Iterable<?>) response.getResponse().getEntity()).hasSize(1).extracting("title", "detail")
+		assertThat((Iterable<?>) response.getResponse().getErrors()).hasSize(1).extracting("title", "detail")
 				.containsExactly(tuple(TITLE1, DETAIL1));
 	}
 
@@ -34,6 +34,17 @@ public class CrnkExceptionMapperTest {
 		CrnkMappableException exception = mapper.fromErrorResponse(response);
 		assertThat(exception).isInstanceOf(InternalServerErrorException.class);
 		assertThat(exception.getMessage()).isEqualTo("testMessage");
+	}
+
+	@Test
+	public void methodNotAllowed() {
+		CrnkExceptionMapper mapper = new CrnkExceptionMapper();
+		ErrorResponse response = mapper.toErrorResponse(new MethodNotAllowedException("GET"));
+		assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED_405);
+		assertThat(mapper.accepts(response)).isTrue();
+		CrnkMappableException exception = mapper.fromErrorResponse(response);
+		assertThat(exception).isInstanceOf(MethodNotAllowedException.class);
+		assertThat(exception.getMessage()).isEqualTo("method not allowed: GET");
 	}
 
 

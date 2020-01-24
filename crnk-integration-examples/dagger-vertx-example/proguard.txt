@@ -1,0 +1,114 @@
+# Include java runtime classes
+
+# -libraryjars  <java.home>/lib/rt.jar
+
+-libraryjars <java.home>/jmods
+-libraryjars <java.home>/lib
+-dontwarn com.oracle.jmc.**
+
+
+
+
+# Output a source map file
+-printmapping proguard.map
+
+# Keep filenames and line numbers
+-keepattributes Signature, SourceFile, LineNumberTable, *Annotation*
+
+
+-dontskipnonpubliclibraryclasses
+
+-dontskipnonpubliclibraryclassmembers
+
+
+
+# Disable certain proguard optimizations which remove stackframes (same as Android defaults)
+-optimizations !method/inlining/*
+
+#-dontobfuscate
+-dontoptimize
+
+
+-keep class * implements io.crnk.core.engine.error.ExceptionMapper {
+	*;
+}
+
+-keep class io.vertx.core.http.impl.* {
+	*;
+}
+
+-keep class io.netty.channel.* {
+	*;
+}
+-keepclasseswithmembers class io.netty.channel.* {
+   *;
+}
+
+# netty freezes without this
+-keepclasseswithmembers class io.netty.channel.nio.* {
+   *;
+}
+
+-keep public class io.crnk.core.engine.internal.exception.CrnkExceptionMapper {
+  	*;
+}
+
+-keepnames class io.vertx.core.spi.VertxFactory
+-keepnames class io.vertx.core.spi.BufferFactory
+-keepnames class io.vertx.core.spi.FutureFactory
+-keepnames class org.slf4j.impl.StaticMDCBinder
+
+# keep all naming for now for simplicity... still some issues left
+-keepnames class * {
+  *;
+}
+
+-keepclasseswithmembers public class io.crnk.example.vertx.AppMain {
+    public static void main(java.lang.String[]);
+}
+
+
+-keep public class io.vertx.core.buffer.impl.BufferFactoryImpl {
+  	*;
+}
+
+
+-keep public class io.vertx.core.impl.FutureFactoryImpl {
+  	*;
+}
+
+-keep public class io.vertx.core.impl.VertxFactoryImpl {
+  	*;
+}
+
+-keep public class io.vertx.core.impl.DeploymentManager {
+  *;
+}
+
+-keepclassmembernames class * {
+    java.lang.Class class$(java.lang.String);
+    java.lang.Class class$(java.lang.String, boolean);
+}
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-dontwarn org.jetbrains.**
+-dontwarn kotlin.**
+-dontwarn javax.**
+-dontwarn java.**
+-dontwarn io.vertx.**
+-dontwarn io.**
+-dontwarn groovy.**
+-dontwarn org.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.apache.commons.logging.**
+-dontwarn org.apache.logging.**
+-dontwarn org.apache.log4j.**
+-dontwarn reactor.core.**

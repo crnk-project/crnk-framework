@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="approvalDefinitions"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 targetNamespace="http://activiti.org/bpmn20"
+			 xmlns:activiti="http://activiti.org/bpmn"
+			 xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+
+
+	<process id="scheduleChange" name="Approve schedule change" isExecutable="true">
+		<documentation>
+			This process is initiated when a user modifies a scheduleEntity trough the JSON API endpoint.
+		</documentation>
+
+		<startEvent id="startScheduleChange" name="Start" activiti:initiator="initiator"></startEvent>
+
+		<userTask id="approveScheduleTask" name="Approve new Schedule">
+			<extensionElements>
+				<activiti:formProperty id="approved" name="Do you approve this change" type="boolean" required="true" />
+			</extensionElements>
+		</userTask>
+
+		<sequenceFlow id="startFlow" sourceRef="startScheduleChange" targetRef="approveScheduleTask"></sequenceFlow>
+
+		<sequenceFlow id="decideFlow" sourceRef="approveScheduleTask" targetRef="approvalExclusiveGateway"></sequenceFlow>
+
+		<serviceTask id="scheduleChangeApproved" name="Create schedule Account, send Alerts"
+					 activiti:expression="${approvalManager.approved(execution)}"></serviceTask>
+		<serviceTask id="scheduleChangeDenied" name="send alert"
+					 activiti:expression="${approvalManager.denied(execution)}"></serviceTask>
+
+		<endEvent id="endEvent" name="End"></endEvent>
+
+		<exclusiveGateway id="approvalExclusiveGateway" name="Exclusive Gateway"></exclusiveGateway>
+
+		<sequenceFlow id="approveFlow" sourceRef="approvalExclusiveGateway" targetRef="scheduleChangeApproved">
+			<conditionExpression xsi:type="tFormalExpression">
+				<![CDATA[
+                ${approved == true}
+            ]]>
+			</conditionExpression>
+		</sequenceFlow>
+
+		<sequenceFlow id="denyFlow" sourceRef="approvalExclusiveGateway" targetRef="scheduleChangeDenied">
+			<conditionExpression xsi:type="tFormalExpression">
+				<![CDATA[
+                ${approved == false}
+            ]]>
+			</conditionExpression>
+		</sequenceFlow>
+		<sequenceFlow id="flow5" sourceRef="scheduleChangeDenied" targetRef="endEvent"></sequenceFlow>
+		<sequenceFlow id="flow6" sourceRef="scheduleChangeApproved" targetRef="endEvent"></sequenceFlow>
+	</process>
+
+
+	<process id="immediateTerminationFlow" name="Directly terminates" isExecutable="true">
+		<documentation>
+			This process directly terminates
+		</documentation>
+
+		<startEvent id="quickStartEvent" name="Start" activiti:initiator="initiator"></startEvent>
+
+		<sequenceFlow id="quickStartFlow" sourceRef="quickStartEvent" targetRef="quickEndEvent"></sequenceFlow>
+
+		<endEvent id="quickEndEvent" name="End"></endEvent>
+
+	</process>
+</definitions>

@@ -7,11 +7,10 @@ dependencies {
 	compileOnly group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
 
 	testCompile project(':crnk-client')
-	testCompile project(':crnk-rs')
+	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
 	testCompile project(':crnk-meta')
 	testCompile group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
-	testCompile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
 	testCompile group: 'org.springframework', name: 'spring-orm', version: '4.3.1.RELEASE'
 	testCompile group: 'org.springframework', name: 'spring-context', version: '4.3.1.RELEASE'
 	testCompile group: 'org.springframework', name: 'spring-test', version: '4.3.1.RELEASE'

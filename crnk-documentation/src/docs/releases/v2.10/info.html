@@ -1,0 +1,63 @@
+<h4>More flexible document formats</h4>
+
+So far Crnk followed the JSON API specification to the letter to establish a REST endpoint. The motivation of this was
+to have a clearly defined standard. In particular the relationship handling and inclusions allow to built powerful applications
+(such as when working with the redux pattern on the client side).
+However, at the same time this feature can make more simpler applications harder to write since
+they are forced to resolve those relationships. With <b>crnk-format-plain-json</b> a new module <b>PlainJsonFormatModule</b>
+is introduced that allows to setup alternative, custom document format next to JSON API. The ACCEPT and CONTENT-TYPE header will determine
+whether the JSON API or that custom format is used. An example can look like:
+
+<pre class="prettyprint">
+{
+  "data" : {
+    "id" : "12",
+    "type" : "tasks",
+    "name" : "someTask",
+    "schedule" : {
+      "data" : null,
+      "links" : {
+        "self" : "http://localhost:8080/tasks/12/relationships/schedule",
+        "related" : "http://localhost:8080/tasks/12/schedule"
+      }
+    },
+    "project" : {
+      "data" : {
+        "id" : "1",
+        "type" : "projects",
+        "name" : "someProject"
+      },
+      "links" : {
+        "self" : "http://localhost:8080/tasks/12/relationships/project",
+        "related" : "http://localhost:8080/tasks/12/project"
+      }
+    }
+  }
+}
+</pre>
+
+Most notably the project relationship is directly inlined with the task. And a resource is written in a more flat manner without the
+<i>attributes</i> and
+<i>relationships</i> containers. Contributions to add more flexibility to the module are always welcome.
+
+
+<h4>Improved default settings</h4>
+
+To simplify development, two further flags have been enabled by default. The flags have been disabled for historic
+reasons to maintain backward compatibility. But more and more they cause issues rather than help with compatibility. Both
+flags can be turned-off again if desired, but in general this is not recommended.
+<p>
+  The first concerns <i>TypeParser.setEnforceJackson</i> that is enabled by default. It affects how filter parameters are serialized and deserialized
+  to urls. Among others, it was by default searching for `parse` methods and constructors with a single String parameter. This behavior
+  is no longer active. Instead always Jackson and its ObjectMapper is used for the mapping (as long as no custom StringMapper is installed with
+  TypeParser). You may want to make use the following annotation to make custom value classes String-serializable:
+
+<pre class="prettyprint">
+	@JsonSerialize(using = ToStringSerializer.class)
+</pre>
+
+In this case the toString method and String constructor is used by Jackson as well.
+<p>
+  The second property concerns <i>crnk.enforceIdName</i> that is now enabled by default. This will result that all @JsonApiId-annotated fields are
+  named &quot;id&quot; on the REST layer regardless of the name in Java. This matches the JSON API specification. It mainly affects
+  the naming in sort and filter parameters.

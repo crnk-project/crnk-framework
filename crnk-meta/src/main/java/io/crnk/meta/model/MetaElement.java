@@ -1,13 +1,15 @@
 package io.crnk.meta.model;
 
+import java.util.*;
+import java.util.concurrent.Callable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
-import io.crnk.core.resource.annotations.*;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 /**
  * Root of the meta model. Elements are identified by id. Have a name. All except the root have a parent and
@@ -16,7 +18,7 @@ import java.util.concurrent.Callable;
  * Relationships are defined with LookupIncludeBehavior.AUTOMATICALLY_ALWAYS to allow to customize the
  * meta model towards the request (hide elements, update mutation information, etc.)
  */
-@JsonApiResource(type = "meta/element")
+@JsonApiResource(type = "metaElement", resourcePath = "meta/element")
 public class MetaElement implements Cloneable {
 
 	@JsonApiId
@@ -29,6 +31,11 @@ public class MetaElement implements Cloneable {
 
 	@JsonApiRelation(opposite = "parent", lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private List<MetaElement> children = new ArrayList<>();
+
+	/**
+	 * Additional feature flags for meta elements
+	 */
+	private Map<String, MetaNature> natures = new HashMap<>();
 
 	public MetaElement getParent() {
 		return parent;
@@ -48,6 +55,14 @@ public class MetaElement implements Cloneable {
 
 	public void addChild(MetaElement child) {
 		children.add(child);
+	}
+
+	public Map<String, MetaNature> getNatures() {
+		return natures;
+	}
+
+	public void setNatures(Map<String, MetaNature> natures) {
+		this.natures = natures;
 	}
 
 	public MetaType asType() {

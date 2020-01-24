@@ -1,9 +1,9 @@
 package io.crnk.meta.model;
 
+import io.crnk.core.engine.parser.TypeParser;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-
-import io.crnk.core.engine.parser.TypeParser;
 
 public class MetaMapAttribute extends MetaAttribute {
 

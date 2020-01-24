@@ -1,9 +1,12 @@
+# Hints for attaching to a local JVM
+**/.attach_pid*
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Java template
 *.class
 replay_pid*
 hs_err_pid*
-temp*
+
 coverage**
 
 # Mobile Tools for Java (J2ME)
@@ -44,7 +47,7 @@ hs_err_pid*
 
 # IntelliJ
 /out/
-*/out/
+**/out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -57,7 +60,6 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-### Eclipse template
 
 .metadata
 bin/
@@ -109,7 +111,7 @@ local.properties
 
 # Code Recommenders
 .recommenders/
-### Maven template
+
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -128,3 +130,5 @@ buildNumber.properties
 build
 
 node_modules
+
+temp

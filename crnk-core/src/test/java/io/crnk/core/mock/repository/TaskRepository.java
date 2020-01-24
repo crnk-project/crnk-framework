@@ -1,92 +1,90 @@
 package io.crnk.core.mock.repository;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.LinksRepository;
+import io.crnk.core.repository.MetaRepository;
+import io.crnk.core.repository.ResourceRepositoryBase;
+import io.crnk.core.resource.links.DefaultPagedLinksInformation;
+import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.annotations.JsonApiDelete;
-import io.crnk.legacy.repository.annotations.JsonApiFindAll;
-import io.crnk.legacy.repository.annotations.JsonApiFindAllWithIds;
-import io.crnk.legacy.repository.annotations.JsonApiFindOne;
-import io.crnk.legacy.repository.annotations.JsonApiMeta;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import io.crnk.legacy.repository.annotations.JsonApiSave;
 
-@JsonApiResourceRepository(Task.class)
-public class TaskRepository {
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-	private static final ConcurrentHashMap<Long, Task> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
+public class TaskRepository extends ResourceRepositoryBase<Task, Long>
+        implements MetaRepository<Task>, LinksRepository<Task> {
 
-	public static void clear() {
-		THREAD_LOCAL_REPOSITORY.clear();
-	}
+    public static final String BAD_REQUEST_NAME = "badName";
 
-	@JsonApiSave
-	public <S extends Task> S save(S entity) {
-		if ("badName".equals(entity.getName())) {
-			throw new BadRequestException("badName not a valid name");
-		}
-		if (entity.getId() == null) {
-			entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
-		}
-		THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
+    private Set<Task> tasks = new HashSet<>();
 
-		return entity;
-	}
+    private long nextId = 0;
 
-	@JsonApiFindOne
-	public Task findOne(Long aLong, QueryParams queryParams) {
-		Task task = THREAD_LOCAL_REPOSITORY.get(aLong);
-		if (task == null) {
-			throw new ResourceNotFoundException("");
-		}
-		return task;
-	}
+    public TaskRepository() {
+        super(Task.class);
+    }
 
-	@JsonApiFindAll
-	public Iterable<Task> findAll(QueryParams queryParams) {
-		return THREAD_LOCAL_REPOSITORY.values();
-	}
+    @Override
+    public ResourceList<Task> findAll(QuerySpec querySpec) {
+        TaskList list = new TaskList();
+        querySpec.apply(tasks, list);
+        list.setMeta(new DefaultPagedMetaInformation());
+        list.setLinks(new DefaultPagedLinksInformation());
+        return list;
+    }
 
 
-	@JsonApiFindAllWithIds
-	public Iterable<Task> findAll(Iterable<Long> ids, QueryParams queryParams) {
-		List<Task> values = new LinkedList<>();
-		for (Task value : THREAD_LOCAL_REPOSITORY.values()) {
-			if (contains(value, ids)) {
-				values.add(value);
-			}
-		}
-		return values;
-	}
+    @Override
+    public <S extends Task> S save(S entity) {
+        if (BAD_REQUEST_NAME.equals(entity.getName())) {
+            throw new BadRequestException("badName");
+        }
+        if (entity.getId() == null) {
+            entity.setId(nextId++);
+        }
+        delete(entity.getId()); // replace current one
 
-	private boolean contains(Task value, Iterable<Long> ids) {
-		for (Long id : ids) {
-			if (value.getId().equals(id)) {
-				return true;
-			}
-		}
+        // maintain bidirectional mapping, not perfect, should be done in the resources, but serves its purpose her.
+        Project project = entity.getProject();
+        if (project != null && !project.getTasks().contains(entity)) {
+            project.getTasks().add(entity);
+        }
 
-		return false;
-	}
+        tasks.add(entity);
+        return entity;
+    }
 
-	@JsonApiDelete
-	public void delete(Long aLong) {
-		THREAD_LOCAL_REPOSITORY.remove(aLong);
-	}
+    @Override
+    public void delete(Long id) {
+        Iterator<Task> iterator = tasks.iterator();
+        while (iterator.hasNext()) {
+            Task next = iterator.next();
+            if (next.getId().equals(id)) {
+                iterator.remove();
+            }
+        }
+    }
 
-	@JsonApiMeta
-	public MetaInformation getMetaInformation(Iterable<Task> resources, QueryParams queryParams) {
-		return new MetaData();
-	}
+    @Override
+    public LinksInformation getLinksInformation(Collection<Task> resources, QuerySpec queryParams, LinksInformation current) {
+        return new LinksInformation() {
 
-	public static class MetaData implements MetaInformation {
+            public String name = "value";
+        };
+    }
 
-		public String someValue;
-	}
+    @Override
+    public MetaInformation getMetaInformation(Collection<Task> resources, QuerySpec queryParams, MetaInformation current) {
+        return new MetaInformation() {
+
+            public String name = "value";
+        };
+    }
 }

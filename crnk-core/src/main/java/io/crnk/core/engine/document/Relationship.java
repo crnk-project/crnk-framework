@@ -36,11 +36,11 @@ public class Relationship implements MetaContainer, LinksContainer {
 	}
 
 	public Relationship(ResourceIdentifier resourceId) {
-		this.data = Nullable.of((Object) resourceId);
+		this.data = Nullable.of(resourceId);
 	}
 
 	public Relationship(List<ResourceIdentifier> resourceIds) {
-		this.data = Nullable.of((Object) resourceIds);
+		this.data = Nullable.of(resourceIds);
 	}
 
 	@Override
@@ -58,21 +58,20 @@ public class Relationship implements MetaContainer, LinksContainer {
 	}
 
 	public void setData(Nullable<Object> data) {
-		PreconditionUtil.assertNotNull("make use of Nullable, null not allowed", data);
+		PreconditionUtil.verify(data != null, "make use of Nullable, null not allowed");
 		if (data.isPresent()) {
 			Object value = data.get();
 			if (value instanceof Collection) {
 				Collection<?> col = (Collection<?>) value;
 				if (!col.isEmpty()) {
 					Object object = col.iterator().next();
-					PreconditionUtil.assertFalse("relationship data cannot be a Resource", object instanceof Resource);
-					PreconditionUtil.assertTrue("relationship data must be an instanceof of ResourceIdentifier", object instanceof ResourceIdentifier);
+					PreconditionUtil.verify(object instanceof ResourceIdentifier, "relationship data must be an instanceof of ResourceIdentifier, got %s", object);
+					PreconditionUtil.verify(!(object instanceof Resource), "relationship data cannot be a Resource, must be a ResourceIdentifier");
 				}
 			}
 			else {
-				PreconditionUtil.assertTrue("value must be a ResourceIdentifier, null or collection", value == null || value
-						instanceof
-						ResourceIdentifier);
+				PreconditionUtil.verify(value == null || value
+						instanceof ResourceIdentifier, "value must be a ResourceIdentifier, null or collection, got %s", value);
 			}
 
 		}

@@ -136,13 +136,13 @@ export class FormBinding {
 
 	public dirty: Observable<boolean>;
 
-	private ngrxJsonApiZone: NgrxJsonApiZoneService;
+	public readonly zone: NgrxJsonApiZoneService;
 
 	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: FormBindingConfig,
 		private store: Store<any>) {
 
 		const zoneId = config.zoneId || NGRX_JSON_API_DEFAULT_ZONE;
-		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(zoneId);
+		this.zone = ngrxJsonApiService.getZone(zoneId);
 
 		this.dirtySubject.next(false);
 		this.validSubject.next(true);
@@ -159,7 +159,7 @@ export class FormBinding {
 
 		// we make use of share() to keep the this.config.resource$ subscription
 		// as long as there is at least subscriber on this.resource$.
-		this.resource$ = this.ngrxJsonApiZone.selectOneResults(this.config.queryId, true)
+		this.resource$ = this.zone.selectOneResults(this.config.queryId, true)
 			.filter(it => !_.isEmpty(it)) // ignore deletions
 			.filter(it => !it.loading)
 			.map(it => it.data as StoreResource)
@@ -287,11 +287,11 @@ export class FormBinding {
 	}
 
 	public save() {
-		this.ngrxJsonApiZone.apply();
+		this.zone.apply();
 	}
 
 	public delete() {
-		this.ngrxJsonApiZone.deleteResource({
+		this.zone.deleteResource({
 				resourceId: this.primaryResourceId,
 				toRemote: true
 			}
@@ -359,7 +359,7 @@ export class FormBinding {
 		const patchedResources = _.values(patchedResourceMap);
 		for (const patchedResource of patchedResources) {
 			const cleanedPatchedResource = this.clearPrimeNgMarkers(patchedResource);
-			this.ngrxJsonApiZone.patchResource({resource: cleanedPatchedResource});
+			this.zone.patchResource({resource: cleanedPatchedResource});
 		}
 	}
 

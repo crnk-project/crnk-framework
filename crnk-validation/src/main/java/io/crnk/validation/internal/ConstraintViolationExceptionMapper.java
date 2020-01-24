@@ -1,5 +1,31 @@
 package io.crnk.validation.internal;
 
+import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.document.ErrorDataBuilder;
+import io.crnk.core.engine.error.ErrorResponse;
+import io.crnk.core.engine.error.ExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapperHelper;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.module.Module.ModuleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ElementKind;
+import javax.validation.Path.Node;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -10,27 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ElementKind;
-import javax.validation.Path.Node;
-
-import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.document.ErrorDataBuilder;
-import io.crnk.core.engine.error.ErrorResponse;
-import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.ExceptionMapperHelper;
-import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.ExceptionUtil;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.module.Module.ModuleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
 
@@ -76,8 +81,7 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				Object parentNode = parentMethod.invoke(propertyNode);
 				if (parentNode != null) {
 					return valueMethod.invoke(parentNode);
-				}
-				else {
+				} else {
 					return valueMethod.invoke(propertyNode);
 				}
 			}
@@ -170,13 +174,35 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 	public ConstraintViolationException fromErrorResponse(ErrorResponse errorResponse) {
 		Set violations = new HashSet();
 
+		StringBuilder message = new StringBuilder();
+
+		HttpRequestContextProvider httpRequestContextProvider = context.getModuleRegistry().getHttpRequestContextProvider();
+		HttpRequestContext requestContext = httpRequestContextProvider.getRequestContext();
+		QueryContext queryContext = requestContext.getQueryContext();
+
 		Iterable<ErrorData> errors = errorResponse.getErrors();
 		for (ErrorData error : errors) {
-			ConstraintViolationImpl violation = ConstraintViolationImpl.fromError(context.getResourceRegistry(), error);
+			ConstraintViolationImpl violation = ConstraintViolationImpl.fromError(context.getResourceRegistry(), error, queryContext);
 			violations.add(violation);
+
+			// TODO cleanup message handling
+			if (message.length() > 0) {
+				message.append(", ");
+			}
+			if (violation.getMessage() != null) {
+				message.append(violation.getMessage());
+			} else if (error.getDetail() != null) {
+				message.append(error.getDetail());
+			} else {
+				message.append(error.getCode());
+			}
+			String sourcePointer = error.getSourcePointer();
+			if (sourcePointer != null) {
+				message.append(" (" + sourcePointer + ")");
+			}
 		}
 
-		return new ConstraintViolationException(null, violations);
+		return new ConstraintViolationException(message.toString(), violations);
 	}
 
 	@Override
@@ -280,31 +306,56 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 		}
 
 		public Object visitProperty(Object nodeObject, Node node) {
+			ResourceRegistry resourceRegistry = context.getResourceRegistry();
+			Class nodeClass = nodeObject.getClass();
+			ResourceInformation resourceInformation = null;
+			if (resourceRegistry.hasEntry(nodeClass)) {
+				RegistryEntry entry = resourceRegistry.getEntry(nodeClass);
+				resourceInformation = entry.getResourceInformation();
+			}
+
+			String name = node.getName();
+
 			Object next;
 			if (node.getKind() == ElementKind.PROPERTY) {
-				next = PropertyUtils.getProperty(nodeObject, node.getName());
-			}
-			else if (node.getKind() == ElementKind.BEAN) {
+				if (resourceRegistry.hasEntry(nodeClass)) {
+					ResourceFieldAccessor accessor = resourceInformation.getAccessor(name);
+					if (accessor != null) {
+						next = accessor.getValue(nodeObject);
+					} else {
+						next = PropertyUtils.getProperty(nodeObject, name);
+					}
+				} else {
+					next = PropertyUtils.getProperty(nodeObject, name);
+				}
+			} else if (node.getKind() == ElementKind.BEAN) {
 				next = nodeObject;
-			}
-			else {
+			} else {
 				throw new UnsupportedOperationException("unknown node: " + node);
 			}
 
-			if (node.getName() != null) {
+			if (name != null) {
+				ResourceField resourceField =
+						resourceInformation != null ? resourceInformation.findFieldByUnderlyingName(name) : null;
+
+				String mappedName = name;
+				if (resourceField != null) {
+					// in case of @JsonApiRelationId it will be mapped to original name
+					resourceField = resourceInformation.findFieldByUnderlyingName(resourceField.getUnderlyingName());
+					mappedName = resourceField.getJsonName();
+				}
+
 				appendSeparator();
-				if (!isResource(nodeObject.getClass()) || isPrimaryKey(nodeObject.getClass(), node.getName())) {
+				if (resourceField == null || resourceField.getResourceFieldType() == ResourceFieldType.ID) {
 					// continue along attributes path or primary key on root
-					appendSourcePointer(node.getName());
-				}
-				else if (isAssociation(nodeObject.getClass(), node.getName())) {
+					appendSourcePointer(mappedName);
+				} else if (resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
 					appendSourcePointer("/data/relationships/");
-					appendSourcePointer(node.getName());
-				}
-				else {
+					appendSourcePointer(mappedName);
+				} else {
 
 					appendSourcePointer("/data/attributes/");
-					appendSourcePointer(node.getName());
+					appendSourcePointer(mappedName);
 				}
 			}
 			return next;
@@ -317,13 +368,11 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				appendSeparator();
 				appendSourcePointer(index);
 				return ((List<?>) element).get(index);
-			}
-			else if (key != null) {
+			} else if (key != null) {
 				appendSeparator();
 				appendSourcePointer(key);
 				return ((Map<?, ?>) element).get(key);
-			}
-			else if (element instanceof Set && getValue(node) != null) {
+			} else if (element instanceof Set && getValue(node) != null) {
 				Object elementEntry = getValue(node);
 
 				// since sets get translated to arrays, we do the same here
@@ -358,32 +407,6 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 		private void appendSeparator() {
 			if (leafSourcePointer.length() > 0) {
 				appendSourcePointer("/");
-			}
-		}
-
-		private boolean isPrimaryKey(Class<? extends Object> clazz, String name) {
-			ResourceRegistry resourceRegistry = context.getResourceRegistry();
-			RegistryEntry entry = resourceRegistry.findEntry(clazz);
-			if (entry != null) {
-				ResourceInformation resourceInformation = entry.getResourceInformation();
-				ResourceField idField = resourceInformation.getIdField();
-				return idField.getUnderlyingName().equals(name);
-			}
-			else {
-				return DEFAULT_PRIMARY_KEY_NAME.equals(name);
-			}
-		}
-
-		private boolean isAssociation(Class<? extends Object> clazz, String name) {
-			ResourceRegistry resourceRegistry = context.getResourceRegistry();
-			RegistryEntry entry = resourceRegistry.findEntry(clazz);
-			if (entry != null) {
-				ResourceInformation resourceInformation = entry.getResourceInformation();
-				ResourceField relationshipField = resourceInformation.findRelationshipFieldByName(name);
-				return relationshipField != null;
-			}
-			else {
-				return false;
 			}
 		}
 

@@ -5,18 +5,13 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.MultivaluedMap;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.action.JerseyActionStubFactory;
-import io.crnk.client.module.TestModule;
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.rs.JsonApiResponseFilter;
 import io.crnk.rs.JsonapiExceptionMapperBridge;
 import io.crnk.test.JerseyTestBase;
+import io.crnk.test.mock.ClientTestModule;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.ProjectToTaskRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
@@ -29,12 +24,9 @@ import org.junit.Before;
 
 public abstract class AbstractClientTest extends JerseyTestBase {
 
-	protected CrnkClient client;
+	public CrnkClient client;
 
 	protected TestApplication testApplication;
-
-	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
-
 
 	@Before
 	public void setup() {
@@ -49,7 +41,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 
 	protected void createClient() {
 		client = new CrnkClient(getBaseUri().toString());
-		client.addModule(new TestModule());
+		client.addModule(new ClientTestModule());
 		// tag::jerseyStubFactory[]
 		client.setActionStubFactory(JerseyActionStubFactory.newInstance());
 		// end::jerseyStubFactory[]
@@ -71,9 +63,8 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 	@Override
 	protected TestApplication configure() {
 		if (testApplication == null) {
-			testApplication = new TestApplication(false);
+			testApplication = new TestApplication();
 		}
-
 		return testApplication;
 	}
 
@@ -91,7 +82,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 		List<String> values = headers.get(name);
 		Assert.assertNotNull(values);
 
-		Assert.assertTrue(values.contains(value));
+		Assert.assertTrue(values.toString(), values.contains(value));
 	}
 
 	/**
@@ -120,24 +111,17 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 
 		private CrnkTestFeature feature;
 
-		public TestApplication(boolean querySpec) {
-			this(querySpec, false, false);
+		public TestApplication() {
+			this(false, false);
 		}
 
-		public TestApplication(boolean querySpec, boolean jsonApiFilter, boolean serializeLinksAsObjects) {
-			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.test.mock");
+		public TestApplication(boolean jsonApiFilter, boolean serializeLinksAsObjects) {
 			property(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS, Boolean.toString(serializeLinksAsObjects));
 
-			if (!querySpec) {
-				feature = new CrnkTestFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),
-						new SampleJsonServiceLocator());
-			}
-			else {
-				feature = new CrnkTestFeature(new ObjectMapper(), new DefaultQuerySpecDeserializer(),
-						new SampleJsonServiceLocator());
-			}
+			feature = new CrnkTestFeature();
 
-			feature.addModule(new TestModule());
+			feature.addModule(new io.crnk.test.mock.TestModule());
+			feature.addModule(new ClientTestModule());
 
 			if (jsonApiFilter) {
 				register(new JsonApiResponseFilter(feature));

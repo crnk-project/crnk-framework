@@ -6,25 +6,39 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.crnk.core.engine.internal.utils.CompareUtils;
-import io.crnk.core.engine.internal.utils.StringUtils;
 
 public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpec> {
 
+	@JsonSerialize(using = ToStringSerializer.class)
 	private FilterOperator operator;
+
 	private Object value;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private List<FilterSpec> expressions;
 
 	protected FilterSpec() {
 	}
 
 	FilterSpec(FilterSpec spec) {
-		super(spec.getAttributePath());
+		super(spec.getPath() != null ? spec.getPath().clone() : null);
 		this.operator = spec.operator;
 		this.value = spec.value;
 		if (spec.expressions != null) {
 			this.expressions = cloneExpressions(spec.expressions, false);
 		}
+	}
+
+	/**
+	 * Search without attribute path, e.g. with a complex JSON query.
+	 */
+	public FilterSpec(Object value) {
+		super();
+		this.value = value;
 	}
 
 	public FilterSpec(FilterOperator operator, List<FilterSpec> expressions) {
@@ -34,15 +48,19 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 	}
 
 	public FilterSpec(List<String> attributePath, FilterOperator operator, Object value) {
-		super(attributePath);
+		this(PathSpec.of(attributePath), operator, value);
+	}
+
+	public FilterSpec(PathSpec path, FilterOperator operator, Object value) {
+		super(path);
 		this.operator = operator;
 		this.value = value;
 		assertOperator();
 		assertNotExpressions();
 	}
 
-	private FilterSpec(List<String> attributePath, FilterOperator operator, Object value, List<FilterSpec> expressions) {
-		super(attributePath);
+	private FilterSpec(PathSpec pathSpec, FilterOperator operator, Object value, List<FilterSpec> expressions) {
+		super(pathSpec);
 		this.operator = operator;
 		this.value = value;
 		this.expressions = expressions;
@@ -53,6 +71,9 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 	}
 
 	public static FilterSpec and(FilterSpec... conditions) {
+		if (conditions.length == 0) {
+			return null;
+		}
 		if (conditions.length == 1) {
 			return conditions[0];
 		}
@@ -92,7 +113,8 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 		for (FilterSpec spec : list) {
 			if (normalize) {
 				result.add(spec.normalize());
-			} else {
+			}
+			else {
 				result.add(spec.clone());
 			}
 		}
@@ -121,8 +143,8 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 		return operator;
 	}
 
-	public void setOperator(FilterOperator condition) {
-		this.operator = condition;
+	public void setOperator(FilterOperator operator) {
+		this.operator = operator;
 	}
 
 	public <T> T getValue() {
@@ -135,6 +157,10 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 
 	public List<FilterSpec> getExpression() {
 		return expressions;
+	}
+
+	public void setExpression(List<FilterSpec> expression) {
+		this.expressions = expression;
 	}
 
 	/**
@@ -152,24 +178,24 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 	}
 
 	public boolean hasExpressions() {
-		// if nothing is set we assume an empty expression (i.e. an empty where
-		// clause)
-		return getAttributePath() == null;
+		return expressions != null && !expressions.isEmpty();
 	}
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(new Object[]{getAttributePath(), operator, expressions, value});
+		return Arrays.hashCode(new Object[] { getAttributePath(), operator, expressions, value });
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null || getClass() != obj.getClass())
+		}
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
+		}
 		FilterSpec other = (FilterSpec) obj;
-		return CompareUtils.isEquals(attributePath, other.attributePath)
+		return CompareUtils.isEquals(path, other.path)
 				&& CompareUtils.isEquals(operator, other.operator) && CompareUtils.isEquals(value, other.value)
 				&& CompareUtils.isEquals(expressions, other.expressions);
 	}
@@ -181,11 +207,13 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 			int nExprs = getExpression().size();
 			if (getOperator() == FilterOperator.NOT) {
 				appendNot(b, nExprs);
-			} else {
+			}
+			else {
 				appendExpressions(b, nExprs);
 			}
-		} else if (attributePath != null) {
-			b.append(StringUtils.join(".", attributePath));
+		}
+		else if (path != null) {
+			b.append(path);
 			b.append(' ');
 			b.append(operator.name());
 			b.append(' ');
@@ -232,9 +260,9 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 	 * @return normalized FilterSpec
 	 */
 	public FilterSpec normalize() {
-		List<FilterSpec>  clonedExpressions = expressions != null ? cloneExpressions(expressions, true) : null;
+		List<FilterSpec> clonedExpressions = expressions != null ? cloneExpressions(expressions, true) : null;
 
-		FilterSpec copy = new FilterSpec(attributePath, operator, value, clonedExpressions);
+		FilterSpec copy = new FilterSpec(path, operator, value, clonedExpressions);
 		return copy;
 	}
 

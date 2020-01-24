@@ -1,14 +1,21 @@
 package io.crnk.core.mock.models;
 
-import io.crnk.core.resource.annotations.*;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "projects")
 public class Project {
 
 	@JsonApiId
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Long id;
 
 	private String name;
@@ -17,23 +24,23 @@ public class Project {
 
 	private ProjectData data;
 
-	@JsonApiToMany(opposite = "project")
+	@JsonApiRelation(mappedBy = "project")
 	private List<Task> tasks = new ArrayList<>();
 
-	@JsonApiToOne
+	@JsonApiRelation
 	private Task task;
 
-	@JsonApiToOne
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER)
 	private ProjectEager projectEager;
 
-	@JsonApiToMany
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private List<ProjectEager> projectEagerList = new ArrayList<>();
 
-	@JsonApiToOne
-	@JsonApiLookupIncludeAutomatically
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Task includedTask;
+
+	@JsonApiRelation(opposite = "project")
+	private Collection<Schedule> schedules;
 
 	public Long getId() {
 		return id;
@@ -42,6 +49,14 @@ public class Project {
 	public Project setId(Long id) {
 		this.id = id;
 		return this;
+	}
+
+	public Collection<Schedule> getSchedules() {
+		return schedules;
+	}
+
+	public void setSchedules(Collection<Schedule> schedules) {
+		this.schedules = schedules;
 	}
 
 	public String getName() {

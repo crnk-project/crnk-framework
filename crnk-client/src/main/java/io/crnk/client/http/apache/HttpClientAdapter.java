@@ -1,9 +1,7 @@
 package io.crnk.client.http.apache;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-
 import io.crnk.client.http.HttpAdapter;
+import io.crnk.client.http.HttpAdapterListener;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -12,83 +10,93 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 public class HttpClientAdapter implements HttpAdapter {
 
-	private CloseableHttpClient impl;
+    private CloseableHttpClient impl;
 
-	private CopyOnWriteArrayList<HttpClientAdapterListener> listeners = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<HttpClientAdapterListener> nativeListeners = new CopyOnWriteArrayList<>();
 
-	private Integer receiveTimeout;
+    private CopyOnWriteArrayList<HttpAdapterListener> listeners = new CopyOnWriteArrayList<>();
 
-	public static HttpClientAdapter newInstance() {
-		return new HttpClientAdapter();
-	}
+    @Override
+    public void addListener(HttpAdapterListener listener) {
+        checkNotInitialized();
+        listeners.add(listener);
+    }
 
-	public void addListener(HttpClientAdapterListener listener) {
-		checkNotInitialized();
-		listeners.add(listener);
-	}
+    private Integer receiveTimeout;
 
-	private void checkNotInitialized() {
-		if (impl != null) {
-			throw new IllegalStateException("already initialized");
-		}
-	}
+    public static HttpClientAdapter newInstance() {
+        return new HttpClientAdapter();
+    }
 
-	public CloseableHttpClient getImplementation() {
-		if (impl == null) {
-			initImpl();
-		}
-		return impl;
-	}
+    public void addListener(HttpClientAdapterListener listener) {
+        checkNotInitialized();
+        nativeListeners.add(listener);
+    }
 
-	private synchronized void initImpl() {
-		if (impl == null) {
-			HttpClientBuilder builder = createBuilder();
+    private void checkNotInitialized() {
+        if (impl != null) {
+            throw new IllegalStateException("already initialized");
+        }
+    }
 
-			if (receiveTimeout != null) {
-				RequestConfig.Builder requestBuilder = RequestConfig.custom();
-				requestBuilder = requestBuilder.setSocketTimeout(receiveTimeout);
-				builder.setDefaultRequestConfig(requestBuilder.build());
-			}
+    public CloseableHttpClient getImplementation() {
+        if (impl == null) {
+            initImpl();
+        }
+        return impl;
+    }
 
-			for (HttpClientAdapterListener listener : listeners) {
-				listener.onBuild(builder);
-			}
-			impl = builder.build();
-		}
-	}
+    private synchronized void initImpl() {
+        if (impl == null) {
+            HttpClientBuilder builder = createBuilder();
 
-	private HttpClientBuilder createBuilder() {
-		// brave enforces this, hopefully can be removed again eventually
+            if (receiveTimeout != null) {
+                RequestConfig.Builder requestBuilder = RequestConfig.custom();
+                requestBuilder = requestBuilder.setSocketTimeout(receiveTimeout);
+                builder.setDefaultRequestConfig(requestBuilder.build());
+            }
 
-		HttpClientBuilder builder = null;
-		for (HttpClientAdapterListener listener : listeners) {
-			if (listener instanceof HttpClientBuilderFactory) {
-				PreconditionUtil
-						.assertNull("only one module can contribute a HttpClientBuilder with HttpClientBuilderFactory", builder);
-				builder = ((HttpClientBuilderFactory) listener).createBuilder();
-			}
-		}
+            for (HttpClientAdapterListener listener : nativeListeners) {
+                listener.onBuild(builder);
+            }
+            impl = builder.build();
+        }
+    }
 
-		if (builder != null) {
-			return builder;
-		}
-		else {
-			return HttpClients.custom();
-		}
+    private HttpClientBuilder createBuilder() {
+        // brave enforces this, hopefully can be removed again eventually
 
-	}
+        HttpClientBuilder builder = null;
+        for (HttpClientAdapterListener listener : nativeListeners) {
+            if (listener instanceof HttpClientBuilderFactory) {
+                PreconditionUtil
+                        .assertNull("only one module can contribute a HttpClientBuilder with HttpClientBuilderFactory", builder);
+                builder = ((HttpClientBuilderFactory) listener).createBuilder();
+            }
+        }
 
-	@Override
-	public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
-		CloseableHttpClient implementation = getImplementation();
-		return new HttpClientRequest(implementation, url, method, requestBody);
-	}
+        if (builder != null) {
+            return builder;
+        } else {
+            return HttpClients.custom();
+        }
 
-	@Override
-	public void setReceiveTimeout(int timeout, TimeUnit unit) {
-		checkNotInitialized();
-		receiveTimeout = (int) unit.toMillis(timeout);
-	}
+    }
+
+    @Override
+    public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
+        CloseableHttpClient implementation = getImplementation();
+        return new HttpClientRequest(implementation, url, method, requestBody, listeners);
+    }
+
+    @Override
+    public void setReceiveTimeout(int timeout, TimeUnit unit) {
+        checkNotInitialized();
+        receiveTimeout = (int) unit.toMillis(timeout);
+    }
 }

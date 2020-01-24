@@ -2,8 +2,12 @@ package io.crnk.core.engine.document;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+
 public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	protected String id;
 
 	protected String type;
@@ -12,6 +16,8 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 	}
 
 	public ResourceIdentifier(String id, String type) {
+		PreconditionUtil.verify(type != null, "type cannot be null");
+		PreconditionUtil.verify(id == null || !id.startsWith("ResourceIdentifier{id="), "cannot pass ResourceIdentifier as id");
 		this.id = id;
 		this.type = type;
 	}
@@ -57,9 +63,13 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 
 	@Override
 	public String toString() {
-		return "ResourceIdentifier{" +
+		return getClass().getSimpleName() + "{" +
 				"id='" + id + '\'' +
 				", type='" + type + '\'' +
 				'}';
+	}
+
+	public ResourceIdentifier toIdentifier() {
+		return this;
 	}
 }

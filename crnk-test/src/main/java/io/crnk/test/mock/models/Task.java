@@ -1,57 +1,77 @@
 package io.crnk.test.mock.models;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
-import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.links.SelfLinksInformation;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 
-@JsonApiResource(type = "tasks")
-public class Task {
+@JsonApiResource(type = "tasks", pagingSpec = OffsetLimitPagingSpec.class)
+public class Task implements ResourceTypeHolder {
 
 	@JsonApiId
 	private Long id;
 
 	private String name;
 
-	@JsonApiToOne
-	@JsonApiIncludeByDefault
+	@JsonApiRelation
 	private Project project;
 
-	@JsonApiToOne(opposite = "tasks")
+	@JsonApiRelation(serialize = SerializeType.ONLY_ID)
 	private Schedule schedule;
 
-	@JsonApiToMany(lazy = false)
-	private List<Project> projects = Collections.emptyList();
+	@JsonApiRelation
+	private ResourceList<Project> projects;
 
-	@JsonApiToOne
-	@JsonApiLookupIncludeAutomatically
+	@JsonApiRelation
 	private Project includedProject;
 
-	@JsonApiToMany
-	@JsonApiLookupIncludeAutomatically
-	private List<Project> includedProjects;
+	@JsonApiRelation
+	private List<Project> includedProjects = new ArrayList<>();
 
 	@JsonApiMetaInformation
-	private TaskMeta metaInformation;
+	private TaskMeta metaInformation = new TaskMeta();
 
 	@JsonApiLinksInformation
-	private TaskLinks linksInformation;
+	private TaskLinks linksInformation = new TaskLinks();
 
-	public static class TaskLinks implements LinksInformation {
+	private String type;
+
+	@Override
+	public String getType() {
+		return type;
+	}
+
+	@Override
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public static class TaskLinks implements LinksInformation, SelfLinksInformation {
 
 		public String value = "test";
 
+		public String self;
+
+		@Override
+		public String getSelf() {
+			return self;
+		}
+
+		@Override
+		public void setSelf(String self) {
+			this.self = self;
+		}
 	}
 
 	public static class TaskMeta implements MetaInformation {
@@ -59,7 +79,6 @@ public class Task {
 		public String value = "test";
 
 	}
-
 
 	private List<Task> otherTasks;
 
@@ -87,20 +106,7 @@ public class Task {
 	}
 
 	public void setSchedule(Schedule schedule) {
-		if (this.schedule != schedule) {
-			if (this.schedule != null) {
-				this.schedule.getTasks().remove(this);
-			}
-			if (schedule != null) {
-				Set<Task> tasks = schedule.getTasks();
-				if (tasks == null || Collections.EMPTY_SET.getClass().isAssignableFrom(tasks.getClass())) {
-					tasks = new HashSet<>();
-					schedule.setTasks(tasks);
-				}
-				tasks.add(this);
-			}
-			this.schedule = schedule;
-		}
+		this.schedule = schedule;
 	}
 
 	public Long getId() {
@@ -128,11 +134,11 @@ public class Task {
 		this.project = project;
 	}
 
-	public List<Project> getProjects() {
+	public ResourceList<Project> getProjects() {
 		return projects;
 	}
 
-	public void setProjects(List<Project> projects) {
+	public void setProjects(ResourceList<Project> projects) {
 		this.projects = projects;
 	}
 

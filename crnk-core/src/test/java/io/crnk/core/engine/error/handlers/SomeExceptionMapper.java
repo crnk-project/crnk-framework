@@ -3,11 +3,9 @@ package io.crnk.core.engine.error.handlers;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ErrorResponseBuilder;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.legacy.queryParams.errorhandling.ExceptionMapperProvider;
+import io.crnk.core.engine.error.ExceptionMapper;
 
-@ExceptionMapperProvider
-public class SomeExceptionMapper implements JsonApiExceptionMapper<SomeExceptionMapper.SomeException> {
+public class SomeExceptionMapper implements ExceptionMapper<SomeExceptionMapper.SomeException> {
 
 	@Override
 	public ErrorResponse toErrorResponse(SomeException Throwable) {
@@ -19,7 +17,18 @@ public class SomeExceptionMapper implements JsonApiExceptionMapper<SomeException
 				.build();
 	}
 
+	@Override
+	public SomeException fromErrorResponse(ErrorResponse errorResponse) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean accepts(ErrorResponse errorResponse) {
+		return false;
+	}
+
 	public static class SomeException extends RuntimeException {
+
 	}
 }
 

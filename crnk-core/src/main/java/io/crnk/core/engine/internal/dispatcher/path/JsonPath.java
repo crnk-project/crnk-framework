@@ -1,8 +1,13 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
-import java.util.Objects;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
-import io.crnk.core.engine.internal.utils.CompareUtils;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.registry.RegistryEntry;
 
 /**
  * Represent a JSON API path sent to the server. Each resource or field defined in the path is represented by one
@@ -13,72 +18,33 @@ import io.crnk.core.engine.internal.utils.CompareUtils;
  */
 public abstract class JsonPath {
 
-	/**
-	 * Name of a resource or a filed
-	 */
-	final String elementName;
+	public static final String ID_SEPARATOR = ",";
 
-	/**
-	 * Unique identifier of a field
-	 */
-	PathIds ids;
+	public static final String ID_SEPARATOR_PATTERN = ",|%2C";
 
-	/**
-	 * Entry closer to path's beginning
-	 */
-	JsonPath parentResource;
+	private RegistryEntry rootEntry;
 
+	private List<Serializable> ids;
 
-	public JsonPath(String elementName) {
-		this(elementName, null);
-	}
+	protected ResourceField parentField;
 
-	public JsonPath(String elementName, PathIds pathIds) {
-		this.elementName = elementName;
-		this.ids = pathIds;
-	}
-
-	/**
-	 * Returns true if a JsonPath concerns a collection.
-	 * It can happen if there's no or more than one id provided.
-	 *
-	 * @return true if a path concern a collection
-	 */
-	public abstract boolean isCollection();
-
-	/**
-	 * Returns name of a resource the last resource in requested path.
-	 * There can be paths that concern relations. In this case a elementName from parent JsonPath should be retrieved.
-	 *
-	 * @return nam of the lase resource
-	 */
-	public abstract String getResourceType();
-
-	/**
-	 * Returns name of the current element. It can be either resource type or resource's field.
-	 *
-	 * @return name of the element
-	 */
-	// TODO separte resource type from resource field
-	public String getElementName() {
-		return elementName;
-	}
-
-	public PathIds getIds() {
-		return ids;
-	}
-
-	public void setIds(PathIds ids) {
+	public JsonPath(RegistryEntry rootEntry, List<Serializable> ids) {
+		this.rootEntry = rootEntry;
 		this.ids = ids;
 	}
 
-	public JsonPath getParentResource() {
-		return parentResource;
+	/**
+	 * @return parent relationship field in case of a nested resource
+	 */
+	public ResourceField getParentField(){
+		return parentField;
 	}
 
-	public void setParentResource(JsonPath parentResource) {
-		this.parentResource = parentResource;
+	public Collection<Serializable> getIds() {
+		return ids;
 	}
+
+	public abstract boolean isCollection();
 
 	@Override
 	public boolean equals(Object o) {
@@ -88,14 +54,61 @@ public abstract class JsonPath {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		JsonPath jsonPath = (JsonPath) o;
-		return CompareUtils.isEquals(elementName, jsonPath.elementName) &&
-				CompareUtils.isEquals(ids, jsonPath.ids) &&
-				CompareUtils.isEquals(parentResource, jsonPath.parentResource);
+		return o.toString().equals(toString());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(elementName, ids, parentResource);
+		return toString().hashCode();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(rootEntry.getResourceInformation().getResourcePath());
+		if (ids != null) {
+			builder.append("/");
+			builder.append(ids);
+		}
+		return builder.toString();
+	}
+
+	public Serializable getId() {
+		PreconditionUtil.verify(ids.size() == 1, "single id expected, got %s", ids);
+		return ids.get(0);
+	}
+
+	public RegistryEntry getRootEntry() {
+		return rootEntry;
+	}
+
+	/**
+	 * Replaces resource identifiers with {id} to have nice urls for e.g. tracing.
+	 */
+	public String toGroupPath() {
+		RegistryEntry rootEntry = getRootEntry();
+		ResourceInformation resourceInformation = rootEntry.getResourceInformation();
+
+		String resourcePath;
+		if (parentField != null) {
+			// TODO nested resource can be queried through two means, nested or direct flat (maybe). should be stored and considered somewhere here
+			ResourceInformation parentType = parentField.getResourceInformation();
+			resourcePath = parentType.getResourcePath() + "/{id}/" + parentField.getJsonName();
+		}
+		else {
+			resourcePath = resourceInformation.getResourcePath();
+		}
+
+		if (getIds() != null && (!resourceInformation.isNested() || !resourceInformation.isSingularNesting())) {
+			resourcePath += "/{id}";
+		}
+		return resourcePath;
+	}
+
+	/**
+	 * Used in case of nesting of resources.
+	 */
+	void addParentField(ResourceField parentField) {
+		this.parentField = parentField;
 	}
 }

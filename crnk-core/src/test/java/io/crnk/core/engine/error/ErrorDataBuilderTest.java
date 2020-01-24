@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ErrorDataBuilderTest {
 
 	@Test
-	public void shouldSetDetail() throws Exception {
+	public void shouldSetDetail() {
 		ErrorData error = ErrorData.builder()
 				.setDetail(ErrorDataMother.DETAIL)
 				.build();
@@ -17,7 +17,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldSetCode() throws Exception {
+	public void shouldSetCode() {
 		ErrorData error = ErrorData.builder()
 				.setCode(ErrorDataMother.CODE)
 				.build();
@@ -25,7 +25,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldSetAboutLink() throws Exception {
+	public void shouldSetAboutLink() {
 		ErrorData error = ErrorData.builder()
 				.setAboutLink(ErrorDataMother.ABOUT_LINK)
 				.build();
@@ -33,7 +33,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldSetId() throws Exception {
+	public void shouldSetId() {
 		ErrorData error = ErrorData.builder()
 				.setId(ErrorDataMother.ID)
 				.build();
@@ -41,7 +41,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldSetStatus() throws Exception {
+	public void shouldSetStatus() {
 		ErrorData error = ErrorData.builder()
 				.setStatus(ErrorDataMother.STATUS)
 				.build();
@@ -49,7 +49,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldSetTitle() throws Exception {
+	public void shouldSetTitle() {
 		ErrorData error = ErrorData.builder()
 				.setTitle(ErrorDataMother.TITLE)
 				.build();
@@ -57,7 +57,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldSetSourcePointer() throws Exception {
+	public void shouldSetSourcePointer() {
 		ErrorData error = ErrorData.builder()
 				.setSourcePointer(ErrorDataMother.POINTER)
 				.build();
@@ -65,7 +65,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldSetPaths() throws Exception {
+	public void shouldSetPaths() {
 		ErrorData error = ErrorData.builder()
 				.setSourceParameter(ErrorDataMother.PARAMETER)
 				.build();
@@ -73,7 +73,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldSetMeta() throws Exception {
+	public void shouldSetMeta() {
 		ErrorData error = ErrorData.builder()
 				.setMeta(ErrorDataMother.META)
 				.build();
@@ -81,7 +81,7 @@ public class ErrorDataBuilderTest {
 	}
 
 	@Test
-	public void shouldAddMeta() throws Exception {
+	public void shouldAddMeta() {
 		ErrorData error = ErrorData.builder()
 				.addMetaField("a", "b")
 				.addMetaField("c", "d")

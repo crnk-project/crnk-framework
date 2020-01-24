@@ -1,29 +1,25 @@
 package io.crnk.core.queryspec;
 
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
-import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
-import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.legacy.internal.DefaultQuerySpecConverter;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
-
+import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import org.junit.Before;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -32,69 +28,83 @@ import java.util.Set;
 
 public abstract class AbstractQuerySpecTest {
 
-	protected DefaultQuerySpecConverter querySpecConverter;
 
-	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
+    protected ResourceRegistry resourceRegistry;
 
-	protected ResourceRegistry resourceRegistry;
+    protected ModuleRegistry moduleRegistry;
 
-	protected ModuleRegistry moduleRegistry;
+    protected CoreTestContainer container;
 
-	protected static void addParams(Map<String, Set<String>> params, String key, String value) {
-		params.put(key, new HashSet<>(Arrays.asList(value)));
-	}
+    protected QuerySpecUrlContext deserializerContext;
 
-	@Before
-	public void setup() {
-		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new NullPropertiesProvider(), new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
+    protected QueryContext queryContext = new QueryContext().setRequestVersion(0);
 
-			@Override
-			protected List<ResourceField> getResourceFields(Class<?> resourceClass) {
-				List<ResourceField> fields = super.getResourceFields(resourceClass);
+    protected static void addParams(Map<String, Set<String>> params, String key, String value) {
+        params.put(key, new HashSet<>(Arrays.asList(value)));
+    }
 
-				if (resourceClass == Task.class) {
-					// add additional field that is not defined on the class
-					String name = "computedAttribute";
-					ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
+    @Before
+    public void setup() {
+        container = new CoreTestContainer();
+        ResourceFieldContributor contributor = new ResourceFieldContributor() {
+            @Override
+            public List<ResourceField> getResourceFields(ResourceFieldContributorContext context) {
+                List<ResourceField> fields = new ArrayList<>();
+                if (context.getResourceInformation().getResourceClass() == Task.class) {
+                    // add additional field that is not defined on the class
+                    String name = "computedAttribute";
+                    ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
 
-					InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser());
+                    InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser());
 
-					InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
-					fieldBuilder.type(Integer.class);
-					fieldBuilder.jsonName(name);
-					fieldBuilder.underlyingName(name);
-					fieldBuilder.access(access);
-					fieldBuilder.accessor(new ResourceFieldAccessor() {
+                    InformationBuilder.FieldInformationBuilder fieldBuilder = informationBuilder.createResourceField();
+                    fieldBuilder.type(Integer.class);
+                    fieldBuilder.jsonName(name);
+                    fieldBuilder.underlyingName(name);
+                    fieldBuilder.access(access);
+                    fieldBuilder.accessor(new ResourceFieldAccessor() {
 
-						public Object getValue(Object resource) {
-							return 13;
-						}
+                        public Object getValue(Object resource) {
+                            return 13;
+                        }
 
-						public void setValue(Object resource, Object fieldValue) {
+                        public void setValue(Object resource, Object fieldValue) {
 
-						}
-					});
-					fields.add(fieldBuilder.build());
-				}
-				return fields;
-			}
-		};
+                        }
 
-		SimpleModule testModule = new SimpleModule("test");
-		testModule.addResourceInformationProvider(resourceInformationProvider);
+                        @Override
+                        public Class getImplementationClass() {
+                            return Integer.class;
+                        }
+                    });
+                    fields.add(fieldBuilder.build());
 
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
-		boot.addModule(testModule);
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(getResourceSearchPackage()));
-		boot.boot();
+                }
+                return fields;
+            }
+        };
+        SimpleModule module = new SimpleModule("test");
+        module.addResourceFieldContributor(contributor);
 
-		moduleRegistry = boot.getModuleRegistry();
-		querySpecConverter = new DefaultQuerySpecConverter(moduleRegistry);
-		resourceRegistry = boot.getResourceRegistry();
-	}
+        setup(container);
+        container.addModule(module);
+        container.boot();
 
-	public String getResourceSearchPackage() {
-		return getClass().getPackage().getName();
-	}
+        moduleRegistry = container.getModuleRegistry();
+        resourceRegistry = container.getResourceRegistry();
+    }
+
+    protected void setup(CoreTestContainer container) {
+        container.addModule(new CoreTestModule());
+    }
+
+    protected QuerySpec querySpec(Long offset, Long limit) {
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        querySpec.setPaging(new OffsetLimitPagingSpec(offset, limit));
+        return querySpec;
+    }
+
+    protected QuerySpec querySpec() {
+        return querySpec(0L, null);
+    }
 }

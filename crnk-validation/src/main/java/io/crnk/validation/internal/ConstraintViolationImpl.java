@@ -1,5 +1,21 @@
 package io.crnk.validation.internal;
 
+import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ElementKind;
+import javax.validation.Path;
+import javax.validation.Path.Node;
+import javax.validation.metadata.ConstraintDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -8,23 +24,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.ElementKind;
-import javax.validation.Path;
-import javax.validation.Path.Node;
-import javax.validation.metadata.ConstraintDescriptor;
-
-import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
+import java.util.stream.Stream;
 
 // TODO remo: take care of UnsupportedOperationExceptions to adhere to spec
 public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 
 	private ErrorData errorData;
+
+	private ResourceInformation resourceInformation;
 
 	private Class<?> resourceClass;
 
@@ -32,7 +39,7 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 
 	private Path path;
 
-	private ConstraintViolationImpl(ResourceRegistry resourceRegistry, ErrorData errorData) {
+	private ConstraintViolationImpl(ResourceRegistry resourceRegistry, ErrorData errorData, QueryContext queryContext) {
 		this.errorData = errorData;
 
 		Map<String, Object> meta = this.errorData.getMeta();
@@ -42,28 +49,29 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 
 			if (resourceType != null) {
 				RegistryEntry entry = resourceRegistry.getEntry(resourceType);
-				resourceClass = entry.getResourceInformation().getResourceClass();
+				resourceInformation = entry.getResourceInformation();
+				resourceClass = resourceInformation.getResourceClass();
 				if (strResourceId != null) {
-					resourceId = entry.getResourceInformation().parseIdString(strResourceId);
+					resourceId = resourceInformation.parseIdString(strResourceId);
 				}
 			}
 		}
 
 		String sourcePointer = errorData.getSourcePointer();
 		if (sourcePointer != null && resourceClass != null) {
-			path = toPath(sourcePointer);
+			path = toPath(sourcePointer, queryContext);
 		}
 	}
 
-	public static ConstraintViolationImpl fromError(ResourceRegistry resourceRegistry, ErrorData error) {
-		return new ConstraintViolationImpl(resourceRegistry, error);
+	public static ConstraintViolationImpl fromError(ResourceRegistry resourceRegistry, ErrorData error, QueryContext queryContext) {
+		return new ConstraintViolationImpl(resourceRegistry, error, queryContext);
 	}
 
 	public ErrorData getErrorData() {
 		return errorData;
 	}
 
-	private Path toPath(String sourcePointer) { //NOSONAR
+	private Path toPath(String sourcePointer, QueryContext queryContext) { //NOSONAR
 		String[] elements = sourcePointer.split("\\/");
 
 		LinkedList<NodeImpl> nodes = new LinkedList<>();
@@ -105,14 +113,22 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 			} else if (isJsonApiStructure(elements, i)) {
 				i++; // skip next as well
 			} else {
-				nodes.add(new NodeImpl(element));
+				// we don't have any meta-information about nested objects (https://github.com/crnk-project/crnk-framework/issues/399) yet,
+				// therefore we're not attempting to find the property name, as soon as we're in a nested object.
+				String propertyName = type == resourceClass ? findPropertyNameByJsonName(element, queryContext) : element;
+				nodes.add(new NodeImpl(propertyName));
 
 				// follow attribute
-				type = PropertyUtils.getPropertyType(rawType, element);
+				type = PropertyUtils.getPropertyType(rawType, propertyName);
 			}
 			i++;
 		}
 		return new PathImpl(nodes);
+	}
+
+	private String findPropertyNameByJsonName(String jsonName, QueryContext queryContext) {
+		ResourceField field = resourceInformation.findFieldByJsonName(jsonName, queryContext.getRequestVersion());
+		return field != null ? field.getUnderlyingName() : jsonName;
 	}
 
 	private boolean isJsonApiStructure(String[] elements, int i) {

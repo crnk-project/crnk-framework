@@ -1,10 +1,12 @@
 package io.crnk.core.module;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 
-class TestRepository implements ResourceRepositoryV2<TestResource, Integer> {
+import java.util.Collection;
+
+class TestRepository implements ResourceRepository<TestResource, Integer> {
 
 	@Override
 	public <S extends TestResource> S save(S entity) {
@@ -31,7 +33,7 @@ class TestRepository implements ResourceRepositoryV2<TestResource, Integer> {
 	}
 
 	@Override
-	public ResourceList<TestResource> findAll(Iterable<Integer> ids, QuerySpec querySpec) {
+	public ResourceList<TestResource> findAll(Collection<Integer> ids, QuerySpec querySpec) {
 		return null;
 	}
 

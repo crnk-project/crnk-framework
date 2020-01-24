@@ -32,6 +32,29 @@ public class BasicActionTest extends AbstractClientTest {
 		scheduleRepo = client.getRepositoryForInterface(ScheduleRepository.class);
 	}
 
+	public interface SubclassedScheduleRepository extends ScheduleRepository {
+
+	}
+
+	@Test
+	public void testSubclassedInterface() {
+		SubclassedScheduleRepository subclassRepository =
+				client.getRepositoryForInterface(SubclassedScheduleRepository.class);
+
+		Schedule schedule = new Schedule();
+		schedule.setId(1L);
+		schedule.setName("schedule");
+		subclassRepository.create(schedule);
+
+		Iterable<Schedule> schedules = subclassRepository.findAll(new QuerySpec(Schedule.class));
+		schedule = schedules.iterator().next();
+		Assert.assertEquals("schedule", schedule.getName());
+
+		subclassRepository.delete(schedule.getId());
+		schedules = subclassRepository.findAll(new QuerySpec(Schedule.class));
+		Assert.assertFalse(schedules.iterator().hasNext());
+	}
+
 	@Test
 	public void setActionStubFactoryShouldBeProperyInitialized() {
 		ActionStubFactory actionStubFactory = Mockito.mock(ActionStubFactory.class);
@@ -67,7 +90,7 @@ public class BasicActionTest extends AbstractClientTest {
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(true);
+		return new TestApplication();
 	}
 
 	@Test

@@ -1,33 +1,33 @@
 package io.crnk.client;
 
-import java.util.List;
-
-import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.legacy.queryParams.QueryParams;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 public class HeadersTest extends AbstractClientTest {
 
 	private static final String EXPECTED_CONTENT_TYPE = "application/vnd.api+json";
 
-	protected ResourceRepositoryStub<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
 	@Before
 	public void setup() {
 		super.setup();
 
-		taskRepo = client.getQueryParamsRepository(Task.class);
+		taskRepo = client.getRepositoryForType(Task.class);
 	}
 
 	@Test
 	public void testClientHeadersOnGet() {
 		clearLastReceivedHeaders();
 
-		List<Task> tasks = taskRepo.findAll(new QueryParams());
+		List<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
 		Assert.assertTrue(tasks.isEmpty());
 
 		assertHasHeaderValue("Accept", EXPECTED_CONTENT_TYPE);

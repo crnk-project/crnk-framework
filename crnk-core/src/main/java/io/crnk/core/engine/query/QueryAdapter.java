@@ -1,51 +1,45 @@
 package io.crnk.core.engine.query;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
-import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
-import io.crnk.legacy.queryParams.params.TypedParams;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
+
+import java.util.Map;
+import java.util.Set;
 
 public interface QueryAdapter {
 
-	TypedParams<IncludedRelationsParams> getIncludedRelations();
+    Map<String, Set<PathSpec>> getIncludedRelations();
 
-	TypedParams<IncludedFieldsParams> getIncludedFields();
+    Map<String, Set<PathSpec>> getIncludedFields();
 
-	ResourceInformation getResourceInformation();
+    ResourceInformation getResourceInformation();
 
-	/**
-	 * @return maximum number of resources to return or null for unbounded
-	 */
-	Long getLimit();
+    ResourceRegistry getResourceRegistry();
 
-	void setLimit(Long limit);
+    QueryContext getQueryContext();
 
-	/**
-	 * @return maximum number of resources to skip in the response.
-	 */
-	long getOffset();
+    /**
+     * @return duplicate of this instance
+     */
+    QueryAdapter duplicate();
 
-	void setOffset(long offset);
+    /**
+     * The {@link QuerySpec} instance for this query adapter if possible.
+     *
+     * @return may return null if the implementation does not support QueryParams
+     */
+    QuerySpec toQuerySpec();
 
-	/**
-	 * @return duplicate of this instance
-	 */
-	QueryAdapter duplicate();
+    boolean getCompactMode();
 
-	/**
-	 * The {@link QueryParams} instance for this query adapter if possible.
-	 *
-	 * @return may return null if the implementation does not support QueryParams
-	 */
-	QueryParams toQueryParams();
+    void setPagingSpec(PagingSpec pagingSpec);
 
-	/**
-	 * The {@link QuerySpec} instance for this query adapter if possible.
-	 *
-	 * @return may return null if the implementation does not support QueryParams
-	 */
-	QuerySpec toQuerySpec();
+    PagingSpec getPagingSpec();
 
+    boolean isEmpty();
+
+    boolean isSelfLink();
 }

@@ -1,7 +1,9 @@
 package io.crnk.core.engine.internal.utils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
@@ -10,10 +12,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class PropertyUtilsTest {
 
@@ -21,7 +21,7 @@ public class PropertyUtilsTest {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@Test
-	public void onNullBeanGetShouldThrowException() throws Exception {
+	public void onNullBeanGetShouldThrowException() {
 		// THEN
 		expectedException.expect(IllegalArgumentException.class);
 
@@ -30,7 +30,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onBooleanWithGetPrefix() throws Exception {
+	public void onBooleanWithGetPrefix() {
 		// GIVEN
 		Bean bean = new Bean();
 		bean.setBooleanWithGetPrefix(true);
@@ -43,7 +43,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onNullFieldGetShouldThrowException() throws Exception {
+	public void onNullFieldGetShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -55,7 +55,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onBooleanPrimitiveWithMutatorsShouldReturnValue() throws Exception {
+	public void onBooleanPrimitiveWithMutatorsShouldReturnValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		bean.setBooleanPrimitivePropertyWithMutators(true);
@@ -70,7 +70,7 @@ public class PropertyUtilsTest {
 
 
 	@Test
-	public void methodPropertyShouldReturnValue() throws Exception {
+	public void methodPropertyShouldReturnValue() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -83,7 +83,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void getPropertyClassForMethodPropertyShouldReturnClass() throws Exception {
+	public void getPropertyClassForMethodPropertyShouldReturnClass() {
 		// WHEN
 		Object result = PropertyUtils.getPropertyClass(Bean.class, "methodProperty");
 
@@ -92,7 +92,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void getPropertyTypeForMethodPropertyShouldReturnType() throws Exception {
+	public void getPropertyTypeForMethodPropertyShouldReturnType() {
 		// WHEN
 		Object result = PropertyUtils.getPropertyType(Bean.class, "methodProperty");
 
@@ -101,7 +101,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void getPropertyTypeForSetShouldReturnGenericType() throws Exception {
+	public void getPropertyTypeForSetShouldReturnGenericType() {
 		// WHEN
 		Object result = PropertyUtils.getPropertyType(Bean.class, "setProperty");
 
@@ -111,7 +111,7 @@ public class PropertyUtilsTest {
 
 
 	@Test
-	public void onBooleanWithMutatorsShouldReturnValue() throws Exception {
+	public void onBooleanWithMutatorsShouldReturnValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		bean.setBooleanPropertyWithMutators(true);
@@ -124,7 +124,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onStringPublicWithMutatorsShouldReturnValue() throws Exception {
+	public void onStringPublicWithMutatorsShouldReturnValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		bean.publicProperty = "value";
@@ -137,7 +137,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onStringPublicReturnStringClass() throws Exception {
+	public void onStringPublicReturnStringClass() {
 		// WHEN
 		Object result = PropertyUtils.getPropertyClass(Bean.class, "publicProperty");
 
@@ -146,31 +146,29 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void getPropertyClassShouldThrowExceptionForInvalidField() throws Exception {
+	public void getPropertyClassShouldThrowExceptionForInvalidField() {
 		try {
 			PropertyUtils.getPropertyClass(Bean.class, "doesNotExist");
 			Assert.fail();
-		}
-		catch (PropertyException e) {
+		} catch (PropertyException e) {
 			Assert.assertEquals("doesNotExist", e.getField());
 			Assert.assertEquals(Bean.class, e.getResourceClass());
 		}
 	}
 
 	@Test
-	public void getPropertyTypeShouldThrowExceptionForInvalidField() throws Exception {
+	public void getPropertyTypeShouldThrowExceptionForInvalidField() {
 		try {
 			PropertyUtils.getPropertyType(Bean.class, "doesNotExist");
 			Assert.fail();
-		}
-		catch (PropertyException e) {
+		} catch (PropertyException e) {
 			Assert.assertEquals("doesNotExist", e.getField());
 			Assert.assertEquals(Bean.class, e.getResourceClass());
 		}
 	}
 
 	@Test
-	public void onStringPublicReturnStringType() throws Exception {
+	public void onStringPublicReturnStringType() {
 		// WHEN
 		Object result = PropertyUtils.getPropertyType(Bean.class, "publicProperty");
 
@@ -179,7 +177,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onBooleanPropertyWithMutatorsReturnBooleanClass() throws Exception {
+	public void onBooleanPropertyWithMutatorsReturnBooleanClass() {
 		// WHEN
 		Object result = PropertyUtils.getPropertyClass(Bean.class, "booleanPropertyWithMutators");
 
@@ -189,7 +187,7 @@ public class PropertyUtilsTest {
 
 
 	@Test
-	public void onStringProtectedGetWithMutatorsShouldThrowException() throws Exception {
+	public void onStringProtectedGetWithMutatorsShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -201,7 +199,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onInheritedStringPrivateWithMutatorsShouldReturnValue() throws Exception {
+	public void onInheritedStringPrivateWithMutatorsShouldReturnValue() {
 		// GIVEN
 		Bean bean = new ChildBean();
 		bean.setPrivatePropertyWithMutators("value");
@@ -214,7 +212,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onMethodAccessorOnlyShouldReturnValue() throws Exception {
+	public void onMethodAccessorOnlyShouldReturnValue() {
 		// GIVEN
 		GetterTest bean = new GetterTest();
 
@@ -226,7 +224,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onListValueForSetPropertyShouldGetConverted() throws Exception {
+	public void onListValueForSetPropertyShouldGetConverted() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -239,7 +237,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onNullBeanSetShouldThrowException() throws Exception {
+	public void onNullBeanSetShouldThrowException() {
 		// THEN
 		expectedException.expect(IllegalArgumentException.class);
 
@@ -248,7 +246,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onNullFieldSetShouldThrowException() throws Exception {
+	public void onNullFieldSetShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -260,7 +258,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onBooleanPrimitiveWithMutatorsShouldSetValue() throws Exception {
+	public void onBooleanPrimitiveWithMutatorsShouldSetValue() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -272,7 +270,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onBooleanWithMutatorsShouldSetValue() throws Exception {
+	public void onBooleanWithMutatorsShouldSetValue() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -284,7 +282,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onStringPublicWithMutatorsShouldSetValue() throws Exception {
+	public void onStringPublicWithMutatorsShouldSetValue() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -296,7 +294,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onStringProtectedSetWithMutatorsShouldThrowException() throws Exception {
+	public void onStringProtectedSetWithMutatorsShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -308,7 +306,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onInheritedStringPrivateWithMutatorsShouldSetValue() throws Exception {
+	public void onInheritedStringPrivateWithMutatorsShouldSetValue() {
 		// GIVEN
 		Bean bean = new ChildBean();
 
@@ -320,7 +318,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onDifferentFieldAndMutatorNamesShouldSetValue() throws Exception {
+	public void onDifferentFieldAndMutatorNamesShouldSetValue() {
 		// GIVEN
 		SetterTest bean = new SetterTest();
 
@@ -332,7 +330,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onNonExistingPropertyShouldThrowException() throws Exception {
+	public void onNonExistingPropertyShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -344,7 +342,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onFieldListShouldSetValue() throws Exception {
+	public void onFieldListShouldSetValue() {
 		// GIVEN
 		FieldListTest bean = new FieldListTest();
 		List<String> value = Collections.singletonList("asd");
@@ -357,7 +355,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onFieldSetShouldSetValue() throws Exception {
+	public void onFieldSetShouldSetValue() {
 		// GIVEN
 		FieldSetTest bean = new FieldSetTest();
 		Set<String> value = Collections.singleton("asd");
@@ -370,7 +368,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onSetterListShouldSetValue() throws Exception {
+	public void onSetterListShouldSetValue() {
 		// GIVEN
 		SetterListTest bean = new SetterListTest();
 		List<String> value = Collections.singletonList("asd");
@@ -383,7 +381,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onSetterSetShouldSetValue() throws Exception {
+	public void onSetterSetShouldSetValue() {
 		// GIVEN
 		SetterSetTest bean = new SetterSetTest();
 		Set<String> value = Collections.singleton("asd");
@@ -396,7 +394,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onFieldWithSetterListShouldSetValue() throws Exception {
+	public void onFieldWithSetterListShouldSetValue() {
 		// GIVEN
 		FieldWithSetterListTest bean = new FieldWithSetterListTest();
 		List<String> value = Collections.singletonList("asd");
@@ -409,7 +407,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onFieldWithSetterSetShouldSetValue() throws Exception {
+	public void onFieldWithSetterSetShouldSetValue() {
 		// GIVEN
 		FieldWithSetterSetTest bean = new FieldWithSetterSetTest();
 		Set<String> value = Collections.singleton("asd");
@@ -422,7 +420,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onFieldWithThrowingUncheckedExceptionGetterShouldThrowException() throws Exception {
+	public void onFieldWithThrowingUncheckedExceptionGetterShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -434,7 +432,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onFieldWithThrowingUncheckedExceptionSetterShouldThrowException() throws Exception {
+	public void onFieldWithThrowingUncheckedExceptionSetterShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -446,7 +444,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onFieldWithThrowingCheckedExceptionGetterShouldThrowException() throws Exception {
+	public void onFieldWithThrowingCheckedExceptionGetterShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -458,7 +456,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void onFieldWithThrowingCheckedExceptionSetterShouldThrowException() throws Exception {
+	public void onFieldWithThrowingCheckedExceptionSetterShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -470,7 +468,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void unknownPropertyThrowingException() throws Exception {
+	public void unknownPropertyThrowingException() {
 		// GIVEN
 		Bean bean = new Bean();
 
@@ -482,7 +480,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void unknownPropertyClassThrowingException() throws Exception {
+	public void unknownPropertyClassThrowingException() {
 		// THEN
 		expectedException.expect(PropertyException.class);
 
@@ -491,7 +489,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void unknownPropertyTypeThrowingException() throws Exception {
+	public void unknownPropertyTypeThrowingException() {
 		// THEN
 		expectedException.expect(PropertyException.class);
 
@@ -500,7 +498,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void nullBeanResultsInNullValue() throws Exception {
+	public void nullBeanResultsInNullValue() {
 		// GIVEN
 		Bean bean = null;
 

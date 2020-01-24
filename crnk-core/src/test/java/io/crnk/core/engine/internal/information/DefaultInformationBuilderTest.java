@@ -4,11 +4,17 @@ import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,25 +29,35 @@ public class DefaultInformationBuilderTest {
 	public void setup() {
 		TypeParser parser = new TypeParser();
 		builder = new DefaultInformationBuilder(parser);
+	}
 
+	@Test
+	public void resourceWithNoResourcePath() {
+		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks");
+		ResourceInformation info = resource.build();
+		resource.superResourceType("superTask");
+		resource.implementationType(Project.class);
+		Assert.assertEquals("tasks", info.getResourceType());
+		Assert.assertEquals("tasks", info.getResourcePath());
 	}
 
 	@Test
 	public void resource() {
-		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks");
+		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
-		resource.resourceClass(Project.class);
+		resource.implementationType(Project.class);
 
-		InformationBuilder.Field idField = resource.addField("id", ResourceFieldType.ID, String.class);
+		InformationBuilder.FieldInformationBuilder idField = resource.addField("id", ResourceFieldType.ID, String.class);
 		idField.serializeType(SerializeType.EAGER);
 		idField.access(new ResourceFieldAccess(true, true, true, false, false));
 
 		ResourceFieldAccessor accessor = Mockito.mock(ResourceFieldAccessor.class);
-		InformationBuilder.Field projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
+		InformationBuilder.FieldInformationBuilder projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
 		projectField.serializeType(SerializeType.EAGER);
 		projectField.access(new ResourceFieldAccess(true, false, true, false, false));
 		projectField.oppositeName("tasks");
+		projectField.relationshipRepositoryBehavior(RelationshipRepositoryBehavior.FORWARD_OWNER);
 		projectField.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
 		projectField.accessor(accessor);
 
@@ -63,7 +79,7 @@ public class DefaultInformationBuilderTest {
 		ResourceField projectInfo = info.findFieldByName("project");
 		Assert.assertEquals("project", projectInfo.getUnderlyingName());
 		Assert.assertEquals("tasks", projectInfo.getOppositeName());
-		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeAutomatically());
+		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeBehavior());
 		Assert.assertEquals(Project.class, projectInfo.getType());
 		Assert.assertSame(accessor, projectInfo.getAccessor());
 		Assert.assertFalse(projectInfo.getAccess().isFilterable());
@@ -71,14 +87,62 @@ public class DefaultInformationBuilderTest {
 		Assert.assertFalse(projectInfo.getAccess().isPostable());
 		Assert.assertTrue(projectInfo.getAccess().isPatchable());
 		Assert.assertEquals(SerializeType.EAGER, projectInfo.getSerializeType());
+		Assert.assertEquals(RelationshipRepositoryBehavior.FORWARD_OWNER, projectInfo.getRelationshipRepositoryBehavior());
+		Assert.assertFalse(projectInfo.isCollection());
+	}
+
+
+	@Test
+	public void checkRelationIdFieldCreation() {
+		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks", null);
+		resource.superResourceType("superTask");
+		resource.resourceType("changedTasks");
+		resource.implementationType(Project.class);
+
+		InformationBuilder.FieldInformationBuilder idField = resource.addField("id", ResourceFieldType.ID, String.class);
+		idField.serializeType(SerializeType.EAGER);
+		idField.access(new ResourceFieldAccess(true, true, true, false, false));
+
+		ResourceFieldAccessor idAccessor = Mockito.mock(ResourceFieldAccessor.class);
+		ResourceFieldAccessor accessor = Mockito.mock(ResourceFieldAccessor.class);
+		InformationBuilder.FieldInformationBuilder projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
+		projectField.idName("taskId");
+		projectField.idAccessor(idAccessor);
+		projectField.idType(Long.class);
+		projectField.serializeType(SerializeType.EAGER);
+		projectField.access(new ResourceFieldAccess(true, false, true, false, false));
+		projectField.oppositeName("tasks");
+		projectField.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
+		projectField.accessor(accessor);
+
+		ResourceInformation info = resource.build();
+		Assert.assertEquals("changedTasks", info.getResourceType());
+		Assert.assertEquals(Project.class, info.getResourceClass());
+		Assert.assertEquals("superTask", info.getSuperResourceType());
+
+		ResourceField projectInfo = info.findFieldByName("project");
+		Assert.assertEquals("project", projectInfo.getUnderlyingName());
+		Assert.assertEquals("tasks", projectInfo.getOppositeName());
+		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeBehavior());
+		Assert.assertEquals(Project.class, projectInfo.getType());
+		Assert.assertSame(accessor, projectInfo.getAccessor());
+		Assert.assertFalse(projectInfo.getAccess().isFilterable());
+		Assert.assertFalse(projectInfo.getAccess().isSortable());
+		Assert.assertFalse(projectInfo.getAccess().isPostable());
+		Assert.assertTrue(projectInfo.getAccess().isPatchable());
+		Assert.assertEquals(SerializeType.EAGER, projectInfo.getSerializeType());
+		Assert.assertTrue(projectInfo.hasIdField());
+		Assert.assertEquals("taskId", projectInfo.getIdName());
+		Assert.assertEquals(Long.class, projectInfo.getIdType());
+		Assert.assertSame(idAccessor, projectInfo.getIdAccessor());
 		Assert.assertFalse(projectInfo.isCollection());
 	}
 
 	@Test
 	public void checkResourceRepository() {
-		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks").build();
+		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks", null).build();
 
-		InformationBuilder.ResourceRepository repositoryBuilder = builder.createResourceRepository();
+		InformationBuilder.ResourceRepositoryInformationBuilder repositoryBuilder = builder.createResourceRepository();
 		repositoryBuilder.setResourceInformation(resourceInformation);
 		RepositoryMethodAccess expectedAccess = new RepositoryMethodAccess(true, false, true, false);
 		repositoryBuilder.setAccess(expectedAccess);
@@ -89,8 +153,15 @@ public class DefaultInformationBuilderTest {
 	}
 
 	@Test
+	public void checkResourceTypeHolderIngored() {
+		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks", null).build();
+		Assert.assertTrue(ResourceTypeHolder.class.isAssignableFrom(ResourceTypeHolder.class));
+		Assert.assertNull(resourceInformation.findFieldByName("type"));
+	}
+
+	@Test
 	public void checkRelationshipRepository() {
-		InformationBuilder.RelationshipRepository repositoryBuilder = builder.createRelationshipRepository("projects", "tasks");
+		InformationBuilder.RelationshipRepositoryInformationBuilder repositoryBuilder = builder.createRelationshipRepository("projects", "tasks");
 		RepositoryMethodAccess expectedAccess = new RepositoryMethodAccess(true, false, true, false);
 		repositoryBuilder.setAccess(expectedAccess);
 		RelationshipRepositoryInformation repositoryInformation = repositoryBuilder.build();

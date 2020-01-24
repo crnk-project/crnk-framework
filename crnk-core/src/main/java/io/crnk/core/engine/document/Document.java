@@ -1,10 +1,5 @@
 package io.crnk.core.engine.document;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -18,6 +13,14 @@ import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.utils.Nullable;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * See http://jsonapi.org/format/#document-top-level.
+ */
 public class Document implements MetaContainer, LinksContainer {
 
 	@JsonInclude(Include.NON_EMPTY)
@@ -37,13 +40,15 @@ public class Document implements MetaContainer, LinksContainer {
 	@JsonInclude(Include.NON_EMPTY)
 	private List<ErrorData> errors;
 
+	@JsonInclude(Include.NON_EMPTY)
+	private ObjectNode jsonapi;
 
 	public Nullable<Object> getData() {
 		return data;
 	}
 
 	public void setData(Nullable<Object> data) {
-		PreconditionUtil.assertNotNull("make use of Nullable instead of null", data);
+		PreconditionUtil.verify(data != null, "parameter cannot be null, make use of Nullable instead of null");
 		this.data = data;
 	}
 
@@ -122,5 +127,13 @@ public class Document implements MetaContainer, LinksContainer {
 			return Nullable.of((Collections.singletonList((Resource) value)));
 		}
 		return Nullable.of((List<Resource>) value);
+	}
+
+	public ObjectNode getJsonapi() {
+		return jsonapi;
+	}
+
+	public void setJsonapi(ObjectNode jsonapi) {
+		this.jsonapi = jsonapi;
 	}
 }

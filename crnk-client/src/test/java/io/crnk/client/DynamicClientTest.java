@@ -1,20 +1,19 @@
 package io.crnk.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class DynamicClientTest extends AbstractClientTest {
@@ -26,7 +25,7 @@ public class DynamicClientTest extends AbstractClientTest {
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(true);
+		return new TestApplication();
 	}
 
 	protected void setupFeature(CrnkTestFeature feature) {
@@ -34,8 +33,8 @@ public class DynamicClientTest extends AbstractClientTest {
 	}
 
 	@Test
-	public void testResource() throws JsonProcessingException, IOException {
-		ResourceRepositoryV2<Resource, String> repository = client.getRepositoryForPath("dynamic1");
+	public void testResource() throws IOException {
+		ResourceRepository<Resource, String> repository = client.getRepositoryForPath("dynamic1");
 		ObjectMapper mapper = new ObjectMapper();
 
 		Resource resource = new Resource();
@@ -61,9 +60,9 @@ public class DynamicClientTest extends AbstractClientTest {
 	}
 
 	@Test
-	public void testRelationship() throws JsonProcessingException, IOException {
-		ResourceRepositoryV2<Resource, String> resourceRepository = client.getRepositoryForPath("dynamic1");
-		RelationshipRepositoryV2<Resource, String, Resource, String> repository = client.getRepositoryForPath("dynamic1", "tasks");
+	public void testRelationship() throws IOException {
+		ResourceRepository<Resource, String> resourceRepository = client.getRepositoryForPath("dynamic1");
+		RelationshipRepository<Resource, String, Resource, String> repository = client.getRepositoryForPath("dynamic1", "tasks");
 		ObjectMapper mapper = new ObjectMapper();
 
 
@@ -88,7 +87,8 @@ public class DynamicClientTest extends AbstractClientTest {
 		try {
 			repository.setRelation(source, "13", "parent");
 			Assert.fail();
-		} catch (InternalServerErrorException e) {
+		}
+		catch (InternalServerErrorException e) {
 			// ok
 		}
 	}

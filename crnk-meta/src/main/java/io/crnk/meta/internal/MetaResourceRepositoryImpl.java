@@ -1,19 +1,26 @@
 package io.crnk.meta.internal;
 
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextAware;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Supplier;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaElement;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MetaResourceRepositoryImpl<T> extends ReadOnlyResourceRepositoryBase<T, String> {
+public class MetaResourceRepositoryImpl<T> extends ReadOnlyResourceRepositoryBase<T, String> implements HttpRequestContextAware {
 
 	private final Supplier<MetaLookup> lookupSupplier;
+
+	private HttpRequestContextProvider requestContextProvider;
 
 	public MetaResourceRepositoryImpl(Supplier<MetaLookup> lookupSupplier, Class<T> resourceClass) {
 		super(resourceClass);
@@ -23,11 +30,14 @@ public class MetaResourceRepositoryImpl<T> extends ReadOnlyResourceRepositoryBas
 	@SuppressWarnings("unchecked")
 	@Override
 	public T findOne(String id, QuerySpec querySpec) {
-		MetaLookup lookup = lookupSupplier.get();
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+		QueryContext queryContext = requestContext.getQueryContext();
+
+		MetaLookupImpl lookup = (MetaLookupImpl) lookupSupplier.get();
 		MetaElement metaElement = lookup.getMetaById().get(id);
 		Class<T> resourceClass = this.getResourceClass();
 		if (metaElement != null && resourceClass.isInstance(metaElement)) {
-			MetaElement wrappedElement = MetaUtils.adjustForRequest(lookup, metaElement);
+			MetaElement wrappedElement = MetaUtils.adjustForRequest(lookup, metaElement, queryContext);
 			if (wrappedElement != null) {
 				return (T) metaElement;
 			}
@@ -37,19 +47,22 @@ public class MetaResourceRepositoryImpl<T> extends ReadOnlyResourceRepositoryBas
 
 	@Override
 	public ResourceList<T> findAll(QuerySpec querySpec) {
-		MetaLookup lookup = lookupSupplier.get();
+		MetaLookupImpl lookup = (MetaLookupImpl) lookupSupplier.get();
 		Collection<T> values = filterByType(lookup.getMetaById().values());
 		return querySpec.apply(values);
 	}
 
 	@SuppressWarnings("unchecked")
 	private Collection<T> filterByType(Collection<MetaElement> values) {
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+		QueryContext queryContext = requestContext.getQueryContext();
+
 		Collection<T> results = new ArrayList<>();
 		Class<T> resourceClass = this.getResourceClass();
-		MetaLookup lookup = lookupSupplier.get();
+		MetaLookupImpl lookup = (MetaLookupImpl) lookupSupplier.get();
 		for (MetaElement element : values) {
 			if (resourceClass.isInstance(element)) {
-				MetaElement wrappedElement = MetaUtils.adjustForRequest(lookup, element);
+				MetaElement wrappedElement = MetaUtils.adjustForRequest(lookup, element, queryContext);
 				if (wrappedElement != null) {
 					results.add((T) wrappedElement);
 				}
@@ -58,4 +71,8 @@ public class MetaResourceRepositoryImpl<T> extends ReadOnlyResourceRepositoryBas
 		return results;
 	}
 
+	@Override
+	public void setHttpRequestContextProvider(HttpRequestContextProvider requestContextProvider) {
+		this.requestContextProvider = requestContextProvider;
+	}
 }

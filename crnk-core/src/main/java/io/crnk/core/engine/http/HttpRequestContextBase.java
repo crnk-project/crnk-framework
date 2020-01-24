@@ -1,14 +1,12 @@
 package io.crnk.core.engine.http;
 
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
-import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 
 public interface HttpRequestContextBase {
 
-	RepositoryMethodParameterProvider getRequestParameterProvider();
+	Set<String> getRequestHeaderNames();
 
 	String getRequestHeader(String name);
 
@@ -18,13 +16,13 @@ public interface HttpRequestContextBase {
 
 	String getBaseUrl();
 
-	byte[] getRequestBody() throws IOException;
-
-	void setResponseHeader(String name, String value);
-
-	void setResponse(int code, byte[] body) throws IOException;
+	byte[] getRequestBody();
 
 	String getMethod();
 
-	String getResponseHeader(String name);
+	URI getRequestUri();
+
+	HttpResponse getResponse();
+
+	void setResponse(HttpResponse response);
 }

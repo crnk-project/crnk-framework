@@ -2,9 +2,13 @@ package io.crnk.meta.integration;
 
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaResource;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,13 +21,13 @@ import java.util.List;
 
 public class MetaIntTest extends AbstractMetaJerseyTest {
 
-	private ResourceRepositoryV2<MetaElement, Serializable> repository;
+	private ResourceRepository<MetaElement, Serializable> repository;
 
 	@Before
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		repository = client.getQuerySpecRepository(MetaElement.class);
+		repository = client.getRepositoryForType(MetaElement.class);
 	}
 
 	@Test
@@ -50,7 +54,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 	public void testAttributesHaveParent() {
 		QuerySpec querySpec = new QuerySpec(MetaAttribute.class);
 		querySpec.includeRelation(Arrays.asList("parent"));
-		ResourceList<MetaAttribute> list = client.getQuerySpecRepository(MetaAttribute.class).findAll(querySpec);
+		ResourceList<MetaAttribute> list = client.getRepositoryForType(MetaAttribute.class).findAll(querySpec);
 		Assert.assertFalse(list.isEmpty());
 		for (MetaAttribute elem : list) {
 			Assert.assertNotNull(elem.getParent());
@@ -61,7 +65,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 	public void testAttributesHaveType() {
 		QuerySpec querySpec = new QuerySpec(MetaAttribute.class);
 		querySpec.includeRelation(Arrays.asList("type", "elementType"));
-		ResourceList<MetaAttribute> list = client.getQuerySpecRepository(MetaAttribute.class).findAll(querySpec);
+		ResourceList<MetaAttribute> list = client.getRepositoryForType(MetaAttribute.class).findAll(querySpec);
 		Assert.assertFalse(list.isEmpty());
 		for (MetaAttribute elem : list) {
 			Assert.assertNotNull(elem.getType());
@@ -158,8 +162,8 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 		querySpec.includeRelation(Arrays.asList("declaredAttributes"));
 		querySpec.includeRelation(Arrays.asList("primaryKey", "elements"));
 		querySpec.includeRelation(Arrays.asList("superType"));
-		String id = "resources.schedules";
-		MetaResource resource = (MetaResource) client.getQuerySpecRepository(elementClass).findOne(id, querySpec);
+		String id = "resources.schedule";
+		MetaResource resource = (MetaResource) client.getRepositoryForType(elementClass).findOne(id, querySpec);
 		Assert.assertNotNull(resource);
 		Assert.assertNotNull(resource.getAttributes());
 		Assert.assertNotNull(resource.getDeclaredAttributes());
@@ -180,7 +184,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaElement$List", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaAttribute", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaType", querySpec));
-		Assert.assertNotNull(repository.findOne("io.crnk.jpa.metaEmbeddableAttribute.laz", querySpec));
+		Assert.assertNotNull(repository.findOne("io.crnk.data.jpa.metaEmbeddableAttribute.laz", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaType$primaryKey", querySpec));
 	}
 }

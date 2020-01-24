@@ -4,15 +4,15 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
 
-@JsonApiResource(type = "meta/key")
+@JsonApiResource(type = "metaKey", resourcePath = "meta/key")
 public class MetaKey extends MetaElement {
 
 	public static final String ID_ELEMENT_SEPARATOR = "-";
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private List<MetaAttribute> elements;
 
 	private boolean unique;
@@ -49,13 +49,14 @@ public class MetaKey extends MetaElement {
 
 	@JsonIgnore
 	public MetaAttribute getUniqueElement() {
-		if (elements.size() != 1)
+		if (elements.size() != 1) {
 			throw new IllegalStateException(getName() + " must contain a single primary key attribute");
+		}
 		return elements.get(0);
 	}
 
 	public String toKeyString(Object id) {
-		if(id == null){
+		if (id == null) {
 			return null;
 		}
 		// => support compound keys with unique ids

@@ -1,9 +1,9 @@
 package io.crnk.meta.provider;
 
-import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaElement;
 
 import java.lang.reflect.Type;
+import java.util.Optional;
 
 public interface MetaPartition {
 

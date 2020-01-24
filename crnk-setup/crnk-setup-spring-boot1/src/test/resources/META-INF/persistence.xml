@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+			 version="2.0"
+			 xs:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+			 xmlns="http://java.sun.com/xml/ns/persistence">
+
+	<persistence-unit name="TEST_SPRING" transaction-type="RESOURCE_LOCAL">
+
+		<class>io.crnk.spring.app.model.PersonEntity</class>
+
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<properties>
+			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+			<property name="javax.persistence.jdbc.url" value="jdbc:h2:mem"/>
+			<property name="javax.persistence.jdbc.user" value="sa"/>
+
+			<property name="hibernate.id.new_generator_mappings" value="true"/>
+			<property name="hibernate.dialect" value="H2"/>
+			<property name="hibernate.format_sql" value="false"/>
+			<property name="hibernate.hbm2ddl.auto" value="drop-and-create"/>
+			<property name="hibernate.validator.autoregister_listeners"
+					  value="true"/>
+		</properties>
+	</persistence-unit>
+</persistence>

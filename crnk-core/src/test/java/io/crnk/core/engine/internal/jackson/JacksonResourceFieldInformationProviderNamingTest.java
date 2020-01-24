@@ -1,10 +1,5 @@
 package io.crnk.core.engine.internal.jackson;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -19,16 +14,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class JacksonResourceFieldInformationProviderNamingTest {
 
 	private ObjectMapper objectMapper;
 
 	private JacksonResourceFieldInformationProvider sut;
+
 	private ResourceInformationProviderContext context;
+
 	private BeanInformation beanDesc;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		objectMapper = new ObjectMapper();
 
 		context = Mockito.mock(ResourceInformationProviderContext.class);
@@ -37,7 +39,7 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 		sut = new JacksonResourceFieldInformationProvider();
 		sut.init(context);
 
-		beanDesc = new BeanInformation(TestClass.class);
+		beanDesc = BeanInformation.get(TestClass.class);
 	}
 
 	@Test
@@ -48,13 +50,13 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 	}
 
 	@Test
-	public void onFieldWithoutJsonPropertyShouldReturnBaseName() throws Exception {
+	public void onFieldWithoutJsonPropertyShouldReturnBaseName() {
 		BeanAttributeInformation field = beanDesc.getAttribute("field");
 		assertThat(sut.getJsonName(field).isPresent()).isFalse();
 	}
 
 	@Test
-	public void onFieldWithJsonPropertyShouldReturnCustomName() throws Exception {
+	public void onFieldWithJsonPropertyShouldReturnCustomName() {
 		// GIVEN
 		BeanAttributeInformation field = beanDesc.getAttribute("fieldWithJsonProperty");
 
@@ -66,26 +68,25 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 	}
 
 	@Test
-	public void onFieldWithDefaultJsonPropertyShouldReturnBaseName() throws Exception {
+	public void onFieldWithDefaultJsonPropertyShouldReturnBaseName() {
 		BeanAttributeInformation attr = beanDesc.getAttribute("fieldWithDefaultJsonProperty");
 		assertThat(sut.getJsonName(attr).isPresent()).isFalse();
 	}
 
 	@Test
-	public void onWrappedBooleanFieldShouldReturnFieldNameBasedOnGetter() throws Exception {
+	public void onWrappedBooleanFieldShouldReturnFieldNameBasedOnGetter() {
 		BeanAttributeInformation attr = beanDesc.getAttribute("accessorField");
-
 		assertThat(sut.getJsonName(attr).isPresent()).isFalse();
 	}
 
 	@Test
-	public void onWrappedFieldShouldReturnFieldNameBasedOnGetter() throws Exception {
+	public void onWrappedFieldShouldReturnFieldNameBasedOnGetter() {
 		BeanAttributeInformation attr = beanDesc.getAttribute("booleanProperty");
 		assertThat(sut.getJsonName(attr).isPresent()).isFalse();
 	}
 
 	@Test
-	public void onNoSerializationConfigShouldSerializeField() throws Exception {
+	public void onNoSerializationConfigShouldSerializeField() {
 		sut = new JacksonResourceFieldInformationProvider();
 		sut.init(context);
 		BeanAttributeInformation field = beanDesc.getAttribute("namingStrategyTest");

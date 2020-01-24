@@ -1,199 +1,244 @@
 package io.crnk.client;
 
-import java.io.Serializable;
-import java.util.Collection;
-
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
+import io.crnk.test.mock.models.ScheduleStatus;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.Serializable;
+import java.util.Collection;
+
 public abstract class AbstractProxiedObjectsClientTest extends AbstractClientTest {
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+    protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+    protected ResourceRepository<Project, Long> projectRepo;
 
-	protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
+    protected RelationshipRepository<Task, Long, Project, Long> relRepo;
 
-	private ResourceRepositoryV2<Schedule, Long> scheduleRepo;
+    private ResourceRepository<Schedule, Long> scheduleRepo;
 
-	private RelationshipRepositoryV2<Schedule, Serializable, Task, Serializable> scheduleTaskRepo;
+    private RelationshipRepository<Schedule, Serializable, Task, Serializable> scheduleTaskRepo;
 
-	private RelationshipRepositoryV2<Task, Serializable, Schedule, Serializable> taskScheduleRepo;
+    private RelationshipRepository<Task, Serializable, Schedule, Serializable> taskScheduleRepo;
 
-	@Before
-	public void setup() {
-		super.setup();
+    private ResourceRepository<ScheduleStatus, Object> statusRepo;
 
-		client.setPushAlways(false);
+    private RelationshipRepository<Schedule, Object, Project, Object> scheduleProjectRepo;
 
-		scheduleRepo = client.getQuerySpecRepository(Schedule.class);
-		taskRepo = client.getQuerySpecRepository(Task.class);
-		projectRepo = client.getQuerySpecRepository(Project.class);
-		relRepo = client.getQuerySpecRepository(Task.class, Project.class);
-		scheduleTaskRepo = client.getQuerySpecRepository(Schedule.class, Task.class);
-		taskScheduleRepo = client.getQuerySpecRepository(Task.class, Schedule.class);
-	}
+    private RelationshipRepository<Task, Object, Project, Object> taskProjectRepo;
 
-	@Override
-	protected TestApplication configure() {
-		return new TestApplication(false);
-	}
+    @Before
+    public void setup() {
+        super.setup();
 
-	@Test
-	public void noProxyForLazy() {
-		Schedule schedule = new Schedule();
-		schedule.setId(1L);
-		schedule.setName("project");
-		scheduleRepo.create(schedule);
+        scheduleRepo = client.getRepositoryForType(Schedule.class);
+        taskRepo = client.getRepositoryForType(Task.class);
+        projectRepo = client.getRepositoryForType(Project.class);
+        statusRepo = client.getRepositoryForType(ScheduleStatus.class);
+        relRepo = client.getRepositoryForType(Task.class, Project.class);
+        scheduleTaskRepo = client.getRepositoryForType(Schedule.class, Task.class);
+        scheduleProjectRepo = client.getRepositoryForType(Schedule.class, Project.class);
+        taskScheduleRepo = client.getRepositoryForType(Task.class, Schedule.class);
+        taskProjectRepo = client.getRepositoryForType(Task.class, Project.class);
+    }
 
-		Task task = new Task();
-		task.setId(2L);
-		task.setName("test");
-		taskRepo.create(task);
+    @Override
+    protected TestApplication configure() {
+        return new TestApplication();
+    }
 
-		scheduleTaskRepo.setRelation(schedule, task.getId(), "lazyTask");
+    @Test
+    public void noProxyForLazy() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setName("project");
+        taskRepo.create(task);
 
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		schedule = scheduleRepo.findOne(1L, querySpec);
-		Task proxiedObject = schedule.getLazyTask();
-		Assert.assertNull(proxiedObject);
+        Project project = new Project();
+        project.setId(2L);
+        project.setName("test");
+        projectRepo.create(project);
 
-	}
+        taskProjectRepo.setRelation(task, project.getId(), "project");
 
-	@Test
-	public void proxyForNoneLazy() {
-		Schedule schedule = new Schedule();
-		schedule.setId(1L);
-		schedule.setName("project");
-		scheduleRepo.create(schedule);
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        task = taskRepo.findOne(1L, querySpec);
+        Project proxiedObject = task.getProject();
+        Assert.assertNull(proxiedObject);
 
-		Task task = new Task();
-		task.setId(2L);
-		task.setName("test");
-		taskRepo.create(task);
+    }
 
-		scheduleTaskRepo.setRelation(schedule, task.getId(), "task");
+    @Test
+    public void noproxyForIdFieldAndSerializedId() {
+        Schedule schedule = new Schedule();
+        schedule.setId(1L);
+        schedule.setName("project");
+        scheduleRepo.create(schedule);
 
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		schedule = scheduleRepo.findOne(1L, querySpec);
-		Task proxiedObject = schedule.getTask();
-		Assert.assertNotNull(proxiedObject);
-		Assert.assertEquals(2L, proxiedObject.getId().longValue());
-		Assert.assertNull(proxiedObject.getName());
+        Project project = new Project();
+        project.setId(2L);
+        project.setName("test");
+        projectRepo.create(project);
 
-	}
+        scheduleProjectRepo.setRelation(schedule, project.getId(), "project");
 
-	@Test
-	public void proxyForLazySet() {
-		proxyForCollection(true);
-	}
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        schedule = scheduleRepo.findOne(1L, querySpec);
+        Project proxiedObject = schedule.getProject();
+        Assert.assertNull(proxiedObject);
+        Assert.assertEquals(Long.valueOf(2L), schedule.getProjectId());
+    }
 
-	@Test
-	public void proxyForLazyList() {
-		proxyForCollection(false);
-	}
 
-	private void proxyForCollection(boolean set) {
-		Schedule schedule = new Schedule();
-		schedule.setId(1L);
-		schedule.setName("project");
-		scheduleRepo.create(schedule);
+    @Test
+    public void proxyForSerializedIdWithoutRelationId() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setName("project");
+        taskRepo.create(task);
 
-		Task task = new Task();
-		task.setId(2L);
-		task.setName("test");
-		taskRepo.create(task);
+        Schedule schedule = new Schedule();
+        schedule.setId(2L);
+        schedule.setName("test");
+        scheduleRepo.create(schedule);
 
-		taskScheduleRepo.setRelation(task, schedule.getId(), "schedule");
+        taskScheduleRepo.setRelation(task, schedule.getId(), "schedule");
 
-		// collection must be available as proxy
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		schedule = scheduleRepo.findOne(1L, querySpec);
-		Collection<Task> proxiedTasks = set ? schedule.getTasks() : schedule.getTasksList();
-		Assert.assertNotNull(proxiedTasks);
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        task = taskRepo.findOne(1L, querySpec);
+        Schedule proxiedObject = task.getSchedule();
+        Assert.assertNotNull(proxiedObject);
+        Assert.assertEquals(2L, proxiedObject.getId().longValue());
+        Assert.assertNull(proxiedObject.getName());
+    }
 
-		// check status without loading
-		ObjectProxy proxy = (ObjectProxy) proxiedTasks;
-		Assert.assertFalse(proxy.isLoaded());
-		Assert.assertNotNull(proxy.getUrl());
-		Assert.assertFalse(proxy.isLoaded());
 
-		// lazy load
-		Assert.assertEquals(1, proxiedTasks.size());
-		Assert.assertTrue(proxy.isLoaded());
-		task = proxiedTasks.iterator().next();
-		Assert.assertEquals(2L, task.getId().longValue());
-	}
+    @Test
+    public void noProxyForEager() {
+        Schedule schedule = new Schedule();
+        schedule.setId(1L);
+        schedule.setName("project");
+        scheduleRepo.create(schedule);
 
-	@Test
-	public void saveDoesNotTriggerLazyLoad() {
-		Schedule schedule = new Schedule();
-		schedule.setId(1L);
-		schedule.setName("project");
-		scheduleRepo.create(schedule);
+        ScheduleStatus status = new ScheduleStatus();
+        status.setId(2L);
+        status.setDescription("test");
+        statusRepo.create(status);
 
-		QuerySpec querySpec = new QuerySpec(Schedule.class);
-		schedule = scheduleRepo.findOne(1L, querySpec);
-		Collection<Task> proxiedTasks = schedule.getTasks();
-		ObjectProxy proxy = (ObjectProxy) proxiedTasks;
-		Assert.assertFalse(proxy.isLoaded());
+        scheduleTaskRepo.setRelation(schedule, status.getId(), "status");
 
-		// update primitive field
-		schedule.setName("newValue");
-		scheduleRepo.save(schedule);
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        schedule = scheduleRepo.findOne(1L, querySpec);
+        ScheduleStatus proxiedObject = schedule.getStatus();
+        Assert.assertNotNull(proxiedObject);
+        Assert.assertEquals(2L, proxiedObject.getId().longValue());
+        Assert.assertNotNull(proxiedObject.getDescription());
 
-		// save should not trigger a load of the relation
-		Assert.assertFalse(proxy.isLoaded());
-		Assert.assertSame(proxy, schedule.getTasks());
+    }
 
-		// data should be saved
-		schedule = scheduleRepo.findOne(1L, querySpec);
-		Assert.assertEquals("newValue", schedule.getName());
-	}
 
-	@Test
-	public void saveLazyCollectionChange() {
-		Schedule schedule = new Schedule();
-		schedule.setId(1L);
-		schedule.setName("project");
-		scheduleRepo.create(schedule);
+    @Test
+    public void proxyForLazySet() {
+        Schedule schedule = new Schedule();
+        schedule.setId(1L);
+        schedule.setName("project");
+        scheduleRepo.create(schedule);
 
-		Task task = new Task();
-		task.setId(2L);
-		task.setName("test");
-		taskRepo.create(task);
+        Task task = new Task();
+        task.setId(2L);
+        task.setName("test");
+        taskRepo.create(task);
 
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		schedule = scheduleRepo.findOne(1L, querySpec);
-		Collection<Task> proxiedTasks = schedule.getTasks();
-		ObjectProxy proxy = (ObjectProxy) proxiedTasks;
-		Assert.assertFalse(proxy.isLoaded());
+        taskScheduleRepo.setRelation(task, schedule.getId(), "schedule");
 
-		// add task to collection
-		proxiedTasks.add(task);
-		Assert.assertTrue(proxy.isLoaded());
-		Assert.assertEquals(1, proxiedTasks.size());
-		scheduleRepo.save(schedule);
+        // collection must be available as proxy
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        schedule = scheduleRepo.findOne(1L, querySpec);
+        Collection<Task> proxiedTasks = schedule.getTasks();
+        Assert.assertNotNull(proxiedTasks);
 
-		schedule = scheduleRepo.findOne(1L, querySpec);
-		proxiedTasks = schedule.getTasks();
-		Assert.assertEquals(1, proxiedTasks.size());
+        // check status without loading
+        ObjectProxy proxy = (ObjectProxy) proxiedTasks;
+        Assert.assertFalse(proxy.isLoaded());
+        Assert.assertNotNull(proxy.getUrl());
+        Assert.assertFalse(proxy.isLoaded());
 
-		// remove task from collection
-		proxiedTasks.remove(task);
-		Assert.assertEquals(1, proxiedTasks.size());
-		scheduleRepo.save(schedule);
+        // lazy load
+        Assert.assertEquals(1, proxiedTasks.size());
+        Assert.assertTrue(proxy.isLoaded());
+        task = proxiedTasks.iterator().next();
+        Assert.assertEquals(2L, task.getId().longValue());
+    }
 
-		schedule = scheduleRepo.findOne(1L, querySpec);
-		proxiedTasks = schedule.getTasks();
-		Assert.assertEquals(1, proxiedTasks.size());
-	}
+    @Test
+    public void saveDoesNotTriggerLazyLoad() {
+        Schedule schedule = new Schedule();
+        schedule.setId(1L);
+        schedule.setName("project");
+        scheduleRepo.create(schedule);
+
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        schedule = scheduleRepo.findOne(1L, querySpec);
+        Collection<Task> proxiedTasks = schedule.getTasks();
+        ObjectProxy proxy = (ObjectProxy) proxiedTasks;
+        Assert.assertFalse(proxy.isLoaded());
+
+        // update primitive field
+        schedule.setName("newValue");
+        scheduleRepo.save(schedule);
+
+        // save should not trigger a load of the relation
+        Assert.assertFalse(proxy.isLoaded());
+        Assert.assertSame(proxy, schedule.getTasks());
+
+        // data should be saved
+        schedule = scheduleRepo.findOne(1L, querySpec);
+        Assert.assertEquals("newValue", schedule.getName());
+    }
+
+    @Test
+    public void saveLazyCollectionChange() {
+        Schedule schedule = new Schedule();
+        schedule.setId(1L);
+        schedule.setName("project");
+        scheduleRepo.create(schedule);
+
+        Task task = new Task();
+        task.setId(2L);
+        task.setName("test");
+        taskRepo.create(task);
+
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        schedule = scheduleRepo.findOne(1L, querySpec);
+        Collection<Task> proxiedTasks = schedule.getTasks();
+        ObjectProxy proxy = (ObjectProxy) proxiedTasks;
+        Assert.assertFalse(proxy.isLoaded());
+
+        // add task to collection
+        proxiedTasks.add(task);
+        Assert.assertTrue(proxy.isLoaded());
+        Assert.assertEquals(1, proxiedTasks.size());
+        scheduleRepo.save(schedule);
+
+        schedule = scheduleRepo.findOne(1L, querySpec);
+        proxiedTasks = schedule.getTasks();
+        Assert.assertEquals(1, proxiedTasks.size());
+
+        // remove task from collection
+        proxiedTasks.remove(task);
+        Assert.assertEquals(1, proxiedTasks.size());
+        scheduleRepo.save(schedule);
+
+        schedule = scheduleRepo.findOne(1L, querySpec);
+        proxiedTasks = schedule.getTasks();
+        Assert.assertEquals(1, proxiedTasks.size());
+    }
 }

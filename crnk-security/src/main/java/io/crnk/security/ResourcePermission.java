@@ -58,7 +58,7 @@ public class ResourcePermission {
 
 	public static ResourcePermission fromMethod(HttpMethod method) {
 		ResourcePermission permission = METHODS.get(method);
-		PreconditionUtil.assertNotNull("unknown method", permission);
+		PreconditionUtil.verify(permission != null, "unknown method %s, expected=%s", method, METHODS);
 		return permission;
 	}
 

@@ -1,5 +1,7 @@
 package io.crnk.meta.model;
 
+import java.lang.reflect.Type;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -8,20 +10,27 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
-import java.lang.reflect.Type;
-
-@JsonApiResource(type = "meta/type")
+@JsonApiResource(type = "metaType", resourcePath = "meta/type")
 public class MetaType extends MetaElement {
 
 	@JsonIgnore
 	private Type implementationType;
+
+	private String implementationClassName;
 
 	@JsonApiRelation(serialize = SerializeType.LAZY, lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private MetaType elementType;
 
 	@JsonIgnore
 	public Class<?> getImplementationClass() {
-		return ClassUtils.getRawType(implementationType);
+		if (implementationType == null && implementationClassName != null) {
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			implementationType = ClassUtils.loadClass(cl, implementationClassName);
+		}
+		if (implementationType != null) {
+			return ClassUtils.getRawType(implementationType);
+		}
+		return null;
 	}
 
 	public Type getImplementationType() {
@@ -30,6 +39,17 @@ public class MetaType extends MetaElement {
 
 	public void setImplementationType(Type implementationType) {
 		this.implementationType = implementationType;
+		if (implementationType != null) {
+			this.implementationClassName = ClassUtils.getRawType(implementationType).getName();
+		}
+	}
+
+	public String getImplementationClassName() {
+		return implementationClassName;
+	}
+
+	public void setImplementationClassName(String implementationClassName) {
+		this.implementationClassName = implementationClassName;
 	}
 
 	@JsonIgnore

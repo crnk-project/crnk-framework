@@ -1,5 +1,7 @@
 
-# Module Development
+anchor:moduledev[]
+
+# Advanced Customizations through Modules
 
 Crnk has a module API that allows to extend the core functionality by third-party contributions.
 The mentioned JPA module in the next section is an example for that. The API is similar in spirit
@@ -8,10 +10,11 @@ a default implementation provided by `SimpleModule`. A module has access to a `M
 that allows to register all kinds of extensions like new `ResourceInformationBuilder`,
 `ResourceLookup`, `Filter`, `ExceptionMapper` and Jackson modules. It also gives access to the
 `ResourceRegistry` holding information about all the repositories registered to crnk.
-The `JpaModule` in `crnk-jpa` provides a good, more advanced example of using the
+The `JpaModule` in `crnk-data-jpa` provides a good, more advanced example of using the
 module API.
 
 
+anchor:requestfilter[]
 
 ## Request Filtering
 
@@ -36,21 +39,7 @@ can be registered with `ModuleContext.addRepositoryDecoratorFactory`. The factor
 notified about every repository registration and is then free do decorate it or not.
 
 
-## Resource Filtering
-
-`ResourceFilter` allows to restrict access to resources and fields. To methods `filterResource` and
-`filterField` can be implemented for this purpose. Both return a `FilterBehavior` which allows to
-distinguish between `NONE`, `IGNORE` and `FORBIDDEN`. For example, a field like a
-lock count can make use of `IGNORE` in order to be ignored for POST and PATCH requests (the current value
-on the server is left untouched). While access to an unauthorized resource or
-field results in a forbidden error with `FORBIDDEN`.
-
-The `SecurityModule` makes use of `ResourceFilter` to perform access control.
-`SecurityResourceFilter` in 'crnk-security` gives an example how it is used. The `MetaModule` and
-`HomeModule` make use of `ResourceFilterDirectory` obtained with `ModuleContext.getResourceFilterDirectory(...)` to
-query those `ResourceFilter` and only display information about resources and fields accessible in the context
-of the current re quest. The `ResourceFilterDirectory` makes use of per-request caching as the information
-may be accessed repeatedly for a request.
+anchor:modificationfilter[]
 
 ## Filter Modifications
 
@@ -63,6 +52,9 @@ Such filters are useful, for example, to implement auditing functionality.
 
 `DocumentFilter`, `RepositoryFilter` and `ResourceModificationFilter` can implement
 `Prioritizable` to introduce a priority among multiple filters.
+
+
+anchor:accesshttp[]
 
 ## Access to HTTP layer
 
@@ -78,6 +70,8 @@ active request. Modules have access to `HttpRequestContextProvider` trough the `
 Repositories, filters and modules can implement `HttpRequestContextAware` to get
 access to `HttpRequestContextProvider`.
 
+
+anchor:moduleextensions[]
 
 ## Module Extensions and dependencies
 
@@ -95,6 +89,9 @@ For an example have a look at MetaModuleExtension and the JpaModule making use o
 The ModuleExtension was introduced with Crnk 2.0 and its use is expected to grow heavily
 over time.
 
+
+anchor:thirdpartystores[]
+
 ## Integrate third-party data stores
 
 The core of Crnk is quite flexible when it comes to implementing repositories. As such, it is
@@ -103,17 +100,32 @@ not mandatory to make use of the Crnk annotations and conventions. Instead, it i
 into Crnk. For this purpose a module can provide custom implementations of
 `ResourceInformationBuilder` and `RepositoryInformationBuilder` trough
 `ModuleContext.addResourceInformationBuilder` and `ModuleContext.addRepositoryInformationBuilder`.
-For example, the JpaModule of  `crnk-jpa` makes use of that to read JPA instead of Crnk annotations.
+For example, the JpaModule of  `crnk-data-jpa` makes use of that to read JPA instead of Crnk annotations.
 Such a module can then register additional (usually dynamic) repositories with
 `ModuleContext.addRepository`.
 
+
+anchor:customdiscovery[]
 
 ## Implement a custom discovery mechanism
 
 Crnk comes with out-of-the-box support for Spring and CDI. Both of them implement
 `ServiceDiscovery`. You may provide your own implementation which can be hooked into the
-various Crnk integrations, like the CrnkFeature. Modules have access to that
-`ServiceDiscovery` trough the `ModuleContext`.
+various Crnk integrations, like the CrnkFeature. Alternatively, it can be auto-detected
+through the Java service mechanism. For example, `crnk-cdi` makes use of:
+
+[source]
+.META-INF/services/io.crnk.core.module.discovery.ServiceDiscovery
+----
+include::../../../../crnk-setup/crnk-setup-cdi/src/main/resources/META-INF/services/io.crnk.core.module.discovery.ServiceDiscovery[]
+----
+
+
+
+Modules have access to that `ServiceDiscovery` trough the `ModuleContext.getServiceDiscovery()`.
+
+
+
 
 
 ## Let a module hook into the Crnk HTTP client implementation
@@ -121,6 +133,8 @@ various Crnk integrations, like the CrnkFeature. Modules have access to that
 Modules for the Crnk client can additionally implement `HttpAdapterAware`. It gives
 the module access to the underlying HTTP client implementation and allows arbitrary
 customizations of it. Have a look at the Crnk client documentation for more information.
+
+anchor:customintegration[]
 
 ## Implement a custom integration
 
@@ -137,25 +151,37 @@ necessary is already be provided by `crnk-core`. The steps include:
   and `PropertiesProvider` to interface with that particular systems.
 
 
+anchor:runtimerepository[]
+
 ## Create repositories at runtime
 
 Repositories are usually created at compile-time, either by making use of the various annotations or a module
-such as the ´JpaModule´. However, the module API also allows the creation of repositories at runtime.
+such as the `JpaModule`. However, the module API also allows the creation of repositories at runtime.
 There are two complementary mechanisms in place to achieve this and outlined in the next two sections.
 
 NOTE: this feature is in incubation, more refinements are expected in upcoming releases.
 
 ### Implementing repositories dynamically at runtime
 
-There are different possibilities to implement a repository at runtime:
+There are different possibilities to implement resources and repositories at runtime:
 
-- Create a matching resource class at runtime with a library like http://bytebuddy.net/#/ to follow the same
+1. Create resources classes at runtime with a library like http://bytebuddy.net/#/ to follow the same
   pattern as for any compile-time repository.
-- Make use of the `Resource` class. It is the generic JSON API resource presentation within the Crnk engine.
-- Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
+
+2. `JsonAnyGetter` and `JsonAnySetter` annotations from Jackson allow to dynamically add properties to a resource.
+  Further implementing `ResourceTypeHolder` interface allows to manipulate the type of a resource. Together
+  the annotations allow the implementation of arbitrarily custom resources and type hierarchies. Note that
+  when making use of `ResourceTypeHolder` it may also become necessary to register the resource types
+  to the `ResourceRegistry` as `RegistryEntry` as outlined in the `Resource` example below.
+
+3. Make use of the `Resource` class. It is the generic JSON:API resource presentation within the Crnk engine.
+4. Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
   each `ResourceField` to specify how to read and write attributes (see below for `ResourceField` examples).
 
-In the following example we make use of the second option:
+The use of `JsonAnyGetter` and `JsonAnySetter` is simplest and recommended for most use case.
+An example is given in
+https://github.com/crnk-project/crnk-example/blob/master/crnk-example-service/src/main/java/io/crnk/example/service/model/PersonEntity.java[PersonEntity]
+Nevertheless the direct use of `Resource` opens up the possibility for more deeper control of everything:
 
 [source]
 .DynamicResourceRepository.java
@@ -201,6 +227,7 @@ An example can be found at
 https://github.com/crnk-project/crnk-framework/tree/master/crnk-core/src/test/java/io/crnk/core/engine/registry/CustomResourceRegistryTest.java[CustomResourceRegistryTest.java]
 
 
+anchor:clientmodulediscovery[]
 
 ## Discovery of Modules by CrnkClient
 

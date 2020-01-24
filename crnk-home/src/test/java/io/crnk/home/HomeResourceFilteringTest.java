@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.SimpleModule;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
+import io.crnk.test.mock.TestModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ public class HomeResourceFilteringTest {
 	private CrnkBoot boot;
 
 	private HomeModule module;
+
 	private ResourceFilter filter;
 
 	@Before
@@ -36,31 +38,31 @@ public class HomeResourceFilteringTest {
 		this.module = Mockito.spy(HomeModule.create());
 		boot = new CrnkBoot();
 		boot.addModule(module);
+		boot.addModule(new TestModule());
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.test.mock", new SampleJsonServiceLocator
-				()));
 		boot.addModule(filterModule);
 		boot.boot();
 	}
 
 	@Test
 	public void checkDoesNotDoFiltering() throws IOException {
-		Mockito.when(filter.filterResource(Mockito.any(ResourceInformation.class), Mockito.eq(HttpMethod.GET))).
+		ResourceFilterContext filterContext = Mockito.any(ResourceFilterContext.class);
+		Mockito.when(filter.filterResource(filterContext, Mockito.any(ResourceInformation.class), Mockito.eq(HttpMethod.GET))).
 				thenReturn(FilterBehavior.NONE);
 		checkResponse(false);
 	}
 
 	@Test
 	public void checkDoesDoFiltering() throws IOException {
-		Mockito.when(filter.filterResource(Mockito.any(ResourceInformation.class), Mockito.eq(HttpMethod.GET))).
+		ResourceFilterContext filterContext = Mockito.any(ResourceFilterContext.class);
+		Mockito.when(filter.filterResource(filterContext, Mockito.any(ResourceInformation.class), Mockito.eq(HttpMethod.GET))).
 				thenReturn(FilterBehavior.FORBIDDEN);
 		checkResponse(true);
 	}
 
 
 	private void checkResponse(boolean filtered) throws IOException {
-		ArgumentCaptor<Integer> statusCaptor = ArgumentCaptor.forClass(Integer.class);
-		ArgumentCaptor<byte[]> responseCaptor = ArgumentCaptor.forClass(byte[].class);
+		ArgumentCaptor<HttpResponse> responseCaptor = ArgumentCaptor.forClass(HttpResponse.class);
 
 		HttpRequestContextBase requestContextBase = Mockito.mock(HttpRequestContextBase.class);
 
@@ -68,21 +70,20 @@ public class HomeResourceFilteringTest {
 		Mockito.when(requestContextBase.getPath()).thenReturn("/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
 
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
 
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(statusCaptor.capture(), responseCaptor.capture());
-		Assert.assertEquals(200, (int) statusCaptor.getValue());
+		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(responseCaptor.capture());
+		HttpResponse response = responseCaptor.getValue();
+		Assert.assertEquals(200, response.getStatusCode());
 
-		String json = new String(responseCaptor.getValue());
-		JsonNode response = boot.getObjectMapper().reader().readTree(json);
-
-		JsonNode resourcesNode = response.get("resources");
-		JsonNode tasksNode = resourcesNode.get("tag:tasks");
+		JsonNode json = boot.getObjectMapper().reader().readTree(new String(response.getBody()));
+		JsonNode resourcesNode = json.get("links");
+		JsonNode tasksNode = resourcesNode.get("tasks");
 		if (filtered) {
 			Assert.assertNull(tasksNode);
 		} else {
-			Assert.assertEquals("/tasks/", tasksNode.get("href").asText());
+			Assert.assertEquals("http://localhost/tasks", tasksNode.asText());
 		}
 	}
 }

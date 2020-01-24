@@ -1,21 +1,101 @@
+
+anchor:architecture[]
+
 # Architecture
 
-*Resources* and *repositories* are the main object types in use by Crnk. Those types closely reflect the
-JSON API specification. Resources hold the data; while repositories implement the access to those resources. A
-running Crnk application can have any number of those repositories which may or may not be related. To establish
-such relations, there is a further distinction between *resource repositories* and *relationship repositories*.
+*Resources*, *relationships* and *repositories* are the central building blocks of Crnk:
 
-The `crnk-core` project hosts a `engine` package that provides an implementation of the JSON API specification.
-It processes incoming requests and makes the appropriate calls to repositories. A single request may make one or multiple calls
- to repositories. Multiple
-repository are called when the request asks for inclusions of related resoures where the main repository chooses
-to not directly handle those inclusions by itself (explained in detail in later chapters). In the background
-the engine takes care of details like serialization, repository lookup and error handling. For this
-to work it offers a module API to customize and extend the Crnk feature set. The engine
-does not dictate how resources and repositories are implemented. It makes use of a more abstract
-information model and adapters to forward call to a particular implementation. This allows for a lot of flexibility
-in the repository design. In many cases users will make use of annotations and interfaces provided by `crnk-core`
-which follow the specification and recommendations of JSON API. But there is also the possibility to implement
-repositories in other fashions like it has been done in `crnk-jpa`.
+- Resources hold data as value attributes, meta information and link information.
+- Relationships establish links between resources.
+- *resource repositories* and *relationship repositories* implement access to resources and relationships.
+  `GET`, `POST`, `PATCH`, `DELETE` requests allow to interact with the repositories.
 
-The subsequent chapters explain how to setup and use Crnk.
+A Crnk application models its API as resources and relationships. One may also call it a *graph* with one
+wants to throw in some current buzzword. For example, for a `person` resource holding an address, there
+are different possibilities to set it up in such a resource-oriented
+way:
+
+- A `person` resource holding address information as attribute. A `PATCH` request to `/api/person/{id}`
+  with the new address will update the attribute on the person accordingly.
+- A `person` resource, an `address` resource and a relationship between the two. Then a `PATCH`
+  request to `/api/person/{id}/relationships/address` will trigger an update of the relationship.
+- A dedicated `AddressChangeResource` that is in a relationship with the `person` resource.
+  Then a `POST` request to `/api/addressChange` or `/api/person/{id}/addressChange` (depending on the setup)
+  will trigger a new address change. This is
+  the most elaborate setup and can complement the `address` relationship from before. It allows not just
+  to trigger a change, but also, for example, to query
+  the current status and get a history of changes. This in turn allows to model more complex workflows where
+  an address change may take a larger mount of time and may involve further manual steps.
+
+The opposite to this are RPC-style APIs, where one would implement a `changeAddress` service taking
+the person id and new address as input and performing the desired changes. Crnk
+focuses on resource-oriented APIs, but still works well together with the later, for which there are already many
+libraries out there such as JAX-RS and Spring MVC.
+
+The *benefits of resource-oriented APIs* are:
+
+- A clean, consistent model of your API. Seeing it means understanding it. The semantics of resource and relationships
+  are well established. Consumers can learn about the API by just browsing it through the provided linking.
+- Better evolution into the future. RPC-style APIs frequently suffer from many different, isolated services. Every
+  service can basically do whatever it pleases. Over time this can lead to difficulties understanding and changing a system.
+- Better testability and mocking: By using built-in in-memory repositories and providing test data for resources, a fully
+  running endpoint can be achieved within hours. After that can, for example, frontend and backend development
+  take place in parallel without uncertainty about API contracts.
+- The basic yet powerful model allows for a rich set of tooling and automation to reduce the amount of custom coding.
+  Crnk comes with support for JPA, JSR-303 validation, faceted search support, OpenTracing and more next to
+  handling lower-layer REST details, linking and relationships.
+
+Crnk is implemented as library rather than new framework. It almost no third-party dependencies, is
+lightweight in design and integrates well with many other libraries like Vert.X, JAX-RS and Spring Boot.
+
+Crnk follows, but is not limited by the https://jsonapi.org/[JSON:API] specification to built resource-oriented APIs.
+Its implementation is hosted in the `crnk-core` project. The JSON:API specification provides
+all the essential building blocks like sorting, filtering, paging, document formats, linking and error handling to access
+resources and relationships. If desired, also other protocols like GraphQL and custom REST API contract can be
+implemented by updating the serialization layer of `crnk-core`. To understand the inner working, it is
+important to know how requests are processed:
+
+- A Crnk interceptor is called from the underlying framework. This might be, for example, from a Servlet environment,
+ JAX-RS or Spring MVC.
+- The request is deserialized to Crnk data structures like `Document`, `Resource`, `ResourceIdentifier` or `ErrorData`.
+- The type of request is determined: whether it is a `POST`, `PATCH`, `GET` or `DELETE` request and whether it is a resource or
+relationship request.
+- The request is forwarded to the appropriate repository implementation.
+- `GET` requests can ask for inclusions of further, related resources. Result resources will then trigger further requests to
+  other repositories. This can happen either manually from within the initially called repository or automatically
+  by Crnk (explained in detail in later chapters).
+- The result resources are merged into response document and returned to the underlying framework for delivery. Possible
+  exceptions are handled as and mapped as well.
+
+
+A benefit of Crnk is its flexibility how to set all this up:
+
+- Resources and relationships can be defined with simple Java Beans and annotations or programmatically. The later allows
+  virtually any kind of customization at runtime. One example is `crnk-data-jpa`
+  that is able to expose any JPA entity as resource.
+- Resources and relationships can be entirely decoupled concerns. A new relationship repository can introduce
+  an additoinal relationship to existing resources. For example, an audit component could intercept and log any
+  modifications and introduce a new relationship `history` onto each resource to access it.
+- Information about resources, relationships and repositories are available trough a Java API and resource endpoint.
+- Filters and decorators allow to intercept and modify every step along the request chain. This can be used, for example,
+  to enforce security, collect metrics or do tracing.
+
+To facilitate the setup, Crnk comes with a small module API. Independent functionality can be assembled as module and then just
+included into the application. Crnk comes with a number of modules on its own:
+
+- `crnk-data-jpa`
+- `crnk-data-facets`
+- `crnk-validation`
+- `crnk-operations`
+- Spring modules
+- ...
+
+Such modules can make use of filters, decorators, decoupled resources and relationships and various other features.
+Everything together fosters the use of the *composite pattern* where larger applications can be assembled from smaller
+parts, some from third-party modules and others from manually implemented ones.
+
+
+
+
+
+

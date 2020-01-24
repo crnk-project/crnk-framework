@@ -1,10 +1,5 @@
 package io.crnk.client.module;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import io.crnk.client.AbstractClientTest;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
@@ -13,7 +8,7 @@ import io.crnk.core.module.Module;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
@@ -23,6 +18,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class ModuleClientTest extends AbstractClientTest {
 
@@ -40,12 +40,12 @@ public class ModuleClientTest extends AbstractClientTest {
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(true);
+		return new TestApplication();
 	}
 
 	@Test
 	public void test() {
-		ResourceRepositoryV2<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
+		ResourceRepository<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
 		Task task = new Task();
 		task.setId(1L);
 		task.setName("task");

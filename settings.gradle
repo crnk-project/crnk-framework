@@ -1,60 +1,83 @@
 include ':crnk-core'
+include ':crnk-reactive'
 include ':crnk-home'
 include ':crnk-test'
-include ':crnk-rs'
+include ':crnk-testkit'
 include ':crnk-client'
-include ':crnk-client-angular-ngrx'
 include ':crnk-meta'
-include ':crnk-jpa'
 include ':crnk-validation'
 
-include ':crnk-servlet'
-include ':crnk-cdi'
-include ':crnk-guice'
-include ':crnk-spring'
-include ':crnk-brave'
-include ':crnk-monitor-brave4'
+include ':crnk-monitor:crnk-monitor-brave4'
+include ':crnk-monitor:crnk-monitor-opentracing'
+
 include ':crnk-security'
-include ':crnk-activiti'
+include ':crnk-ui'
+
+include ':crnk-setup:crnk-setup-spring'
+include ':crnk-setup:crnk-setup-spring-boot1'
+include ':crnk-setup:crnk-setup-spring-boot2'
+include ':crnk-setup:crnk-setup-vertx'
+include ':crnk-setup:crnk-setup-servlet'
+include ':crnk-setup:crnk-setup-cdi'
+include ':crnk-setup:crnk-setup-guice'
+include ':crnk-setup:crnk-setup-rs'
+
+include ':crnk-data:crnk-data-facet'
+include ':crnk-data:crnk-data-jpa'
+include ':crnk-data:crnk-data-activiti'
+
+include ':crnk-format:crnk-format-plain-json'
 
 include ':crnk-operations'
-include ':crnk-gen-typescript'
 
-include ':crnk-examples:dropwizard-mongo-example'
-include ':crnk-examples:jersey-example'
-include ':crnk-examples:dropwizard-simple-example'
-include ':crnk-examples:wildfly-example'
-include ':crnk-examples:spring-boot-example'
-
-include ':crnk-ui'
 include ':crnk-documentation'
+include ':crnk-bom'
+
+include ':crnk-gen:crnk-gen-openapi'
+include ':crnk-gen:crnk-gen-typescript'
+include ':crnk-gen:crnk-gen-java'
+include ':crnk-gen:crnk-gen-base'
+include ':crnk-gen:crnk-gen-runtime'
+include ':crnk-gen:crnk-gen-gradle'
+include ':crnk-gen:crnk-gen-asciidoc'
+
+include ':crnk-integration-examples:jersey-example'
+include ':crnk-integration-examples:dropwizard-simple-example'
+include ':crnk-integration-examples:wildfly-example'
+include ':crnk-integration-examples:spring-boot-example'
+include ':crnk-integration-examples:spring-boot-minimal-example'
+include ':crnk-integration-examples:spring-boot-microservice-example'
+include ':crnk-integration-examples:dagger-vertx-example'
 
 gradle.beforeProject { Project project ->
-	project.with {
+    project.with {
 
-		// get password from environment if available
-		if (System.env['SIGNING_PASSWORD']) {
-			ext['signing.password'] = System.env['SIGNING_PASSWORD']
-		}
-		String sonarLogin = System.env['SONAR_LOGIN']
-		if (sonarLogin) {
-			System.setProperty("sonar.login", sonarLogin)
-		}
+        ext {
+            dockerHubUser = System.getenv('DOCKER_HUB_USER')
+            dockerHubPass = System.getenv('DOCKER_HUB_PASS')
+        }
 
-		buildscript {
-			repositories {
-				maven {
-					url('https://plugins.gradle.org/m2')
-				}
-			}
-		}
-		repositories {
-			mavenCentral()
-			maven {
-				url('https://plugins.gradle.org/m2')
-			}
-		}
-		version = rootProject.version
-		group = rootProject.group
-	}
+        // get password from environment if available
+        String sonarLogin = System.env['SONAR_LOGIN']
+        if (sonarLogin) {
+            System.setProperty("sonar.login", sonarLogin)
+        }
+
+        buildscript {
+            repositories {
+                maven {
+                    url('https://plugins.gradle.org/m2')
+                }
+            }
+        }
+        repositories {
+            mavenCentral()
+            maven {
+                url('https://plugins.gradle.org/m2')
+            }
+        }
+        version = rootProject.version
+        group = rootProject.group
+    }
 }
+

@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.jackson;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -12,6 +9,9 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.utils.Nullable;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 public class DocumentDataDeserializer extends JsonDeserializer<Nullable<Object>> {
 
 	@Override
@@ -19,19 +19,17 @@ public class DocumentDataDeserializer extends JsonDeserializer<Nullable<Object>>
 		JsonToken currentToken = jp.getCurrentToken();
 		if (currentToken == JsonToken.START_ARRAY) {
 			Resource[] resources = jp.readValueAs(Resource[].class);
-			return Nullable.of((Object) Arrays.asList(resources));
-		}
-		else if (currentToken == JsonToken.VALUE_NULL) {
+			return Nullable.of(Arrays.asList(resources));
+		} else if (currentToken == JsonToken.VALUE_NULL) {
 			return Nullable.nullValue();
-		}
-		else {
-			PreconditionUtil.assertEquals("parsing failed", currentToken, JsonToken.START_OBJECT);
-			return Nullable.of((Object) jp.readValueAs(Resource.class));
+		} else {
+			PreconditionUtil.verifyEquals(currentToken, JsonToken.START_OBJECT, "parsing failed");
+			return Nullable.of(jp.readValueAs(Resource.class));
 		}
 	}
 
 	@Override
-	public Nullable<Object> getNullValue(DeserializationContext ctxt) throws JsonMappingException {
+	public Nullable<Object> getNullValue(DeserializationContext ctxt) {
 		return Nullable.nullValue();
 	}
 }

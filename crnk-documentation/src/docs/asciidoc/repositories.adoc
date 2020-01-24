@@ -1,89 +1,574 @@
 
 # Repositories
 
-The modelled resources must be complemented by a corresponding
+The modelled resources and relationships must be complemented by a corresponding
 repository implementation. This is achieved by implementing
 one of those two repository interfaces:
 
-  * ResourceRepositoryV2 for a resource
-  * RelationshipRepositoryV2 resp. BulkRelationshipRepositoryV2 for resource relationships
+  * ResourceRepository for resources.
+  * RelationshipRepository resp. BulkRelationshipRepository for relationships.
+
+The repositories are used to serve `POST`, `GET`, `PATCH` and `DELETE` requests as specified by
+JSON:API specification. The repository contract closely resembles the JSON:API specification. Subsequent
+sections and chapters outline various possibilities to speed-up and potentially reuse existing
+repository implementations.
+
+IMPORTANT: When accessing repositories, do not forget to use the `application/vnd.api+json` content type.
 
 
 
-## ResourceRepositoryV2
+anchor:resource_repository[]
 
-Base repository which is used to operate on resources.
-Each resource should have a corresponding repository implementation.
-It consist of five basic methods which provide a CRUD for a resource and two parameters: the first is a type of a resource and the second is a type of the resource’s identifier.
+## ResourceRepository
 
-The methods are as follows:
+`ResourceRepository` is the main interface used to operate on resources with `POST`, `GET`, `PATCH` and `DELETE` requests.
+The interface takes two generic arguments:
+
+1. The type of a resource. Typically this is a plain Java Bean making use of the JSON:API annotations. But may also be something
+  entirely different (see <<architectures> and <<modules>>). One other example is the
+  `io.crnk.core.engine.document.Resource` class used to setup dynamically types repositories.
+2. The type of the resource’s identifier. Typically a primitive type like `String`, `long` or `UUID`. But if necessary
+  can also be a more complex type that serializes to a URL-friendly String.
+
+The methods of `ResourceRepository` look as follows:
 
 * `findOne(ID id, QuerySpec querySpec)`
-  Search one resource with a given ID. If a resource cannot be found, a ResourceNotFoundException exception should be thrown.
-  It should return an entity with associated relationships.
-
-* `findAll(QuerySpec querySpec)`
-  Search for all of the resources. An instance of QuerySpec can be used if necessary.
-  If no resources can be found an empty Iterable or null must be returned.
-  It should return entities with associated relationships.
+  Search one resource with a given ID. If a resource cannot be found, a ResourceNotFoundException exception should be thrown
+  that translates into a `404` HTTP error status. The returned resource must adhere to the behavior as specifies by
+  the various annotations (more details in the <<resource>> chapter), most notably the inclusion of relationships as requested
+  by the passed `querySpec` as long as `LookupIncludeBehavior` does not specify otherwise. More details about `QuerySpec`
+  follow in subsequent sections.
 
 * `findAll(Iterable<ID>ids, QuerySpec querySpec)`
-  Search for resources constrained by a list of identifiers. An instance of QuerySpec can be used if necessary.
-  If no resources can be found an empty Iterable or null must be returned.
-  It should return entities with associated relationships.
+  Allows to bulk request multiple resources, but otherwise work exactly like the preceding `findOne` method.
 
-* `save(S entity)`
-  Saves a resource. It should not save relating relationships. A Returning resource must include assigned identifier created for the instance of resource.
-  This method should be able to both create a new resource and update existing one.
+* `findAll(QuerySpec querySpec)`
+  Search for all resources according to the passed `querySpec` including sorting, filtering, paging, field sets and inclusions.
+  A `ResourceList` must be returned that carries the result resources, links information and meta information.
+
+* `create(S resource)`
+  Called by `POST` requests. The request body is deserialized and passed as `resource` parameter. The method may or may
+  not have to generate an ID for the newly created resource. The request body may specify relationship data to point to
+  other resources. During deserialization, those resources are looked up and the `@JsonApiRelation` annotated fields set
+  accordingly. For relationships making use of `@JsonApiRelationId` annotation, only the identifier will be set without
+  the resource annotation, allowing to improve for performance. The `create` method has to save those relationships, but
+  it does and must not perform any changes on the related resources. For bulk inserting and updating resources, have a look
+  at the <<operations_module, operations module>>. The method must return the updated resource, most notably with a valid
+  identifier.
+
+
+* `save(S resource)`
+  Saves a resource upon a `PATCH` request. The general semantics is identical to the `create(...)` method, with two
+  notable exceptions. First, resources are updated but are not allowed to be inserted.
+  A `ResourceNotFoundException` must be thrown if the resource does not exist. Second, the `PATCH` request
+  allows for partial updates. Internally Crnk will get the current state of a resource, patch it and pass it to this `save`
+  method. A `ResourceModificationFilter` can be registered to collect information about modified fields and relationships and this way,
+  for example, distinguish patched from un-patched fields.
+
+
 
 * `delete(ID id)`
-  Removes a resource identified by id parameter.
+  Removes a resource identified by id parameter. A `ResourceNotFoundException` must be thrown if the resource does not exist.
 
 The ResourceRepositoryBase is a base class that takes care of some boiler-plate, like implementing findOne with findAll. An
 implementation can then look as simple as:
 
 [source]
+.Task.java
 ----
-	public class ProjectRepository extends ResourceRepositoryBase<Project, String> {
-
-		private Map<Long, Project> projects = new HashMap<>();
-
-		public ProjectRepository() {
-			super(Project.class);
-			save(new Project(1L, "Project A"));
-			save(new Project(2L, "Project B"));
-			save(new Project(3L, "Project C"));
-		}
-
-		@Override
-		public synchronized void delete(String id) {
-			projects.remove(id);
-		}
-
-		@Override
-		public synchronized <S extends Project> S save(S project) {
-			projects.put(project.getId(), project);
-			return project;
-		}
-
-		@Override
-		public synchronized ResourceList<Project> findAll(QuerySpec querySpec) {
-			return querySpec.apply(projects.values());
-		}
-	}
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/Task.java[tag=doc1]
+   ...
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/Task.java[tag=doc2]
 ----
+
+and
+
+[source]
+.TaskRepositoryImpl.java
+----
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/TaskRepositoryImpl.java[tag=doc]
+----
+
+The example is taken from
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository[crnk-integration-examples/spring-boot-example].
+(the basic Spring boot example from crnk-framework, not the dedicated full-blown one from crnk-example).
+
+Together with matching project repository, some URLs to checkout:
+
+[source]
+----
+http://127.0.0.1:8080/api/tasks
+http://127.0.0.1:8080/api/tasks/1
+http://127.0.0.1:8080/api/tasks/1
+http://127.0.0.1:8080/api/tasks/1/project
+http://127.0.0.1:8080/api/tasks/1/relationships/project
+http://127.0.0.1:8080/api/tasks?sort=-name
+http://127.0.0.1:8080/api/tasks?sort=-id,name
+http://127.0.0.1:8080/api/tasks?sort=-id,name
+http://127.0.0.1:8080/api/tasks?sort=id&page[offset]=0&page[limit]=2
+http://127.0.0.1:8080/api/tasks?filter[name]=Do things
+http://127.0.0.1:8080/api/tasks?filter[name][EQ]=Do things
+http://127.0.0.1:8080/api/tasks?filter[name][LIKE]=Do%
+http://127.0.0.1:8080/api/tasks?filter[name][EQ]=SomeTask,OtherTask
+http://127.0.0.1:8080/api/tasks?fields=name
+http://127.0.0.1:8080/api/projects
+http://127.0.0.1:8080/api/tasks?include=project
+http://127.0.0.1:8080/api/browse/
+----
+
+You may notice that:
+
+- links get automatically created.
+- `totalResourceCount` and pagination links are added to the response if the `page` parameter is applied.
+- related `project` gets automatically resolved from `projectId`. No relationship repository is implemented here
+  due to the use of `@JsonApiRelationId` (see below).
+- the response gets automatically truncated with the `fields` parameter, ideally suited for bandwidth sensitive applications.
+- multiple values can be separated by comma, typically repositories will then use an `OR` and accept and resource matching any of the values.
+
+This is one small example that *shows the power of native resource-oriented REST libraries*. Implementing a similar API with more
+classical REST libraries can be a substantial amount of work.
 
 There is further a `ReadOnlyResourceRepositoryBase` base class that does not allow to override
 the create, delete and update methods. `crnk-meta` accordingly reports
 insertable, updateable, deltable for such repositories as false.
 
 
-## RelationshipRepositoryV2
+anchor:resource_bulk_repository[]
 
-Each relationship defined in Crnk (annotation @JsonApiToOne and @JsonApiToMany) must have a relationship repository defined.
+## BulkResourceRepository
 
-Base unidirectional repository responsible for operations on relations.
-All of the methods in this interface have fieldName field as their last parameter to solve the problem of many relationships between the same resources.
+WARNING: Experimental and only supports POST
+
+Similar to `ResourceRepository` but takes a list of resources for `create(...)`, `save(...)` and `delete(...)`.
+Allows a repository to process multiple resources at the same time. A request can be made in two ways:
+
+- The data section of the request document must includes a collection rather than a single data item.
+- A JSON Patch request whereas multiple changes to the same repository then access the bulk methods.
+
+For more information about bulk processing can be found <<operations,here>>.
+
+
+## Query parameters with QuerySpec
+
+Crnk passes JSON:API query parameters to repositories trough a QuerySpec parameter. It holds
+request parameters like sorting and filtering specified by JSON:API. The subsequent
+sections will provide a number of example.
+
+NOTE: Not everything is specified by JSON:API. For some request parameters only recommendations
+are provided as different applications are likely to be in need of different semantics and
+implementations. For this reason the engine part in `crnk-core` makes use of `QueryAdapter` and allows implementations other than
+QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameters to QuerySpec and back
+is implemented by <<urlmapper,`QuerySpecUrlMapper`>> that may can also be extended, customized or replaced.
+
+For example showing its use URLs also have a look at the <<resource_repository,ResourceRepository>> section.
+
+The QuerySpec API looks like (further setters available as well):
+
+[source]
+----
+	public class QuerySpec {
+		public <T> List<T> apply(Iterable<T> resources){...}
+
+		public Long getLimit() {...}
+
+		public long getOffset() {...}
+
+		public PagingSpec getPagingSpec() {...}
+
+		public List<FilterSpec> getFilters() {...}
+
+		public List<SortSpec> getSort() {...}
+
+		public List<IncludeFieldSpec> getIncludedFields() {...}
+
+		public List<IncludeRelationSpec> getIncludedRelations() {...}
+
+		public QuerySpec getQuerySpec(Class<?> resourceClass) {...}
+
+		...
+	}
+----
+
+There are `Spec` class for all major features:
+
+- `FilterSpec`
+- `SortSpec`
+- `IncludeFieldSpec`
+- `IncludeRelationSpec`
+- `PagingSpec`
+
+More information is given in the subsequent sections.
+
+QuerySpec provides a method `apply` that allows in-memory sorting, filtering and paging
+on any `java.util.Collection`. It is useful for testing, mocking and on smaller datasets to keep
+the implementation of a repository as simple as possible.
+
+
+
+
+anchor:filtering[]
+
+## Basic Filtering
+
+NOTE: The JSON:API specification does not a mandate a specific filtering semantic. Instead
+it provides a recommendation that comes by default with Crnk. Depending on the data store
+in use, application may choose to extend or replace that default implementation by extending or
+replacing `DefaultQuerySpecUrlMapper`.
+
+Resource filtering can be achieved by providing parameters which start with `filter`:
+
+* `GET /tasks?filter[name]=Super task` to filter by name with the default `EQ` operator.
+* `GET /tasks?filter[name][EQ]=Super task` to filter by name with the `EQ` operator.
+* `GET /tasks?filter[name][EQ]=SomeTask,OtherTask` to filter by multiple `OR`-ed values.
+* `GET /tasks?filter[name][LIKE]=Super%` to filter by name with the `LIKE` operator using `%` as wildcard.
+* `GET /tasks?filter[address.plz][EQ]=Super task` to filter by attribute `name` within a structured or related attributes `address`.
+* `GET /tasks?filter[address.city][EQ]=Super task` to filter by attribute `city` within a structured or related attributes `address`.
+* `GET /tasks?filter[name]=Super task&filter[dueDate][GT]=2015-10-01`
+* `GET /tasks?filter[name]=null` to filter by `name` being equals `null`.
+* `GET /tasks?filter[tasks][name]=Super task` is the longer version of `/tasks/?filter[name]=Super task` where the `tasks` type is explicitly stated.
+  See the subsequent <<inclusion>> section how to use this to perform filtering of related resources.
+
+A filter parameter is represented by a `FilterSpec`. It holds the path to the attribute,
+the operator and the filter value. The attribute specifies what gets filtered. The operator
+specifies how it is filtered. And the value specifies after what should be filtered.
+
+An example looks like:
+
+[source]
+----
+FilterSpec filterSpec = PathSpec.of("person", "address", "city").filter(FilterOperator.EQ, "Zurich");
+Filterspec filterSpec = new FilterSpec(PathSpec.of("person.address.city"), FilterOperator.NEQ, "Zurich");
+----
+
+The filter value  `FilterSpec.value` is strongly typed. Typically (by default) it is assumed
+that the filter value matches the attribute type and Crnk will attempt to parse passed String-based
+filter value accordingly. There are exceptions, for example, the LIKE filter operator always requires
+the filter value to be a string to support wildcards for not just String types, but also Enums
+and other types (the underlying `FilterOperator` implementation can specify this with `getFilterType(...)`).
+
+Operators within `FilterSpec` are represented by the `FilterOperator` class.
+By default, QuerySpec uses the `EQ` operator if no operator was provided.
+Crnk comes with a set of default filters:
+
+[cols="1,3", options="header"]
+|===
+|Name
+|Descriptor
+
+|`EQ`
+|equals operator where values match exactly.
+
+|`NEQ`
+|not equals where values do not match.
+
+|`LIKE`
+|where the value matches the specified pattern. It is usually
+ not case-sensitive and makes use of `%` as wildclard, but
+ may different depending on the underlying implementation.
+
+|`LT`
+|lower than the specified value
+
+|`LE`
+|lower than or equals the specified value
+
+|`GT`
+|greater than the specified value
+
+|`GE`
+|greater than or equals the specified value
+|===
+
+By default the filtering process is quite opinionated and should fit many typical patterns.
+But there also many possibilities to customize its behavior to the use case at hand.
+For this purpose <<CrnkBoot>> offers access to the `DefaultQuerySpecUrlMapper` with `CrnkBoot.getUrlMapper()`
+and `TypeParser` with `CrnkBoot.getModuleRegistry().getTypeParser()` (or `ModuleContext`).
+For example:
+
+- `TypeParser` allows to register and override the parsing of Strings to other classes.
+  By default it has has built-in parsers for various JRE classes. Custom `StringMapper`
+   can be registered. As fallback it will make use of the `ObjectMapper` of Jackson
+   (which in most cases will be also the default).
+- `DefaultQuerySpecUrlMapper.setIgnoreParseExceptions(...)` allows to ignore if parsing
+  of a filter value fails. In this case the filter value is left as String and it is
+  assumed the repository itself will take care of the parsing.
+- `CrnkBoot.setAllowUnknownAttributes` ignore unknown attributes and passes them as is to
+  the repositories to handle them. More information in the <<properties>> section.
+- The application is free to implements custom `FilterOperator`. Next to the name
+  a `matches` method can be implemented to support in-memory filtering
+  with `QuerySpec.apply`. Otherwise, it is up to the repository implementation
+  to handle the various filter operators; usually by translating them
+  to datastore-native query expressions. Custom operators can be registered
+  with `DefaultQuerySpecUrlMapper.addSupportedOperator(..)`. The default operator can be
+  overridden by setting `DefaultQuerySpecUrlMapper.setDefaultOperator(...)`.
+  For more information see  <<urlmapper,`QuerySpecUrlMapper`>>.
+
+anchor:nested_filtering[]
+
+## Nested Filtering
+
+WARNING: This feature is experimental. Please provide feedback.
+
+The url patterns from the previous section allow to `AND` multiple filter conditions. For scenarios where
+this is insufficient, it is also possible to specify more complex filter specifications through JSON.
+The subsequent example filters projects by either their `name` being equals `Great Project` or its `id`
+being smaller or equals 122.
+
+[source]
+----
+http://127.0.0.1:8080/projects?filter={"OR": {"name": "Great Project", "LE": {"id": 122}}}
+----
+
+The following rules apply:
+
+- JSON field names matching an operator can be used in two different ways: to setup arbitrary nesting
+  of `AND`, `OR`, `NOT` or to specify an operator for field, name pair like `{"id": 122}`.
+- JSON field names matching a resource field name can also be used in two different ways: to filter the
+  attribute by the specified value or to setup nested attributes.
+
+Some further examples:
+
+1. To require a single attribute to equal a value:
+
+  {"name": "test"}
+
+2. To require a single attribute to equal a value from within a set:
+
+  {"id": [12, 13, 14]}
+
+3. To filter by multiple attributes with the `OR` operator:
+
+  { "OR": [ {"id": [12, 13, 14]}, {"completed": "true"} ] }
+
+4. To filter by multiple attributes with the `AND` operator:
+
+  { "AND": [ {"id": [12, 13, 14]}, {"completed": "true"} ] }
++
+or more simply:
+
+  {"id": [12, 13, 14], "completed": "true" }
+
+5. To nest `AND`, `OR`, `NOT` operators:
+
+  {"name": "Great Task", "OR": {"id": 122, "name": "Other Task"}}
+
+6. To filter an attribute `name` on relationship `assignee`:
+
+  {"assignee": {"name": "test"}}
+
+
+
+
+
+anchor:sorting[]
+
+## Sorting
+
+Sorting information for the resources can be achieved by providing `sort` parameter.
+
+`GET /tasks?sort=name,-shortName`
+`GET /tasks?sort=assignee.firstName,assignee.lastName`
+
+- Sorting parameters are represented by `SortSpec` within `QuerySpec` similar to `FilterSpec` above.
+- `-` is used to denote to sort in descending order.
+
+An example in Java looks like:
+
+[source]
+----
+SortSpec sortSpec = PathSpec.of("person", "address", "city").sort(Direction.ASC);
+SortSpec sortSpec = new SortSpec(PathSpec.of("person.address.city"), Direction.DESC);
+----
+
+anchor:pagination[]
+
+## Pagination
+
+
+### Offset/Limit Paging
+
+Crnk comes by default with support for offset/limit paging:
+
+`GET /tasks?page[offset]=0&page[limit]=10`
+
+The parameters are then available with `QuerySpec.getPaging(type)` or the shortcuts `QuerySpec.getLimit` and `QuerySpec.getOffset`.
+
+
+## Number/Size Paging
+
+Support for number/size-based paging can be enabled by registering the `NumberSizePagingBehavior` in one of two ways:
+
+- register `NumberSizePagingBehavior.createModule()`
+- register `NumberSizePagingBehavior` directly to service discovery.
+
+Paging parameters can then look like:
+
+`GET /tasks?page[number]=1&page[size]=10`
+
+Internally Crnk is able to translate between offset/limit and number/size-based paging. If
+a repository has been implemented with offset/limit paging, it works equally well when number/size paging is used.
+The conversion takes place automatically when invoking `QuerySpec.getPaging(desiredPagingType)`.
+
+
+### Pagination Links
+
+JSON:API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
+The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
+by repositories along with the result data. There is a default implementation named `DefaultPagedLinksInformation`.
+
+There are two ways to let Crnk compute pagination links automatically:
+
+1. The repository returns meta information implementing `PagedMetaInformation`. With this interface the total
+   number of (potentially filtered) resources is passed to Crnk, which in turn allows the computation of the links.
+2. The repository returns meta information implementing `HasMoreResourcesMetaInformation`. This interface
+   only specifies whether further resources are available after the currently requested resources. This
+   lets Crnk compute all except the `last` link.
+
+Note that for both approaches the repository has to return either no links or links information implementing
+`PagedLinksInformation`. If the links are already set, then the computation will be skipped.
+
+The potential benefit of the second over the first approach is that it might be easier to just
+determine whether more resources are available rather than counting all resources.
+This is typically achieved by querying `limit + 1` resources.
+
+### Custom strategies
+
+`OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec` and `NumberSizePagingBehavior` and `NumberSizePagingSpec`
+are two implementations of `PagingBehavior` and `PagingSpec`. Applications are free to add further implementations
+or replace the existing ones. In order to do so, you would have to perform the following actions:
+
+* Provide an instance of a custom `PagingBehavior` implementation.
+* Register the `PagingBehavior` to Spring. There are two possibilities:
+** through the service discovery mechanism like CDI or Spring.
+** through a new module with:
+
+   SimpleModule module = new SimpleModule("myPaging");
+   module.addPaginationBehavior(new MyPaginationBehavior());
+
+
+* Make use of the new pagination strategy for your resources:
+** by default the first pagination behavior will become the default for all resources.
+** by explicitly specify which resource makes use of which paging specification with
+  <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingSpec>>.
+
+For examples have a look at the `OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec` or
+`NumberSizePagingBehavior` and `NumberSizePagingSpec` implementations.
+
+There is the possibility for a `PagingBehavior` to serve multiple `PagingSpec`. This is used, for example,
+by `NumberSizePagingBehavior` to translate `number` and `size` to `offset` and `limit` for repositories
+that are based on `OffsetLimitPagingSpec`.
+
+
+## Sparse Fieldsets
+
+Information about fields to include in the response can be achieved by providing `fields` parameter:
+
+`GET /tasks?fields=name,description`
+
+
+anchor:inclusion[]
+
+### Inclusion of Related Resources
+
+Information about relationships to include in the response can be achieved by providing an `include` parameter. Examples:
+
+* `GET /tasks?include=project` performs an inclusion of `project`.
+* `GET /tasks?include=assignee,project` performs an inclusion of `project` and `assignee`.
+* `GET /tasks?include=assignee.address` performs a nested inclusion of `assignee` within `owner`.
+* `GET /tasks/1?include=project` performs an inclusion of `project` for the task with id `1`.
+
+It is not only possible to include related resources, but also to use all other query features like sorting and filtering. In this
+case the parameters must be prefixed with the resource type such as `[project]` to sort and filter the related project:
+
+`GET /tasks?include=project&sort[project]=name&filter[project][name]=someProject`
+
+It is important to note that the requested main resource is NOT affected by `[project]`. To rather sort all tasks by the related project
+make use of:
+
+`GET /tasks?include=project&sort=project.name&filter[project.name]=someProject`
+
+Internally QuerySpec holds the value for a given resource type. If parameters for other resource types, multiple
+QuerySpec instances are used. Repositories are then accessed with the QuerySpec matching the repository.
+The QuerySpec for a particular resource type can be obtained with `QuerySpec.getRelatedSpec(Class)` on the root QuerySpec.
+
+
+
+anchor:urlmapper[]
+
+## URL Mapping
+
+The mapping of request parameters to QuerySpec and back is implemented by `QuerySpecUrlMapper`.
+With `DefaultQuerySpecUrlMapper` there is a default implementation that follows the JSON:API
+specification and recommendations and introduces some further defaults as documented
+in the previous sections (like the filter operators) where the recommendations
+do not go far enough. The used `QuerySpecUrlMapper` can be obtained
+from `CrnkBoot.getUrlMapper()` and `CrnkClient.getUrlMapper()`. Matching setter allow to
+setup a custom implementation.
+
+`DefaultQuerySpecUrlMapper` comes with a number of customization options:
+
+* `setAllowUnknownAttributes(boolean)`
+	`DefaultQuerySpecUrlMapper` validates all passed parameters against the domain model and fails
+	if one of the attributes is unknown. This flag allows to disable that check in case this should be necessary.
+
+* `setAllowUnknownParameters(boolean)`
+	`DefaultQuerySpecUrlMapper` validates all passed parameters to be one of the following types: `filter`, `sort`, `page`, `fields` or `include`.
+	In case of any custom query parameter `ParametersDeserializationException` will be thrown.
+	This flag allows to disable that check and ignore any unknown ones.
+
+* `setIgnoreParseExceptions(boolean)`
+	`DefaultQuerySpecUrlMapper` attempts to convert all filter parameters to their proper type based on the
+	attribute type to be filtered. In some scenarios like dates this behavior may be undesirable as applications
+	introduce expressions like 'now`. Enabling this flag will let `DefaultQuerySpecDeserializer` ignore
+	such values and provide them as `String` within `FilterSpec`.
+
+* `setEnforceDotPathSeparator(boolean)`
+	DefaultQuerySpecUrlMapper makes use of a dotted URL convetion like
+	 `http://.../resource?filter[task][project.name]=myProject`. But for historic reasons it also
+	 accepts `http://.../resource?filter[task][project][name]=myProject`. The later is not recommended
+	 to be used anymore because  there is danger of introducing ambiguity when resources and attributes
+	 are named equally. By enabling this flag, support for the historic format gets removed and no
+	 ambiguity can occur. While not being the default, it is recommended to do so. With the next
+	 major version, the default will change.
+
+
+* `setMapJsonNames`
+    Whether to map JSON to Java names for `QuerySpec`. Enabled by default. Typically JSON and Java names are equal, but, for example,
+    fields can be renamed with the `@JsonProperty` annotation.
+
+
+* `addSupportedOperator`
+    Adds a new `FilterOperator`. See <<filtering>> for more information.
+
+* `setDefaultOperator`
+    Sets the default `FilterOperator`. See <<filtering>> for more information.
+
+Some of those methods are also available from some of the integrations like `CrnkFeature` for convenience.
+
+
+
+
+
+anchor:relationshipRepository[]
+
+## Relationship Repositories
+
+IMPORTANT: Before getting started with the development of relationship repositories, familiarize yourself
+with <<jsonApiRelation,@JsonApiRelation>>. In various scenarios, a custom implementation is unnecessary!
+In many cases `@JsonApiRelationId` provides the simplest solution to a relationship. Any opposite
+relationship can then make use of `@JsonApiRelation.mappedBy`.
+
+Each relationship defined in Crnk (annotation @JsonApiRelation) must have a relationship repository
+defined implementing `OneRelationshipRepository` or `ManyRelationshipRepository`. The
+repository implements the methods necessary to work with a relationship. They provide the methods to work
+with single-valued and multi-valued relationships:
+
+
+* `getMatcher()`
+  Provides a  `RelationshipMatcher` instance that specifies which relationships it is able provide.
+  It can match against source and target types and fields in any combination. Note that this
+  is a default method that access the legacy `getSourceResourceClass` and `getTargetResourceClass`
+  by default. Implementation of those methods can be omitted if a matcher is available.
 
 * `setRelation(T source, D_ID targetId, String fieldName)`
   Sets a resource defined by targetId to a field fieldName in an instance source. If no value is to be set, null value is passed.
@@ -97,44 +582,113 @@ All of the methods in this interface have fieldName field as their last paramete
 * `removeRelations(T source, Iterable<D_ID> targetIds, String fieldName)`
   Removes relationships from a list of relationships.
 
-* `findOneTarget(T_ID sourceId, String fieldName, QuerySpec querySpec)`
-  Finds one field's value defined by fieldName in a source defined by sourceId.
+* `findOneRelations(Collection<T_ID> sourceIds, String fieldName, QuerySpec querySpec)`
+  Finds the single-valued relationship for sources with the ids `sourceIds`.
 
-* `findManyTargets(T_ID sourceId, String fieldName, QuerySpec querySpec)`
-  Finds an Iterable of field's values defined by fieldName in a source defined by sourceId .
+* `findManyRelations(Collection<T_ID> sourceIds, String fieldName, QuerySpec querySpec)`
+  Finds the multi-valued relationship for sources with the ids `sourceIds`.
+
+All of the methods in this interface have a `fieldName` as last parameter in case multiple fields are served
+by the same repository. The `findOneRelations` and `findManyRelations` methods gain access to the source
+class through `querySpec.getResourceClass`, whereas the other methods directly obtain a `source` instance.
 
 
-This interface must be implemented to let Crnk work correctly, some of the requests are processed using only this kind of repository.
-As it can be seen above, there are two kinds of methods: for multiple and single relationships and it is possible to implement only one type of methods, e.g. singular methods.
-Nevertheless, it should be avoided because of potential future problems when adding new fields of other sizes.
-
-In many cases, relationship operations can be mapped back to resource repository operations. Making the need
-for a custom relationship repository implementation redundant. A findManyTargets request might can be
-served by filtering the target repository. Or a relationship can be set by invoking the save operation
-on either the source or target resource repository (usually you want to save on the single-valued side).
-The ResourceRepositoryBase is a base class that takes care of exactly this. A repository
-implementation then looks as simple as:
+### Example
 
 
 [source]
+.HistoryRelationshipRepository
 ----
-	public class ProjectToTaskRepository extends RelationshipRepositoryBase<Project, Long, Task, Long> {
-
-		public ScheduleToTaskRepository() {
-			super(Project.class, Task.class);
-		}
-	}
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryRelationshipRepository.java[tag=docs]
 ----
 
-For this to work, relations must be set up bidirectionally with the `opposite` attribute:
+
+### RelationshipMatcher
+
+With `RelationshipRepository.getMatcher()` one has a lot of flexibility about which kind of relationships a repository is
+serving. Rules can look like:
+
+[source]
+.RelationshipMatcherTest
+----
+new RelationshipMatcher().rule().source("projects").add().matches(field)
+new RelationshipMatcher().rule().target(Task.class).add().matches(field)
+new RelationshipMatcher().rule().target(Tasks.class).add().matches(field)
+new RelationshipMatcher().rule().field("tasks").add().matches(field)
+new RelationshipMatcher().rule().oppositeField("project").add().matches(field)
+----
+
+One can implement, for example, a history relationship repository that introduces a history relationship for every other resource
+as done in the example from the previous section.
+
+
+### Self and Related Links
+
+The JSON:API specification from http://jsonapi.org/format/#fetching-relationships
+mandates two relationship links:
+
+- `"self": "http://example.com/articles/1/relationships/author"`
+- `"related": "http://example.com/articles/1/author"`
+
+While the `related` link returns full resources, the `self` link only returns the `type` and `id`:
+
+[source]
+----
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+  "links": {
+    "self": "/articles/1/relationships/author",
+    "related": "/articles/1/author"
+  },
+  "data": {
+    "type": "people",
+    "id": "12"
+  }
+----
+
+Behind the scenes, Crnk invokes the same relationship repository implementation , but the QuerySpec will specify whether only the identifier is required through
+the `includedFields` property.
+
+
+### ForwardingRelationshipRepository
+
+NOTE: Also have a look at <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>> before getting started to use
+this base class.
+
+In many cases, relationship operations can be mapped back to resource repository operations. Making the need
+for a custom relationship repository implementation redundant. `@JsonApiRelationId` fields is one example
+where Crnk will take care of this automatically. But there are many other scenarios where application apply
+similar techniques. A findManyTargets request might can be
+served by filtering the target repository. Or a relationship can be set by invoking the save operation
+on either the source or target resource repository (usually you want to save on the single-valued side).
+The `ForwardingRelationshipRepository` is a base class that takes care of exactly such use cases.
+`ForwardingRelationshipRepository` knows to `ForwardingDirection`: `OWNER` and `OPPOSITE`. The former forwards requests
+to the resource repository of the owning side of a relationship, while the later forwards to the opposite side.
+`ForwardingDirection` is set separately for `GET` and modification operations (`POST`, `PATCH`, `DELETE`).
+
+An example to create such a repository looks like:
+
+[source]
+----
+RelationshipMatcher taskProjectMatcher = new RelationshipMatcher();
+taskProjectMatcher.rule().source(Task.class).target(Project.class).add();
+
+new ForwardingRelationshipRepository(
+  Task.class, taskProjectMatcher, ForwardingDirection.OWNER, ForwardingDirection.OWNER
+);
+----
+
+Note that to access the opposite side for `GET` operations, relations must be set up bidirectionally with the
+`opposite` attribute (to allow filtering in that direction):
 
 [source]
 ----
 	@JsonApiResource(type = "tasks")
 	public class Task {
 
-		@JsonApiToOne(opposite = "tasks")
-		@JsonApiIncludeByDefault
+		@JsonApiRelation(opposite = "tasks", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 		private Project project;
 
 	    ...
@@ -142,21 +696,9 @@ For this to work, relations must be set up bidirectionally with the `opposite` a
 ----
 
 
-## BulkRelationshipRepositoryV2
-
-BulkRelationshipRepositoryV2 extends RelationshipRepositoryV2 and provides an additional
-`findTargets` method. It allows to fetch a relation for multiple resources at once.
-It is recommended to make use of this implementation if a relationship is loaded frequently
-(either by a eager declaration or trough the `include` parameter) and it is costly to
-fetch that relation. RelationshipRepositoryBase provides a default implementation where
-`findOneTarget` and `findManyTargets` forward calls to the bulk `findTargets`.
-
-
-
-
 ## ResourceList
 
-ResourceRepositoryV2 and RelationshipRepositoryV2 return lists of type ResourceList. The ResourceList can carry, next
+ResourceRepository and RelationshipRepository return lists of type ResourceList. The ResourceList can carry, next
 to the actual resources, also meta and links information:
 
 * `getLinks()`
@@ -200,7 +742,7 @@ and used by both servers and clients:
 
 [source]
 ----
-	public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long> {
+	public interface ScheduleRepository extends ResourceRepository<Schedule, Long> {
 
 		@Override
 		public ScheduleList findAll(QuerySpec querySpec);
@@ -211,232 +753,11 @@ and used by both servers and clients:
 
 
 
-## Query parameters with QuerySpec
-
-Crnk passes JSON API query parameters to repositories trough a QuerySpec parameter. It holds
-request parameters like sorting and filtering specified by JSON API. The subsequent
-sections will provide a number of example.
-
-NOTE: Not everything is specified by JSON API. For some request parameters only recommendations
-are provided as different applications are likely to be in need of different semantics and
-implementations. For this reason the engine part in `crnk-core` makes use of `QueryAdapter` and allows implementations other than
-QuerySpec (like the legacy `QueryParams`).
-
-
-### Filtering
-
-NOTE: The JSON API specification does not a mandate a specific filtering semantic. Instead
-it provides a recommendation that comes by default with Crnk. Depending on the data store
-in use, application may choose to extend or replace that default implementation.
-
-Resource filtering can be achieved by providing parameters which start with `filter`.
-The format for filters: `filter[ResourceType][property|operator]([property|operator])* = "value"`
-
-* `GET /tasks/?filter[name]=Super task`
-* `GET /tasks/?filter[name][EQ]=Super task`
-* `GET /tasks/?filter[tasks][name]=Super task`
-* `GET /tasks/?filter[tasks][name]=Super task&filter[tasks][dueDate]=2015-10-01`
-
-QuerySpec uses the `EQ` operator if no operator was provided.
-
-Operators are represented by the `FilterOperator` class. Crnk comes with a set of
-default filters:
-
-[cols="1,3", options="header"]
-|===
-|Name
-|Descriptor
-
-|`EQ`
-|equals operator where values match exactly.
-
-|`NEQ`
-|not equals where values do not match.
-
-|`LIKE`
-|where the value matches the specified pattern. It is usually
- not case-sensitive and makes use of `%` as wildclard, but
- may different depending on the underlying implementation.
-
-|`LT`
-|lower than the specified value
-
-|`LE`
-|lower than or equals the specified value
-
-|`GT`
-|greater than the specified value
-
-|`GE`
-|greater than or equals the specified value
-|===
-
-The application is free to implements its own `FilterOperator`. Next to the name
-a `matches` method can be implemented to support in-memory filtering
-with `QuerySpec.apply`. Otherwise, it is up to the repository implementation
-to handle the various filter operators; usually by translating them
-to datastore-native query expressions. Custom operators can be registered
-with `DefaultQuerySpecDeserializer.addSupportedOperator(..)`. The default operator can be
-overridden by setting `DefaultQuerySpecDeserializer.setDefaultOperator(...)`.
-
-
-### Sorting
-
-Sorting information for the resources can be achieved by providing `sort` parameter.
-
-* `GET /tasks/?sort=name,-shortName`
-* `GET /tasks/?sort[projects]=name,-shortName&include=projects`
-
-
-anchor:pagination[]
-
-### Pagination
-
-Pagination for the repositories can be achieved by providing `page` parameter.
-The format for pagination: `page[offset|limit] = "value", where value is an integer`
-
-Example:
-
-* `GET /tasks/?page[offset]=0&page[limit]=10`
-
-
-The JSON API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
-The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
-by repositories along with the result data. There is a default implementation named `DefaultPagedLinksInformation`.
-
-There are two ways to let Crnk compute pagination links automatically:
-
-1. The repository returns meta information implementing `PagedMetaInformation`. With this interface the total
-   number of (potentially filtered) resources is passed to Crnk, which in turn allows the computation of the links.
-2. The repository returns meta information implementing `HasMoreResourcesMetaInformation`. This interface
-   only specifies whether further resources are available after the currently requested resources. This
-   lets Crnk compute all except the `last` link.
-
-Note that for both approaches the repository has to return either no links or links information implementing
-`PagedLinksInformation`. If the links are already set, then the computation will be skipped.
-
-The potential benefit of the second over the first approach is that it might be easier to just
-determine whether more resources are available rather than counting all resources.
-This is typically achieved by querying `limit + 1` resources.
-
-
-### Sparse Fieldsets
-
-Information about fields to include in the response can be achieved by providing `fields` parameter.
-
-* `GET /tasks/?fields=name`
-* `GET /tasks/?fields[projects]=name,description&include=projects`
-
-
-
-### Inclusion of Related Resources
-
-Information about relationships to include in the response can be achieved by providing `include` parameter.
-The format for fields: `include[ResourceType] = "property(.property)*"`
-
-Examples:
-
-* `GET /tasks/?include[tasks]=project`
-* `GET /tasks/1/?include[tasks]=project`
-* `GET /tasks/?include[tasks]=author`
-* `GET /tasks/?include[tasks][]=author&include[tasks][]=comments`
-* `GET /tasks/?include[projects]=task&include[tasks]=comments`
-* `GET /tasks/?include[projects]=task&include=comments` (QuerySpec example)
-
-
-### API
-
-The QuerySpec API looks like (further setters available as well):
-
-[source]
-----
-	public class QuerySpec {
-		public <T> List<T> apply(Iterable<T> resources){...}
-
-		public Long getLimit() {...}
-
-		public long getOffset() {...}
-
-		public List<FilterSpec> getFilters() {...}
-
-		public List<SortSpec> getSort() {...}
-
-		public List<IncludeFieldSpec> getIncludedFields() {...}
-
-		public List<IncludeRelationSpec> getIncludedRelations() {...}
-
-		public QuerySpec getQuerySpec(Class<?> resourceClass) {...}
-
-		...
-	}
-----
-
-Note that single QuerySpec holds the parameters for a single resource type and,
-in more complex scenarios, request can lead to multiple QuerySpec instances
-(namely when related resources are also filtered, sorted, etc). A repository
-is invoked with the QuerySpec for the requested root type. If related resources are
-included in the request, their QuerySpecs can be obtained by calling `QuerySpec.getRelatedSpec(Class)` on the root QuerySpec.
-
-`FilterSpec` holds a value of type object. Since URL parameters are passed as String,
-they get converted to the proper types by the `DefaultQuerySpecDeserializer`. The
-type is determined based on the type of the filtered attribute.
-
-QuerySpec provides a method `apply` that allows in-memory sorting, filtering and paging
-on any `java.util.Collection`. It is useful for testing and on smaller datasets to keep
-the implementation of a repository as simple as possible. It returns a ResourceList
-that carries a PagedMetaInformation that lets Crnk automatically compute pagination links.
-
-
-
-### DefaultQuerySpecDeserializer
-
-Crnk make use of `DefaultQuerySpecDeserializer` to map URL parameters to a QuerySpec instance.
-This instance is accessible from the various integrations, such as from the `CrnkFeature`. It
-provides a number of customization options:
-
-* `setDefaultLimit(Long)`
-	Sets the page limit if none is specified by the request.
-
-* `setMaxPageLimit(Long)`
-	Sets the maximum page limit allowed to be requested.
-
-* `setAllowUnknownAttributes(boolean)`
-	`DefaultQuerySpecDeserializer` validates all passed parameters against the domain model and fails
-	if one of the attributes is unknown. This flag allows to disable that check in case the should be necessary.
-
-* `setIgnoreParseExceptions(boolean)`
-	`DefaultQuerySpecDeserializer` attempts to convert all filter parameters to their proper type based on the
-	attribute type to be filtered. In some scenarios like dates this behavior may be undesirable as applications
-	introduce expressions like 'now`. Enabling this flag will let `DefaultQuerySpecDeserializer` ignore
-	such values and provide them as `String` within `FilterSpec`.
-
-* `setEnforceDotPathSeparator(boolean)`
-	DefaultQuerySpecDeserializer by default supports by default two URL conventions:
-	 `http://.../resource?filter[task][project][name]=myProject` and
-	 `http://.../resource?filter[task][project.name]=myProject`. The later is recommended. The former
-	 still supported for historic reasons. By default the flag is still disabled, but it is recommended
-	 to be packagingEnabled and will become the default at some point in the future. Note that without the enforcement,
-	 there is danger of introducing ambiguity with resources and attributes are named equally.
-
-
-Note that appropriate page limits are vital to protect against denial-of-service attacks when working
-with large data sets! Such attacks may not be of malicious nature, but normals users using a browser
-and omitting to specify pagination parameters.
-
-`DefaultQuerySpecDeserializer` implements `QuerySpecDeserializer` and you may also provide your own
-implementation to further customize its behavior. The various integrations like `CrnkFeature` will
-allow to replace the implementation.
-
-One can get access to `DefaultQuerySpecDeserializer` trough the various integrations, e.g.
-`CrnkFeature.getQuerySpecDeserializer()`. For more information have a look at the
-<<setup,setup chapter>>.
-
-
 
 ## Error Handling
 
 Processing errors in Crnk can be handled by throwing an exception and providing
-a corresponding exception mapper which defines mapping to a proper JSON API error response.
+a corresponding exception mapper which defines mapping to a proper JSON:API error response.
 
 
 ### Throwing an exception...
@@ -474,11 +795,11 @@ Sample exception is nothing more than a simple runtime exception:
   }
 ----
 
-### ...and mapping it to JSON API response
+### ...and mapping it to JSON:API response
 
 Class responsible for mapping the exception should:
 
-* implement ExceptionMapper interface
+* implement `ExceptionMapper` interface
 * available trough the used discovery mechanism or added trough a module.
 
 Sample exception mapper:
@@ -489,14 +810,60 @@ Sample exception mapper:
 include::../../../../crnk-test/src/main/java/io/crnk/test/mock/TestExceptionMapper.java[]
 ----
 
-On the server-side an exception should be mapped to an `ErrorResponse` object
-with `toErrorResponse`. It consists of an HTTP status and `ErrorData` (which is consistent with JSON API error structure).
+On the server-side an exception is mapped to an `ErrorResponse` object
+with `toErrorResponse`. It consists of an HTTP status and `ErrorData` (which is consistent with JSON:API error structure).
 On the client-side an `ExceptionMapper` returning `true` upon `accept(...)` is used to map an
 `ErrorResponse` back to an exception with `fromErrorResponse`.
 
-Note that the exception mapper is reponsible for providing the logging of exceptions with the
-appropriate log levels. Also have a look at the subsequent section about the validation module that takes
-care of JSR-303 bean validation exception mapping.
+Note that `ExceptionMapper` follow a number of important behaviors:
+
+- Built-in `ExceptionMapper` can be overridden by custom `ExceptionMapper` implementations. The later always takes precedence.
+- The `ExceptionMapper` is responsible for providing the logging of exceptions with the appropriate log levels.
+  Typically a `4xx` status causes a `WARN` log message, whereas `5xx` errors cause an `ERROR` log message.
+  Also have a look at the subsequent section about the validation module that takes
+  care of JSR-303 bean validation exception mapping.
+- `ExceptionMapper` target a given exception class. In case of type hierarchies, the closest `ExceptionMapper` is chosen.
+  For example, if there are `ExceptionMapper` implementations for both `RuntimeException` and `IllegalStateException`,
+  the mappers for `RuntimeException` is chosen if there is no direct mapper for `IllegalStateException`.
+- `ExceptionMapper` can implement the `Prioritizable` interface if multiple implementations target the
+  same exception type. But note that the type hierarchy still takes precedence.
+- The implementation of a custom `ExceptionMapper` can be skipped if the exception inherits from `CrnkMappableException`.
+
+There are a number of built-in exception mappers provided by crnk-core and the various modules:
+
+[cols="1,3", options="header"]
+|===
+|Status
+|Exception
+
+| 401
+| `UnauthorizedException`
+
+| 403
+| `ForbiddenException`
+
+| 404
+| `ResourceNotFoundException`
+
+| 405
+| `MethodNotAllowedException`
+
+| 409
+| `OptimisticLockException`
+
+| 422
+| `ConstraintViolationException`
+
+| 422
+| `ValidationException`
+
+| 500
+| `InternalServerErrorException`
+
+| 503
+| `TimeoutException`
+
+|===
 
 
 ## Meta Information
@@ -520,3 +887,128 @@ It contains a single method `LinksInformation getLinksInformation(Iterable<T> re
 If you want to add meta information along with the responses, all repositories (those that implement `ResourceRepository` and `RelationshipRepository`), must implement `LinksRepository`.
 
 When using annotated versions of repositories, a method that returns a `LinksInformation` object should be annotated with `JsonApiLinks` and the first parameter of the method has to be a list of resources.
+
+
+anchor:inheritance[]
+
+## Inheritance
+
+There are two different kinds of inheritance supported:
+
+
+### Inheritance with a repository per type
+
+Each subtype is served by its own resource repository and each repository has its own URL.
+
+[source]
+----
+  @JsonApiResource(type = "task")
+  public class Task {
+    // fields, getters and setters
+  }
+
+  @JsonApiResource(type = "specialTask")
+  public class SpecialTask extends Task{
+    // fields, getters and setters
+  }
+----
+
+There is no special configuration necessary. But repositories of super types must
+also return resources of subtypes if they match the specified id or filter parameters.
+
+
+### Inheritance with a single repository per type hierarchy
+
+In this case all resources share a repository implementation and URL (except for the identifier part). An example may look like:
+
+[source]
+----
+  @JsonApiResource(type = "task", subTypes = SpecialTask.class)
+  public class Task {
+    // fields, getters and setters
+  }
+
+  @JsonApiResource(type = "specialTask", resourcePath = "task")
+  public class SpecialTask extends Task{
+    // fields, getters and setters
+  }
+----
+
+The `SpecialTask` extends `Task` but is configured to use the same `resourcePath`, meaning `SpecialTask` does not have
+a repository implementation on its own, but is served by the repository of `Task`. For a more detailed example have
+a look at `InheritanceWithoutSubtypeRepositoryClientTest`.
+
+
+## Payload Size Optimizations
+
+Self and related links can make up to 60% of the response payload size and not always are those links of use.
+Crnk offers a `Crnk-Compact: true` header that can be sent along with the request. In this case the computation
+of those links is omitted. Further relationships without data are completely omitted.
+
+
+
+anchor:repository_decoration[]
+
+## Repository Decoration
+
+Sometimes it is useful to augment a repository with further features. There are  different situations where that can makes sense:
+
+- the main repository implementation comes from a third-party library and can/should not directly be modified.
+- the feature is unrelated to the main repository feature set, for example, cross-cutting concerns like security, caching, tracing and metrics.
+
+`RepositoryDecoratorFactory` allows to do exactly that. It puts a **decorating** resource or relationship repository inbetween
+the Crnk engine and the main repository. It implements the same interface contract as the main repository,
+intercept all requests and can do arbitrary modifications. The modifications may or may not include calling the main repository.
+
+An example can look like:
+
+[source]
+.ApprovalRepositoryDecorator.java
+----
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_decorator]
+----
+
+The particular example, for example, intercepts the `save` operation and may trigger an approval workflow:
+
+[source]
+.ApprovalRepositoryDecorator.java
+----
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_save]
+----
+
+
+
+## ResourceFieldContributor
+
+The `ResourceFieldContributor` interface allows to dynamically introduce new fields to resources without actually
+touching them. This is useful, for example, if you have a JPA entity exposed with crnk-data-jpa and
+want to add further fields like that mentioned history relationship from the earlier relationship example.
+`ResourceFieldContributor` can
+be implemented by a repository or obtained from the regular service discovery mechanism.
+
+Any type of field can be added: meta, links, attribute and relationship fields. For relationship fields
+an application may make use of `RelationshipMatcher` to provide repository serving those fields.
+Notice the `accessor` property that is used to obtain the value of that field
+(make sure this method is efficient to execute). An example is given by the `HistoryRelationshipRepository` in
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-example[crnk-integration-examples/spring-boot-example]:
+
+[source]
+.HistoryFieldContributor
+----
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryFieldContributor.java[tag=docs]
+----
+
+- `getRelationshipFields` introduces the field dynamically instead of statically.
+- `getMatcher` attaches the repository to the historized resources.
+- `findManyTarget` implements the lookup of history elements.
+
+anchor:JsonApiExposed[]
+
+## @JsonApiExposed
+
+A repository may be annotated with `@JsonApiExposed(false)`. In this case the repository is only available internally to other repositories, not
+externally on the JSON:API endpoint. There are different use cases for this:
+
+- Have a look at the https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-microservice-example[micro-service example application] to see how remote repositories can be linked to local ones.
+- <<nested_resources,nested resources>> can be made accessible only through their parent, such as `http://example.com/posts/1/comments/2` and no longer `http://example.com/comments`
+

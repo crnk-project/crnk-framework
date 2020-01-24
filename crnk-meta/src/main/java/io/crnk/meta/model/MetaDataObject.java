@@ -1,5 +1,15 @@
 package io.crnk.meta.model;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiRelation;
@@ -7,10 +17,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-@JsonApiResource(type = "meta/dataObject")
+@JsonApiResource(type = "metaDataObject", resourcePath = "meta/dataObject")
 public abstract class MetaDataObject extends MetaType {
 
 	private static final MetaAttributeFinder DEFAULT_ATTRIBUTE_FINDER = new MetaAttributeFinder() {
@@ -156,8 +163,11 @@ public abstract class MetaDataObject extends MetaType {
 		if (i == pathElements.size() - 1) {
 			return null;
 		} else {
+			if (pathElementType instanceof MetaCollectionType) {
+				pathElementType = pathElementType.getElementType();
+			}
 			if (!(pathElementType instanceof MetaDataObject)) {
-				throw new IllegalArgumentException("failed to resolve path " + pathElements);
+				throw new IllegalArgumentException("failed to resolve path " + pathElements + ", expected a simple object, but got " + pathElementType.getImplementationClass());
 			}
 			return pathElementType.asDataObject();
 		}
@@ -292,6 +302,11 @@ public abstract class MetaDataObject extends MetaType {
 					newDeclaredAttributes.add(attr);
 					newAttributes.add(attr);
 
+					if (superType != null && superType.hasAttribute(attr.getName())) {
+						MetaAttribute superAttr = superType.getAttribute(attr.getName());
+						boolean remove = newAttributes.remove(superAttr);
+						PreconditionUtil.verify(remove, "expected overriden element to be removed");
+					}
 				}
 			}
 

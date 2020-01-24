@@ -1,18 +1,29 @@
 package io.crnk.core.mock.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.crnk.core.resource.annotations.*;
-import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.core.resource.meta.MetaInformation;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.crnk.core.resource.ResourceTypeHolder;
+import io.crnk.core.resource.annotations.JsonApiField;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
+import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.meta.MetaInformation;
+
 @JsonApiResource(type = "tasks")
 @JsonPropertyOrder(alphabetic = true)
-public class Task {
+public class Task implements ResourceTypeHolder {
 
 	@JsonApiId
 	private Long id;
@@ -23,28 +34,26 @@ public class Task {
 
 	private boolean completed;
 
+	@JsonApiField(filterable = false, sortable = false)
 	private boolean deleted;
 
 	@JsonIgnore
 	private boolean ignoredField;
 
-	@JsonApiToOne(opposite = "tasks")
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project project;
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private List<Project> projectsInit = Collections.emptyList();
 
-	@JsonApiToMany(lazy = false)
-	private List<Project> projects = Collections.emptyList();
+	@JsonApiRelation(serialize = SerializeType.ONLY_ID)
+	private List<Project> projects = new ArrayList<>();
 
-	@JsonApiToOne
-	@JsonApiLookupIncludeAutomatically
+	@JsonApiRelation
 	private Project includedProject;
 
-	@JsonApiToMany
-	@JsonApiLookupIncludeAutomatically
-	private List<Project> includedProjects;
+	@JsonApiRelation
+	private List<Project> includedProjects = new ArrayList<>();
 
 	@JsonApiMetaInformation
 	private MetaInformation metaInformation;
@@ -54,13 +63,22 @@ public class Task {
 
 	private List<Task> otherTasks;
 
-	@JsonApiField(patchable = false, postable = false)
+	@JsonApiField(patchable = false, postable = false, deletable = false)
 	private String status;
+
+	@JsonApiRelationId
+	private Long statusThingId;
+
+	@JsonApiField(patchable = false, postable = false, deletable = false)
+	@JsonApiRelation(serialize = SerializeType.ONLY_ID, repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
+	private Thing statusThing;
 
 	private String readOnlyValue = "someReadOnlyValue";
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String writeOnlyValue;
+
+	private String type;
 
 	public boolean isCompleted() {
 		return completed;
@@ -68,6 +86,22 @@ public class Task {
 
 	public void setCompleted(boolean completed) {
 		this.completed = completed;
+	}
+
+	public Long getStatusThingId() {
+		return statusThingId;
+	}
+
+	public void setStatusThingId(Long statusThingId) {
+		this.statusThingId = statusThingId;
+	}
+
+	public Thing getStatusThing() {
+		return statusThing;
+	}
+
+	public void setStatusThing(Thing statusThing) {
+		this.statusThing = statusThing;
 	}
 
 	public boolean getDeleted() {
@@ -90,7 +124,9 @@ public class Task {
 		return readOnlyValue;
 	}
 
-	public String getWriteOnlyValue() { return writeOnlyValue; }
+	public String getWriteOnlyValue() {
+		return writeOnlyValue;
+	}
 
 	public List<Task> getOtherTasks() {
 		return otherTasks;
@@ -193,5 +229,15 @@ public class Task {
 
 	public void setProjectsInit(List<Project> projectsInit) {
 		this.projectsInit = projectsInit;
+	}
+
+	@Override
+	public String getType() {
+		return type;
+	}
+
+	@Override
+	public void setType(String type) {
+		this.type = type;
 	}
 }

@@ -1,27 +1,31 @@
 package io.crnk.core.mock.models;
 
-import io.crnk.core.resource.annotations.*;
-import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.core.resource.meta.MetaInformation;
-
 import java.util.Collections;
 import java.util.List;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
+import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.meta.MetaInformation;
 
 @JsonApiResource(type = "users")
 public class User {
 
 	@JsonApiId
-	private Long id;
+	private Long loginId;
 
 	private String name;
 
-	@JsonApiToMany(lazy = false)
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private List<Project> assignedProjects = Collections.emptyList();
 
-	@JsonApiToMany(lazy = false)
-	@JsonApiIncludeByDefault
-	private List<Project> assignedTasks = Collections.emptyList();
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
+	private List<Task> assignedTasks = Collections.emptyList();
 
 	@JsonApiMetaInformation
 	private MetaInformation metaInformation;
@@ -29,12 +33,12 @@ public class User {
 	@JsonApiLinksInformation
 	private LinksInformation linksInformation;
 
-	public Long getId() {
-		return id;
+	public Long getLoginId() {
+		return loginId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setLoginId(Long loginId) {
+		this.loginId = loginId;
 	}
 
 	public String getName() {
@@ -69,11 +73,11 @@ public class User {
 		this.linksInformation = linksInformation;
 	}
 
-	public List<Project> getAssignedTasks() {
+	public List<Task> getAssignedTasks() {
 		return assignedTasks;
 	}
 
-	public void setAssignedTasks(List<Project> assignedTasks) {
+	public void setAssignedTasks(List<Task> assignedTasks) {
 		this.assignedTasks = assignedTasks;
 	}
 }

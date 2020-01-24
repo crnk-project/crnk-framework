@@ -1,0 +1,46 @@
+apply plugin: 'java'
+
+apply plugin: 'java-gradle-plugin'
+
+gradlePlugin {
+    plugins {
+        'crnk-gen' {
+            id = "crnk-gen"
+            implementationClass = "io.crnk.gen.gradle.GeneratorPlugin"
+        }
+		'crnk-xml-doclet' {
+			id = "crnk-xml-doclet"
+			implementationClass = "io.crnk.gen.gradle.DocletPlugin"
+		}
+    }
+}
+
+dependencies {
+    compile gradleApi()
+
+    // TODO use shade plugin
+    compile project(':crnk-gen:crnk-gen-base')
+    compile project(':crnk-gen:crnk-gen-runtime')
+    compile project(':crnk-meta')
+    compile project(':crnk-data:crnk-data-jpa')
+    compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+
+    compile project(':crnk-gen:crnk-gen-typescript')
+    compile project(':crnk-gen:crnk-gen-asciidoc')
+    compile project(':crnk-gen:crnk-gen-openapi')
+
+    compile 'com.fasterxml.jackson.core:jackson-databind'
+
+    compileOnly 'junit:junit:4.12'
+
+    testCompile gradleTestKit()
+    testCompile project(':crnk-core')
+    testCompile project(':crnk-meta')
+    testCompile project(':crnk-test')
+
+}
+
+
+
+
+

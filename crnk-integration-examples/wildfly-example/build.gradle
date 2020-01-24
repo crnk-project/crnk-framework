@@ -1,0 +1,16 @@
+apply plugin: 'war'
+
+war {
+	archiveName = "example.war"
+}
+
+dependencies {
+
+	compile project(':crnk-setup:crnk-setup-rs')
+	compile project(':crnk-setup:crnk-setup-cdi')
+	compile project(':crnk-home')
+	compile project(':crnk-data:crnk-data-jpa')
+
+	compileOnly 'javax:javaee-api:7.0'
+
+}

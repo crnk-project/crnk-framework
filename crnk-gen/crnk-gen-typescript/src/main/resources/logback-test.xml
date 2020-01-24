@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>WARN</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>%d{HH:mm:ss,SSS} %-5.5p [%15.15t] [%30.30c] %X{indent}%m%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<append>false</append>
+		<file>build/tmp/crnk.gen.typescript.log</file>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>%d{HH:mm:ss,SSS} %-5.5p [%15.15t] [%30.30c] %X{indent}%m%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="io.crnk" level="DEBUG"/>
+
+	<root level="WARN">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>
+

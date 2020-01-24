@@ -5,7 +5,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.operations.client.OperationsCall;
 import io.crnk.operations.client.OperationsClient;
 import io.crnk.operations.model.MovieEntity;
@@ -14,11 +14,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class OperationsDeleteRelationTest extends AbstractOperationsTest {
 
-	protected ResourceRepositoryV2<MovieEntity, UUID> movieRepo;
+	protected ResourceRepository<MovieEntity, UUID> movieRepo;
 
 	private OperationsClient operationsClient;
 

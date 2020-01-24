@@ -1,5 +1,9 @@
 package io.crnk.core.queryspec;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.exception.BadRequestException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,6 +28,16 @@ public class FilterOperatorTest {
 	@Test
 	public void testLEOperator() {
 		Assert.assertTrue(FilterOperator.LE.matches("a", "b"));
+	}
+
+	@Test
+	public void testSerialization() throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String json = objectMapper.writerFor(FilterOperator.class).writeValueAsString(FilterOperator.EQ);
+		Assert.assertEquals("\"EQ\"", json);
+
+		FilterOperator operator = objectMapper.readerFor(FilterOperator.class).readValue(json);
+		Assert.assertEquals(FilterOperator.EQ, operator);
 	}
 
 	@Test
@@ -61,9 +75,28 @@ public class FilterOperatorTest {
 		Assert.assertTrue(FilterOperator.LIKE.matches("(", "("));
 		Assert.assertTrue(FilterOperator.LIKE.matches("+", "+"));
 		Assert.assertTrue(FilterOperator.LIKE.matches("*", "*"));
-		Assert.assertFalse(FilterOperator.LIKE.matches("*", null));
+		Assert.assertFalse(FilterOperator.LIKE.matches(null, "*"));
 	}
 
+	@Test
+	public void testLikeOperatorUsesStringType() {
+		Assert.assertEquals(String.class, FilterOperator.LIKE.getFilterType(null, Integer.class));
+	}
+
+	@Test(expected = BadRequestException.class)
+	public void testLikeWithoutPattern() {
+		FilterOperator.LIKE.matches("test", null);
+	}
+
+
+	@Test
+	public void testDefaultOperatorsUsesSameType() {
+		Assert.assertEquals(Integer.class, FilterOperator.EQ.getFilterType(null, Integer.class));
+		Assert.assertEquals(Integer.class, FilterOperator.GT.getFilterType(null, Integer.class));
+		Assert.assertEquals(Integer.class, FilterOperator.GE.getFilterType(null, Integer.class));
+		Assert.assertEquals(Boolean.class, FilterOperator.LT.getFilterType(null, Boolean.class));
+		Assert.assertEquals(Long.class, FilterOperator.LE.getFilterType(null, Long.class));
+	}
 
 	@Test
 	public void testEquals() {

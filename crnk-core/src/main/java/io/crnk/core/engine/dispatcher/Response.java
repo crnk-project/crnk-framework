@@ -1,8 +1,12 @@
 package io.crnk.core.engine.dispatcher;
 
-import io.crnk.core.engine.document.Document;
-
 import java.util.Objects;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.http.HttpResponse;
+import io.crnk.core.engine.http.HttpStatus;
 
 public class Response {
 
@@ -39,9 +43,28 @@ public class Response {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Response))
+		if (!(obj instanceof Response)) {
 			return false;
+		}
 		Response other = (Response) obj;
 		return Objects.equals(document, other.document) && Objects.equals(httpStatus, other.httpStatus);
+	}
+
+	public HttpResponse toHttpResponse(ObjectMapper objectMapper, String contentType) {
+		HttpResponse httpResponse = new HttpResponse();
+		httpResponse.setStatusCode(getHttpStatus());
+
+		if (getHttpStatus() != HttpStatus.NO_CONTENT_204) {
+			String responseBody;
+			try {
+				responseBody = objectMapper.writeValueAsString(getDocument());
+			}
+			catch (JsonProcessingException e) {
+				throw new IllegalStateException(e);
+			}
+			httpResponse.setBody(responseBody);
+			httpResponse.setContentType(contentType);
+		}
+		return httpResponse;
 	}
 }

@@ -1,38 +1,148 @@
 apply plugin: 'org.asciidoctor.convert'
 
-apply plugin: 'org.ajoberstar.git-publish'
+
 
 asciidoctor {
 	backends = ['html5', 'pdf']
 	attributes 'source-highlighter': 'coderay'
 	sources {
 		include 'index.adoc'
+		include 'cheatsheet.adoc'
 	}
 }
 
 tasks.assemble.dependsOn 'asciidoctor'
+tasks.assemble.dependsOn ':crnk-integration-examples:spring-boot-example:assemble'
 
-
+apply plugin: 'org.ajoberstar.git-publish'
 // see https://github.com/ajoberstar/gradle-git-publish
 gitPublish {
-	repoUri = 'git@github.com:crnk-project/crnk-web.git'
+
+	repoUri = 'https://github.com/crnk-project/crnk-web.git'
 	branch = 'master'
-	repoDir = file("$buildDir/asciidoc/")
+	repoDir = file("$buildDir/website/")
 
 	contents {
-		into('documentation')
-		from 'html5'
-		from 'pdf'
+		from("${project.buildDir}/asciidoc/html5") {
+			into('releases/latest/documentation')
+		}
+		from("${project.buildDir}/asciidoc/pdf") {
+			into('releases/latest')
+			include "**.pdf"
+
+		}
+		rename { String fileName ->
+			fileName.replace("index.pdf", "crnk.pdf")
+		}
 	}
 
 	preserve {
 		include '**'
-		exclude 'documentation/**'
 	}
 
 	// message used when committing changes
 	commitMessage = 'Publishing a new documentation'
 }
 
-// TODO plugin broken
-// tasks.publish.dependsOn 'gitPublishPush'
+gitPublishCopy.doLast {
+	def latestSrc = file("${project.projectDir}/src/docs/releases/latest/info.html")
+	if (!latestSrc.exists()) {
+		latestSrc.parentFile.mkdirs()
+		latestSrc.text = ""
+	}
+}
+
+gitPublishCopy.doLast {
+	def templateFile = file('src/docs/template/release.html')
+
+	def releasesSrcDir = file("${project.projectDir}/src/docs/releases")
+	def releasesWebDir = file("$project.buildDir/website/releases")
+	def latestReleaseDir = file("${releasesSrcDir}/latest")
+
+	if (!latestReleaseDir.isDirectory()) {
+		throw new IllegalStateException("latest release directory not found")
+	}
+	def releaseIndexFile = file("$releasesWebDir/latest/index.html")
+	def releaseInfoFile = file("src/docs/releases/latest/info.html")
+
+	def info =
+			"<div class=\"section\">\n" +
+					"  <div class=\"section-content\">\n" +
+					"      <h3>Latest</h3>" +
+					"      <p>Version: ${project.version}</p>" +
+					"      <p><a href='documentation/'>Documentation</a> (<a href='crnk.pdf'>pdf</a>)</p>" +
+					"      $releaseInfoFile.text\n" +
+					"  </div>\n" +
+					"</div>"
+
+	def content = templateFile.text.replace('${content}', info)
+	content = content.replace('"../crnk', '"../../crnk')
+
+	releaseIndexFile.parentFile.mkdirs()
+	releaseIndexFile.text = content
+
+	def versions = new ArrayList()
+	for (def releaseDir : releasesSrcDir.listFiles()) {
+		if (releaseDir.isDirectory()) {
+			versions.add(releaseDir.name)
+		}
+	}
+	Collections.sort(versions)
+	versions = versions.reverse()
+	versions.remove("latest")
+	versions.remove("stable")
+	versions.add(0, "latest")
+	versions.add(1, "stable")
+
+	def releaseSet = new StringBuilder()
+
+	releaseSet.append("<div class=\"section\">")
+	releaseSet.append("  <div class=\"section-content\">\n")
+	releaseSet.append("    <h3>Releases</h3>\n")
+	releaseSet.append("    <ul>\n")
+	for (def version : versions) {
+		releaseSet.append("   <li>\n")
+		releaseSet.append("     <a href=\"$version/\">$version</a>")
+		if (version == "latest") {
+			releaseSet.append(": temporary, available from <a href=\"https://dl.bintray.com/crnk-project/mavenLatest/\">https://dl.bintray.com/crnk-project/mavenLatest/</a>")
+		}
+		releaseSet.append("   </li>\n")
+	}
+	releaseSet.append("    </ul>\n")
+	releaseSet.append("    </p>")
+	releaseSet.append("  </div>")
+	releaseSet.append("</div>")
+
+	def releasesFile = file("$releasesWebDir/index.html")
+	releasesFile.text = templateFile.text.replace('${content}', releaseSet)
+}
+
+task promote(type: Copy) {
+	group = 'publishing'
+	from("${project.buildDir}/website/releases/latest") {
+		into("v$BUILD_VERSION_PREFIX")
+	}
+
+	from("${project.buildDir}/website/releases/latest") {
+		into("stable")
+	}
+	into("${project.buildDir}/website/releases")
+
+	doLast {
+		def latestSrc = file("${project.buildDir}/website/releases/latest/index.html")
+
+		def versionSrc = file("${project.buildDir}/website/releases/v$BUILD_VERSION_PREFIX/index.html")
+		versionSrc.parentFile.mkdirs()
+		versionSrc.text = latestSrc.text.replace("<h3>Latest</h3>", "<h3>${project.version}</h3>")
+
+		def stableSrc = file("${project.buildDir}/website/releases/stable/index.html")
+		stableSrc.parentFile.mkdirs()
+		stableSrc.text = latestSrc.text.replace("<h3>Latest</h3>", "<h3>${project.version}</h3>")
+	}
+}
+
+promote.dependsOn gitPublishCopy
+gitPublishCommit.mustRunAfter promote
+
+gitPublishCopy.dependsOn assemble
+publish.dependsOn gitPublishPush

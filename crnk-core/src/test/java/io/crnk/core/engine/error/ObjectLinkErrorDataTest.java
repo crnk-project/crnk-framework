@@ -1,7 +1,5 @@
 package io.crnk.core.engine.error;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.ErrorData;
@@ -12,6 +10,8 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
 
 /**
  * @author AdNovum Informatik AG

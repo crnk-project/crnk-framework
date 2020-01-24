@@ -1,17 +1,20 @@
 package io.crnk.client.http;
 
 import java.io.IOException;
+import java.util.Set;
 
 public interface HttpAdapterResponse {
 
-	boolean isSuccessful();
+    boolean isSuccessful();
 
-	String body() throws IOException;
+    String body() throws IOException;
 
-	int code();
+    int code();
 
-	String message();
+    String message();
 
-	String getResponseHeader(String name);
+    String getResponseHeader(String name);
+
+    Set<String> getHeaderNames();
 
 }

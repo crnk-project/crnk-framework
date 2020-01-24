@@ -6,22 +6,28 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.client.ClientFormat;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.client.internal.ClientDocumentMapper;
+import io.crnk.client.internal.ClientStubBase;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.exception.InternalServerErrorException;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
+import io.crnk.operations.server.OperationsRequestProcessor;
 
 public class OperationsCall {
 
@@ -51,6 +57,16 @@ public class OperationsCall {
 		queuedOperations.add(queuedOperation);
 	}
 
+	public void add(HttpMethod method, String path) {
+		Operation operation = new Operation();
+		operation.setOp(method.toString());
+		operation.setPath(path);
+
+		QueuedOperation queuedOperation = new QueuedOperation();
+		queuedOperation.operation = operation;
+		queuedOperations.add(queuedOperation);
+	}
+
 	protected String computePath(HttpMethod method, Resource resource) {
 		if (method == HttpMethod.POST) {
 			return resource.getType();
@@ -63,18 +79,22 @@ public class OperationsCall {
 		response.setEntity(object);
 
 		QuerySpec querySpec = new QuerySpec(object.getClass());
-		QueryAdapter queryAdapter = new QuerySpecAdapter(querySpec, client.getCrnk().getRegistry());
-
 		CrnkClient crnk = client.getCrnk();
+		QueryContext queryContext = crnk.getQueryContext();
+		ResourceRegistry registry = crnk.getRegistry();
+
+		QueryAdapter queryAdapter = new QuerySpecAdapter(querySpec, registry, queryContext);
+
 		DocumentMapper documentMapper = crnk.getDocumentMapper();
-		Document document = documentMapper.toDocument(response, queryAdapter);
+		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+		Document document = documentMapper.toDocument(response, queryAdapter, mappingConfig).get();
 		return document.getSingleData().get();
 	}
 
 	protected <T> T fromResource(Document document, Class<T> clazz) {
 		CrnkClient crnk = client.getCrnk();
 		ClientDocumentMapper documentMapper = crnk.getDocumentMapper();
-		return (T) documentMapper.fromDocument(document, false);
+		return (T) documentMapper.fromDocument(document, false, crnk.getQueryContext());
 	}
 
 	public void execute() {
@@ -90,19 +110,21 @@ public class OperationsCall {
 
 			String url = client.getCrnk().getServiceUrlProvider().getUrl() + "/operations";
 			HttpAdapterRequest request = adapter.newRequest(url, HttpMethod.PATCH, operationsJson);
+			request.header(HttpHeaders.HTTP_CONTENT_TYPE, OperationsRequestProcessor.JSONPATCH_CONTENT_TYPE);
+			request.header(HttpHeaders.HTTP_HEADER_ACCEPT, OperationsRequestProcessor.JSONPATCH_CONTENT_TYPE);
 			HttpAdapterResponse response = request.execute();
 
-			int status = response.code();
-			if (status != 200) {
-				// general issue, status of individual operations is important.
-				throw new InternalServerErrorException("patch execution failed with status " + status);
+			if (!response.isSuccessful()) {
+				throw ClientStubBase.handleError(client.getCrnk(), response, ClientFormat.JSONAPI);
 			}
 			String json = response.body();
 			responses = Arrays.asList(mapper.readValue(json, OperationResponse[].class));
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}
+
 
 	public OperationResponse getResponse(int index) {
 		checkResponsesAvailable();

@@ -1,24 +1,45 @@
 package io.crnk.core.boot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestContextAware;
+import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
-import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
+import io.crnk.core.engine.internal.dispatcher.controller.CollectionGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.Controller;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerContext;
+import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.FieldResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationsDeleteController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsPatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsPostController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceDeleteController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -28,30 +49,28 @@ import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory;
-import io.crnk.core.module.discovery.FallbackServiceDiscoveryFactory;
+import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.UnkonwnMappingAware;
+import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.Repository;
-import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
-import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
-import io.crnk.legacy.repository.RelationshipRepository;
-import io.crnk.legacy.repository.ResourceRepository;
-import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import net.jodah.typetools.TypeResolver;
+import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -60,63 +79,64 @@ import net.jodah.typetools.TypeResolver;
 @SuppressWarnings("deprecation")
 public class CrnkBoot {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkBoot.class);
+
+	private static final String DISCOVERY_MODULE_NAME = "discovery";
+
 	private final ModuleRegistry moduleRegistry = new ModuleRegistry();
 
 	private ObjectMapper objectMapper;
 
-	private QueryParamsBuilder queryParamsBuilder;
-
-	private QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
-
 	private boolean configured;
-
-	private JsonServiceLocator serviceLocator = new SampleJsonServiceLocator();
 
 	private ResourceRegistry resourceRegistry;
 
-	private HttpRequestProcessorImpl requestDispatcher;
+	private HttpRequestDispatcherImpl requestDispatcher;
 
 	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
 	private ServiceDiscoveryFactory serviceDiscoveryFactory = new DefaultServiceDiscoveryFactory();
 
-	private ServiceDiscovery serviceDiscovery;
+	private ServiceDiscovery serviceDiscovery = null;
 
 	private DocumentMapper documentMapper;
 
 	private List<Module> registeredModules = new ArrayList<>();
 
+	private Long defaultPageLimit = null;
+
+	private Long maxPageLimit = null;
+
+	private Boolean allowUnknownAttributes;
+
+	private Boolean allowUnknownParameters;
+
+	private QueryAdapterBuilder queryAdapterBuilder;
+
+	private CoreModule coreModule = new CoreModule();
+
+	private Map<String, String> serverInfo = new HashMap<>();
+
+	private String webPathPrefix;
+
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
 	}
 
+	/**
+	 * Returned in the jsonapi field with every response. See http://jsonapi.org/format/#document-top-level.
+	 */
+	public void putServerInfo(String key, String value) {
+		serverInfo.put(key, value);
+
+		moduleRegistry.setServerInfo(serverInfo);
+	}
+
 	public void setServiceDiscoveryFactory(ServiceDiscoveryFactory factory) {
 		checkNotConfiguredYet();
+		PreconditionUtil.verify(serviceDiscovery == null, "serviceDiscovery already initialized: %s", serviceDiscovery);
 		this.serviceDiscoveryFactory = factory;
 	}
-
-	/**
-	 * Set the {@link QueryParamsBuilder} to use to parse and handle query parameters.
-	 * When invoked, overwrites previous QueryParamsBuilders and {@link QuerySpecDeserializer}s.
-	 */
-	public void setQueryParamsBuilds(QueryParamsBuilder queryParamsBuilder) {
-		checkNotConfiguredYet();
-		PreconditionUtil.assertNotNull("A query params builder must be provided, but is null", queryParamsBuilder);
-		this.queryParamsBuilder = queryParamsBuilder;
-		this.querySpecDeserializer = null;
-	}
-
-	/**
-	 * Sets a JsonServiceLocator. No longer necessary if a ServiceDiscovery
-	 * implementation is in place.
-	 *
-	 * @param serviceLocator
-	 */
-	public void setServiceLocator(JsonServiceLocator serviceLocator) {
-		checkNotConfiguredYet();
-		this.serviceLocator = serviceLocator;
-	}
-
 
 	/**
 	 * Adds a module. No longer necessary if a ServiceDiscovery implementation
@@ -131,8 +151,6 @@ public class CrnkBoot {
 	/**
 	 * Sets a ServiceUrlProvider. No longer necessary if a ServiceDiscovery
 	 * implementation is in place.
-	 *
-	 * @param serviceUrlProvider
 	 */
 	public void setServiceUrlProvider(ServiceUrlProvider serviceUrlProvider) {
 		checkNotConfiguredYet();
@@ -141,7 +159,7 @@ public class CrnkBoot {
 
 	private void checkNotConfiguredYet() {
 		if (configured) {
-			throw new IllegalStateException("cannot further modify CrnkFeature once configured/initialized by JAX-RS");
+			throw new IllegalStateException("cannot further modify CrnkBoot once configured/initialized");
 		}
 	}
 
@@ -149,6 +167,7 @@ public class CrnkBoot {
 	 * Performs the setup.
 	 */
 	public void boot() {
+		LOGGER.debug("performing setup");
 		checkNotConfiguredYet();
 		configured = true;
 
@@ -158,23 +177,20 @@ public class CrnkBoot {
 
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
+		setupQuerySpecUrlMapper();
 		bootDiscovery();
-	}
 
-	private void setupServiceDiscovery() {
-		if (serviceDiscovery == null) {
-			// revert to reflection-based approach if no ServiceDiscovery is
-			// found
-			FallbackServiceDiscoveryFactory fallback =
-					new FallbackServiceDiscoveryFactory(serviceDiscoveryFactory, serviceLocator, propertiesProvider);
-			setServiceDiscovery(fallback.getInstance());
-		}
+		LOGGER.debug("completed setup");
 	}
 
 	private void bootDiscovery() {
 		setupObjectMapper();
+
+		resourceRegistry = new ResourceRegistryImpl(null, moduleRegistry);
+
 		addModules();
 
+		setupPagingBehavior();
 		setupComponents();
 		ResourceRegistryPart rootPart = setupResourceRegistry();
 
@@ -183,6 +199,42 @@ public class CrnkBoot {
 		setupRepositories(rootPart);
 
 		requestDispatcher = createRequestDispatcher(moduleRegistry.getExceptionMapperRegistry());
+		moduleRegistry.setDocumentMapper(documentMapper);
+
+		logInfo();
+	}
+
+	private void setupServiceDiscovery() {
+		if (serviceDiscovery == null) {
+			if (serviceDiscoveryFactory != null) {
+				setServiceDiscovery(serviceDiscoveryFactory.getInstance());
+			}
+			else {
+				setServiceDiscovery(new EmptyServiceDiscovery());
+			}
+		}
+	}
+
+	private void logInfo() {
+		int numResources = resourceRegistry.getEntries().size();
+		List<String> modules = moduleRegistry.getModules().stream().map(Module::getModuleName).collect(Collectors.toList());
+		// hide internal module names
+		modules.remove(ResourceInformationProviderModule.NAME);
+		modules.remove(DISCOVERY_MODULE_NAME);
+		modules.remove(CoreModule.NAME);
+		List<String> securityProviders = toSimpleNames(moduleRegistry.getSecurityProviders());
+		List<String> pagingBehaviors = toSimpleNames(moduleRegistry.getPagingBehaviors());
+		QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
+		ServiceDiscovery serviceDiscovery = moduleRegistry.getServiceDiscovery();
+
+		LOGGER.info("crnk initialized: numResources={}, usedModules={}, securityProviders={}, pagingBehaviors={}, " +
+						"urlMapper={}, serviceDiscovery={}", numResources, modules, securityProviders, pagingBehaviors,
+				urlMapper.getClass().getSimpleName(),
+				serviceDiscovery.getClass().getSimpleName());
+	}
+
+	private List<String> toSimpleNames(List<?> implementations) {
+		return implementations.stream().map(it -> it.getClass().getSimpleName()).collect(Collectors.toList());
 	}
 
 	private void setupRepositories(ResourceRegistryPart rootPart) {
@@ -197,18 +249,21 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		} else {
+		}
+		else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
 			}
 			if (!registryParts.containsKey("")) {
-				moduleRegistry.getContext().addRegistryPart("", new DefaultResourceRegistryPart());
+                ResourceRegistryPart defaultResourceRegistryPart = new DefaultResourceRegistryPart();
+                hierarchialPart.putPart("", defaultResourceRegistryPart);
+				moduleRegistry.getContext().addRegistryPart("", defaultResourceRegistryPart);
 			}
 			rootPart = hierarchialPart;
 		}
+		((ResourceRegistryImpl) resourceRegistry).setRootPart(rootPart);
 
-		resourceRegistry = new ResourceRegistryImpl(rootPart, moduleRegistry);
 		return rootPart;
 	}
 
@@ -227,63 +282,107 @@ public class CrnkBoot {
 		return moduleRegistry.getExceptionMapperRegistry();
 	}
 
-	private HttpRequestProcessorImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
-		ControllerRegistryBuilder controllerRegistryBuilder =
-				new ControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
-						propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(), moduleRegistry.getResourceModificationFilters());
-		ControllerRegistry controllerRegistry = controllerRegistryBuilder.build();
-		this.documentMapper = controllerRegistryBuilder.getDocumentMapper();
+	private HttpRequestDispatcherImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
+		this.documentMapper = createDocumentMapper();
+		return new HttpRequestDispatcherImpl(moduleRegistry, exceptionMapperRegistry);
+	}
 
-		QueryAdapterBuilder queryAdapterBuilder;
-		if (queryParamsBuilder != null) {
-			queryAdapterBuilder = new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		} else {
-			queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
+	protected QueryAdapterBuilder createQueryAdapterBuilder() {
+		return new QuerySpecAdapterBuilder(moduleRegistry.getUrlMapper(), moduleRegistry);
+	}
+
+	protected DocumentMapper createDocumentMapper() {
+		ResourceFilterDirectory filterDirectory = moduleRegistry.getContext().getResourceFilterDirectory();
+		ResultFactory resultFactory = moduleRegistry.getContext().getResultFactory();
+		return new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterDirectory, resultFactory,
+				serverInfo);
+	}
+
+	protected ControllerRegistry createControllerRegistry() {
+		Set<Controller> controllers = new HashSet<>();
+		controllers.add(new RelationsDeleteController());
+		controllers.add(new RelationshipsPatchController());
+		controllers.add(new RelationshipsPostController());
+		controllers.add(new ResourceDeleteController());
+		controllers.add(new CollectionGetController());
+		controllers.add(new FieldResourceGetController());
+		controllers.add(new RelationshipsResourceGetController());
+		controllers.add(new ResourceGetController());
+		controllers.add(new FieldResourcePost());
+		controllers.add(new ResourcePatchController());
+		controllers.add(new ResourcePostController());
+
+		ControllerContext context = new ControllerContext(moduleRegistry, this::getDocumentMapper);
+		for (Controller controller : controllers) {
+			controller.init(context);
 		}
-
-		return new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, exceptionMapperRegistry, queryAdapterBuilder);
+		ControllerRegistry controllerRegistry = new ControllerRegistry(controllers);
+		moduleRegistry.setControllerRegistry(controllerRegistry);
+		return controllerRegistry;
 	}
 
 	public DocumentMapper getDocumentMapper() {
 		return documentMapper;
 	}
 
+	private ControllerRegistry controllerRegistry;
+
 	private void setupComponents() {
 		// not that the provided default implementation here are added last and
 		// as a consequence,
 		// can be overriden by other modules, like the
 		// JaxrsResourceRepositoryInformationBuilder.
-		SimpleModule module = new SimpleModule("discovery") {
+		LOGGER.debug("performing service discovery with {}", serviceDiscovery);
+		SimpleModule module = new SimpleModule(DISCOVERY_MODULE_NAME) {
 
 			@Override
 			public void setupModule(ModuleContext context) {
+				controllerRegistry = createControllerRegistry();
+				queryAdapterBuilder = createQueryAdapterBuilder();
+				moduleRegistry.setQueryAdapterBuilder(queryAdapterBuilder);
+
 				this.addHttpRequestProcessor(new JsonApiRequestProcessor(context));
 				super.setupModule(context);
 			}
 		};
 
-		for (JsonApiExceptionMapper<?> exceptionMapper : getInstancesByType(JsonApiExceptionMapper.class)) {
+		for (ExceptionMapper<?> exceptionMapper : getInstancesByType(ExceptionMapper.class)) {
 			module.addExceptionMapper(exceptionMapper);
 		}
 		for (DocumentFilter filter : getInstancesByType(DocumentFilter.class)) {
 			module.addFilter(filter);
 		}
-		for (Object repository : getInstancesByType(Repository.class)) {
-			setupRepository(module, repository);
+		List<Repository> repositories = getInstancesByType(Repository.class);
+		for (Object repository : repositories) {
+			module.addRepository(repository);
 		}
-		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiResourceRepository.class)) {
-			JsonApiResourceRepository annotation =
-					ClassUtils.getAnnotation(repository.getClass(), JsonApiResourceRepository.class).get();
-			Class<?> resourceClass = annotation.value();
-			module.addRepository(resourceClass, repository);
+		List<ResourceFieldContributor> resourceFieldContributors = getInstancesByType(ResourceFieldContributor.class);
+		for (ResourceFieldContributor resourceFieldContributor : resourceFieldContributors) {
+			module.addResourceFieldContributor(resourceFieldContributor);
 		}
-		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiRelationshipRepository.class)) {
-			JsonApiRelationshipRepository annotation =
-					ClassUtils.getAnnotation(repository.getClass(), JsonApiRelationshipRepository.class).get();
-			module.addRepository(annotation.source(), annotation.target(), repository);
+		List<RepositoryDecoratorFactory> decoratorFactories = getInstancesByType(RepositoryDecoratorFactory.class);
+		for (RepositoryDecoratorFactory decoratorFactory : decoratorFactories) {
+			module.addRepositoryDecoratorFactory(decoratorFactory);
 		}
+		List<ResourceModificationFilter> modificationFilters = getInstancesByType(ResourceModificationFilter.class);
+		for (ResourceModificationFilter modificationFilter : modificationFilters) {
+			module.addResourceModificationFilter(modificationFilter);
+		}
+		List<ResourceFilter> accessFilters = getInstancesByType(ResourceFilter.class);
+		for (ResourceFilter accessFilter : accessFilters) {
+			module.addResourceFilter(accessFilter);
+		}
+		List<HttpStatusBehavior> httpStatusBehaviors = getInstancesByType(HttpStatusBehavior.class);
+		for (HttpStatusBehavior httpStatusBehavior : httpStatusBehaviors) {
+			module.addHttpStatusBehavior(httpStatusBehavior);
+		}
+		List<SecurityProvider> securityProviders = getInstancesByType(SecurityProvider.class);
+		for (SecurityProvider securityProvider : securityProviders) {
+			module.addSecurityProvider(securityProvider);
+		}
+
 		moduleRegistry.addModule(module);
-		moduleRegistry.addModule(new CoreModule());
+		moduleRegistry.addModule(new ResourceInformationProviderModule());
 	}
 
 	private <T> List<T> getInstancesByType(Class<T> clazz) {
@@ -301,37 +400,17 @@ public class CrnkBoot {
 		}
 	}
 
-	private void setupRepository(SimpleModule module, Object repository) {
-		if (repository instanceof ResourceRepository) {
-			ResourceRepository resRepository = (ResourceRepository) repository;
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, resRepository.getClass());
-			Class resourceClass = typeArgs[0];
-			module.addRepository(resourceClass, resRepository);
-		} else if (repository instanceof RelationshipRepository) {
-			RelationshipRepository relRepository = (RelationshipRepository) repository;
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, relRepository.getClass());
-			Class sourceResourceClass = typeArgs[0];
-			Class targetResourceClass = typeArgs[2];
-			module.addRepository(sourceResourceClass, targetResourceClass, relRepository);
-		} else if (repository instanceof ResourceRepositoryV2) {
-			ResourceRepositoryV2<?, ?> resRepository = (ResourceRepositoryV2<?, ?>) repository;
-			module.addRepository(resRepository.getResourceClass(), resRepository);
-		} else if (repository instanceof RelationshipRepositoryV2) {
-			RelationshipRepositoryV2<?, ?, ?, ?> relRepository = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
-			module.addRepository(relRepository.getSourceResourceClass(), relRepository.getTargetResourceClass(), relRepository);
-		} else {
-			throw new IllegalStateException(repository.toString());
-		}
-	}
-
 	private void addModules() {
+		boolean serializeLinksAsObjects =
+				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects));
+
+		// without priority setup or something, has to come last as some defaults are in there, needs to become more robust
+		moduleRegistry.addModule(coreModule);
 
 		for (Module module : registeredModules) {
 			moduleRegistry.addModule(module);
 		}
-
-		boolean serializeLinksAsObjects = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
-		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects));
 
 		List<Module> discoveredModules = getInstancesByType(Module.class);
 		for (Module module : discoveredModules) {
@@ -348,12 +427,13 @@ public class CrnkBoot {
 		}
 	}
 
-	public HttpRequestProcessorImpl getRequestDispatcher() {
-		PreconditionUtil.assertNotNull("expected requestDispatcher", requestDispatcher);
+	public HttpRequestDispatcherImpl getRequestDispatcher() {
+		PreconditionUtil.verify(requestDispatcher != null, "requestDispatcher not yet available, initialize CrnkBoot first");
 		return requestDispatcher;
 	}
 
 	public ResourceRegistry getResourceRegistry() {
+		PreconditionUtil.verify(resourceRegistry != null, "resourceRegistry not yet available, initialize CrnkBoot first");
 		return resourceRegistry;
 	}
 
@@ -366,7 +446,7 @@ public class CrnkBoot {
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		checkNotConfiguredYet();
-		PreconditionUtil.assertNull("ObjectMapper already set", this.objectMapper);
+		PreconditionUtil.verify(this.objectMapper == null, "ObjectMapper already set");
 		this.objectMapper = objectMapper;
 	}
 
@@ -376,27 +456,29 @@ public class CrnkBoot {
 
 	public void setPropertiesProvider(PropertiesProvider propertiesProvider) {
 		checkNotConfiguredYet();
+		LOGGER.debug("set properties provider {}", propertiesProvider);
 		this.propertiesProvider = propertiesProvider;
 	}
 
 	/**
-	 * @deprecated use {@link #setServiceUrlProvider(ServiceUrlProvider)}
+	 * @return prefix like /api where to provide the JSON API endpoint. Always starts with a leading slash, but no trailing
+	 * slash. Or null if not specified.
 	 */
-	@Deprecated
-	public ServiceUrlProvider getDefaultServiceUrlProvider() {
-		return getServiceUrlProvider();
-	}
-
-	/**
-	 * @deprecated use {@link #getServiceUrlProvider()}
-	 */
-	@Deprecated
-	public void setDefaultServiceUrlProvider(ServiceUrlProvider defaultServiceUrlProvider) {
-		setServiceUrlProvider(defaultServiceUrlProvider);
-	}
-
 	public String getWebPathPrefix() {
-		return propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
+		String pathPrefix = null;
+		if (webPathPrefix != null) {
+			pathPrefix = webPathPrefix;
+		}
+		else {
+			pathPrefix = propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
+		}
+		if (pathPrefix != null && !pathPrefix.startsWith("/")) {
+			pathPrefix = "/" + pathPrefix;
+		}
+		if (pathPrefix != null && pathPrefix.endsWith("/")) {
+			pathPrefix = pathPrefix.substring(0, pathPrefix.length() - 1);
+		}
+		return pathPrefix;
 	}
 
 	public ServiceDiscovery getServiceDiscovery() {
@@ -404,6 +486,8 @@ public class CrnkBoot {
 	}
 
 	public void setServiceDiscovery(ServiceDiscovery serviceDiscovery) {
+		LOGGER.debug("set service discovery {}", serviceDiscovery);
+		PreconditionUtil.verify(this.serviceDiscovery == null, "serviceDiscovery already set: %s", this.serviceDiscovery);
 		this.serviceDiscovery = serviceDiscovery;
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
 	}
@@ -414,13 +498,9 @@ public class CrnkBoot {
 	 * <p>
 	 * This is important to prevent denial of service attacks on the server.
 	 * <p>
-	 * NOTE: This using this feature requires a {@link QuerySpecDeserializer} and it does not work with the
-	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setDefaultPageLimit(Long defaultPageLimit) {
-		PreconditionUtil.assertNotNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
-				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
+		this.defaultPageLimit = defaultPageLimit;
 	}
 
 	/**
@@ -428,45 +508,100 @@ public class CrnkBoot {
 	 * <p>
 	 * This is important to prevent denial of service attacks on the server.
 	 * <p>
-	 * NOTE: This using this feature requires a {@link QuerySpecDeserializer} and it does not work with the
-	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setMaxPageLimit(Long maxPageLimit) {
-		PreconditionUtil.assertNotNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
-				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
+		this.maxPageLimit = maxPageLimit;
 	}
 
 	/**
 	 * Sets the allow unknown attributes for API requests.
-	 *
+	 * <p>
 	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
 	 */
 	public void setAllowUnknownAttributes() {
-		PreconditionUtil.assertNotNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
-				"it is null.", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
-				.setAllowUnknownAttributes(Boolean
-						.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+		this.allowUnknownAttributes = true;
+	}
+
+	/**
+	 * Sets the allow unknown query parameters for API requests.
+	 * <p>
+	 */
+	public void setAllowUnknownParameters() {
+		this.allowUnknownParameters = true;
 	}
 
 	public ModuleRegistry getModuleRegistry() {
 		return moduleRegistry;
 	}
 
-	public QuerySpecDeserializer getQuerySpecDeserializer() {
-		return querySpecDeserializer;
+	private void setupQuerySpecUrlMapper() {
+		if (moduleRegistry.getUrlMapper() == null) {
+			List<QuerySpecUrlMapper> list = serviceDiscovery.getInstancesByType(QuerySpecUrlMapper.class);
+			if (list.isEmpty()) {
+				moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
+			}
+			else {
+				moduleRegistry.setUrlMapper(list.get(0));
+			}
+		}
+
+		QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
+		if (urlMapper instanceof UnkonwnMappingAware) {
+			if (allowUnknownAttributes == null) {
+				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES);
+				if (strAllow != null) {
+					allowUnknownAttributes = Boolean.parseBoolean(strAllow);
+				}
+			}
+			if (allowUnknownAttributes != null) {
+				((UnkonwnMappingAware) urlMapper).setAllowUnknownAttributes(allowUnknownAttributes);
+			}
+
+			if (allowUnknownParameters == null) {
+				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_PARAMETERS);
+				if (strAllow != null) {
+					allowUnknownParameters = Boolean.parseBoolean(strAllow);
+				}
+			}
+			if (allowUnknownParameters != null) {
+				((UnkonwnMappingAware) urlMapper).setAllowUnknownParameters(allowUnknownParameters);
+			}
+		}
+	}
+
+	private void setupPagingBehavior() {
+		moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
+
+		if (moduleRegistry.getPagingBehaviors().isEmpty()) {
+			moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
+		}
+
+		for (PagingBehavior pagingBehavior : moduleRegistry.getPagingBehaviors()) {
+			if (pagingBehavior instanceof LimitBoundedPagingBehavior) {
+				if (defaultPageLimit != null) {
+					((LimitBoundedPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
+				}
+				else {
+					LOGGER.warn(
+							"no defaultLimit for paging specified, may lead to denial of service for in proper requests with "
+									+ "large data sets"
+					);
+				}
+				if (maxPageLimit != null) {
+					((LimitBoundedPagingBehavior) pagingBehavior).setMaxPageLimit(maxPageLimit);
+				}
+			}
+		}
 	}
 
 	/**
-	 * Set the {@link QuerySpecDeserializer} to use to parse and handle query parameters.
-	 * When invoked, overwrites previous {@link QueryParamsBuilder}s and QuerySpecDeserializers.
+	 * Set the {@link QuerySpecUrlMapper} to use to parse and handle query parameters.
+	 * When invoked, overwrites previous QuerySpecDeserializers.
 	 */
-	public void setQuerySpecDeserializer(QuerySpecDeserializer querySpecDeserializer) {
+	public void setUrlMapper(QuerySpecUrlMapper urlMapper) {
 		checkNotConfiguredYet();
-		PreconditionUtil.assertNotNull("A query spec deserializer must be provided, but is null", querySpecDeserializer);
-		this.querySpecDeserializer = querySpecDeserializer;
-		this.queryParamsBuilder = null;
+		PreconditionUtil.verify(urlMapper != null, "urlMapper parameter must not be null");
+		moduleRegistry.setUrlMapper(urlMapper);
 	}
 
 	public boolean isNullDataResponseEnabled() {
@@ -475,5 +610,30 @@ public class CrnkBoot {
 
 	public ServiceUrlProvider getServiceUrlProvider() {
 		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
+	}
+
+	public List<PagingBehavior> getPagingBehaviors() {
+		return moduleRegistry.getPagingBehaviors();
+	}
+
+	public ControllerRegistry getControllerRegistry() {
+		return controllerRegistry;
+	}
+
+	public QueryAdapterBuilder getQueryAdapterBuilder() {
+		return queryAdapterBuilder;
+	}
+
+	public CoreModule getCoreModule() {
+		return coreModule;
+	}
+
+	public QuerySpecUrlMapper getUrlMapper() {
+		setupQuerySpecUrlMapper();
+		return moduleRegistry.getUrlMapper();
+	}
+
+	public void setWebPathPrefix(String webPathPrefix) {
+		this.webPathPrefix = webPathPrefix;
 	}
 }

@@ -1,12 +1,12 @@
 package io.crnk.client.http;
 
-import java.util.concurrent.TimeUnit;
-
 import io.crnk.client.http.apache.HttpClientAdapter;
 import io.crnk.client.http.apache.HttpClientAdapterListener;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.concurrent.TimeUnit;
 
 public class HttpClientAdapterTest {
 

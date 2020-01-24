@@ -1,0 +1,33 @@
+apply plugin: 'java'
+
+dependencies {
+    compile project(':crnk-meta')
+    compile project(':crnk-client')
+    compile project(':crnk-gen:crnk-gen-base')
+
+    compile 'guru.nidi:graphviz-java:0.8.3'
+
+    testCompile 'commons-io:commons-io:2.5'
+    testCompile project(':crnk-meta')
+    testCompile project(':crnk-test')
+    testCompile project(':crnk-format:crnk-format-plain-json')
+}
+
+
+apply plugin: 'org.asciidoctor.convert'
+
+asciidoctor {
+    sourceDir = file('build/tmp/asciidoc/generated/source/asciidoc')
+    backends = ['html5']
+    attributes 'source-highlighter': 'coderay'
+    sources {
+        include 'index.adoc'
+    }
+}
+
+// compile generated asciidoc files
+tasks.test.doFirst {
+    delete 'build/tmp/asciidoc'
+}
+check.dependsOn tasks.asciidoctor
+tasks.asciidoctor.dependsOn test

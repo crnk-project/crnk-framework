@@ -1,18 +1,17 @@
 package io.crnk.core.resource.registry;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
 
-import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
+import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
-import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
 import io.crnk.core.engine.registry.ResourceRegistryPartListener;
@@ -21,16 +20,14 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.repository.InMemoryResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
 
 public class ResourceRegistryTest {
 
@@ -46,13 +43,16 @@ public class ResourceRegistryTest {
 	@Before
 	public void resetResourceRegistry() {
 		moduleRegistry = new ModuleRegistry();
+		moduleRegistry.addModule(new CoreModule());
+		moduleRegistry.addModule(new ResourceInformationProviderModule());
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider(TEST_MODELS_URL));
+		moduleRegistry.setObjectMapper(new ObjectMapper());
 		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 	}
 
 	@Test
 	public void onExistingTypeShouldReturnEntry() {
-		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 		RegistryEntry tasksEntry = resourceRegistry.getEntry("tasks");
 		assertThat(tasksEntry).isNotNull();
 	}
@@ -66,10 +66,11 @@ public class ResourceRegistryTest {
 	}
 
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
-		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null);
-		return new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL), null,
-				null);
+		RegistryEntryBuilder entryBuilder = moduleRegistry.getContext().newRegistryEntryBuilder();
+		entryBuilder.fromImplementation(new InMemoryResourceRepository(repositoryClass));
+		entryBuilder.resource().resourcePath(path);
+		return entryBuilder.build();
+
 	}
 
 	@Test
@@ -84,32 +85,36 @@ public class ResourceRegistryTest {
 
 	@Test
 	public void onExistingClassShouldReturnEntry() {
-		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 		RegistryEntry tasksEntry = resourceRegistry.findEntry(Task.class);
 		assertThat(tasksEntry).isNotNull();
 	}
 
 	@Test
 	public void onExistingTypeShouldReturnUrl() {
-		RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		RegistryEntry entry = resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 		String resourceUrl = resourceRegistry.getResourceUrl(entry.getResourceInformation());
 		assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks");
 	}
 
 	@Test
+	public void onExistingTypeAndQueryContextShouldReturnUrl() {
+		Task task = new Task();
+		task.setId(12L);
+		QueryContext queryContext = new QueryContext();
+		queryContext.setBaseUrl("http://querycontext:1234");
+		RegistryEntry entry = resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
+		assertThat(resourceRegistry.getResourceUrl(queryContext, entry.getResourceInformation())).isEqualTo("http://querycontext:1234/tasks");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, Task.class)).isEqualTo("http://querycontext:1234/tasks");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, Task.class, "12")).isEqualTo("http://querycontext:1234/tasks/12");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, task)).isEqualTo("http://querycontext:1234/tasks/12");
+	}
+
+	@Test
 	public void onExistingResourceShouldReturnUrl() {
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 		Task task = new Task();
 		task.setId(1L);
-
-		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
-		ResourceField valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
-				String.class, "projects");
-		TypeParser typeParser = new TypeParser();
-		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, Arrays.asList(idField, valueField));
-		RegistryEntry registryEntry = new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl("tasks", resourceInformation, RepositoryMethodAccess.ALL), null,
-				null);
-		resourceRegistry.addEntry(Task.class, registryEntry);
 
 		String resourceUrl = resourceRegistry.getResourceUrl(task);
 		assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks/1");
@@ -117,21 +122,22 @@ public class ResourceRegistryTest {
 
 	@Test
 	public void onExistingTypeAndIdentifierShouldReturnUrl() {
-		RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		RegistryEntry entry = resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 		String resourceUrl = resourceRegistry.getResourceUrl(Task.class, "1");
 		assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks/1");
 	}
 
 	@Test
-	public void onNonExistingTypeShouldReturnNull() {
-		RegistryEntry entry = resourceRegistry.getEntry("nonExistingType");
-		assertThat(entry).isNull();
+	public void onNonExistingTypeShouldThrowException() {
+		assertThatThrownBy(() -> resourceRegistry.getEntry("nonExistingType"))
+				.isInstanceOf(RepositoryNotFoundException.class)
+				.hasMessage("Repository for a resource not found: nonExistingType");
 	}
 
 
 	@Test
 	public void checkHasEntry() {
-		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 		Assert.assertTrue(resourceRegistry.hasEntry(Task.class));
 		Assert.assertFalse(resourceRegistry.hasEntry(String.class));
 	}
@@ -150,7 +156,7 @@ public class ResourceRegistryTest {
 
 	@Test
 	public void onResourceClassReturnCorrectClass() {
-		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 
 		// WHEN
 		Class<?> clazz = resourceRegistry.findEntry(Task$Proxy.class).getResourceInformation().getResourceClass();
@@ -163,7 +169,7 @@ public class ResourceRegistryTest {
 
 	@Test
 	public void onResourceClassReturnCorrectParentInstanceClass() {
-		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 		Task$Proxy resource = new Task$Proxy();
 
 		// WHEN
@@ -175,7 +181,7 @@ public class ResourceRegistryTest {
 
 	@Test
 	public void onResourceClassReturnCorrectInstanceClass() {
-		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 		Task resource = new Task();
 
 		// WHEN
@@ -187,7 +193,7 @@ public class ResourceRegistryTest {
 
 	@Test(expected = RepositoryNotFoundException.class)
 	public void onResourceClassReturnNoInstanceClass() {
-		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 
 		// WHEN
 		resourceRegistry.findEntry(Object.class);
@@ -196,7 +202,7 @@ public class ResourceRegistryTest {
 	@Test
 	public void onResourceGetEntryWithBackUp() {
 		String taskType = Task.class.getAnnotation(JsonApiResource.class).type();
-		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, taskType));
+		resourceRegistry.addEntry(newRegistryEntry(Task.class, taskType));
 
 		// WHEN
 		RegistryEntry registryEntry = resourceRegistry.findEntry(Task.class);

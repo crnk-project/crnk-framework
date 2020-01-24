@@ -1,15 +1,11 @@
 package io.crnk.meta.integration;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
@@ -20,11 +16,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
 public class MetaDefaultLimitIntTest extends AbstractMetaJerseyTest {
 
-
-	private ResourceRepositoryV2<MetaResource, Serializable> repository;
-
+	private ResourceRepository<MetaResource, Serializable> repository;
 
 	@Before
 	public void setup() {
@@ -45,7 +43,6 @@ public class MetaDefaultLimitIntTest extends AbstractMetaJerseyTest {
 		ResourceList<MetaResource> list = repository.findAll(querySpec);
 		Assert.assertEquals(2, list.size());
 	}
-
 
 	@Test
 	public void limitShouldNotAffectRelationships() {
@@ -81,7 +78,7 @@ public class MetaDefaultLimitIntTest extends AbstractMetaJerseyTest {
 
 	@Test
 	public void limitShouldNotAffectRelationshipsWithMetaElement() {
-		ResourceRepositoryV2<MetaElement, Serializable> elementRepository = client.getRepositoryForType(MetaElement.class);
+		ResourceRepository<MetaElement, Serializable> elementRepository = client.getRepositoryForType(MetaElement.class);
 
 		QuerySpec querySpec = new QuerySpec(MetaElement.class);
 		querySpec.includeRelation(Arrays.asList("attributes"));

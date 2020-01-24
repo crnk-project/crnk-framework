@@ -1,16 +1,23 @@
 package io.crnk.ui;
 
 
+import java.io.IOException;
+import java.util.List;
+
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpResponse;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.module.Module;
+import io.crnk.core.module.ModuleRegistry;
+import io.crnk.home.HomeModule;
 import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.ui.internal.UIHttpRequestProcessor;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
 
 public class UIModuleTest {
 
@@ -27,8 +34,12 @@ public class UIModuleTest {
 	@Test
 	public void setup() {
 		UIModule module = UIModule.create(new UIModuleConfig());
+
+		ModuleRegistry moduleRegistry = Mockito.mock(ModuleRegistry.class);
 		Module.ModuleContext context = Mockito.mock(Module.ModuleContext.class);
+		Mockito.when(context.getModuleRegistry()).thenReturn(moduleRegistry);
 		module.setupModule(context);
+
 		Mockito.verify(context, Mockito.times(1)).addHttpRequestProcessor(Mockito.any(HttpRequestProcessor.class));
 	}
 
@@ -47,10 +58,64 @@ public class UIModuleTest {
 
 		processor.process(context);
 
-		Mockito.verify(context, Mockito.times(1)).setResponse(Mockito.eq(200), Mockito.any(byte[].class));
-		Mockito.verify(context, Mockito.times(1)).setContentType(Mockito.eq("text/html"));
+
+		ArgumentCaptor<HttpResponse> responseCaptor = ArgumentCaptor.forClass(HttpResponse.class);
+		Mockito.verify(context, Mockito.times(1)).setResponse(responseCaptor.capture());
+		HttpResponse response = responseCaptor.getValue();
+		Assert.assertEquals(200, response.getStatusCode());
+		Assert.assertEquals("text/html", response.getContentType());
 	}
 
+
+	@Test
+	public void testDisableBrowser() {
+		UIModuleConfig config = new UIModuleConfig();
+		config.setBrowserEnabled(false);
+		UIModule module = new UIModule(config);
+
+		ModuleRegistry moduleRegistry = Mockito.mock(ModuleRegistry.class);
+		Module.ModuleContext context = Mockito.mock(Module.ModuleContext.class);
+		Mockito.when(context.getModuleRegistry()).thenReturn(moduleRegistry);
+		module.setupModule(context);
+
+		Mockito.verify(context, Mockito.times(0)).addHttpRequestProcessor(Mockito.any(HttpRequestProcessor.class));
+	}
+
+	@Test
+	public void testDisablePresentationModel() {
+		UIModuleConfig config = new UIModuleConfig();
+		config.setPresentationModelEnabled(false);
+		UIModule module = new UIModule(config);
+
+		ModuleRegistry moduleRegistry = Mockito.mock(ModuleRegistry.class);
+		Module.ModuleContext context = Mockito.mock(Module.ModuleContext.class);
+		Mockito.when(context.getModuleRegistry()).thenReturn(moduleRegistry);
+		module.setupModule(context);
+
+		Mockito.verify(context, Mockito.times(0)).addRepository(Mockito.any());
+	}
+
+
+	@Test
+	public void checkHomeModuleExtension() {
+		HomeModule homeModule = HomeModule.create();
+		UIModule uiModule = UIModule.create(new UIModuleConfig());
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(homeModule);
+		boot.addModule(uiModule);
+		boot.boot();
+
+		List<String> list = homeModule.list("/", new QueryContext());
+		Assert.assertTrue(list.contains("browse/"));
+	}
+
+	@Test
+	public void checkHomeModuleIsOptional() {
+		CrnkBoot boot = new CrnkBoot();
+		UIModule uiModule = UIModule.create(new UIModuleConfig());
+		boot.addModule(uiModule);
+		boot.boot();
+	}
 
 	@Test
 	public void processorReturnsIndexHtmlForRootPage() throws IOException {
@@ -60,9 +125,12 @@ public class UIModuleTest {
 		Mockito.when(context.getMethod()).thenReturn("GET");
 		Mockito.when(context.getPath()).thenReturn("browse/");
 
+		ArgumentCaptor<HttpResponse> responseCaptor = ArgumentCaptor.forClass(HttpResponse.class);
 		processor.process(context);
 
-		Mockito.verify(context, Mockito.times(1)).setResponse(Mockito.eq(200), Mockito.any(byte[].class));
+		Mockito.verify(context, Mockito.times(1)).setResponse(responseCaptor.capture());
+		HttpResponse response = responseCaptor.getValue();
+		Assert.assertEquals(200, response.getStatusCode());
 	}
 
 
@@ -75,7 +143,7 @@ public class UIModuleTest {
 		Mockito.when(context.getPath()).thenReturn("browse/index.html");
 
 		processor.process(context);
-		Mockito.verify(context, Mockito.times(0)).setResponse(Mockito.anyInt(), Mockito.any(byte[].class));
+		Mockito.verify(context, Mockito.times(0)).setResponse(Mockito.any(HttpResponse.class));
 	}
 
 	@Test
@@ -87,6 +155,6 @@ public class UIModuleTest {
 		Mockito.when(context.getPath()).thenReturn("somethingDifferent/index.html");
 
 		processor.process(context);
-		Mockito.verify(context, Mockito.times(0)).setResponse(Mockito.anyInt(), Mockito.any(byte[].class));
+		Mockito.verify(context, Mockito.times(0)).setResponse(Mockito.any(HttpResponse.class));
 	}
 }
