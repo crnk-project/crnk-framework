@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.resource.annotations.JsonApiVersion;
 
@@ -19,6 +20,22 @@ public class QueryContext {
 	private String requestPath;
 
 	private int requestVersion = -1;
+
+	private HttpRequestContext requestContext;
+
+	/**
+	 * @return requestContext underlying this query giving access to lower-layer transport layer.
+	 */
+	public HttpRequestContext getRequestContext() {
+		return requestContext;
+	}
+
+	/**
+	 * @param requestContext underlying this query giving access to lower-layer transport layer.
+	 */
+	public void setRequestContext(HttpRequestContext requestContext) {
+		this.requestContext = requestContext;
+	}
 
 	/**
 	 * @return version used to serve this request. See {@link JsonApiVersion}.

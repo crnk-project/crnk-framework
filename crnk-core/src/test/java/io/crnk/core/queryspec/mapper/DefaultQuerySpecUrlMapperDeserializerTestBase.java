@@ -74,7 +74,12 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
             public ObjectMapper getObjectMapper() {
                 return container.getObjectMapper();
             }
-        };
+
+			@Override
+			public UrlBuilder getUrlBuilder() {
+				return container.getModuleRegistry().getUrlBuilder();
+			}
+		};
 
         urlMapper = new DefaultQuerySpecUrlMapper();
         urlMapper.init(deserializerContext);

@@ -7,6 +7,7 @@ import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 
 public class PagingSpecUrlBuilder {
 
@@ -22,7 +23,9 @@ public class PagingSpecUrlBuilder {
 
 	public String build(QueryAdapter queryAdapter) {
 		QueryContext queryContext = queryAdapter.getQueryContext();
-		JsonApiUrlBuilder urlBuilder = new JsonApiUrlBuilder(moduleRegistry, queryContext);
+
+		UrlBuilder urlBuilder = moduleRegistry.getUrlBuilder();
+
 		Object relationshipSourceId = requestSpec.getId();
 		ResourceField relationshipField = requestSpec.getRelationshipField();
 
@@ -32,7 +35,7 @@ public class PagingSpecUrlBuilder {
 		} else {
 			rootInfo = relationshipField.getResourceInformation();
 		}
-		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter.toQuerySpec(),
+		return urlBuilder.buildUrl(queryContext, rootInfo, relationshipSourceId, queryAdapter.toQuerySpec(),
 				relationshipField != null ? relationshipField.getJsonName() : null, queryAdapter.isSelfLink());
 	}
 }

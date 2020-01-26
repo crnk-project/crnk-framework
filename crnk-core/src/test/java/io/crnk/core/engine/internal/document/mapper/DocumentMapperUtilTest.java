@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.document.mapper;
 
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.mock.models.Task;
 import org.junit.Assert;
@@ -17,7 +18,7 @@ public class DocumentMapperUtilTest extends AbstractDocumentMapperTest {
 	@Before
 	public void setup() {
 		super.setup();
-		util = new DocumentMapperUtil(container.getBoot().getResourceRegistry(), objectMapper, new NullPropertiesProvider());
+		util = new DocumentMapperUtil(container.getBoot().getResourceRegistry(), objectMapper, new NullPropertiesProvider(), new JsonApiUrlBuilder(null));
 	}
 
 	@Test
