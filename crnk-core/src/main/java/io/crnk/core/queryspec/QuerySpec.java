@@ -273,13 +273,13 @@ public class QuerySpec {
     }
 
     public void setNestedSpecs(Collection<QuerySpec> specs) {
-    	this.typeRelatedSpecs.clear();;
+    	this.typeRelatedSpecs.clear();
         this.classRelatedSpecs.clear();
         for (QuerySpec spec : specs) {
-            if (spec.getResourceClass() != null) {
-                classRelatedSpecs.put(spec.getResourceClass(), spec);
-            } else {
+	    if (spec.getResourceType() != null) {
                 typeRelatedSpecs.put(spec.getResourceType(), spec);
+            } else {
+                classRelatedSpecs.put(spec.getResourceClass(), spec);
             }
         }
     }
