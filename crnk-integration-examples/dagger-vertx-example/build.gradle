@@ -25,7 +25,7 @@ buildscript {
 sourceSets {
     main {
         java {
-            srcDir 'build/generated/source/apt/main'
+            srcDir 'build/generated/sources/apt/main'
         }
     }
 }
@@ -65,7 +65,7 @@ dependencies {
 compileJava {
     options.incremental = false
 }
-def generatedSrcRoot = file("${buildDir}/generated/source/apt/main")
+def generatedSrcRoot = file("${buildDir}/generated/sources/apt/main")
 task deleteGeneratedSources(type: Delete) {
     delete generatedSrcRoot
 }

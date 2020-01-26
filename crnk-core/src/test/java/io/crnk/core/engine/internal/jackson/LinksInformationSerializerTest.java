@@ -18,6 +18,7 @@ public class LinksInformationSerializerTest {
 	private TestSelfLinksInformation selfLink;
 	private DefaultPagedLinksInformation pagedLink;
 	private TestCustomLinksInformation customLink;
+	private TestCustomStringBasedLinksInformation customStringLink;
 
 	@Before
 	public void setup() {
@@ -30,6 +31,7 @@ public class LinksInformationSerializerTest {
 		pagedLink.setNext("/next");
 
 		customLink = new TestCustomLinksInformation("http://www.imdb.com");
+		customStringLink = new TestCustomStringBasedLinksInformation("http://www.imdb.com");
 	}
 
 	/*@Test
@@ -69,6 +71,10 @@ public class LinksInformationSerializerTest {
 
 		serialized = mapper.writeValueAsString(customLink);
 		expected = createSingleLinkJson(OBJECT_LINK, "imdb", customLink.getImdb().getHref());
+		Assert.assertEquals(expected, serialized);
+
+		serialized = mapper.writeValueAsString(customStringLink);
+		expected = createSingleLinkJson(OBJECT_LINK, "imdb", customStringLink.getImdb());
 		Assert.assertEquals(expected, serialized);
 	}
 
@@ -120,6 +126,19 @@ public class LinksInformationSerializerTest {
 		}
 
 		public Link getImdb() {
+			return imdb;
+		}
+	}
+
+	public static class TestCustomStringBasedLinksInformation implements LinksInformation {
+
+		private String imdb;
+
+		TestCustomStringBasedLinksInformation(String imdb) {
+			this.imdb = imdb;
+		}
+
+		public String getImdb() {
 			return imdb;
 		}
 	}

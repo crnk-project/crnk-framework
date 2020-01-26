@@ -12,34 +12,30 @@ import java.util.Objects;
 public class EmbeddableInformation extends BeanInformationBase {
 
 
-    public EmbeddableInformation(Type implementationType, List<ResourceField> fields) {
-        super(implementationType, fields);
-        initFields();
-    }
+	public EmbeddableInformation(Type implementationType, List<ResourceField> fields) {
+		super(implementationType, fields);
+		initFields();
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ResourceInformation that = (ResourceInformation) o;
-        return Objects.equals(implementationClass, that.implementationClass);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ResourceInformation that = (ResourceInformation) o;
+		return Objects.equals(implementationClass, that.implementationClass);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(implementationClass);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(implementationClass);
+	}
 
-    protected void initField(ResourceField field) {
-        if (field.getResourceFieldType() != ResourceFieldType.ATTRIBUTE) {
-            throw new InvalidResourceException("only attributes are supported for @JsonApiEmbeddable-types, got " + field.getResourceFieldType() + " for " + field);
-        }
-
-        super.initField(field);
-        field.setResourceInformation(this);
-    }
+	protected void initField(ResourceField field) {
+		super.initField(field);
+		field.setResourceInformation(this);
+	}
 }

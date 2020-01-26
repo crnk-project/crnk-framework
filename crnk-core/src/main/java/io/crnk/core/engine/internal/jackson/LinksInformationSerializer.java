@@ -34,7 +34,8 @@ public class LinksInformationSerializer extends JsonSerializer<LinksInformation>
 
 		for (String attrName : info.getAttributeNames()) {
 			BeanAttributeInformation attribute = info.getAttribute(attrName);
-			Link linkValue = (Link)attribute.getValue(value);
+			Object objLinkValue = attribute.getValue(value);
+			Link linkValue = objLinkValue instanceof String ? new DefaultLink((String) objLinkValue) : (Link) objLinkValue;
 			if (linkValue != null) {
 				if (!serializeLinksAsObjects && !shouldSerializeLink(linkValue)) { // Return a simple String link
 					gen.writeStringField(attrName, linkValue.getHref());

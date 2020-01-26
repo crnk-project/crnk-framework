@@ -109,7 +109,10 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
                 relationIdFields.add(attributeDesc.getName());
             }
         }
-        verifyRelationIdFields(resourceClass, relationIdFields, fields);
+
+        if(!embedded) {
+			verifyRelationIdFields(resourceClass, relationIdFields, fields);
+		}
 
         for (ResourceField resourceField : fields) {
             ResourceFieldImpl impl = (ResourceFieldImpl) resourceField;

@@ -72,7 +72,9 @@ public interface ScheduleRepository extends ResourceRepository<Schedule, Long> {
 
 	class ScheduleListLinks extends DefaultPagedLinksInformation implements LinksInformation {
 
-		public Link name = new DefaultLink("value");
+		public Link objLink = new DefaultLink("value");
+
+		public String stringLink = "value";
 	}
 
 	class ScheduleListMeta extends DefaultPagedMetaInformation {
