@@ -59,7 +59,7 @@ public class AsciiDocCaptureTest {
     }
 
     private AsciidocCaptureModule setupAsciidoc() {
-        File outputDir = new File("build/tmp/asciidoc/generated/source/asciidoc");
+        File outputDir = new File("build/tmp/asciidoc/generated/sources/asciidoc");
         AsciidocCaptureConfig asciidocConfig = new AsciidocCaptureConfig();
         asciidocConfig.setGenDir(outputDir);
         return new AsciidocCaptureModule(asciidocConfig);

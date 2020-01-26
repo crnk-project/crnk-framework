@@ -64,7 +64,7 @@ public class TSGeneratorConfig extends GeneratorModuleConfigBase {
      */
     public File getGenDir() {
         if (genDir == null) {
-            return new File(buildDir, "generated/source/typescript/");
+            return new File(buildDir, "generated/sources/typescript/");
         }
         return genDir;
     }

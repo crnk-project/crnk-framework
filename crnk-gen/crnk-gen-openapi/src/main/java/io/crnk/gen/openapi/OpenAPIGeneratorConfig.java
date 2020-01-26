@@ -34,7 +34,7 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
    */
   public File getGenDir() {
     if (genDir == null) {
-      return new File(buildDir, "generated/source/openapi/");
+      return new File(buildDir, "generated/sources/openapi/");
     }
     return genDir;
   }

@@ -17,7 +17,7 @@ dependencies {
 apply plugin: 'org.asciidoctor.convert'
 
 asciidoctor {
-    sourceDir = file('build/tmp/asciidoc/generated/source/asciidoc')
+    sourceDir = file('build/tmp/asciidoc/generated/sources/asciidoc')
     backends = ['html5']
     attributes 'source-highlighter': 'coderay'
     sources {

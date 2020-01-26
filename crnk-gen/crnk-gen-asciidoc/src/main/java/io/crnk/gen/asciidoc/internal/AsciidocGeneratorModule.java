@@ -108,8 +108,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 				AsciidocBuilder attrBuilder = newBuilder(resourceAnchor);
 				attrBuilder.appendFields(type.asDataObject());
 				attrBuilder.write(new File(outputDir, ATTRIBUTES_FILE));
-			}
-			else {
+			} else {
 				AsciidocBuilder literalsBuilder = newBuilder(resourceAnchor);
 				literalsBuilder.appendLiterals((MetaEnumType) type);
 				literalsBuilder.write(new File(outputDir, LITERALS_FILE));
@@ -134,8 +133,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 				for (MetaAttribute attr : dataType.getAttributes()) {
 					collectTypes(types, attr.getType().getElementType());
 				}
-			}
-			else if (type instanceof MetaEnumType) {
+			} else if (type instanceof MetaEnumType) {
 				types.add(type);
 			}
 		}
@@ -168,7 +166,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 		AsciidocBuilder indexBuilder = newBuilder(Collections.emptyList());
 		indexBuilder.startSection("Resources");
 
-		if(config.isGraphEnabled()) {
+		if (config.isGraphEnabled()) {
 			writeGraph(resources);
 			indexBuilder.writeInclude("graph");
 		}
@@ -324,7 +322,8 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 
 	private boolean isIncluded(MetaResource resource) {
 		return !config.getExcludes().stream()
-				.filter(it -> resource.getImplementationClass().getName().startsWith(it) || resource.getResourceType().startsWith(it))
+				.filter(it -> resource.getImplementationClass().getName().startsWith(it)
+						|| resource.getResourceType().startsWith(it) || resource.getResourcePath().startsWith(it))
 				.findFirst().isPresent();
 	}
 
