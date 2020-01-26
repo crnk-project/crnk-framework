@@ -106,7 +106,6 @@ public class AsciidocBuilder {
 
 	public void appendOverview(MetaType type, File outputDir) {
 		startSection(type.getName());
-		appendLine(getDescription(type));
 
 		File descriptionFile = new File(outputDir, AsciidocGeneratorModule.DESCRIPTION_FILE);
 		if (descriptionFile.exists()) {
@@ -150,7 +149,7 @@ public class AsciidocBuilder {
 					writeInclude(example.descriptionFile.getName());
 				}
 
-				writeInclude(example.requestFile.getName());
+				writeInclude(example.curlFile.getName());
 				if (example.responseFile.exists()) {
 					writeInclude(example.responseFile.getName());
 				}
@@ -194,6 +193,8 @@ public class AsciidocBuilder {
 
 		private final File outputDir;
 
+		private final File curlFile;
+
 		private final File requestFile;
 
 		private final File responseFile;
@@ -210,6 +211,7 @@ public class AsciidocBuilder {
 			this.urlFile = getFile("url.adoc");
 			this.requestFile = getFile("request.adoc");
 			this.responseFile = getFile("response.adoc");
+			this.curlFile = getFile("curl.adoc");
 			this.title = readFile(getFile("title.txt"));
 			this.descriptionFile = getFile("description.adoc");
 		}

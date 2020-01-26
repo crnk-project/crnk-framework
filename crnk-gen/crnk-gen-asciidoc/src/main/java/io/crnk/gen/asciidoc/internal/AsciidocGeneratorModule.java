@@ -205,9 +205,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 		descriptionBuilder.appendDescription(resource);
 		descriptionBuilder.write(new File(outputDir, DESCRIPTION_FILE));
 
-		List<String> exampleAnchor = new ArrayList<>(resourceAnchor);
-		exampleAnchor.add("examples");
-		AsciidocBuilder exampleBuilder = newBuilder(exampleAnchor);
+		AsciidocBuilder exampleBuilder = newBuilder(resourceAnchor, depth);
 		exampleBuilder.appendExamples(outputDir);
 		exampleBuilder.write(new File(outputDir, EXAMPLES_FILE));
 
