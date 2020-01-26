@@ -5,7 +5,7 @@ dependencies {
     compile project(':crnk-client')
     compile project(':crnk-gen:crnk-gen-base')
 
-    compile 'guru.nidi:graphviz-java:0.8.3'
+    compile 'guru.nidi:graphviz-java:0.12.1'
 
     testCompile 'commons-io:commons-io:2.5'
     testCompile project(':crnk-meta')

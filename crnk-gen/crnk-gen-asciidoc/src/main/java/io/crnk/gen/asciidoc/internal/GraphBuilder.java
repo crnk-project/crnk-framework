@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import guru.nidi.graphviz.attribute.RankDir;
+import guru.nidi.graphviz.attribute.Rank;
 import guru.nidi.graphviz.attribute.Records;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
@@ -26,7 +26,7 @@ public class GraphBuilder {
 	public void generate(Collection<MetaResource> resources, File file) throws IOException {
 		Graph g = graph("example1");
 		g = g.directed();
-		g = g.graphAttr().with(RankDir.LEFT_TO_RIGHT);
+		g = g.graphAttr().with(Rank.dir(Rank.RankDir.LEFT_TO_RIGHT));
 
 		Map<String, Node> nodeMap = new HashMap<>();
 		for (MetaResource resource : resources) {
@@ -53,7 +53,7 @@ public class GraphBuilder {
 			}
 			g = g.with(node);
 		}
-		Graphviz.fromGraph(g).height(2000).width(1000).render(Format.SVG).toFile(file);
+		Graphviz.fromGraph(g).height(800).width(1000).render(Format.SVG).toFile(file);
 	}
 
 	private String getKey(MetaAttribute attribute) {
