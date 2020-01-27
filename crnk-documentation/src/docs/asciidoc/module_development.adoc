@@ -23,7 +23,7 @@ Crnk provides three different, complementing mechanisms to hook into the request
 The `DocumentFilter` interface allows to intercept incoming requests and do
 any kind of validation, changes, monitoring, transaction handling, etc. `DocumentFilter` can be
 hooked into Crnk by setting up a module and registering the filter to the
-`ModuleContext`. Not that for every request, this interface is called exactly once.
+`ModuleContext`. Note that for every request, this interface is called exactly once.
 
 A request may span multiple repository accesses. To intercept the actual repository requests,
 implement the `RepositoryFilter` interface. `RepositoryFilter` has a number of methods
@@ -36,7 +36,7 @@ implementing the same Crnk repository interfaces. The decorated repository inste
 the actual repository will get called and it is up to the decorated repository of how to proceed
 with the request, usually by calling the actual repository. `RepositoryDecoratorFactory`
 can be registered with `ModuleContext.addRepositoryDecoratorFactory`. The factory gets
-notified about every repository registration and is then free do decorate it or not.
+notified about every repository registration and is then free to decorate it or not.
 
 
 anchor:modificationfilter[]
