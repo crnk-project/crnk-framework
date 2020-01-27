@@ -278,10 +278,10 @@ public class ResourceFieldImpl implements ResourceField {
         }
         if(resourceInformation instanceof ResourceInformation) {
             this.parentInformation = (ResourceInformation) resourceInformation;
-        }
 
-        PreconditionUtil.verify(!jsonName.equals("id") || resourceFieldType == ResourceFieldType.ID,
-                "only ID fields can be named 'id' for %s, consider adding @JsonApiId, ignoring it with @JsonIgnore or renaming it with @JsonProperty", resourceInformation);
+			PreconditionUtil.verify(!jsonName.equals("id") || resourceFieldType == ResourceFieldType.ID,
+					"only ID fields can be named 'id' for %s, consider adding @JsonApiId, ignoring it with @JsonIgnore or renaming it with @JsonProperty", resourceInformation);
+        }
     }
 
     public void setRelationshipRepositoryBehavior(RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
