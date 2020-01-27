@@ -449,7 +449,9 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
         @Override
         public EmbeddableInformationBuilder embeddedType(Class<?> type) {
-            genericType(type);
+        	if(genericType == null) {
+				genericType(type);
+			}
             if (embeddedTypeBuilder == null) {
                 embeddedTypeBuilder = new DefaultEmbeddableInformation();
                 embeddedTypeBuilder.implementationType(type);

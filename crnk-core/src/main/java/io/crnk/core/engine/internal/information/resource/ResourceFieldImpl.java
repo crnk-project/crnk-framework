@@ -78,24 +78,26 @@ public class ResourceFieldImpl implements ResourceField {
                              JsonIncludeStrategy jsonIncludeStrategy, LookupIncludeBehavior lookupIncludeBehavior,
                              ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
                              RelationshipRepositoryBehavior relationshipRepositoryBehavior, PatchStrategy patchStrategy) {
-        this.jsonName = jsonName;
-        this.underlyingName = underlyingName;
-        this.resourceFieldType = resourceFieldType;
-        this.serializeType = serializeType;
-        this.jsonIncludeStrategy = jsonIncludeStrategy;
-        this.type = type;
-        this.genericType = genericType;
-        this.lookupIncludeBehavior = lookupIncludeBehavior;
-        this.oppositeName = oppositeName;
-        this.oppositeResourceType = oppositeResourceType;
-        this.access = access;
-        this.idName = idName;
-        this.idType = idType;
-        this.idAccessor = idAccessor;
-        this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
-        this.patchStrategy = patchStrategy;
 
-        if (resourceFieldType != ResourceFieldType.LINKS_INFORMATION) {
+		this.jsonName = jsonName;
+		this.underlyingName = underlyingName;
+		this.resourceFieldType = resourceFieldType;
+		this.serializeType = serializeType;
+		this.jsonIncludeStrategy = jsonIncludeStrategy;
+		this.type = type;
+		this.genericType = genericType;
+		this.lookupIncludeBehavior = lookupIncludeBehavior;
+		this.oppositeName = oppositeName;
+		this.oppositeResourceType = oppositeResourceType;
+		this.access = access;
+		this.idName = idName;
+		this.idType = idType;
+		this.idAccessor = idAccessor;
+		this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
+		this.patchStrategy = patchStrategy;
+
+		PreconditionUtil.assertEquals("expected generic type to match", ClassUtils.getRawType(genericType), type);
+		if (resourceFieldType != ResourceFieldType.LINKS_INFORMATION) {
             PreconditionUtil.verify(!jsonName.equals("links"), "cannot name none-@JsonLinksInformation field `links`");
         }
         if (resourceFieldType != ResourceFieldType.META_INFORMATION) {
