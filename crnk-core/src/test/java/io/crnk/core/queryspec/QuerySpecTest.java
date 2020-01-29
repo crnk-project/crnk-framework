@@ -72,38 +72,38 @@ public class QuerySpecTest {
         Assert.assertEquals("QuerySpec[resourceType=projects, paging=OffsetLimitPagingSpec[offset=0]]", spec.toString());
 
         spec = new QuerySpec(Project.class);
-        Assert.assertEquals("QuerySpec[resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec[offset=0]]",
+        Assert.assertEquals("QuerySpec[resourceClass=io.crnk.core.mock.models.Project, resourceType=projects, paging=OffsetLimitPagingSpec[offset=0]]",
                 spec.toString());
 
         spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
         Assert.assertEquals(
-                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec[offset=0], "
+                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, resourceType=projects, paging=OffsetLimitPagingSpec[offset=0], "
                         + "filters=[filterAttr EQ test]]",
                 spec.toString());
 
         spec.addSort(new SortSpec(Arrays.asList("sortAttr"), Direction.ASC));
         Assert.assertEquals(
-                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec[offset=0], "
+                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, resourceType=projects, paging=OffsetLimitPagingSpec[offset=0], "
                         + "filters=[filterAttr EQ test], sort=[sortAttr ASC]]",
                 spec.toString());
 
         spec.includeField(Arrays.asList("includedField"));
         Assert.assertEquals(
-                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec[offset=0], "
+                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, resourceType=projects, paging=OffsetLimitPagingSpec[offset=0], "
                         + "filters=[filterAttr EQ test], sort=[sortAttr ASC], "
                         + "includedFields=[includedField]]",
                 spec.toString());
 
         spec.includeRelation(Arrays.asList("includedRelation"));
         Assert.assertEquals(
-                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec[offset=0], "
+                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, resourceType=projects, paging=OffsetLimitPagingSpec[offset=0], "
                         + "filters=[filterAttr EQ test], sort=[sortAttr ASC], "
                         + "includedFields=[includedField], includedRelations=[includedRelation]]",
                 spec.toString());
 
         spec.setPaging(new OffsetLimitPagingSpec(12L, 13L));
         Assert.assertEquals(
-                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec[offset=12, limit=13], "
+                "QuerySpec[resourceClass=io.crnk.core.mock.models.Project, resourceType=projects, paging=OffsetLimitPagingSpec[offset=12, limit=13], "
                         + "filters=[filterAttr EQ test], "
                         + "sort=[sortAttr ASC], includedFields=[includedField], includedRelations=[includedRelation]]",
                 spec.toString());

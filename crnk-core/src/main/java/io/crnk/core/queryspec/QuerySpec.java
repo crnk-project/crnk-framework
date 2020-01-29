@@ -6,19 +6,13 @@ import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 public class QuerySpec {
 
@@ -34,7 +28,8 @@ public class QuerySpec {
 
     private List<IncludeRelationSpec> includedRelations = new ArrayList<>();
 
-    private Map<Object, QuerySpec> relatedSpecs = new HashMap<>();
+    private Map<String, QuerySpec> typeRelatedSpecs = new HashMap<>();
+    private Map<Class<?>, QuerySpec> classRelatedSpecs = new HashMap<>();
 
     private PagingSpec pagingSpec;
 
@@ -51,7 +46,14 @@ public class QuerySpec {
         if (resourceClass != Resource.class) {
             this.resourceClass = resourceClass;
         }
-        this.resourceType = resourceType;
+        if (resourceType == null) {
+			JsonApiResource annotation = resourceClass.getAnnotation(JsonApiResource.class);
+			if (annotation != null) {
+				this.resourceType = annotation.type();
+			}
+		} else {
+			this.resourceType = resourceType;
+		}
         this.pagingSpec = new OffsetLimitPagingSpec();
     }
 
@@ -80,7 +82,8 @@ public class QuerySpec {
             if (pagingSpec != null) {
                 visitor.visitPaging(pagingSpec);
             }
-            relatedSpecs.values().forEach(it -> it.accept(visitor));
+            typeRelatedSpecs.values().forEach(it -> it.accept(visitor));
+			classRelatedSpecs.values().forEach(it -> it.accept(visitor));
             visitor.visitEnd(this);
         }
     }
@@ -149,7 +152,8 @@ public class QuerySpec {
         result = prime * result + ((includedFields == null) ? 0 : includedFields.hashCode());
         result = prime * result + ((includedRelations == null) ? 0 : includedRelations.hashCode());
         result = prime * result + ((pagingSpec == null) ? 0 : pagingSpec.hashCode());
-        result = prime * result + ((relatedSpecs == null) ? 0 : relatedSpecs.hashCode());
+        result = prime * result + ((typeRelatedSpecs == null) ? 0 : typeRelatedSpecs.hashCode());
+		result = prime * result + ((classRelatedSpecs == null) ? 0 : classRelatedSpecs.hashCode());
         result = prime * result + ((sort == null) ? 0 : sort.hashCode());
         return result;
     }
@@ -167,7 +171,8 @@ public class QuerySpec {
                 && CompareUtils.isEquals(includedFields, other.includedFields)
                 && CompareUtils.isEquals(includedRelations, other.includedRelations)
                 && CompareUtils.isEquals(pagingSpec, other.pagingSpec)
-                && CompareUtils.isEquals(relatedSpecs, other.relatedSpecs)
+                && CompareUtils.isEquals(typeRelatedSpecs, other.typeRelatedSpecs)
+				&& CompareUtils.isEquals(classRelatedSpecs, other.classRelatedSpecs)
                 && CompareUtils.isEquals(sort, other.sort);
     }
 
@@ -261,16 +266,21 @@ public class QuerySpec {
     }
 
     public Collection<QuerySpec> getNestedSpecs() {
-        return Collections.unmodifiableCollection(relatedSpecs.values());
+    	// Using a set to remove duplicate querySpec between typeRelatedSpecs and classRelatedSpecs
+    	Set<QuerySpec> allRelatedSpecs = new HashSet(typeRelatedSpecs.values());
+    	allRelatedSpecs.addAll(classRelatedSpecs.values());
+        return Collections.unmodifiableCollection(allRelatedSpecs);
     }
 
     public void setNestedSpecs(Collection<QuerySpec> specs) {
-        this.relatedSpecs.clear();
+    	this.typeRelatedSpecs.clear();
+        this.classRelatedSpecs.clear();
         for (QuerySpec spec : specs) {
-            if (spec.getResourceClass() != null) {
-                relatedSpecs.put(spec.getResourceClass(), spec);
-            } else {
-                relatedSpecs.put(spec.getResourceType(), spec);
+	    if (spec.getResourceType() != null) {
+                typeRelatedSpecs.put(spec.getResourceType(), spec);
+            } 
+        if (spec.getResourceClass() != null) {
+                classRelatedSpecs.put(spec.getResourceClass(), spec);
             }
         }
     }
@@ -303,7 +313,7 @@ public class QuerySpec {
         if (resourceType.equals(this.resourceType)) {
             return this;
         }
-        return relatedSpecs.get(resourceType);
+        return typeRelatedSpecs.get(resourceType);
     }
 
     /**
@@ -315,7 +325,7 @@ public class QuerySpec {
         if (resourceClass.equals(this.resourceClass)) {
             return this;
         }
-        return relatedSpecs.get(resourceClass);
+        return classRelatedSpecs.get(resourceClass);
     }
 
 
@@ -343,21 +353,23 @@ public class QuerySpec {
         verifyNotNull(targetResourceClass, targetResourceType);
 
         QuerySpec querySpec = null;
-        if (querySpec == null && targetResourceType != null) {
-            querySpec = getQuerySpec(targetResourceType);
-        }
-        if (querySpec == null && targetResourceClass != null) {
-            querySpec = getQuerySpec(targetResourceClass);
-        }
-        if (querySpec == null) {
-            querySpec = new QuerySpec(targetResourceClass, targetResourceType);
-            if (targetResourceClass != null) {
-                relatedSpecs.put(targetResourceClass, querySpec);
-            }
-            if (targetResourceType != null) {
-                relatedSpecs.put(targetResourceType, querySpec);
-            }
-        }
+        // First work with resourceType not null
+		if (targetResourceType != null) {
+			querySpec = getQuerySpec(targetResourceType);
+			if (querySpec == null) {
+				querySpec = new QuerySpec(targetResourceClass, targetResourceType);
+				typeRelatedSpecs.put(targetResourceType, querySpec);
+				if (targetResourceClass != null) {
+					classRelatedSpecs.put(targetResourceClass, querySpec);
+				}
+			}
+		} else { // Fallback to targetResourceClass which can't be null because of verifyNotNull
+			querySpec = getQuerySpec(targetResourceClass);
+			if (querySpec == null) {
+				querySpec = new QuerySpec(targetResourceClass);
+				classRelatedSpecs.put(targetResourceClass, querySpec);
+			}
+		}
         querySpec.setPaging(pagingSpec);
         return querySpec;
     }
@@ -375,7 +387,7 @@ public class QuerySpec {
         if (relatedResourceClass.equals(resourceClass)) {
             throw new IllegalArgumentException("cannot set related spec with root resourceClass");
         }
-        relatedSpecs.put(relatedResourceClass, relatedSpec);
+        classRelatedSpecs.put(relatedResourceClass, relatedSpec);
     }
 
     public QuerySpec clone() {
@@ -395,11 +407,12 @@ public class QuerySpec {
         for (FilterSpec filterSpec : filters) {
             copy.filters.add(filterSpec.clone());
         }
-        Iterator<Entry<Object, QuerySpec>> iterator = relatedSpecs.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Entry<Object, QuerySpec> entry = iterator.next();
-            copy.relatedSpecs.put(entry.getKey(), entry.getValue().clone());
-        }
+		for (Entry<String, QuerySpec> entry : typeRelatedSpecs.entrySet()) {
+			copy.typeRelatedSpecs.put(entry.getKey(), entry.getValue().clone());
+		}
+		for (Entry<Class<?>, QuerySpec> entry : classRelatedSpecs.entrySet()) {
+			copy.classRelatedSpecs.put(entry.getKey(), entry.getValue().clone());
+		}
         return copy;
     }
 
@@ -415,7 +428,8 @@ public class QuerySpec {
                 (!sort.isEmpty() ? ", sort=" + sort : "") +
                 (!includedFields.isEmpty() ? ", includedFields=" + includedFields : "") +
                 (!includedRelations.isEmpty() ? ", includedRelations=" + includedRelations : "") +
-                (!relatedSpecs.isEmpty() ? ", relatedSpecs=" + relatedSpecs : "") +
+                (!typeRelatedSpecs.isEmpty() ? ", typeRelatedSpecs=" + typeRelatedSpecs : "") +
+				(!classRelatedSpecs.isEmpty() ? ", classRelatedSpecs=" + classRelatedSpecs : "") +
                 ']';
     }
 }
