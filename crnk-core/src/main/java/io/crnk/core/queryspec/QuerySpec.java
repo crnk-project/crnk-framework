@@ -278,7 +278,8 @@ public class QuerySpec {
         for (QuerySpec spec : specs) {
 	    if (spec.getResourceType() != null) {
                 typeRelatedSpecs.put(spec.getResourceType(), spec);
-            } else {
+            } 
+        if (spec.getResourceClass() != null) {
                 classRelatedSpecs.put(spec.getResourceClass(), spec);
             }
         }
