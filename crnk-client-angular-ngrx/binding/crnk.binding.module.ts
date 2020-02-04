@@ -1,9 +1,9 @@
 import {Injector, NgModule} from '@angular/core';
-import 'rxjs/add/operator/zip';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/distinct';
-import 'rxjs/add/operator/switch';
+
+
+
+
+
 import {CrnkBindingService} from './crnk.binding.service';
 import {NgrxJsonApiModule, NgrxJsonApiService} from 'ngrx-json-api';
 import {CrnkBindingUtils} from './crnk.binding.utils';

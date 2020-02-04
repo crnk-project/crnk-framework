@@ -1,6 +1,4 @@
-import {Observable} from "rxjs/Observable";
-import {Subject} from "rxjs/Subject";
-import {Subscription} from "rxjs/Subscription";
+import {Observable, Subject, Subscription, ReplaySubject} from "rxjs";
 import * as _ from "lodash";
 import "rxjs/add/operator/zip";
 import "rxjs/add/operator/do";
@@ -23,7 +21,6 @@ import {
 } from 'ngrx-json-api';
 import {Store} from "@ngrx/store";
 import {getNgrxJsonApiStore$, getStoreData$} from './crnk.binding.utils';
-import {ReplaySubject} from "rxjs/ReplaySubject";
 
 
 interface ResourceFieldRef {

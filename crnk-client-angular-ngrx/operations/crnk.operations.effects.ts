@@ -3,18 +3,18 @@ import * as _ from 'lodash';
 import {Injectable, Injector} from '@angular/core';
 import {Action, Store} from '@ngrx/store';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/concatAll';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/mapTo';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/switchMap';
-import 'rxjs/add/operator/switchMapTo';
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/toArray';
-import 'rxjs/add/operator/withLatestFrom';
+import {Observable} from 'rxjs';
+
+
+
+
+
+
+
+
+
+
+
 import {Headers, Http, Request, RequestMethod, RequestOptions} from '@angular/http';
 import {
 	ApiApplyInitAction,

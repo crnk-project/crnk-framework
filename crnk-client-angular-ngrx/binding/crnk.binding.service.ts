@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
-import 'rxjs/add/operator/zip';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/distinct';
-import 'rxjs/add/operator/switch';
+
+
+
+
+
 import {DataTableBinding, DataTableBindingConfig} from './crnk.binding.table';
 import {FormBinding, FormBindingConfig} from './crnk.binding.form';
 import {SelectorBinding, SelectorBindingConfig} from './crnk.binding.selector';

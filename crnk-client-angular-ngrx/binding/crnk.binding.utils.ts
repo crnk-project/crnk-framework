@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import 'rxjs/add/operator/zip';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/distinct';
-import 'rxjs/add/operator/switch';
-import 'rxjs/add/operator/filter';
+
+
+
+
+
+
 import {
 	NgrxJsonApiStore,
 	NgrxJsonApiStoreData,
@@ -17,7 +17,7 @@ import {
 } from 'ngrx-json-api';
 
 import * as _ from 'lodash';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { Expression } from '../expression';
 

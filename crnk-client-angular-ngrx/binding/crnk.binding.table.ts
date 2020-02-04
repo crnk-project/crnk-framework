@@ -1,11 +1,10 @@
-import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
+import { Subject ,  Observable ,  Subscription } from 'rxjs';
 import * as _ from 'lodash';
-import 'rxjs/add/operator/zip';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/distinct';
-import 'rxjs/add/operator/switch';
+
+
+
+
+
 import {
 	Direction,
 	FilteringParam,
@@ -20,7 +19,6 @@ import { CrnkBindingUtils, toQueryPath } from './crnk.binding.utils';
 // TODO get rid of this? or support multiple ones, only dependency to primeng here...
 import { LazyLoadEvent } from 'primeng/primeng';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs/Subscription';
 
 export interface DataTableImplementationContext {
 

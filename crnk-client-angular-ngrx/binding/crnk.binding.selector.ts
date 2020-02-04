@@ -1,5 +1,4 @@
-import {Subject} from "rxjs/Subject";
-import {Observable} from "rxjs/Observable";
+import {Subject, Observable} from "rxjs";
 import * as _ from "lodash";
 import "rxjs/add/operator/zip";
 import "rxjs/add/operator/do";

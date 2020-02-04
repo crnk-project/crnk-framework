@@ -10,7 +10,7 @@ import {
 import {AbstractControl, NgForm} from '@angular/forms';
 import {ResourceError} from 'ngrx-json-api';
 import {Path} from '../expression/crnk.expression';
-import {Subscription} from 'rxjs/Subscription';
+import {Subscription} from 'rxjs';
 
 
 export interface ErrorEntry {
