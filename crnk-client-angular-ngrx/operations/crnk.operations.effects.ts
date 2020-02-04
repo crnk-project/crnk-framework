@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 
 import {Injectable, Injector} from '@angular/core';
 import {Action, Store} from '@ngrx/store';
-import {Actions, Effect} from '@ngrx/effects';
+import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/catch';
@@ -62,9 +62,9 @@ export class OperationsEffects {
 		'Accept': 'application/json-patch+json'
 	});
 
-	@Effect() applyResources$ = this.actions$
-		.ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
-		.withLatestFrom(this.store, (action, state: any) => {
+	@Effect() applyResources$ = this.actions$.pipe(
+		ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
+			.withLatestFrom(this.store, (action, state: any) => {
 			const initAction = action as ApiApplyInitAction;
 			const zoneId = initAction.zoneId;
 			const ngrxstore = getNgrxJsonApiZone(state, zoneId);
@@ -124,7 +124,7 @@ export class OperationsEffects {
 					return Observable.of(new ApiApplyFailAction(actions, zoneId));
 				});
 		})
-		.flatMap(actions => actions);
+	).flatMap(actions => actions);
 
 
 
