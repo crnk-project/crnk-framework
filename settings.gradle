@@ -4,6 +4,7 @@ include ':crnk-home'
 include ':crnk-test'
 include ':crnk-testkit'
 include ':crnk-client'
+include ':crnk-client-angular-ngrx'
 include ':crnk-meta'
 include ':crnk-validation'
 
