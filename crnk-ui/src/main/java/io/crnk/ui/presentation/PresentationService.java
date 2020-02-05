@@ -3,6 +3,8 @@ package io.crnk.ui.presentation;
 import java.util.List;
 
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
@@ -94,28 +96,37 @@ public class PresentationService {
 			throw new UnsupportedOperationException();
 		}
 
-		private QuerySpec createQuerySpec() {
-			QuerySpec querySpec = new QuerySpec(MetaResource.class);
-			querySpec.setLimit(1000L);
-			querySpec.includeRelation(PathSpec.of("attributes"));
-			querySpec.includeRelation(PathSpec.of("repository"));
+	}
 
-			QuerySpec dataTypeSpec = new QuerySpec(MetaDataObject.class);
-			dataTypeSpec.includeRelation(PathSpec.of("attributes", "type"));
-			querySpec.putRelatedSpec(MetaDataObject.class, dataTypeSpec);
+	protected QuerySpec createQuerySpec() {
+		QuerySpec querySpec = new QuerySpec(MetaResource.class);
+		querySpec.setLimit(1000L);
+		querySpec.includeRelation(PathSpec.of("attributes"));
+		querySpec.includeRelation(PathSpec.of("repository"));
 
-			QuerySpec typeSpec = new QuerySpec(MetaType.class);
-			typeSpec.includeRelation(PathSpec.of("elementType"));
-			querySpec.putRelatedSpec(MetaType.class, typeSpec);
+		QuerySpec dataTypeSpec = new QuerySpec(MetaDataObject.class);
+		dataTypeSpec.includeRelation(PathSpec.of("attributes", "type"));
+		querySpec.putRelatedSpec(MetaDataObject.class, dataTypeSpec);
 
-			QuerySpec attrSpec = new QuerySpec(MetaAttribute.class);
-			attrSpec.includeRelation(PathSpec.of("type"));
-			querySpec.putRelatedSpec(MetaAttribute.class, attrSpec);
+		QuerySpec typeSpec = new QuerySpec(MetaType.class);
+		typeSpec.includeRelation(PathSpec.of("elementType"));
+		querySpec.putRelatedSpec(MetaType.class, typeSpec);
 
-			QuerySpec fieldSpec = new QuerySpec(MetaResourceField.class);
-			fieldSpec.includeRelation(PathSpec.of("type"));
-			querySpec.putRelatedSpec(MetaResourceField.class, fieldSpec);
-			return querySpec;
-		}
+		QuerySpec attrSpec = new QuerySpec(MetaAttribute.class);
+		attrSpec.includeRelation(PathSpec.of("type"));
+		querySpec.putRelatedSpec(MetaAttribute.class, attrSpec);
+
+		QuerySpec fieldSpec = new QuerySpec(MetaResourceField.class);
+		fieldSpec.includeRelation(PathSpec.of("type"));
+		querySpec.putRelatedSpec(MetaResourceField.class, fieldSpec);
+
+		filterResources(querySpec);
+
+		return querySpec;
+	}
+
+	protected void filterResources(QuerySpec querySpec) {
+		FilterSpec metaFilter = PathSpec.of("resourceType").filter(FilterOperator.LIKE, "meta%");
+		querySpec.addFilter(FilterSpec.not(metaFilter));
 	}
 }
