@@ -2,6 +2,7 @@ package io.crnk.core.queryspec.mapper;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -228,6 +229,32 @@ public class JsonFilterSpecMapperTest {
 		JsonNode serializedJsonNode = mapper.serialize(filterSpecs);
 		checkNodeEquals(jsonNode, serializedJsonNode);
 		Assert.assertFalse(mapper.isNested(filterSpecs));
+	}
+
+	@Test
+	public void filterTwoAttributesOfSameRelationUsingAnd() {
+		final FilterSpec filterSpec = FilterSpec.and(
+				new FilterSpec(PathSpec.of("project.name"), FilterOperator.EQ, "test"),
+				new FilterSpec(PathSpec.of("project.description"), FilterOperator.EQ, "test test")
+		);
+
+		final List<FilterSpec> serializedFilterSpecs = Collections.singletonList(filterSpec);
+		final JsonNode jsonNode = mapper.serialize(serializedFilterSpecs);
+
+		Assert.assertEquals("{\"AND\":[{\"project\":{\"name\":\"test\"}},{\"project\":{\"description\":\"test test\"}}]}", jsonNode.toString());
+	}
+
+	@Test
+	public void filterTwoAttributesOfSameRelationUsingOr() {
+		final FilterSpec filterSpec = FilterSpec.or(
+				new FilterSpec(PathSpec.of("project.name"), FilterOperator.EQ, "test"),
+				new FilterSpec(PathSpec.of("project.description"), FilterOperator.EQ, "test test")
+		);
+
+		final List<FilterSpec> serializedFilterSpecs = Collections.singletonList(filterSpec);
+		final JsonNode jsonNode = mapper.serialize(serializedFilterSpecs);
+
+		Assert.assertEquals("{\"OR\":[{\"project\":{\"name\":\"test\"}},{\"project\":{\"description\":\"test test\"}}]}", jsonNode.toString());
 	}
 
 	private void checkNodeEquals(JsonNode expected, JsonNode actual) throws JsonProcessingException {

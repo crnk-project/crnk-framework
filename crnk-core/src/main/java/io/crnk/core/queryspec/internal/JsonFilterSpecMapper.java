@@ -101,7 +101,7 @@ public class JsonFilterSpecMapper {
 	}
 
 	public JsonNode serialize(List<FilterSpec> filterSpecs) {
-		return serialize(filterSpecs, FilterOperator.AND);
+		return serialize(filterSpecs, null);
 	}
 
 	private JsonNode serialize(List<FilterSpec> filterSpecs, FilterOperator operator) {
@@ -109,7 +109,12 @@ public class JsonFilterSpecMapper {
 
 		ObjectMapper objectMapper = context.getObjectMapper();
 
-		if (operator == FilterOperator.AND) {
+		// Operators nesting multiple filters: serialize to JSON array
+		if (operator == FilterOperator.AND || operator == FilterOperator.OR) {
+			ArrayNode arrayNode = objectMapper.createArrayNode();
+			filterSpecs.forEach(it -> arrayNode.add(serializeFilter(it)));
+			return arrayNode;
+		} else {
 			ObjectNode objectNode = objectMapper.createObjectNode();
 			for (FilterSpec filterSpec : filterSpecs) {
 				PathSpec path = filterSpec.getPath();
@@ -133,11 +138,6 @@ public class JsonFilterSpecMapper {
 				}
 			}
 			return objectNode;
-		}
-		else {
-			ArrayNode arrayNode = objectMapper.createArrayNode();
-			filterSpecs.stream().forEach(it -> arrayNode.add(serializeFilter(it)));
-			return arrayNode;
 		}
 	}
 
