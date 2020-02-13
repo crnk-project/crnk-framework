@@ -10,8 +10,10 @@ import java.nio.charset.Charset;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.core.repository.InMemoryResourceRepository;
 import io.crnk.data.facet.FacetModule;
 import io.crnk.data.facet.FacetModuleConfig;
+import io.crnk.gen.typescript.model.DottedResourceName;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
@@ -81,6 +83,7 @@ public class GenerateTypescriptTaskTest {
 		assertExists("tasks.ts");
 		assertExists("facet.ts");
 		assertExists("facet.value.ts");
+		assertExists("some/dotted.resource.ts");
 		if (resourceFormat == TSResourceFormat.PLAINJSON) {
 			assertExists("crnk.ts");
 
@@ -141,6 +144,7 @@ public class GenerateTypescriptTaskTest {
 		module.addRepository(new TaskToProjectRepository());
 		module.addRepository(new ScheduleStatusRepositoryImpl());
 		module.addRepository(new PrimitiveAttributeRepository());
+		module.addRepository(new InMemoryResourceRepository(DottedResourceName.class));
 		return module;
 	}
 
@@ -163,11 +167,9 @@ public class GenerateTypescriptTaskTest {
 		String expectedSourceFileName;
 		if (format == TSResourceFormat.PLAINJSON) {
 			expectedSourceFileName = "expected_schedule_plain_json.ts";
-		}
-		else if (expressions) {
+		} else if (expressions) {
 			expectedSourceFileName = "expected_schedule_with_expressions.ts";
-		}
-		else {
+		} else {
 			expectedSourceFileName = "expected_schedule_without_expressions.ts";
 		}
 
