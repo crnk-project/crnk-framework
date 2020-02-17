@@ -34,12 +34,19 @@ import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceException;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.PathSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.pagingspec.NumberSizePagingSpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.core.resource.meta.JsonLinksInformation;
 import io.crnk.core.resource.meta.JsonMetaInformation;
-
+import io.crnk.core.resource.meta.MetaInformation;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -52,6 +59,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
@@ -246,6 +254,10 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 					ResourceFilterDirectory filterDirectory = context.getResourceFilterDirectory();
 					if (!checkAccess() || filterDirectory.canAccess(field, getHttpMethod(), queryAdapter.getQueryContext(), ignoreImmutableFields())) {
 						Optional<Result> result;
+						if (field.isMappedBy()) {
+							processMappedByRelationship(relationship, field, resource, resourceInformation, queryAdapter);
+							continue;
+						}
 						if (field.isCollection()) {
 							//noinspection unchecked
 							result = setRelationsFieldAsync(newResource,
@@ -266,6 +278,112 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 		ResultFactory resultFactory = context.getResultFactory();
 		return resultFactory.zip((List) results);
+	}
+
+	protected void processMappedByRelationship(Relationship relationship, ResourceField field, Resource resource,
+										  ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
+		RegistryEntry oppositeEntry = context.getResourceRegistry().getEntry(field.getOppositeResourceType());
+		ResourceInformation oppositeInformation = oppositeEntry.getResourceInformation();
+		ResourceField oppositeField = oppositeInformation.findRelationshipFieldByName(field.getOppositeName());
+		// First get all opposite resources that refer to the current resource and those that are in the relationship ids
+		// Opposite resources that currently refer to this resource
+		Class localIdFieldType = resourceInformation.getIdField().getType();
+		TypeParser typeParser = context.getTypeParser();
+		Serializable localTypeId = (Serializable) typeParser.parse(resource.getId(), localIdFieldType);
+		QuerySpec referenceQuerySpec = new QuerySpec(oppositeInformation.getResourceType());
+		referenceQuerySpec.setPaging(queryAdapter.getPagingSpec());
+		String referenceName = field.getOppositeName() + "." + resourceInformation.getIdField().getUnderlyingName();
+		referenceQuerySpec.addFilter(PathSpec.of(referenceName).filter(FilterOperator.EQ, localTypeId));
+		QueryAdapter referenceQueryAdapter = new QuerySpecAdapter(referenceQuerySpec, context.getResourceRegistry(), queryAdapter.getQueryContext());
+		Result<MetaInformation> metaResult = oppositeEntry.getResourceRepository().findAll(referenceQueryAdapter).map(JsonApiResponse::getMetaInformation);
+		DefaultPagedMetaInformation pagedMetaInformation = (DefaultPagedMetaInformation) metaResult.get();
+		if (referenceQueryAdapter.getPagingSpec() instanceof NumberSizePagingSpec) {
+			NumberSizePagingSpec numberSizePagingSpec = (NumberSizePagingSpec)referenceQueryAdapter.getPagingSpec();
+			numberSizePagingSpec.setSize(pagedMetaInformation.getTotalResourceCount().intValue());
+		} else if (referenceQueryAdapter.getPagingSpec() instanceof OffsetLimitPagingSpec) {
+			OffsetLimitPagingSpec offsetLimitPagingSpec = (OffsetLimitPagingSpec)referenceQueryAdapter.getPagingSpec();
+			offsetLimitPagingSpec.setOffset(0);
+			offsetLimitPagingSpec.setLimit(pagedMetaInformation.getTotalResourceCount());
+		}
+
+		Result<Object> previousResult = oppositeEntry.getResourceRepository().findAll(referenceQueryAdapter).map(JsonApiResponse::getEntity);
+
+		// Opposite resources that are in the relationship ids
+		List<Result<Object>> relatedResults = new ArrayList<>();
+		if (relationship.getData().isPresent()) {
+			LinkedList relationshipTypedIds = new LinkedList<>();
+			ArrayList<ResourceIdentifier> relationshipIds = new ArrayList<>();
+			if (field.isCollection()) {
+				relationshipIds.addAll(relationship.getCollectionData().get());
+			} else {
+				ResourceIdentifier relationshipId = (ResourceIdentifier) relationship.getData().get();
+				if (relationshipId != null) {
+					relationshipIds.add(relationshipId);
+				}
+			}
+
+			for (ResourceIdentifier resourceId : relationshipIds) {
+				Class idFieldType = oppositeInformation.getIdField().getType();
+				Serializable typedRelationshipId = parseId(resourceId, idFieldType);
+				relationshipTypedIds.add(typedRelationshipId);
+			}
+
+
+			for (int i = 0; i < relationshipIds.size(); i++) {
+				Serializable typedRelationshipId = (Serializable) relationshipTypedIds.get(i);
+				relatedResults.add(fetchRelated(oppositeEntry, typedRelationshipId, queryAdapter));
+			}
+		}
+
+		QuerySpec oppositeUpdateQuerySpec = new QuerySpec(oppositeInformation.getResourceType());
+		QueryAdapter oppositeQueryAdapter = new QuerySpecAdapter(oppositeUpdateQuerySpec, context.getResourceRegistry(), queryAdapter.getQueryContext());
+
+		DefaultResourceList<Object> oldList = (DefaultResourceList) previousResult.get();
+
+		DefaultResourceList<Object> newList = new DefaultResourceList<>();
+		if (!relatedResults.isEmpty()) {
+			for (Result<Object> relatedResult : relatedResults) {
+				Object element = relatedResult.get();
+				if (element != null) {
+					newList.add(element);
+				}
+			}
+		}
+
+		// Proceed to a diff to limit number of update operations
+		ResourceFieldAccessor oppositeIdAccessor = oppositeInformation.getIdField().getAccessor();
+		List<Object> oldListIds = oldList.stream().map(oppositeIdAccessor::getValue).collect(Collectors.toList());
+		List<Object> newListIds = newList.stream().map(oppositeIdAccessor::getValue).collect(Collectors.toList());
+
+		// Get elements in oldList but not in newList
+		List<Object> elementsToRemove = oldList.stream().filter(oObject -> !newListIds.contains(oppositeIdAccessor.getValue(oObject))).collect(Collectors.toList());
+		// Get elements in newList but not in oldList
+		List<Object> elementsToAdd = newList.stream().filter(nObject -> !oldListIds.contains(oppositeIdAccessor.getValue(nObject))).collect(Collectors.toList());
+
+		if (oppositeField.isCollection()) {
+			for (Object element : elementsToRemove) {
+				List<Object> ids = (List<Object>) oppositeField.getIdAccessor().getValue(element);
+				ids.remove(localTypeId);
+				oppositeField.getIdAccessor().setValue(element, ids);
+				oppositeEntry.getResourceRepository().update(element, oppositeQueryAdapter);
+			}
+
+			for (Object element : elementsToAdd) {
+				List<Object> ids = (List<Object>) oppositeField.getIdAccessor().getValue(element);
+				ids.add(localTypeId);
+				oppositeEntry.getResourceRepository().update(element, oppositeQueryAdapter);
+			}
+		} else {
+			for (Object element : elementsToRemove) {
+				oppositeField.getIdAccessor().setValue(element, null);
+				oppositeEntry.getResourceRepository().update(element, oppositeQueryAdapter);
+			}
+
+			for (Object element : elementsToAdd) {
+				oppositeField.getIdAccessor().setValue(element, localTypeId);
+				oppositeEntry.getResourceRepository().update(element, oppositeQueryAdapter);
+			}
+		}
 	}
 
 	protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry,
