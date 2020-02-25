@@ -30,4 +30,12 @@ public class UrlUtils {
 		}
 		return builder.toString();
 	}
+
+	public static String appendRelativePath(String baseUrl, String relativePath) {
+		int sep = baseUrl.indexOf("?");
+		if (sep != -1) {
+			return baseUrl.substring(0, sep) + relativePath + baseUrl.substring(sep);
+		}
+		return baseUrl + relativePath;
+	}
 }

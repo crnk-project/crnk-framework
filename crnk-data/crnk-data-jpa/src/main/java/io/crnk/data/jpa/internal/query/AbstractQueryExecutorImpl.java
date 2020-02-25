@@ -63,9 +63,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	public JpaQueryExecutor<T> fetch(List<String> attrPath) {
 		// include path an all prefix paths
 		MetaAttributePath path = meta.resolvePath(attrPath);
-		for (int i = 1; i <= path.length(); i++) {
-			fetchPaths.add(path.subPath(0, i));
-		}
+		fetchPaths.add(path);
 		return this;
 	}
 

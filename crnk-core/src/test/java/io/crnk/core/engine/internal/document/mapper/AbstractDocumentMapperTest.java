@@ -68,7 +68,11 @@ public abstract class AbstractDocumentMapperTest {
     }
 
     protected String getLinkText(JsonNode link) {
-        return link.asText();
+    	if (link.isTextual()) {
+    		return link.asText();
+		} else {
+    		return link.get("href").asText();
+		}
     }
 
 }

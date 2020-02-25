@@ -5,8 +5,10 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.information.resource.VersionRange;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.resource.ResourceTypeHolder;
+import io.crnk.core.resource.annotations.JsonApiEmbeddable;
 import io.crnk.core.resource.annotations.JsonApiField;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
@@ -98,6 +100,12 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
             return Optional.of(VersionRange.of(jsonApiVersion.min(), jsonApiVersion.max()));
         }
         return Optional.empty();
+    }
+
+    @Override
+    public boolean isEmbeddedType(BeanAttributeInformation attributeDesc) {
+        Class elementType = ClassUtils.getRawType(ClassUtils.getElementType(attributeDesc.getImplementationType()));
+        return elementType.getAnnotation(JsonApiEmbeddable.class) != null;
     }
 
     @Override

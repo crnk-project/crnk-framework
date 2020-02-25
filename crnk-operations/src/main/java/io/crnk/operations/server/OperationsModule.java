@@ -151,7 +151,7 @@ public class OperationsModule implements Module {
     private void enrichTypeIdInformation(List<Operation> operations, QueryContext queryContext) {
         ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
         for (Operation operation : operations) {
-            if (operation.getOp().equalsIgnoreCase(HttpMethod.DELETE.toString())) {
+            if (Arrays.asList(HttpMethod.DELETE.toString(), HttpMethod.GET.toString()).contains(operation.getOp())) {
                 String path = OperationParameterUtils.parsePath(operation.getPath());
                 PathBuilder pathBuilder = new PathBuilder(resourceRegistry, moduleContext.getTypeParser());
                 JsonPath jsonPath = pathBuilder.build(path, queryContext);
@@ -203,12 +203,13 @@ public class OperationsModule implements Module {
 
             Operation operation = orderedOperation.getOperation();
             String method = operation.getOp();
-            JsonPath path = pathBuilder.build(operation.getPath(), queryContext);
-            orderedOperation.setPath(path);
-            if (path == null) {
+            String path = OperationParameterUtils.parsePath(operation.getPath());
+            JsonPath jsonPath = pathBuilder.build(path, queryContext);
+            orderedOperation.setPath(jsonPath);
+            if (jsonPath == null) {
                 throw new BadRequestException("invalid path: " + operation.getPath());
             }
-            String type = path.getRootEntry().getResourceInformation().getResourceType();
+            String type = jsonPath.getRootEntry().getResourceInformation().getResourceType();
 
             if (!method.equals(bulkMethod) || !type.equals(bulkType)) {
                 if (!bulk.isEmpty()) {

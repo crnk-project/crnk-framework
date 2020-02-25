@@ -31,6 +31,10 @@ public class ObjectLinkDocumentMapperTest extends DocumentMapperTest {
 
 	@Override
 	protected String getLinkText(JsonNode link) {
-		return link.get("href").asText();
+		if (link.isTextual()) {
+			return link.asText();
+		} else {
+			return link.get("href").asText();
+		}
 	}
 }

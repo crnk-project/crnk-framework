@@ -19,6 +19,7 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.meta.JsonLinksInformation;
 import io.crnk.core.resource.meta.JsonMetaInformation;
@@ -35,12 +36,12 @@ public class ClientStubBase {
 
     protected CrnkClient client;
 
-    protected JsonApiUrlBuilder urlBuilder;
+    protected UrlBuilder urlBuilder;
 
     protected Class<?> resourceClass;
 
 
-    public ClientStubBase(CrnkClient client, JsonApiUrlBuilder urlBuilder, Class<?> resourceClass) {
+    public ClientStubBase(CrnkClient client, UrlBuilder urlBuilder, Class<?> resourceClass) {
         this.client = client;
         this.urlBuilder = urlBuilder;
         this.resourceClass = resourceClass;

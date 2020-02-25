@@ -26,7 +26,10 @@ public ResourceList<Task> findAll(QuerySpec querySpec) {
 
 Behind the scenes it makes use of `InMemoryEvaluator` that offers further customization options.
 While sorting makes use of `Comparable`, filtering makes use of `FilterOperator.matches(value1, value2)`.
-Custom `FilterOperator` implementations may extend the feature set of  `InMemoryEvaluator`.
+Custom `FilterOperator` implementations may extend the feature set of  `InMemoryEvaluator`. Paging
+is implemented by simply truncating the result list. Inclusions and field sets are honored by
+by the Crnk engine when returning results (other non-in-memory repositories may want to implement
+this functionality directly in the repository to avoid fetching undesired data in the first place).
 
 Based on `QuerySpec.apply(...)` there is a `InMemoryResourceRepository` that simply holds resources in a
 `ConcurrentHashMap`. `POST` and `PATCH` will insert and update resources in the map, while `DELETE` will remove

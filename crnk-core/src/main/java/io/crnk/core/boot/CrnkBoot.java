@@ -296,7 +296,7 @@ public class CrnkBoot {
 		ResourceFilterDirectory filterDirectory = moduleRegistry.getContext().getResourceFilterDirectory();
 		ResultFactory resultFactory = moduleRegistry.getContext().getResultFactory();
 		return new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterDirectory, resultFactory,
-				serverInfo);
+				serverInfo, moduleRegistry.getUrlBuilder());
 	}
 
 	protected ControllerRegistry createControllerRegistry() {

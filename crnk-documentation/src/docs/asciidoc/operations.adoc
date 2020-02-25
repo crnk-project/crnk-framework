@@ -169,10 +169,9 @@ to have `application/json-patch+json`, otherwise the `OperationsModule` will ign
 
 The current limitations of the implementation are:
 
-- So far does not support bulk `GET` operations.
 - Does so far not support bulk update of relationships.
 
-With support for `POST`, `PATCH` and `DELETE` operations the most important building blocks should be in place.
+With support for `GET` (find-one only), `POST`, `PATCH` and `DELETE` operations the most important building blocks should be in place.
 The limitations are expected to be addressed at some point as well, contributions welcomed.
 
 There is experimental support for <<resource_bulk_repository,BulkResourceRepository>>. If multiple changes to the

@@ -254,6 +254,31 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
+	public void testMultipleIncludeNested() {
+		addTestWithManyRelations();
+
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+		querySpec.includeRelation(Arrays.asList(TestEntity.ATTR_manyRelatedValues, RelatedEntity.ATTR_otherEntity));
+		querySpec.includeRelation(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_otherEntity));
+		List<TestEntity> list = testRepo.findAll(querySpec);
+
+		Assert.assertEquals(1, list.size());
+		TestEntity testEntity = list.get(0);
+
+		RelatedEntity ontRelatedValue = testEntity.getOneRelatedValue();
+		Assert.assertNotNull(ontRelatedValue);
+		Assert.assertNotNull(ontRelatedValue.getOtherEntity());
+
+		List<RelatedEntity> manyRelatedValues = testEntity.getManyRelatedValues();
+		Assert.assertNotNull(manyRelatedValues);
+		Assert.assertEquals(5, manyRelatedValues.size());
+
+		// three out of five have a relationship defined
+		long n = manyRelatedValues.stream().filter(it -> it.getOtherEntity() != null).count();
+		Assert.assertEquals(3, n);
+	}
+
+	@Test
 	public void testFindOneTargetWithNullResult() {
 		TestEntity test = new TestEntity();
 		test.setId(2L);
@@ -533,6 +558,7 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 
 			List<Long> relatedIds = Arrays.asList(related1.getId(), related2.getId(), related3.getId(), related4.getId(), related5.getId());
 			relRepo.addRelations(test, relatedIds, TestEntity.ATTR_manyRelatedValues);
+			relRepo.setRelation(test, related1.getId(), TestEntity.ATTR_oneRelatedValue);
 			otherRelRepo.setRelation(related1, other1.getId(), RelatedEntity.ATTR_otherEntity);
 			otherRelRepo.setRelation(related2, other2.getId(), RelatedEntity.ATTR_otherEntity);
 			otherRelRepo.setRelation(related3, other3.getId(), RelatedEntity.ATTR_otherEntity);

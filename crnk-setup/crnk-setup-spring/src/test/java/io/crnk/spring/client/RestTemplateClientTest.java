@@ -113,7 +113,7 @@ public class RestTemplateClientTest {
 
         // links manipulated by test header sent along by http listener
         JsonLinksInformation links = (JsonLinksInformation) results.getLinks();
-        String modifiedUrl = links.as(SelfLinksInformation.class).getSelf();
+        String modifiedUrl = links.as(SelfLinksInformation.class).getSelf().getHref();
         Assert.assertEquals("Hello", modifiedUrl);
     }
 

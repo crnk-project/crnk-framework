@@ -40,6 +40,6 @@ public class RelationshipDelete extends AbstractNestedDeleteOperation implements
 
   @Override
   public String path() {
-    return OASUtils.getRelationshipsPath(metaResource, relatedMetaResource);
+    return OASUtils.getRelationshipsPath(metaResource, metaResourceField);
   }
 }

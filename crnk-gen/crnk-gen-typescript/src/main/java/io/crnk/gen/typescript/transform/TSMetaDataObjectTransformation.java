@@ -1,8 +1,10 @@
 package io.crnk.gen.typescript.transform;
 
+import java.util.Arrays;
 import java.util.List;
 
 import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.gen.typescript.TSResourceFormat;
 import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSArrayType;
@@ -53,7 +55,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		MetaDataObject metaDataObject = (MetaDataObject) element;
 
 		TSInterfaceType interfaceType = new TSInterfaceType();
-		interfaceType.setName(metaDataObject.getName());
+		interfaceType.setName(TypescriptUtils.toClassName(metaDataObject));
 		interfaceType.setExported(true);
 
 		if (metaDataObject instanceof MetaResource) {
@@ -131,7 +133,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private void setRelationshipsSuperType(TSInterfaceType interfaceType, MetaDataObject metaDataObject,
-			TSMetaTransformationContext context) {
+										   TSMetaTransformationContext context) {
 		// iterate over super types till (non-empty) one is found with a relationship interface definition
 		MetaDataObject current = metaDataObject;
 		while (current.getSuperType() != null && generateAsResource(current.getSuperType())) {
@@ -154,7 +156,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private void setAttributeSuperType(TSInterfaceType interfaceType, MetaDataObject metaDataObject,
-			TSMetaTransformationContext context) {
+									   TSMetaTransformationContext context) {
 		// iterate over super types till (non-empty) one is found with a attributes interface definition
 		MetaDataObject current = metaDataObject;
 		while (current.getSuperType() != null && generateAsResource(current.getSuperType())) {
@@ -195,7 +197,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private static void generateResourceFields(TSMetaTransformationContext context, TSInterfaceType interfaceType,
-			MetaDataObject meta) {
+											   MetaDataObject meta) {
 
 		boolean jsonapi = context.getResourceFormat() == TSResourceFormat.JSONAPI;
 
@@ -257,7 +259,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private static void generateResourceField(MetaAttribute attr, TSMetaTransformationContext context,
-			TSInterfaceType interfaceType, TSInterfaceType attributesType, TSInterfaceType relationshipsType) {
+											  TSInterfaceType interfaceType, TSInterfaceType attributesType, TSInterfaceType relationshipsType) {
 
 		LOGGER.debug("transforming field {}", attr.getName());
 
@@ -298,7 +300,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private static void generateAttributes(TSMetaTransformationContext context, TSInterfaceType interfaceType,
-			MetaDataObject element) {
+										   MetaDataObject element) {
 		for (MetaAttribute attr : element.getDeclaredAttributes()) {
 
 			LOGGER.debug("transforming attribute {}", attr.getName());
@@ -344,7 +346,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private static void setupParent(TSMetaTransformationContext context, TSInterfaceType interfaceType,
-			MetaDataObject metaDataObject) {
+									MetaDataObject metaDataObject) {
 		TSContainerElement parent = null;
 
 		// move links and meta information to the resource itself

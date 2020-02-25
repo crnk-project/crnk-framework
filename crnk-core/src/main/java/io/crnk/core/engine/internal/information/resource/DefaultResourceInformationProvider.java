@@ -68,7 +68,7 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
     public ResourceInformation build(Class<?> resourceClass, boolean allowNonResourceBaseClass) {
         ResourceFieldAccess resourceAccess = getResourceAccess(resourceClass);
 
-        List<ResourceField> resourceFields = getResourceFields(resourceClass, resourceAccess);
+        List<ResourceField> resourceFields = getResourceFields(resourceClass, resourceAccess, false);
 
         String resourceType = getResourceType(resourceClass, allowNonResourceBaseClass);
         String resourcePath = getResourcePath(resourceClass, allowNonResourceBaseClass);

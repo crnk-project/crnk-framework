@@ -197,8 +197,15 @@ public class JpaEntityRepositoryBase<T, I> extends JpaRepositoryBase<T> implemen
 	}
 
 	/**
-	 * By default LookupIncludeBehavior.ALWAYS is in place and we let the relationship repositories load the relations. There
-	 * is no need to do join fetches, which can lead to problems with paging (evaluated in memory instead of the db).
+	 * By default LookupIncludeBehavior.ALWAYS is in place and relationships are loaded by querying the
+	 * respective resource repository. This happens internally by Crnk when resolving requested inclusions.
+	 * This should be sufficient for most applications. The implementation is highly efficient also for
+	 * complex object graphs. And every single subgraph honors Crnk properties like enforced security.
+	 * <p>
+	 * Still, this flags allows to change the behavior and let Hibernate build a subgraph to query relationships
+	 * similar to the Crnk inclusion mechanism. While generally not necessary, it can proof useful if some
+	 * of the relationships should be  fetched eagerly do be available on the backend (either directly in the repository
+	 * or by backend code calling the repository without involving the rest layer).
 	 *
 	 * @return relation will be eagerly fetched if true
 	 */

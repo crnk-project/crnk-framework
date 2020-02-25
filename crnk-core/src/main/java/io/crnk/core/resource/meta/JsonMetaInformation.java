@@ -45,7 +45,7 @@ public class JsonMetaInformation implements MetaInformation, CastableInformation
 		}
 	}
 
-	protected static <T> T createInterfaceJsonAdapter(Class<T> interfaceClass, JsonNode data, final ObjectMapper mapper) {
+	protected static <T> T 	createInterfaceJsonAdapter(Class<T> interfaceClass, JsonNode data, final ObjectMapper mapper) {
 		Class[] interfaces = new Class[] { interfaceClass };
 		return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, new InvocationHandler() {
 			@Override

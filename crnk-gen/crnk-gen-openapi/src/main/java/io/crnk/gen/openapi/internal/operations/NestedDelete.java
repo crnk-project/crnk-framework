@@ -41,6 +41,6 @@ public class NestedDelete extends AbstractNestedDeleteOperation implements OASOp
 
   @Override
   public String path() {
-    return OASUtils.getNestedPath(metaResource, relatedMetaResource);
+    return OASUtils.getNestedPath(metaResource, metaResourceField);
   }
 }

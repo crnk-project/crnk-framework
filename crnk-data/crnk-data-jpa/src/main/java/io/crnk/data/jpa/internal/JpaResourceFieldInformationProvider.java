@@ -3,10 +3,12 @@ package io.crnk.data.jpa.internal;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProviderBase;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.resource.annotations.SerializeType;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -53,6 +55,12 @@ public class JpaResourceFieldInformationProvider extends ResourceFieldInformatio
             return Optional.of(false);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public boolean isEmbeddedType(BeanAttributeInformation attributeDesc) {
+        Class elementType = ClassUtils.getRawType(ClassUtils.getElementType(attributeDesc.getImplementationType()));
+        return elementType.getAnnotation(Embeddable.class) != null;
     }
 
     @Override

@@ -8,19 +8,35 @@ package io.crnk.core.resource.links;
  */
 public interface PagedLinksInformation extends LinksInformation {
 
-	String getFirst();
+	Link getFirst();
 
-	void setFirst(String first);
+	void setFirst(Link first);
 
-	String getLast();
+	default void setFirst(String first) {
+		setFirst(new DefaultLink(first));
+	}
 
-	void setLast(String last);
+	Link getLast();
 
-	String getNext();
+	void setLast(Link last);
 
-	void setNext(String next);
+	default void setLast(String last) {
+		setLast(new DefaultLink(last));
+	}
 
-	String getPrev();
+	Link getNext();
 
-	void setPrev(String prev);
+	void setNext(Link next);
+
+	default void setNext(String next) {
+		setNext(new DefaultLink(next));
+	}
+
+	Link getPrev();
+
+	void setPrev(Link prev);
+
+	default void setPrev(String prev) {
+		setPrev(new DefaultLink(prev));
+	}
 }

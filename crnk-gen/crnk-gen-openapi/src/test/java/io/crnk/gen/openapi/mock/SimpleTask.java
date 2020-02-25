@@ -5,6 +5,7 @@ import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -27,15 +28,15 @@ public class SimpleTask {
 
     public String value = "test";
 
-    public String self;
+    public Link self;
 
     @Override
-    public String getSelf() {
+    public Link getSelf() {
       return self;
     }
 
     @Override
-    public void setSelf(String self) {
+    public void setSelf(Link self) {
       this.self = self;
     }
   }

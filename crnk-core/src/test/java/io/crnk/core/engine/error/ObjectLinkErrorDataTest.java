@@ -6,6 +6,7 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapperUtil;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
+import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,7 +28,7 @@ public class ObjectLinkErrorDataTest extends ErrorDataTest {
 					return "true";
 				return null;
 			}
-		});
+		}, new JsonApiUrlBuilder(null));
 	}
 
 	@Test

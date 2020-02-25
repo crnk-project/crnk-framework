@@ -5,7 +5,7 @@ import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiVersion;
 
-// tags::docs[]
+// tag::docs[]
 @JsonApiResource(type = "versionedTask")
 @JsonApiVersion(max = 5)
 public class VersionedTask {
@@ -62,6 +62,6 @@ public class VersionedTask {
         this.newCompleted = newCompleted;
     }
 
-    // tags::docs[]
+    // tag::docs[]
 }
 // end::docs[]

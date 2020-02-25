@@ -1,23 +1,22 @@
 package io.crnk.legacy.repository.information;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import io.crnk.core.engine.information.repository.RepositoryAction;
-import io.crnk.core.engine.information.repository.RepositoryInformation;
-import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
-import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
-import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
+import io.crnk.core.engine.information.repository.*;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
 import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.repository.UntypedResourceRepository;
 import io.crnk.core.repository.decorate.Wrapper;
 import io.crnk.core.resource.annotations.JsonApiExposed;
 import net.jodah.typetools.TypeResolver;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class DefaultResourceRepositoryInformationProvider implements RepositoryInformationProvider {
 
@@ -46,7 +45,7 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	}
 
 	private RepositoryInformation build(Object repository, Class<? extends Object> repositoryClass,
-			RepositoryInformationProviderContext context) {
+										RepositoryInformationProviderContext context) {
 		Class<?> resourceClass = getResourceClass(repository, repositoryClass);
 
 		ResourceInformationProvider resourceInformationProvider = context.getResourceInformationBuilder();
@@ -59,10 +58,37 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 		String path = getPath(resourceInformation, repository);
 		boolean exposed = repository != null && isExposed(resourceInformation, repository);
 		return new ResourceRepositoryInformationImpl(path, resourceInformation, buildActions(repositoryClass),
-				getAccess(repository), exposed);
+				getAccess(repository, repositoryClass), exposed);
 	}
 
-	protected RepositoryMethodAccess getAccess(Object repository) {
+	protected RepositoryMethodAccess getAccess(Object repository, Class repositoryClass) {
+		if (ReadOnlyResourceRepositoryBase.class.isAssignableFrom(repositoryClass)) {
+			return new RepositoryMethodAccess(false, false, true, false);
+		}
+
+		if (ResourceRepositoryBase.class.isAssignableFrom(repositoryClass)) {
+			boolean postable = false;
+			boolean patchable = false;
+			boolean deletable = false;
+			boolean readable = false;
+			for (Method method : repositoryClass.getMethods()) {
+				if (method.getDeclaringClass() != ResourceRepositoryBase.class) {
+					String name = method.getName();
+					if (name.startsWith("find")) {
+						readable = true;
+					} else if (name.startsWith("create")) {
+						postable = true;
+					} else if (name.startsWith("save")) {
+						patchable = true;
+					} else if (name.equals("delete")) {
+						deletable = true;
+					}
+				}
+			}
+			return new RepositoryMethodAccess(postable, patchable, readable, deletable);
+		}
+
+
 		return new RepositoryMethodAccess(true, true, true, true);
 	}
 

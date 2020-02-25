@@ -59,6 +59,6 @@ class RelationshipPostTest extends NestedOperationsBaseTest {
   @Test
   void path() {
     RelationshipPost RelationshipPost = new RelationshipPost(metaResource, metaResourceField, relatedMetaResource);
-    Assert.assertEquals("/ResourcePath/{id}/relationships/RelatedResourcePath", RelationshipPost.path());
+    Assert.assertEquals("/ResourcePath/{id}/relationships/someRelatedResource", RelationshipPost.path());
   }
 }

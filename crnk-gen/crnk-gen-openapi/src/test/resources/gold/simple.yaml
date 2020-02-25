@@ -763,4 +763,7 @@ paths:
         505:
           $ref: '#/components/responses/505'
 servers:
-- url: /
+- description: Production server (uses live data)
+  url: http://prodserver/event/
+- description: Sandbox server (uses develop data)
+  url: http://devserver/event/

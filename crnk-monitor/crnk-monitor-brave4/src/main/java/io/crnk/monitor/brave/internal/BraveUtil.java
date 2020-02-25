@@ -11,6 +11,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +22,8 @@ public class BraveUtil {
     }
 
 
-    public static String getQuery(RepositoryRequestSpec request, ResourceRegistry resourceRegistry, TypeParser typeParser, ObjectMapper objectMapper) {
+    public static String getQuery(RepositoryRequestSpec request, ResourceRegistry resourceRegistry, TypeParser typeParser, ObjectMapper objectMapper,
+								  UrlBuilder urlBuilder) {
         QueryAdapter queryAdapter = request.getQueryAdapter();
         StringBuilder builder = new StringBuilder();
         builder.append("?");
@@ -43,7 +45,12 @@ public class BraveUtil {
                 public ObjectMapper getObjectMapper() {
                     return objectMapper;
                 }
-            });
+
+				@Override
+				public UrlBuilder getUrlBuilder() {
+					return urlBuilder;
+				}
+			});
             Map<String, Set<String>> parameters = serializer.serialize(querySpec, request.getQueryAdapter().getQueryContext());
             for (Map.Entry<String, Set<String>> entry : parameters.entrySet()) {
                 if (builder.length() > 1) {

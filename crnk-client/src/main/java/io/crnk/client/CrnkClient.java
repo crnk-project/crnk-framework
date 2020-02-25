@@ -76,6 +76,7 @@ import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.module.internal.ModuleUtils;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
@@ -106,7 +107,7 @@ public class CrnkClient {
 
     private ModuleRegistry moduleRegistry;
 
-    private JsonApiUrlBuilder urlBuilder;
+    private UrlBuilder urlBuilder;
 
     private boolean initialized = false;
 
@@ -173,7 +174,7 @@ public class CrnkClient {
 
         resourceRegistry = new ClientResourceRegistry(moduleRegistry);
         queryContext.setBaseUrl(serviceUrlProvider.getUrl());
-        urlBuilder = new JsonApiUrlBuilder(moduleRegistry, queryContext);
+        urlBuilder = moduleRegistry.getUrlBuilder();
 
 
         setProxyFactory(new BasicProxyFactory());

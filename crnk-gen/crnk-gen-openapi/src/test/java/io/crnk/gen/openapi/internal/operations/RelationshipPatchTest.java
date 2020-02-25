@@ -59,6 +59,6 @@ class RelationshipPatchTest extends NestedOperationsBaseTest {
   @Test
   void path() {
     RelationshipPatch RelationshipPatch = new RelationshipPatch(metaResource, metaResourceField, relatedMetaResource);
-    Assert.assertEquals("/ResourcePath/{id}/relationships/RelatedResourcePath", RelationshipPatch.path());
+    Assert.assertEquals("/ResourcePath/{id}/relationships/someRelatedResource", RelationshipPatch.path());
   }
 }

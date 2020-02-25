@@ -19,15 +19,15 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
+import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.PathSpec;
-import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.core.resource.links.RelatedLinksInformation;
-import io.crnk.core.resource.links.SelfLinksInformation;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
+import io.crnk.core.resource.links.*;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -38,6 +38,8 @@ public class DocumentMapperUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentMapper.class);
 
+	private final UrlBuilder urlBuilder;
+
 	private ResourceRegistry resourceRegistry;
 
 	private ObjectMapper objectMapper;
@@ -45,7 +47,8 @@ public class DocumentMapperUtil {
 	private static SerializerUtil serializerUtil;
 
 	public DocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-			PropertiesProvider propertiesProvider) {
+							  PropertiesProvider propertiesProvider, UrlBuilder urlBuilder) {
+		this.urlBuilder = urlBuilder;
 		this.resourceRegistry = resourceRegistry;
 		this.objectMapper = objectMapper;
 
@@ -55,19 +58,18 @@ public class DocumentMapperUtil {
 	}
 
 	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
-			List<ResourceField> fields, boolean relation) {
+															List<ResourceField> fields, boolean relation) {
 		Map<String, Set<PathSpec>> includedFieldsSet = queryAdapter != null ? queryAdapter.getIncludedFields() : null;
 		Set<PathSpec> includedFields = includedFieldsSet != null ? includedFieldsSet.get(resourceInformation.getResourceType()) : null;
 		if (noResourceIncludedFieldsSpecified(includedFields)) {
 			return fields;
-		}
-		else {
+		} else {
 			return computeRequestedFields(includedFields, relation, queryAdapter, resourceInformation, fields);
 		}
 	}
 
 	private static List<ResourceField> computeRequestedFields(Set<PathSpec> includedFields, boolean relation,
-			QueryAdapter queryAdapter, ResourceInformation resourceInformation, List<ResourceField> fields) {
+															  QueryAdapter queryAdapter, ResourceInformation resourceInformation, List<ResourceField> fields) {
 
 		if (relation) {
 			// for relations consider both "include" and "fields"
@@ -101,29 +103,33 @@ public class DocumentMapperUtil {
 		return typeIncludedFields == null || typeIncludedFields.isEmpty();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static <T> List<T> toList(Object entity) {
 		if (entity instanceof List) {
 			return (List) entity;
-		}
-		else if (entity instanceof Iterable) {
+		} else if (entity instanceof Iterable) {
 			ArrayList<T> result = new ArrayList<>();
 			for (Object element : (Iterable) entity) {
 				result.add((T) element);
 			}
 			return result;
-		}
-		else {
+		} else {
 			return Collections.singletonList((T) entity);
 		}
 	}
 
-	public String getRelationshipLink(Resource resource, ResourceField field, boolean related) {
+	public Link getRelationshipLink(Resource resource, ResourceField field, boolean related) {
 		ObjectNode links = resource.getLinks();
 
 		// use self link from url, whatever it source might be
-		String resourceUrl = serializerUtil.getLinks(links, "self");
-		return resourceUrl + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field.getJsonName();
+		Link resourceLink = serializerUtil.getLinks(links, "self");
+		if (resourceLink == null) {
+			return null;
+		}
+		String href = resourceLink.getHref();
+		String relationshipPath = (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field.getJsonName();
+		resourceLink.setHref(UrlUtils.appendRelativePath(href, relationshipPath));
+		return resourceLink;
 	}
 
 	public List<ResourceIdentifier> toResourceIds(Collection<?> entities) {
@@ -176,7 +182,8 @@ public class DocumentMapperUtil {
 	}
 
 	public String getSelfUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object entity) {
-		return resourceRegistry.getResourceUrl(queryContext, entity);
+		Object id = resourceInformation.getId(entity);
+		return urlBuilder.buildUrl(queryContext, resourceInformation, id, null);
 	}
 
 	public static SerializerUtil getSerializerUtil() {
@@ -187,28 +194,28 @@ public class DocumentMapperUtil {
 	protected static class DefaultSelfRelatedLinksInformation implements SelfLinksInformation, RelatedLinksInformation {
 
 		@JsonInclude(Include.NON_EMPTY)
-		private String related;
+		private Link related;
 
 		@JsonInclude(Include.NON_EMPTY)
-		private String self;
+		private Link self;
 
 		@Override
-		public String getRelated() {
+		public Link getRelated() {
 			return related;
 		}
 
 		@Override
-		public void setRelated(String related) {
+		public void setRelated(Link related) {
 			this.related = related;
 		}
 
 		@Override
-		public String getSelf() {
+		public Link getSelf() {
 			return self;
 		}
 
 		@Override
-		public void setSelf(String self) {
+		public void setSelf(Link self) {
 			this.self = self;
 		}
 

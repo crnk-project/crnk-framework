@@ -286,7 +286,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
         task.setProject(projectDefault);
 
         mapper = new DocumentMapper(container.getResourceRegistry(), objectMapper, new NullPropertiesProvider(), resourceFilterDirectory,
-                new ImmediateResultFactory(), null);
+                new ImmediateResultFactory(), null, container.getModuleRegistry().getUrlBuilder());
 
         QuerySpec querySpec = new QuerySpec(Project.class);
         querySpec.includeRelation(Collections.singletonList("task"));

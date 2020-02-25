@@ -177,7 +177,7 @@ public class TSGenerator {
         }
         for (TSMetaTransformation transformation : transformations) {
             if (transformation.accepts(element)) {
-                LOGGER.warn("transforming type {} of type {} with {}", element.getId(), element.getClass().getSimpleName(),
+                LOGGER.debug("transforming type {} of type {} with {}", element.getId(), element.getClass().getSimpleName(),
                         transformation);
                 TSElement tsElement = transformation.transform(element, createMetaTransformationContext(), options);
                 transformedElements.add(tsElement);

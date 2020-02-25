@@ -106,7 +106,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 		ResourceFieldAccess resourceAccess = getResourceAccess(resourceClass);
 
-		List<ResourceField> fields = getResourceFields(resourceClass, resourceAccess);
+		List<ResourceField> fields = getResourceFields(resourceClass, resourceAccess, false);
 		handleIdOverride(resourceClass, fields);
 
 		Class<?> superclass = resourceClass.getSuperclass();

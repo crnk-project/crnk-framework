@@ -34,6 +34,7 @@ class NestedOperationsBaseTest extends OperationsBaseTest {
     relatedMetaResource.setResourcePath("RelatedResourcePath");
 
     metaResourceField = new MetaResourceField();
+    metaResourceField.setName("someRelatedResource");
     metaResourceField.setType(new MetaType());
 
     // Set up Primary Key

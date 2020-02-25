@@ -11,4 +11,6 @@ public interface QuerySpecUrlContext {
     TypeParser getTypeParser();
 
     ObjectMapper getObjectMapper();
+
+    UrlBuilder getUrlBuilder();
 }
