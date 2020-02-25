@@ -20,7 +20,7 @@ public interface ResourceField {
 
     /**
      * See also
-     * {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically}
+     * {@link io.crnk.core.resource.annotations.LookupIncludeBehavior}
      * }
      *
      * @return if lookup should be performed
@@ -51,6 +51,12 @@ public interface ResourceField {
 
     Type getGenericType();
 
+    /**
+     * @return available if attribute type is annotated with
+     * {@link io.crnk.core.resource.annotations.JsonApiEmbeddable}.
+     */
+    EmbeddableInformation getEmbeddedType();
+
     SerializeType getSerializeType();
 
     JsonIncludeStrategy getJsonIncludeStrategy();
@@ -63,11 +69,16 @@ public interface ResourceField {
     Class<?> getElementType();
 
     /**
-     * @return resourceInformation this field belongs to.
+     * @return resourceInformation this field belongs to. Matches {@link #getParentInformation()}
      */
     ResourceInformation getResourceInformation();
 
-    void setResourceInformation(ResourceInformation resourceInformation);
+    /**
+     * @return {@link BeanInformationBase} this field belongs to.
+     */
+    BeanInformationBase getParentInformation();
+
+    void setResourceInformation(BeanInformationBase resourceInformation);
 
     boolean isCollection();
 

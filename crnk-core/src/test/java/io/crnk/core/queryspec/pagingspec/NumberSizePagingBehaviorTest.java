@@ -208,9 +208,9 @@ public class NumberSizePagingBehaviorTest {
 		PagedLinksInformation pagedLinksInformation = new DefaultPagedLinksInformation();
 		pagingBehavior.build(pagedLinksInformation, resourceList, querySpecAdapter, urlBuilder);
 
-		assertThat(pagedLinksInformation.getFirst(), equalTo("http://some.org"));
-		assertThat(pagedLinksInformation.getNext(), equalTo("http://some.org"));
+		assertThat(pagedLinksInformation.getFirst().getHref(), equalTo("http://some.org"));
+		assertThat(pagedLinksInformation.getNext().getHref(), equalTo("http://some.org"));
 		assertNull(pagedLinksInformation.getPrev());
-		assertThat(pagedLinksInformation.getLast(), equalTo("http://some.org"));
+		assertThat(pagedLinksInformation.getLast().getHref(), equalTo("http://some.org"));
 	}
 }

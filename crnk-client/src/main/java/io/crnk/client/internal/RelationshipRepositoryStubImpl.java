@@ -9,9 +9,9 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
-import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
@@ -30,7 +30,7 @@ public class RelationshipRepositoryStubImpl<T, I, D, J> extends ClientStubBase
     private ResourceInformation sourceResourceInformation;
 
     public RelationshipRepositoryStubImpl(CrnkClient client, Class<T> sourceClass, Class<D> targetClass,
-                                          ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
+                                          ResourceInformation sourceResourceInformation, UrlBuilder urlBuilder) {
         super(client, urlBuilder, targetClass);
         this.sourceClass = sourceClass;
         this.targetClass = targetClass;
@@ -40,28 +40,28 @@ public class RelationshipRepositoryStubImpl<T, I, D, J> extends ClientStubBase
     @Override
     public void setRelation(T source, J targetId, String fieldName) {
         Serializable sourceId = getSourceId(source);
-        String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
+        String url = urlBuilder.buildUrl(client.getQueryContext(), sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
         executeWithId(url, HttpMethod.PATCH, targetId);
     }
 
     @Override
     public void setRelations(T source, Collection<J> targetIds, String fieldName) {
         Serializable sourceId = getSourceId(source);
-        String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
+        String url = urlBuilder.buildUrl(client.getQueryContext(), sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
         executeWithIds(url, HttpMethod.PATCH, targetIds);
     }
 
     @Override
     public void addRelations(T source, Collection<J> targetIds, String fieldName) {
         Serializable sourceId = getSourceId(source);
-        String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
+        String url = urlBuilder.buildUrl(client.getQueryContext(), sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
         executeWithIds(url, HttpMethod.POST, targetIds);
     }
 
     @Override
     public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
         Serializable sourceId = getSourceId(source);
-        String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
+        String url = urlBuilder.buildUrl(client.getQueryContext(), sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
         executeWithIds(url, HttpMethod.DELETE, targetIds);
     }
 
@@ -77,14 +77,14 @@ public class RelationshipRepositoryStubImpl<T, I, D, J> extends ClientStubBase
     @Override
     public D findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
         verifyQuerySpec(querySpec);
-        String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, querySpec, fieldName, false);
+        String url = urlBuilder.buildUrl(client.getQueryContext(), sourceResourceInformation, sourceId, querySpec, fieldName, false);
         return (D) executeGet(url, ResponseType.RESOURCE);
     }
 
     @Override
     public DefaultResourceList<D> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
         verifyQuerySpec(querySpec);
-        String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, querySpec, fieldName, false);
+        String url = urlBuilder.buildUrl(client.getQueryContext(), sourceResourceInformation, sourceId, querySpec, fieldName, false);
         return (DefaultResourceList<D>) executeGet(url, ResponseType.RESOURCES);
     }
 

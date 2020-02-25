@@ -136,7 +136,7 @@ public class RandomWalkLinkChecker {
 			HttpAdapterRequest request = httpAdapter.newRequest(url, HttpMethod.GET, null);
 			HttpAdapterResponse response = request.execute();
 			int code = response.code();
-			if (code >= 300) {
+			if (!accept(url, response)) {
 				throw new IllegalStateException("expected endpoint to return success status code, got " + code + " from " + url + ", url obtained from " + urlToSourceMapping.get(url));
 			}
 			String body = response.body();
@@ -149,6 +149,16 @@ public class RandomWalkLinkChecker {
 		} catch (IOException e) {
 			throw new IllegalStateException("failed to visit " + url + ", url obtained from " + urlToSourceMapping.get(url), e);
 		}
+	}
+
+	/**
+	 * @param url
+	 * @param response
+	 * @return true if the given response is acceptable
+	 */
+	protected boolean accept(String url, HttpAdapterResponse response) {
+		int code = response.code();
+		return code < 300;
 	}
 
 	protected void findLinks(JsonNode jsonNode) {

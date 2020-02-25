@@ -103,7 +103,7 @@ public class JsonFilterSpecMapper {
 	}
 
 	public JsonNode serialize(ResourceInformation resourceInformation, List<FilterSpec> filterSpecs, QueryContext queryContext) {
-		return serialize(resourceInformation, filterSpecs, FilterOperator.AND, queryContext);
+		return serialize(resourceInformation, filterSpecs, null, queryContext);
 	}
 
 	private JsonNode serialize(ResourceInformation resourceInformation, List<FilterSpec> filterSpecs, FilterOperator operator, QueryContext queryContext) {
@@ -111,7 +111,12 @@ public class JsonFilterSpecMapper {
 
 		ObjectMapper objectMapper = context.getObjectMapper();
 
-		if (operator == FilterOperator.AND) {
+		// Operators nesting multiple filters: serialize to JSON array
+		if (operator == FilterOperator.AND || operator == FilterOperator.OR) {
+			ArrayNode arrayNode = objectMapper.createArrayNode();
+			filterSpecs.forEach(it -> arrayNode.add(serializeFilter(resourceInformation, it, queryContext)));
+			return arrayNode;
+		} else {
 			ObjectNode objectNode = objectMapper.createObjectNode();
 			for (FilterSpec filterSpec : filterSpecs) {
 				PathSpec implPath = filterSpec.getPath();
@@ -141,11 +146,6 @@ public class JsonFilterSpecMapper {
 				}
 			}
 			return objectNode;
-		}
-		else {
-			ArrayNode arrayNode = objectMapper.createArrayNode();
-			filterSpecs.stream().forEach(it -> arrayNode.add(serializeFilter(resourceInformation, it, queryContext)));
-			return arrayNode;
 		}
 	}
 

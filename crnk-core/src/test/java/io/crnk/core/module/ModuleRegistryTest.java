@@ -1,10 +1,12 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
@@ -17,6 +19,8 @@ import io.crnk.core.engine.internal.dispatcher.filter.TestFilter;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator.DecoratedScheduleRepository;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
+import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
+import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.IllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.SomeIllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
@@ -30,6 +34,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.security.SecurityProviderContext;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.mock.models.ComplexPojo;
 import io.crnk.core.mock.models.Document;
 import io.crnk.core.mock.models.FancyProject;
@@ -68,6 +73,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -297,7 +303,7 @@ public class ModuleRegistryTest {
     @Test
     public void testExceptionMappers() {
         ExceptionMapperLookup exceptionMapperLookup = moduleRegistry.getExceptionMapperLookup();
-        Set<ExceptionMapper> exceptionMappers = exceptionMapperLookup.getExceptionMappers();
+        List<ExceptionMapper> exceptionMappers = exceptionMapperLookup.getExceptionMappers();
         Set<Class<?>> classes = new HashSet<>();
         for (ExceptionMapper exceptionMapper : exceptionMappers) {
             classes.add(exceptionMapper.getClass());
@@ -438,6 +444,63 @@ public class ModuleRegistryTest {
         Assert.assertNotNull(relationshipRepositoryAdapter);
     }
 
+    @Test
+    public void checkOverrideDefaultExceptionMapper() {
+        SimpleModule module = new SimpleModule("test2");
+        module.addExceptionMapper(new IllegalStateExceptionMapper());
+        module.addExceptionMapper(new ExceptionMapperRegistryTest.CustomForbiddenExceptionMapper());
+
+        moduleRegistry = new ModuleRegistry();
+        moduleRegistry.setResourceRegistry(resourceRegistry);
+        moduleRegistry.addModule(module);
+        moduleRegistry.init(new ObjectMapper());
+
+        ExceptionMapperRegistry registry = moduleRegistry.getExceptionMapperRegistry();
+        Response response = registry.toResponse(new ForbiddenException("test"));
+        Assert.assertEquals(HttpStatus.BAD_REQUEST_400, response.getHttpStatus().intValue());
+    }
+
+    @Test
+    public void checkNotOverrideDefaultExceptionMapper() {
+        moduleRegistry = new ModuleRegistry();
+        moduleRegistry.setResourceRegistry(resourceRegistry);
+        moduleRegistry.init(new ObjectMapper());
+
+        Response response = moduleRegistry.getExceptionMapperRegistry().toResponse(new ForbiddenException("test"));
+        Assert.assertEquals(HttpStatus.FORBIDDEN_403, response.getHttpStatus().intValue());
+    }
+
+    @Test
+    public void checkExceptionMapperLowPriority() {
+        SimpleModule module = new SimpleModule("illegalException");
+        module.addExceptionMapper(new IllegalStateExceptionMapper());
+        module.addExceptionMapper(new ExceptionMapperRegistryTest.SecondIllegalStateExceptionMapper(1));
+
+        moduleRegistry = new ModuleRegistry();
+        moduleRegistry.setResourceRegistry(resourceRegistry);
+        moduleRegistry.addModule(module);
+        moduleRegistry.init(new ObjectMapper());
+
+        Response response = moduleRegistry.getExceptionMapperRegistry().toResponse(new IllegalStateException());
+        Assert.assertEquals(HttpStatus.BAD_REQUEST_400, response.getHttpStatus().intValue());
+    }
+
+    @Test
+    public void checkExceptionMapperHighPriority() {
+        SimpleModule module = new SimpleModule("illegalException");
+        module.addExceptionMapper(new IllegalStateExceptionMapper());
+        module.addExceptionMapper(new ExceptionMapperRegistryTest.SecondIllegalStateExceptionMapper(-1));
+
+        moduleRegistry = new ModuleRegistry();
+        moduleRegistry.setResourceRegistry(resourceRegistry);
+        moduleRegistry.addModule(module);
+        moduleRegistry.init(new ObjectMapper());
+
+        ExceptionMapperRegistry registry = moduleRegistry.getExceptionMapperRegistry();
+        Response response = registry.toResponse(new IllegalStateException());
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getHttpStatus().intValue());
+    }
+
     @JsonApiResource(type = "test2")
     static class TestResource2 {
 
@@ -525,9 +588,9 @@ public class ModuleRegistryTest {
 
             context.addExceptionMapper(new IllegalStateExceptionMapper());
             context.addExceptionMapperLookup(() -> {
-                Set<ExceptionMapper> set = new HashSet<>();
-                set.add(new SomeIllegalStateExceptionMapper());
-                return set;
+                List<ExceptionMapper> list = new ArrayList<>();
+                list.add(new SomeIllegalStateExceptionMapper());
+                return list;
             });
         }
 

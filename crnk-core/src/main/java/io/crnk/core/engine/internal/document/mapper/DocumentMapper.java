@@ -18,6 +18,7 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;
@@ -44,13 +45,13 @@ public class DocumentMapper {
 	private boolean client;
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-			ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo) {
-		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, resultFactory, serverInfo, false);
+						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo, UrlBuilder urlBuilder) {
+		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, resultFactory, serverInfo, false, urlBuilder);
 	}
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-			ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo,
-			boolean client) {
+						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo,
+						  boolean client, UrlBuilder urlBuilder) {
 		this.propertiesProvider = propertiesProvider;
 		this.client = client;
 		this.resultFactory = resultFactory;
@@ -58,7 +59,7 @@ public class DocumentMapper {
 
 		PreconditionUtil.verify(client || resourceFilterDirectory != null, "filterBehavior necessary on server-side");
 
-		this.util = newDocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
+		this.util = newDocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider, urlBuilder);
 		this.resourceMapper = newResourceMapper(util, client, objectMapper);
 		this.includeLookupSetter = newIncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, objectMapper);
 
@@ -76,13 +77,13 @@ public class DocumentMapper {
 	}
 
 	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
-			PropertiesProvider propertiesProvider, ObjectMapper objectMapper) {
+														 PropertiesProvider propertiesProvider, ObjectMapper objectMapper) {
 		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, resultFactory, objectMapper);
 	}
 
 	protected DocumentMapperUtil newDocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-			PropertiesProvider propertiesProvider) {
-		return new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
+													   PropertiesProvider propertiesProvider, UrlBuilder urlBuilder) {
+		return new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider, urlBuilder);
 	}
 
 	protected ResourceMapper newResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper) {
@@ -124,8 +125,7 @@ public class DocumentMapper {
 			if (doc.getData().isPresent()) {
 				if (doc.isMultiple()) {
 					compact(doc.getCollectionData().get());
-				}
-				else {
+				} else {
 					compact(doc.getSingleData().get());
 				}
 			}
@@ -152,12 +152,11 @@ public class DocumentMapper {
 	}
 
 	private Result<Document> addRelationDataAndInclusions(Document doc, Object entity, QueryAdapter queryAdapter,
-			DocumentMappingConfig mappingConfig) {
+														  DocumentMappingConfig mappingConfig) {
 
 		if (doc.getData().isPresent() && !client) {
 			return includeLookupSetter.processInclusions(doc, entity, queryAdapter, mappingConfig);
-		}
-		else {
+		} else {
 			return resultFactory.just(doc);
 		}
 	}
@@ -171,8 +170,7 @@ public class DocumentMapper {
 					dataList.add(resourceMapper.toData(obj, queryAdapter, resourceMappingConfig));
 				}
 				doc.setData(Nullable.of(dataList));
-			}
-			else {
+			} else {
 				doc.setData(Nullable.of(resourceMapper.toData(entity, queryAdapter, resourceMappingConfig)));
 			}
 		}

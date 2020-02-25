@@ -8,20 +8,20 @@ import io.crnk.core.exception.InternalServerErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public class ExceptionMapperRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionMapperRegistry.class);
 
-    private final Set<ExceptionMapperType> exceptionMappers;
+    private final List<ExceptionMapperType> exceptionMappers;
 
-    ExceptionMapperRegistry(Set<ExceptionMapperType> exceptionMappers) {
+    ExceptionMapperRegistry(List<ExceptionMapperType> exceptionMappers) {
         this.exceptionMappers = exceptionMappers;
     }
 
-    Set<ExceptionMapperType> getExceptionMappers() {
+    List<ExceptionMapperType> getExceptionMappers() {
         return exceptionMappers;
     }
 

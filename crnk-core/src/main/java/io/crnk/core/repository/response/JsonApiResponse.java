@@ -4,6 +4,9 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class will be deprecated in the future.
  */
@@ -15,7 +18,7 @@ public class JsonApiResponse {
 
 	private LinksInformation linksInformation;
 
-	private Iterable<ErrorData> errors;
+	private List<ErrorData> errors;
 
 	public JsonApiResponse() {
 	}
@@ -47,11 +50,19 @@ public class JsonApiResponse {
 		return this;
 	}
 
-	public Iterable<ErrorData> getErrors() {
+	public List<ErrorData> getErrors() {
 		return errors;
 	}
 
 	public JsonApiResponse setErrors(Iterable<ErrorData> errors) {
+		this.errors = new ArrayList<>();
+		for (ErrorData error : errors) {
+			this.errors.add(error);
+		}
+		return this;
+	}
+
+	public JsonApiResponse setErrors(List<ErrorData> errors) {
 		this.errors = errors;
 		return this;
 	}

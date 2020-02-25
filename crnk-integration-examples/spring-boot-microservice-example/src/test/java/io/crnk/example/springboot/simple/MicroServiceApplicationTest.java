@@ -64,10 +64,10 @@ public class MicroServiceApplicationTest {
 		ResourceList<Task> tasks = repository.findAll(querySpec);
 		Assert.assertNotEquals(0, tasks.size());
 		for (Task task : tasks) {
-			Assert.assertEquals("http://127.0.0.1:12001/task/" + task.getId(), task.getLinks().getSelf());
+			Assert.assertEquals("http://127.0.0.1:12001/task/" + task.getId(), task.getLinks().getSelf().getHref());
 			Project project = task.getProject();
 			Assert.assertNotNull(task.getProject());
-			Assert.assertEquals("http://127.0.0.1:12002/project/" + project.getId(), project.getLinks().getSelf());
+			Assert.assertEquals("http://127.0.0.1:12002/project/" + project.getId(), project.getLinks().getSelf().getHref());
 		}
 	}
 

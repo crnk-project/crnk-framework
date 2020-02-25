@@ -70,7 +70,7 @@ public class OpenAPIGeneratorComplexTest extends OpenAPIGeneratorTestBase {
   @Test
   public void testGeneration() throws IOException {
     File buildDir = new File("build/tmp/openapi");
-    String outputPath = buildDir.toString() + "/generated/source/openapi/openapi.yaml";
+    String outputPath = buildDir.toString() + "/generated/sources/openapi/openapi.yaml";
     generatorModule = new OpenAPIGeneratorModule();
     generatorModule.getConfig().setBuildDir(buildDir);
     generatorModule.initDefaults(buildDir);

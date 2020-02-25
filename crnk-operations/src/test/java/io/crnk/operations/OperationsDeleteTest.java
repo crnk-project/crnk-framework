@@ -88,6 +88,33 @@ public class OperationsDeleteTest extends AbstractOperationsTest {
   }
 
   @Test
+  public void checkDeleteByPath() {
+    ResourceRepository<PersonEntity, UUID> personRepo = client.getRepositoryForType(PersonEntity.class);
+
+    PersonEntity person1 = newPerson("1");
+    PersonEntity person2 = newPerson("2");
+
+    OperationsClient operationsClient = new OperationsClient(client);
+    OperationsCall call = operationsClient.createCall();
+    call.add(HttpMethod.POST, person1);
+    call.add(HttpMethod.POST, person2);
+    call.execute();
+
+    QuerySpec querySpecBeforeDelete = new QuerySpec(PersonEntity.class);
+    ResourceList<PersonEntity> personsBeforeDelete = personRepo.findAll(querySpecBeforeDelete);
+    Assert.assertEquals(2, personsBeforeDelete.size());
+
+    call = operationsClient.createCall();
+    call.add(HttpMethod.DELETE, "person/" + person1.getId());
+    call.add(HttpMethod.DELETE, "person/" + person2.getId());
+    call.execute();
+
+    QuerySpec querySpecAfterDelete = new QuerySpec(PersonEntity.class);
+    ResourceList<PersonEntity> personsAfterDelete = personRepo.findAll(querySpecAfterDelete);
+    Assert.assertEquals(0, personsAfterDelete.size());
+  }
+
+  @Test
   public void checkExperimentalBulkDelete() {
     Task task1 = newTask("1");
     Task task2 = newTask("2");

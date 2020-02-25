@@ -60,7 +60,7 @@ public abstract class NestedRepositoryAccessTestBase {
 		resource.setValue("nested");
 		resource = manyNestedRepo.create(resource);
 		Assert.assertEquals(id, resource.getId());
-		String selfUrl = resource.getLinks().getSelf();
+		String selfUrl = resource.getLinks().getSelf().getHref();
 		Assert.assertTrue(selfUrl, selfUrl.contains("a/comments/b"));
 		Assert.assertEquals("nested", resource.getValue());
 
@@ -68,7 +68,7 @@ public abstract class NestedRepositoryAccessTestBase {
 		resource.setValue("updated");
 		resource = manyNestedRepo.save(resource);
 		Assert.assertEquals("updated", resource.getValue());
-		selfUrl = resource.getLinks().getSelf();
+		selfUrl = resource.getLinks().getSelf().getHref();
 		Assert.assertTrue(selfUrl, selfUrl.contains("a/comments/b"));
 
 		// perform find over all nested resources
@@ -96,7 +96,7 @@ public abstract class NestedRepositoryAccessTestBase {
 		resource.setValue("nested");
 		resource = oneNestedRepo.create(resource);
 		Assert.assertEquals("a", resource.getPostId());
-		String selfUrl = resource.getLinks().getSelf();
+		String selfUrl = resource.getLinks().getSelf().getHref();
 		Assert.assertTrue(selfUrl, selfUrl.contains("a/postHeader"));
 		Assert.assertEquals("nested", resource.getValue());
 
@@ -104,7 +104,7 @@ public abstract class NestedRepositoryAccessTestBase {
 		resource.setValue("updated");
 		resource = oneNestedRepo.save(resource);
 		Assert.assertEquals("updated", resource.getValue());
-		selfUrl = resource.getLinks().getSelf();
+		selfUrl = resource.getLinks().getSelf().getHref();
 		Assert.assertTrue(selfUrl, selfUrl.contains("a/postHeader"));
 
 		// perform find over all nested resources

@@ -6,14 +6,23 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
+import io.crnk.core.resource.links.DefaultLink;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 /**
  * Serializes {@link LinksInformation} objects as JSON objects instead of simple JSON attributes.
  */
 public class LinksInformationSerializer extends JsonSerializer<LinksInformation> {
+
+	private Boolean serializeLinksAsObjects;
+
+	LinksInformationSerializer(Boolean serializeLinksAsObjects) {
+		this.serializeLinksAsObjects = serializeLinksAsObjects;
+	}
 
 	@Override
 	public void serialize(LinksInformation value, JsonGenerator gen, SerializerProvider serializers)
@@ -25,15 +34,14 @@ public class LinksInformationSerializer extends JsonSerializer<LinksInformation>
 
 		for (String attrName : info.getAttributeNames()) {
 			BeanAttributeInformation attribute = info.getAttribute(attrName);
-			Object linkValue = attribute.getValue(value);
+			Object objLinkValue = attribute.getValue(value);
+			Link linkValue = objLinkValue instanceof String ? new DefaultLink((String) objLinkValue) : (Link) objLinkValue;
 			if (linkValue != null) {
-				gen.writeObjectFieldStart(attrName);
-				if (linkValue instanceof String) {
-					gen.writeStringField(SerializerUtil.HREF, linkValue.toString());
+				if (!serializeLinksAsObjects && !shouldSerializeLink(linkValue)) { // Return a simple String link
+					gen.writeStringField(attrName, linkValue.getHref());
 				} else {
-					gen.writeObject(linkValue);
+					gen.writeObjectField(attrName, linkValue);
 				}
-				gen.writeEndObject();
 			}
 		}
 
@@ -46,4 +54,7 @@ public class LinksInformationSerializer extends JsonSerializer<LinksInformation>
 		return LinksInformation.class;
 	}
 
+	private Boolean shouldSerializeLink(Link link) {
+		return link.getRel() != null || link.getAnchor() != null || link.getParams() != null || link.getDescribedby() != null || link.getMeta() != null;
+	}
 }

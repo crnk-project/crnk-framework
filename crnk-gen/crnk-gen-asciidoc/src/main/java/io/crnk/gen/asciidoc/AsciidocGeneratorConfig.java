@@ -46,7 +46,7 @@ public class AsciidocGeneratorConfig extends GeneratorModuleConfigBase {
 	 */
 	public File getGenDir() {
 		if (genDir == null) {
-			return new File(buildDir, "generated/source/asciidoc/");
+			return new File(buildDir, "generated/sources/asciidoc/");
 		}
 		return genDir;
 	}

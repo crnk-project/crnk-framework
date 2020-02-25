@@ -2,6 +2,8 @@ package io.crnk.core.engine.internal.information.resource;
 
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.information.resource.BeanInformationBase;
+import io.crnk.core.engine.information.resource.EmbeddableInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
@@ -43,7 +45,7 @@ public class ResourceFieldImpl implements ResourceField {
 
     private RelationshipRepositoryBehavior relationshipRepositoryBehavior;
 
-    private ResourceInformation resourceInformation;
+    private BeanInformationBase parentInformation;
 
     private ResourceFieldAccessor accessor;
 
@@ -61,6 +63,8 @@ public class ResourceFieldImpl implements ResourceField {
 
     private VersionRange versionRange = VersionRange.UNBOUNDED;
 
+    private EmbeddableInformation embeddedType;
+
     public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
                              Type genericType, String oppositeResourceType) {
         this(jsonName, underlyingName, resourceFieldType, type, genericType,
@@ -74,24 +78,26 @@ public class ResourceFieldImpl implements ResourceField {
                              JsonIncludeStrategy jsonIncludeStrategy, LookupIncludeBehavior lookupIncludeBehavior,
                              ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
                              RelationshipRepositoryBehavior relationshipRepositoryBehavior, PatchStrategy patchStrategy) {
-        this.jsonName = jsonName;
-        this.underlyingName = underlyingName;
-        this.resourceFieldType = resourceFieldType;
-        this.serializeType = serializeType;
-        this.jsonIncludeStrategy = jsonIncludeStrategy;
-        this.type = type;
-        this.genericType = genericType;
-        this.lookupIncludeBehavior = lookupIncludeBehavior;
-        this.oppositeName = oppositeName;
-        this.oppositeResourceType = oppositeResourceType;
-        this.access = access;
-        this.idName = idName;
-        this.idType = idType;
-        this.idAccessor = idAccessor;
-        this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
-        this.patchStrategy = patchStrategy;
 
-        if (resourceFieldType != ResourceFieldType.LINKS_INFORMATION) {
+		this.jsonName = jsonName;
+		this.underlyingName = underlyingName;
+		this.resourceFieldType = resourceFieldType;
+		this.serializeType = serializeType;
+		this.jsonIncludeStrategy = jsonIncludeStrategy;
+		this.type = type;
+		this.genericType = genericType;
+		this.lookupIncludeBehavior = lookupIncludeBehavior;
+		this.oppositeName = oppositeName;
+		this.oppositeResourceType = oppositeResourceType;
+		this.access = access;
+		this.idName = idName;
+		this.idType = idType;
+		this.idAccessor = idAccessor;
+		this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
+		this.patchStrategy = patchStrategy;
+
+		PreconditionUtil.assertEquals("expected generic type to match", ClassUtils.getRawType(genericType), type);
+		if (resourceFieldType != ResourceFieldType.LINKS_INFORMATION) {
             PreconditionUtil.verify(!jsonName.equals("links"), "cannot name none-@JsonLinksInformation field `links`");
         }
         if (resourceFieldType != ResourceFieldType.META_INFORMATION) {
@@ -150,10 +156,10 @@ public class ResourceFieldImpl implements ResourceField {
 
     public String getOppositeResourceType() {
         PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s of %s is not an association",
-                underlyingName, resourceInformation.getResourceType());
+                underlyingName, parentInformation);
         if (getElementType() != Object.class) {
             PreconditionUtil.verify(oppositeResourceType != null, "field %s of %s does not have an opposite resource type",
-                    underlyingName, resourceInformation.getResourceType());
+                    underlyingName, parentInformation);
         }
         return oppositeResourceType;
     }
@@ -184,12 +190,12 @@ public class ResourceFieldImpl implements ResourceField {
             return false;
         }
         ResourceFieldImpl that = (ResourceFieldImpl) o;
-        return Objects.equals(underlyingName, that.underlyingName) && resourceInformation == that.resourceInformation;
+        return Objects.equals(underlyingName, that.underlyingName) && parentInformation == that.parentInformation;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(underlyingName, resourceInformation);
+        return Objects.hash(underlyingName, parentInformation);
     }
 
     /**
@@ -204,12 +210,16 @@ public class ResourceFieldImpl implements ResourceField {
 
     @Override
     public ResourceInformation getResourceInformation() {
-        return resourceInformation;
+        return (ResourceInformation) parentInformation;
+    }
+
+    @Override
+    public BeanInformationBase getParentInformation() {
+        return parentInformation;
     }
 
     @Override
     public ResourceFieldAccessor getAccessor() {
-        PreconditionUtil.verify(accessor != null, "field %s not properly initialized", underlyingName);
         return accessor;
     }
 
@@ -256,22 +266,24 @@ public class ResourceFieldImpl implements ResourceField {
         this.accessor = accessor;
     }
 
-    public void setResourceInformation(ResourceInformation resourceInformation) {
-        if (this.accessor == null && resourceInformation.getResourceClass() == Resource.class) {
+    public void setResourceInformation(BeanInformationBase resourceInformation) {
+        if (this.accessor == null && resourceInformation.getImplementationClass() == Resource.class) {
             this.accessor = new RawResourceFieldAccessor(underlyingName, resourceFieldType, type);
         } else if (this.accessor == null) {
-            this.accessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), underlyingName, type);
+            this.accessor = new ReflectionFieldAccessor(resourceInformation.getImplementationClass(), underlyingName, type);
         }
         if (this.idAccessor == null && idName != null) {
-            this.idAccessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), idName, idType);
+            this.idAccessor = new ReflectionFieldAccessor(resourceInformation.getImplementationClass(), idName, idType);
             if (idType == ResourceIdentifier.class) {
                 this.idAccessor = new ResourceIdentifierAccessorAdapter(idAccessor);
             }
         }
-        this.resourceInformation = resourceInformation;
+        if(resourceInformation instanceof ResourceInformation) {
+            this.parentInformation = (ResourceInformation) resourceInformation;
 
-        PreconditionUtil.verify(!jsonName.equals("id") || resourceFieldType == ResourceFieldType.ID,
-                "only ID fields can be named 'id' for %s, consider adding @JsonApiId, ignoring it with @JsonIgnore or renaming it with @JsonProperty", resourceInformation );
+			PreconditionUtil.verify(!jsonName.equals("id") || resourceFieldType == ResourceFieldType.ID,
+					"only ID fields can be named 'id' for %s, consider adding @JsonApiId, ignoring it with @JsonIgnore or renaming it with @JsonProperty", resourceInformation);
+        }
     }
 
     public void setRelationshipRepositoryBehavior(RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
@@ -288,6 +300,14 @@ public class ResourceFieldImpl implements ResourceField {
 
     public void setAccess(ResourceFieldAccess access) {
         this.access = access;
+    }
+
+    public void setEmbeddedType(EmbeddableInformation embeddedType) {
+        this.embeddedType = embeddedType;
+    }
+
+    public EmbeddableInformation getEmbeddedType() {
+        return embeddedType;
     }
 
     static class ResourceFieldAccessorWrapper implements ResourceFieldAccessor {
@@ -336,12 +356,12 @@ public class ResourceFieldImpl implements ResourceField {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName());
         sb.append("[");
-        if (resourceInformation != null && resourceInformation.getResourceClass() != null) {
-            sb.append("resourceClass=").append(resourceInformation.getResourceClass().getName());
+        if (parentInformation != null && parentInformation.getImplementationClass() != null) {
+            sb.append("resourceClass=").append(parentInformation.getImplementationClass().getName());
         }
         sb.append(", name=").append(underlyingName);
-        if (resourceInformation != null && resourceInformation.getResourceType() != null) {
-            sb.append(",resourceType=").append(resourceInformation.getResourceType());
+        if (parentInformation instanceof ResourceInformation && getResourceInformation().getResourceType() != null) {
+            sb.append(",resourceType=").append(getResourceInformation().getResourceType());
         }
         sb.append("]");
         return sb.toString();

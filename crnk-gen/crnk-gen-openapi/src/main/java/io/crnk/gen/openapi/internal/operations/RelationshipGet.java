@@ -40,6 +40,6 @@ public class RelationshipGet extends AbstractNestedAccessOperation implements OA
 
   @Override
   public String path() {
-    return OASUtils.getRelationshipsPath(metaResource, relatedMetaResource);
+    return OASUtils.getRelationshipsPath(metaResource, metaResourceField);
   }
 }

@@ -59,6 +59,6 @@ class RelationshipGetTest extends NestedOperationsBaseTest {
   @Test
   void path() {
     RelationshipGet RelationshipGet = new RelationshipGet(metaResource, metaResourceField, relatedMetaResource);
-    Assert.assertEquals("/ResourcePath/{id}/relationships/RelatedResourcePath", RelationshipGet.path());
+    Assert.assertEquals("/ResourcePath/{id}/relationships/someRelatedResource", RelationshipGet.path());
   }
 }

@@ -59,6 +59,6 @@ class NestedPostTest extends NestedOperationsBaseTest {
   @Test
   void path() {
     NestedPost NestedPost = new NestedPost(metaResource, metaResourceField, relatedMetaResource);
-    Assert.assertEquals("/ResourcePath/{id}/RelatedResourcePath", NestedPost.path());
+    Assert.assertEquals("/ResourcePath/{id}/someRelatedResource", NestedPost.path());
   }
 }

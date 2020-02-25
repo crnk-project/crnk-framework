@@ -59,6 +59,6 @@ class RelationshipDeleteTest extends NestedOperationsBaseTest {
   @Test
   void path() {
     RelationshipDelete RelationshipDelete = new RelationshipDelete(metaResource, metaResourceField, relatedMetaResource);
-    Assert.assertEquals("/ResourcePath/{id}/relationships/RelatedResourcePath", RelationshipDelete.path());
+    Assert.assertEquals("/ResourcePath/{id}/relationships/someRelatedResource", RelationshipDelete.path());
   }
 }

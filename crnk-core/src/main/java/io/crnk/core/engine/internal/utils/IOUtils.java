@@ -25,6 +25,7 @@ public class IOUtils {
     }
 
     public static void writeFile(File file, String text) {
+		file.getParentFile().mkdirs();
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(text);
         } catch (IOException e) {

@@ -42,6 +42,6 @@ public class NestedPatch extends AbstractNestedMutateOperation implements OASOpe
 
   @Override
   public String path() {
-    return OASUtils.getNestedPath(metaResource, relatedMetaResource);
+    return OASUtils.getNestedPath(metaResource, metaResourceField);
   }
 }

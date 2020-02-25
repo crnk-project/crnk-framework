@@ -9,6 +9,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpecUrlBuilder;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
@@ -25,13 +26,13 @@ public class RepositoryAdapterUtils {
         if (requestSpec.getQueryAdapter() instanceof QuerySpecAdapter && resource instanceof ResourceList) {
             ResourceList<?> resources = (ResourceList<?>) resource;
             linksInformation = enrichPageLinksInformation(moduleRegistry, linksInformation, resources, requestSpec);
-            linksInformation = enrichSelfLinksInformation(linksInformation, requestSpec);
+            linksInformation = enrichSelfLinksInformation(moduleRegistry.getUrlBuilder(), linksInformation, requestSpec);
         }
         return linksInformation;
     }
 
-    private static LinksInformation enrichSelfLinksInformation(LinksInformation linksInformation,
-                                                               RepositoryRequestSpec requestSpec) {
+    private static LinksInformation enrichSelfLinksInformation(UrlBuilder urlBuilder, LinksInformation linksInformation,
+															   RepositoryRequestSpec requestSpec) {
         QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
         ResourceInformation resourceInformation = queryAdapter.getResourceInformation();
         ResourceRegistry resourceRegistry = queryAdapter.getResourceRegistry();
@@ -40,7 +41,8 @@ public class RepositoryAdapterUtils {
             QueryContext queryContext = queryAdapter.getQueryContext();
             SelfLinksInformation selfLinksInformation = (SelfLinksInformation) linksInformation;
             if(selfLinksInformation.getSelf() == null) {
-                selfLinksInformation.setSelf(resourceRegistry.getResourceUrl(queryContext, resourceInformation));
+				String selfUrl = urlBuilder.buildUrl(queryContext, resourceInformation);
+                selfLinksInformation.setSelf(selfUrl);
             }
         }
         return linksInformation;
