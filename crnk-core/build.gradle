@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 dependencies {
-    compile 'net.jodah:typetools:0.6.1'
+    compile 'net.jodah:typetools:0.6.2'
     compile 'org.slf4j:slf4j-api:1.7.25'
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.fasterxml.jackson.core:jackson-annotations'
