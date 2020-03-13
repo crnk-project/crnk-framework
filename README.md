@@ -62,4 +62,6 @@ Note as part of the build a local Node installation is downloaded to build the f
 
 ## Endorsements
 
-https://www.yourkit.com/images/yklogo.png We thank YourKit for supporting open source projects with https://www.yourkit.com/youmonitor/.
+[![YourKit](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/youmonitor/)
+
+We thank YourKit for supporting open source projects with profiler and monitoring tooling.
