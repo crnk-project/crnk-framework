@@ -11,6 +11,7 @@ import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.exception.UnauthorizedException;
+import io.crnk.core.utils.Prioritizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ import java.util.Iterator;
 /**
  * Exception mapper for a generic exception which can be thrown in request processing.
  */
-public final class CrnkExceptionMapper implements ExceptionMapper<CrnkMappableException> {
+public final class CrnkExceptionMapper implements ExceptionMapper<CrnkMappableException>, Prioritizable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkExceptionMapper.class);
 
@@ -83,5 +84,10 @@ public final class CrnkExceptionMapper implements ExceptionMapper<CrnkMappableEx
 		return httpStatus == HttpStatus.NOT_FOUND_404 || httpStatus == HttpStatus.METHOD_NOT_ALLOWED_405 ||
 				httpStatus == HttpStatus.BAD_REQUEST_400 || httpStatus == HttpStatus.FORBIDDEN_403
 				|| httpStatus == HttpStatus.UNAUTHORIZED_401 || httpStatus == HttpStatus.INTERNAL_SERVER_ERROR_500;
+	}
+
+	@java.lang.Override
+	public int getPriority() {
+		return Prioritizable.MEDIUM_PRIORITY;
 	}
 }

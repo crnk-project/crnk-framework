@@ -14,6 +14,11 @@ import java.util.Map;
  */
 public interface Prioritizable {
 
+	public static final int HIGHEST_PRIORITY = 1;
+	public static final int HIGH_PRIORITY = 10;
+	public static final int MEDIUM_PRIORITY = 50;
+	public static final int LOW_PRIORITY = 100;
+
 	/**
 	 * The higher the returned value, the later it will be used.
 	 * e.g. 1 as first priority, 2 as second priority, etc.

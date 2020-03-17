@@ -17,8 +17,8 @@ public final class ExceptionMapperRegistryBuilder {
         for (ExceptionMapper<?> exceptionMapper : exceptionMapperLookup.getExceptionMappers()) {
             registerExceptionMapper(exceptionMapper);
         }
-        exceptionMappers = Prioritizable.prioritze(exceptionMappers);
-        addDefaultMappers();
+		addDefaultMappers();
+		exceptionMappers = Prioritizable.prioritze(exceptionMappers);
         return new ExceptionMapperRegistry(exceptionMappers);
     }
 
