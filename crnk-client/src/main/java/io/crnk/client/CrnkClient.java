@@ -135,6 +135,8 @@ public class CrnkClient {
 
     private ClientProxyFactory configuredProxyFactory;
 
+    private boolean orderExceptionMapperAfterClass = true;
+
     public enum ClientType {
         SIMPLE_lINKS,
 
@@ -386,11 +388,19 @@ public class CrnkClient {
         if (configuredProxyFactory != null) {
             documentMapper.setProxyFactory(configuredProxyFactory);
         }
-    }
+	}
+
+	public boolean getOrderExceptionMapperAfterClass() {
+    	return orderExceptionMapperAfterClass;
+	}
+
+	public void setOrderExceptionMapperAfterClass( boolean orderExceptionMapperAfterClass ) {
+    	this.orderExceptionMapperAfterClass = orderExceptionMapperAfterClass;
+	}
 
     protected void initExceptionMapperRegistry() {
         ExceptionMapperLookup exceptionMapperLookup = moduleRegistry.getExceptionMapperLookup();
-        exceptionMapperRegistry = new ExceptionMapperRegistryBuilder().build(exceptionMapperLookup);
+        exceptionMapperRegistry = new ExceptionMapperRegistryBuilder().build(exceptionMapperLookup, orderExceptionMapperAfterClass);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

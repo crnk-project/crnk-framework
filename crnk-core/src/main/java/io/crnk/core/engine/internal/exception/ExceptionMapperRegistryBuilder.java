@@ -13,13 +13,17 @@ import java.util.List;
 public final class ExceptionMapperRegistryBuilder {
     private List<ExceptionMapperType> exceptionMappers = new ArrayList<>();
 
-    public ExceptionMapperRegistry build(ExceptionMapperLookup exceptionMapperLookup) {
+	public ExceptionMapperRegistry build(ExceptionMapperLookup exceptionMapperLookup) {
+		return build(exceptionMapperLookup, true);
+	}
+
+	public ExceptionMapperRegistry build(ExceptionMapperLookup exceptionMapperLookup, boolean orderExceptionMapperAfterClass) {
         for (ExceptionMapper<?> exceptionMapper : exceptionMapperLookup.getExceptionMappers()) {
             registerExceptionMapper(exceptionMapper);
         }
 		addDefaultMappers();
 		exceptionMappers = Prioritizable.prioritze(exceptionMappers);
-        return new ExceptionMapperRegistry(exceptionMappers);
+        return new ExceptionMapperRegistry(exceptionMappers, orderExceptionMapperAfterClass);
     }
 
     private void addDefaultMappers() {

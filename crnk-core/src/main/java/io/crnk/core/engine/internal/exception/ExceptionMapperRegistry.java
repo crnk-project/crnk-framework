@@ -17,9 +17,15 @@ public class ExceptionMapperRegistry {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionMapperRegistry.class);
 
     private final List<ExceptionMapperType> exceptionMappers;
+    private final boolean orderExceptionMapperAfterClass;
 
-    ExceptionMapperRegistry(List<ExceptionMapperType> exceptionMappers) {
+	ExceptionMapperRegistry(List<ExceptionMapperType> exceptionMappers) {
+		this( exceptionMappers, true);
+	}
+
+	ExceptionMapperRegistry(List<ExceptionMapperType> exceptionMappers, boolean orderExceptionMapperAfterClass) {
         this.exceptionMappers = exceptionMappers;
+        this.orderExceptionMapperAfterClass = orderExceptionMapperAfterClass;
     }
 
     List<ExceptionMapperType> getExceptionMappers() {
@@ -28,18 +34,54 @@ public class ExceptionMapperRegistry {
 
 	@SuppressWarnings({"rawtypes"})
     public Optional<ExceptionMapper> findMapperFor(Class<? extends Throwable> exceptionClass) {
-    	return getExceptionMappers().stream()
-				.filter(mapperType -> mapperType.getExceptionClass().isAssignableFrom(exceptionClass))
-				.map(ExceptionMapperType::getExceptionMapper)
-				.findFirst();
+		if( orderExceptionMapperAfterClass ) {
+			int currentDistance = Integer.MAX_VALUE;
+			ExceptionMapper closestExceptionMapper = null;
+			for (ExceptionMapperType mapperType : exceptionMappers) {
+				int tempDistance = getDistanceBetweenExceptions(exceptionClass, mapperType.getExceptionClass());
+				if (tempDistance < currentDistance) {
+					currentDistance = tempDistance;
+					closestExceptionMapper = mapperType.getExceptionMapper();
+					if (currentDistance == 0) {
+						break;
+					}
+				}
+			}
+			return Optional.ofNullable(closestExceptionMapper);
+		} else {
+			return getExceptionMappers().stream()
+					.filter(mapperType -> mapperType.getExceptionClass().isAssignableFrom(exceptionClass))
+					.map(ExceptionMapperType::getExceptionMapper)
+					.findFirst();
+		}
     }
 
     @SuppressWarnings({"rawtypes"})
     public <E extends Throwable> Optional<ExceptionMapper> findMapperFor(ErrorResponse errorResponse) {
-    	return getExceptionMappers().stream()
-				.map(ExceptionMapperType::getExceptionMapper)
-				.filter(mapper -> mapper.accepts(errorResponse))
-				.findFirst();
+		if( orderExceptionMapperAfterClass ) {
+			int currentDepth = -1;
+			ExceptionMapper closestExceptionMapper = null;
+
+			for (ExceptionMapperType mapperType : exceptionMappers) {
+				ExceptionMapper mapper = mapperType.getExceptionMapper();
+				boolean accepted = mapper.accepts(errorResponse);
+				if (accepted) {
+					// the exception with the most super types is chosen
+					int tempDepth = countSuperTypes(mapperType.getExceptionClass());
+					if (tempDepth > currentDepth) {
+						currentDepth = tempDepth;
+						closestExceptionMapper = mapper;
+					}
+				}
+
+			}
+			return (Optional) Optional.ofNullable(closestExceptionMapper);
+		} else {
+			return getExceptionMappers().stream()
+					.map(ExceptionMapperType::getExceptionMapper)
+					.filter(mapper -> mapper.accepts(errorResponse))
+					.findFirst();
+		}
     }
 
     int getDistanceBetweenExceptions(Class<?> clazz, Class<?> mapperTypeClazz) {
@@ -56,6 +98,16 @@ public class ExceptionMapperRegistry {
         }
         return distance;
     }
+
+	int countSuperTypes(Class<?> clazz) {
+		int count = 0;
+		Class<?> superClazz = clazz;
+		while (superClazz != Object.class) {
+			superClazz = superClazz.getSuperclass();
+			count++;
+		}
+		return count;
+	}
 
     public Response toResponse(Throwable e) {
         Optional<ExceptionMapper> exceptionMapper = findMapperFor(e.getClass());
