@@ -18,6 +18,7 @@ public interface Prioritizable {
 	public static final int HIGH_PRIORITY = 10;
 	public static final int MEDIUM_PRIORITY = 50;
 	public static final int LOW_PRIORITY = 100;
+	public static final int NO_PRIORITY = Integer.MAX_VALUE;
 
 	/**
 	 * The higher the returned value, the later it will be used.
@@ -49,7 +50,7 @@ public interface Prioritizable {
 				if (o1 instanceof Prioritizable) {
 					return ((Prioritizable) o1).getPriority();
 				}
-				return 0;
+				return NO_PRIORITY;
 			}
 		});
 		return results;

@@ -5,6 +5,7 @@ import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.InternalServerErrorException;
+import io.crnk.core.utils.Prioritizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,46 +23,23 @@ public class ExceptionMapperRegistry {
     }
 
     List<ExceptionMapperType> getExceptionMappers() {
-        return exceptionMappers;
+        return Prioritizable.prioritze(exceptionMappers);
     }
 
+	@SuppressWarnings({"rawtypes"})
     public Optional<ExceptionMapper> findMapperFor(Class<? extends Throwable> exceptionClass) {
-        int currentDistance = Integer.MAX_VALUE;
-        ExceptionMapper closestExceptionMapper = null;
-        for (ExceptionMapperType mapperType : exceptionMappers) {
-            int tempDistance = getDistanceBetweenExceptions(exceptionClass, mapperType.getExceptionClass());
-            if (tempDistance < currentDistance) {
-                currentDistance = tempDistance;
-                closestExceptionMapper = mapperType.getExceptionMapper();
-                if (currentDistance == 0) {
-                    break;
-                }
-            }
-        }
-        return Optional.ofNullable(closestExceptionMapper);
+    	return getExceptionMappers().stream()
+				.filter(mapperType -> mapperType.getExceptionClass().isAssignableFrom(exceptionClass))
+				.map(ExceptionMapperType::getExceptionMapper)
+				.findFirst();
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public <E extends Throwable> Optional<ExceptionMapper<E>> findMapperFor(ErrorResponse errorResponse) {
-        int currentDepth = -1;
-        ExceptionMapper closestExceptionMapper = null;
-
-        for (ExceptionMapperType mapperType : exceptionMappers) {
-            ExceptionMapper mapperObj = mapperType.getExceptionMapper();
-            if (mapperObj instanceof ExceptionMapper) {
-                ExceptionMapper mapper = (ExceptionMapper) mapperObj;
-                boolean accepted = mapper.accepts(errorResponse);
-                if (accepted) {
-                    // the exception with the most super types is chosen
-                    int tempDepth = countSuperTypes(mapperType.getExceptionClass());
-                    if (tempDepth > currentDepth) {
-                        currentDepth = tempDepth;
-                        closestExceptionMapper = mapper;
-                    }
-                }
-            }
-        }
-        return (Optional) Optional.ofNullable(closestExceptionMapper);
+    @SuppressWarnings({"rawtypes"})
+    public <E extends Throwable> Optional<ExceptionMapper> findMapperFor(ErrorResponse errorResponse) {
+    	return getExceptionMappers().stream()
+				.map(ExceptionMapperType::getExceptionMapper)
+				.filter(mapper -> mapper.accepts(errorResponse))
+				.findFirst();
     }
 
     int getDistanceBetweenExceptions(Class<?> clazz, Class<?> mapperTypeClazz) {
@@ -77,16 +55,6 @@ public class ExceptionMapperRegistry {
             distance++;
         }
         return distance;
-    }
-
-    int countSuperTypes(Class<?> clazz) {
-        int count = 0;
-        Class<?> superClazz = clazz;
-        while (superClazz != Object.class) {
-            superClazz = superClazz.getSuperclass();
-            count++;
-        }
-        return count;
     }
 
     public Response toResponse(Throwable e) {
