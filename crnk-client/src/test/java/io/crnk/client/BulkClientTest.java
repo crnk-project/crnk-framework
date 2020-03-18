@@ -27,8 +27,17 @@ public class BulkClientTest extends AbstractClientTest {
 
 	@Test
 	public void testCreate() {
+		testCreate(10);
+	}
+
+	@Test
+	public void testCreateWithSingleElement() {
+		testCreate(1);
+	}
+
+	private void testCreate(int n) {
 		List<BulkTask> tasks = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < n; i++) {
 			BulkTask task = new BulkTask();
 			task.setId((long) i);
 			task.setName("task" + i);
@@ -36,7 +45,7 @@ public class BulkClientTest extends AbstractClientTest {
 		}
 
 		List<BulkTask> createdTasks = taskRepo.create(tasks);
-		Assert.assertEquals(10, createdTasks.size());
+		Assert.assertEquals(n, createdTasks.size());
 		Assert.assertEquals("task0", createdTasks.get(0).getName());
 	}
 
