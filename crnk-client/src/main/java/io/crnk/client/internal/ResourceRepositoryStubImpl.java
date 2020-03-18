@@ -24,6 +24,7 @@ import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -75,7 +76,8 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 	@SuppressWarnings("unchecked")
 	protected <S extends T> List<S> bulkModify(List<S> entities, boolean create) {
 		String url = urlBuilder.buildUrl(client.getQueryContext(), resourceInformation, null, (QuerySpec) null);
-		return (List<S>) executeUpdate(url, entities, create);
+		Object result = executeUpdate(url, entities, create);
+		return result instanceof List ? (List<S>) result : Arrays.asList((S) result);
 	}
 
 	protected Object executeUpdate(String requestUrl, Object resource, boolean create) {
