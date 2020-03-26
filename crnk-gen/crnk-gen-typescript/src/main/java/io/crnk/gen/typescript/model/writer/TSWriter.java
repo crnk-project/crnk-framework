@@ -180,8 +180,16 @@ public class TSWriter implements TSVisitor {
 
 	@Override
 	public void visit(TSIndexSignatureType element) {
-		builder.append("[key: ");
-		visitReference(element.getKeyType());
+		builder.append("[key");
+		TSType keyType = element.getKeyType();
+		if (keyType instanceof TSEnumType) {
+			builder.append(" in ");
+		} else if (keyType instanceof TSPrimitiveType && ("string".equals(keyType.getName()) || "number".equals(keyType.getName()))) {
+			builder.append(": ");
+		} else {
+			throw new UnsupportedOperationException();
+		}
+		visitReference(keyType);
 		builder.append("]: ");
 		visitReference(element.getValueType());
 	}
