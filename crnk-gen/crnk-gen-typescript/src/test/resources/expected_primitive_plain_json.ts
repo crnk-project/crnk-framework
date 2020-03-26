@@ -3,7 +3,7 @@ import {
 	OneResult,
 	Resource
 } from './crnk';
-import {ScheduleStatus} from './schedule.status';
+import {TaskStatus} from './task.status';
 
 export interface PrimitiveAttribute extends Resource {
 	stringValue?: string;
@@ -26,8 +26,8 @@ export interface PrimitiveAttribute extends Resource {
 	uuidValue?: string;
 	dateValue?: any;
 	objectValue?: any;
-	mapValueWithEnumKey?: { [key: ScheduleStatus]: string };
-	mapValueWithListValue?: { [key: string]: Array<string> };
+	mapValueWithEnumKey?: { [key in TaskStatus]: string };
+	mapValueWithListValue?: { [key: number]: Array<string> };
 	mapValueWithSetValue?: { [key: string]: Array<string> };
 }
 export interface PrimitiveAttributeResult extends OneResult {

@@ -58,9 +58,9 @@ public class PrimitiveAttributeResource {
 
 	private Object objectValue;
 
-	private Map<ScheduleStatus, String> mapValueWithEnumKey;
+	private Map<TaskStatus, String> mapValueWithEnumKey;
 
-	private Map<String, List<String>> mapValueWithListValue;
+	private Map<Long, List<String>> mapValueWithListValue;
 
 	private Map<String, Set<String>> mapValueWithSetValue;
 
@@ -80,19 +80,19 @@ public class PrimitiveAttributeResource {
 		this.mapValueWithSetValue = mapValueWithSetValue;
 	}
 
-	public Map<ScheduleStatus, String> getMapValueWithEnumKey() {
+	public Map<TaskStatus, String> getMapValueWithEnumKey() {
 		return mapValueWithEnumKey;
 	}
 
-	public void setMapValueWithEnumKey(Map<ScheduleStatus, String> mapValueWithEnumKey) {
+	public void setMapValueWithEnumKey(Map<TaskStatus, String> mapValueWithEnumKey) {
 		this.mapValueWithEnumKey = mapValueWithEnumKey;
 	}
 
-	public Map<String, List<String>> getMapValueWithListValue() {
+	public Map<Long, List<String>> getMapValueWithListValue() {
 		return mapValueWithListValue;
 	}
 
-	public void setMapValueWithListValue(Map<String, List<String>> mapValueWithListValue) {
+	public void setMapValueWithListValue(Map<Long, List<String>> mapValueWithListValue) {
 		this.mapValueWithListValue = mapValueWithListValue;
 	}
 
