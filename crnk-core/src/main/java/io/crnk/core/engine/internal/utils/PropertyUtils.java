@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,7 +96,14 @@ public class PropertyUtils {
 				List<Object> result = new ArrayList<>();
 				Iterable<?> iterable = (Iterable<?>) current;
 				for (Object currentElem : iterable) {
-					result.add(getProperty(currentElem, propertyName));
+					Object property = getProperty(currentElem, propertyName);
+					// follow multi-valued nested property
+					if (property instanceof Collection) {
+						result.addAll((Collection<?>) property);
+					} else {
+						// follow single-valued nested property
+						result.add(property);
+					}
 				}
 				current = result;
 			} else {

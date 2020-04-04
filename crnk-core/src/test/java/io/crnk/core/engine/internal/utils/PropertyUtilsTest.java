@@ -7,6 +7,7 @@ import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -509,6 +510,26 @@ public class PropertyUtilsTest {
 		assertThat(result).isNull();
 	}
 
+	@Test
+	public void onMultipleNestedCollectionsShouldReturnValue() {
+		// GIVEN
+		Bean bean = new Bean();
+
+		SubNestedBean subNestedBean = new SubNestedBean();
+		subNestedBean.setProperty("propertyValue");
+
+		NestedBean nestedBean = new NestedBean();
+		nestedBean.setSubNestedBeans(Collections.singletonList(subNestedBean));
+
+		bean.setNestedBeans(Collections.singletonList(nestedBean));
+
+		// WHEN
+		Object result = PropertyUtils.getProperty(bean, Arrays.asList("nestedBeans", "subNestedBeans", "property"));
+
+		// THEN
+		assertThat(result).isEqualTo(Collections.singletonList("propertyValue"));
+	}
+
 	public static class Bean {
 
 		public String publicProperty;
@@ -522,6 +543,8 @@ public class PropertyUtilsTest {
 		private Boolean booleanPropertyWithMutators;
 
 		private Set<String> setProperty;
+
+		private Collection<NestedBean> nestedBeans;
 
 		public boolean getBooleanWithGetPrefix() {
 			return booleanWithGetPrefix;
@@ -583,10 +606,45 @@ public class PropertyUtilsTest {
 		public String getMethodProperty() {
 			return "noFieldsHere";
 		}
+
+		public Collection<NestedBean> getNestedBeans() {
+			return nestedBeans;
+		}
+
+		public void setNestedBeans(Collection<NestedBean> nestedBeans) {
+			this.nestedBeans = nestedBeans;
+		}
 	}
 
 	private static class ChildBean extends Bean {
 
+	}
+
+	private static class NestedBean {
+
+		private Collection<SubNestedBean> subNestedBeans;
+
+		public Collection<SubNestedBean> getSubNestedBeans() {
+			return subNestedBeans;
+		}
+
+		public void setSubNestedBeans(
+				Collection<SubNestedBean> subNestedBeans) {
+			this.subNestedBeans = subNestedBeans;
+		}
+	}
+
+	private static class SubNestedBean {
+
+		private String property;
+
+		public String getProperty() {
+			return property;
+		}
+
+		public void setProperty(String property) {
+			this.property = property;
+		}
 	}
 
 	public static class GetterTest {
