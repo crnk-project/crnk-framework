@@ -3,7 +3,7 @@ anchor:setup[]
 
 # Setup
 
-Crnk integrates well with many popular framework. The example applications outline various different possible
+Crnk integrates well with many popular frameworks. The example applications outline various different possible
 setups. But application are also free to customize their setup to their liking.
 There are three main, orthogonal aspects of Crnk that need configuration:
 
