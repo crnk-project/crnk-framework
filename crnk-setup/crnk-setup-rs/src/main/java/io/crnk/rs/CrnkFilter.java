@@ -1,6 +1,7 @@
 package io.crnk.rs;
 
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.rs.type.JsonApiMediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 
 /**
  * Handles JSON API requests.
@@ -42,6 +42,12 @@ public class CrnkFilter implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) {
+		if (feature.getWebPathPrefix() != null) {
+			String path = UrlUtils.removeLeadingSlash(requestContext.getUriInfo().getPath());
+			if (!path.startsWith(UrlUtils.addTrailingSlash(feature.getWebPathPrefix()))) {
+				return;
+			}
+		}
 		try {
 			LOGGER.debug("CrnkFilter entered");
 			JaxrsRequestContext context = new JaxrsRequestContext(requestContext, feature);

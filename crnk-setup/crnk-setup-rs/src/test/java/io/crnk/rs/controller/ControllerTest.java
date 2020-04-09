@@ -89,7 +89,7 @@ public abstract class ControllerTest extends JerseyTestBase {
 
 	}
 
-	private String getPrefixForPath() {
+	protected String getPrefixForPath() {
 		String prefix = getPrefix();
 		return prefix != null ? prefix + PathBuilder.SEPARATOR : "";
 	}

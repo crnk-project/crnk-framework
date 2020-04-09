@@ -1,6 +1,7 @@
 package io.crnk.rs;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.util.Arrays;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Configuration;
@@ -12,6 +13,7 @@ import io.crnk.core.engine.http.HttpResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 public class JaxrsRequestContextTest {
@@ -60,5 +62,19 @@ public class JaxrsRequestContextTest {
 		Assert.assertTrue(Arrays.equals(copy1, body));
 	}
 
+	@Test
+	public void testGetBaseBath() {
+		Mockito.when(feature.getWebPathPrefix()).thenReturn(null);
+		Mockito.when(uriInfo.getBaseUri()).thenReturn(URI.create("/base"));
 
+		Assert.assertEquals("/base", context.getBaseUrl());;
+	}
+
+	@Test
+	public void testGetBaseBathWithWebpathPrefix() {
+		Mockito.when(feature.getWebPathPrefix()).thenReturn("/api");
+		Mockito.when(uriInfo.getBaseUri()).thenReturn(URI.create("/base"));
+
+		Assert.assertEquals("/base/api", context.getBaseUrl());;
+	}
 }
