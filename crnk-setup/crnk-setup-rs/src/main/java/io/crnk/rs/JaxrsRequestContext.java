@@ -75,7 +75,12 @@ public class JaxrsRequestContext extends DefaultHttpRequestContextBase {
 
 	@Override
 	public String getBaseUrl() {
-		return UrlUtils.removeTrailingSlash(requestContext.getUriInfo().getBaseUri().toString());
+		String baseUrl = requestContext.getUriInfo().getBaseUri().toString();
+		if (feature.getWebPathPrefix() == null) {
+			return UrlUtils.removeTrailingSlash(baseUrl);
+		} else {
+			return UrlUtils.concat(baseUrl, feature.getWebPathPrefix());
+		}
 	}
 
 	@Override
@@ -137,7 +142,7 @@ public class JaxrsRequestContext extends DefaultHttpRequestContextBase {
 	}
 
 	private String buildPath(UriInfo uriInfo) {
-		String basePath = uriInfo.getPath();
+		String basePath = UrlUtils.removeLeadingSlash(uriInfo.getPath());
 		String webPathPrefix = feature.getWebPathPrefix();
 		String path;
 		if (webPathPrefix != null && basePath.startsWith(webPathPrefix)) {

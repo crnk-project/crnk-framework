@@ -13,9 +13,25 @@ public class UrlUtils {
 		}
 	}
 
+	public static String addTrailingSlash(String url) {
+		if (url != null && !url.endsWith("/")) {
+			return url + "/";
+		} else {
+			return url;
+		}
+	}
+
 	public static String removeLeadingSlash(String url) {
 		if (url != null && url.startsWith("/")) {
 			return url.substring(1);
+		} else {
+			return url;
+		}
+	}
+
+	public static String addLeadingSlash(String url) {
+		if (url != null && !url.startsWith("/")) {
+			return "/" + url;
 		} else {
 			return url;
 		}
