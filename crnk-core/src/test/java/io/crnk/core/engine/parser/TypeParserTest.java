@@ -281,6 +281,15 @@ public class TypeParserTest {
 	}
 
 	@Test
+	public void onInvalidEnumShouldThrowParserException() {
+		// THEN
+		expectedException.expect(ParserException.class);
+
+		// WHEN
+		sut.parse("INVALID_SAMPLE_VALUE", SampleEnum.class);
+	}
+
+	@Test
 	public void onClassWithStringConstructorShouldReturnClassInstance() {
 		SampleClass result = sut.parse("input", SampleClass.class);
 		assertThat(result).isExactlyInstanceOf(SampleClass.class);
