@@ -223,6 +223,7 @@ public class PathBuilder {
                     RegistryEntry parentEntry = someEntry.getParentRegistryEntry();
                     while (parentEntry != null && parentEntry.getResourceInformation().findFieldByJsonName(jsonName, queryContext.getRequestVersion()) != null) {
                         someEntry = parentEntry;
+						parentEntry = someEntry.getParentRegistryEntry();
                     }
                     return someEntry;
                 }
