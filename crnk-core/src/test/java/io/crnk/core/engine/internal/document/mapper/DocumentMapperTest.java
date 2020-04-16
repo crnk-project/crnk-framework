@@ -1,7 +1,11 @@
 package io.crnk.core.engine.internal.document.mapper;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -538,6 +542,27 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertEquals("tasks", resource.getType());
 		Assert.assertNull(resource.getAttributes().get("name"));
 		Assert.assertNull(resource.getRelationships().get("project"));
+		Assert.assertEquals("sample category", resource.getAttributes().get("category").asText());
+	}
+
+	@Test
+	public void testAttributesOrdering() {
+		Task task = createTask(3, "sample task");
+		task.setCategory("sample category");
+		task.setName("sample name");
+		JsonApiResponse response = new JsonApiResponse();
+		response.setEntity(task);
+
+		Document document = mapper.toDocument(response, createAdapter(Task.class), mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("3", resource.getId());
+		Assert.assertEquals("tasks", resource.getType());
+		// check if the attributes are returned in alphabetical order as per the JsonPropertyOrder on Task
+		Assert.assertTrue(resource.getAttributes() instanceof LinkedHashMap);
+		Assert.assertEquals(resource.getAttributes().keySet(),
+				Stream.of("category", "completed", "deleted", "name", "otherTasks", "readOnlyValue", "status")
+						.collect(Collectors.toCollection(LinkedHashSet::new)));
+		Assert.assertEquals("sample name", resource.getAttributes().get("name").asText());
 		Assert.assertEquals("sample category", resource.getAttributes().get("category").asText());
 	}
 
