@@ -93,20 +93,13 @@ public class JpaEntityRepositoryBase<T, I> extends JpaRepositoryBase<T> implemen
 
 		JpaRepositoryUtils.prepareQuery(query, optimizedQuerySpec, computedAttrs);
 		query = JpaRepositoryUtils.filterQuery(repositoryConfig, this, optimizedQuerySpec, query);
-		JpaQueryExecutor<?> executor = query.buildExecutor();
+		JpaQueryExecutor<?> executor = createExecutor(query, optimizedQuerySpec);
 
-		if (optimizeForInclusion(querySpec)) {
-			IncludeRelationSpec includedRelationSpec = querySpec.getIncludedRelations().get(0);
-			executor.fetch(includedRelationSpec.getAttributePath());
-		}
-
-		boolean fetchNext = repositoryConfig.isNextFetched(optimizedQuerySpec);
-		boolean fetchTotal = repositoryConfig.isTotalFetched(optimizedQuerySpec);
-
-		JpaRepositoryUtils.prepareExecutor(executor, optimizedQuerySpec, fetchRelations());
-
+		boolean fetchNext = isNextFetched(optimizedQuerySpec);
+		boolean fetchTotal = isTotalFetched(optimizedQuerySpec);
+		int limit = executor.getLimit();
 		if (fetchNext) {
-			executor.setLimit(executor.getLimit() + 1);
+			executor.setLimit(limit + 1);
 		}
 
 		executor = JpaRepositoryUtils.filterExecutor(repositoryConfig, this, optimizedQuerySpec, executor);
@@ -128,8 +121,7 @@ public class JpaEntityRepositoryBase<T, I> extends JpaRepositoryBase<T> implemen
 		JpaRepositoryUtils.fillResourceList(repositoryConfig, tuples, resources);
 		resources = JpaRepositoryUtils.filterResults(repositoryConfig, this, optimizedQuerySpec, resources);
 		if (fetchTotal) {
-			long totalRowCount = executor.getTotalRowCount();
-			((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
+			((PagedMetaInformation) metaInfo).setTotalResourceCount(computeTotalCount(executor, tuples));
 		}
 		if (fetchNext) {
 			((HasMoreResourcesMetaInformation) metaInfo).setHasMoreResources(hasNext);
@@ -137,6 +129,39 @@ public class JpaEntityRepositoryBase<T, I> extends JpaRepositoryBase<T> implemen
 
 		return resources;
 	}
+
+	protected Long computeTotalCount(JpaQueryExecutor<?> executor, List<Tuple> tuples) {
+		int limit = executor.getLimit();
+		int offset = executor.getOffset();
+		if (limit == -1 || tuples.size() < limit) {
+			// we don't need to count again if we did not limit or we did not reach the limit
+			// avoids an additional query
+			return (long) offset + tuples.size();
+		} else {
+			return executor.getTotalRowCount();
+		}
+	}
+
+	protected boolean isNextFetched(QuerySpec querySpec) {
+		return repositoryConfig.isNextFetched(querySpec);
+	}
+
+	protected boolean isTotalFetched(QuerySpec querySpec) {
+		return repositoryConfig.isTotalFetched(querySpec);
+	}
+
+	protected JpaQueryExecutor<?> createExecutor(JpaQuery<?> query, QuerySpec querySpec) {
+		JpaQueryExecutor<?> executor = query.buildExecutor();
+
+		if (optimizeForInclusion(querySpec)) {
+			IncludeRelationSpec includedRelationSpec = querySpec.getIncludedRelations().get(0);
+			executor.fetch(includedRelationSpec.getAttributePath());
+		}
+
+		JpaRepositoryUtils.prepareExecutor(executor, querySpec, fetchRelations());
+		return executor;
+	}
+
 
 	/**
 	 * override to customize query.
@@ -271,8 +296,7 @@ public class JpaEntityRepositoryBase<T, I> extends JpaRepositoryBase<T> implemen
 		ResourceField idField = getIdField();
 		if (idField.getUnderlyingName().equals(primaryKeyAttribute.getName())) {
 			pk = id;
-		}
-		else {
+		} else {
 			T resource = findOne(id, new QuerySpec(getResourceClass()));
 			pk = PropertyUtils.getProperty(resource, primaryKeyAttribute.getName());
 			if (pk == null) {

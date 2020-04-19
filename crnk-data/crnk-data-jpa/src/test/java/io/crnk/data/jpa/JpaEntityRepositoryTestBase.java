@@ -112,8 +112,7 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 		for (int i = 0; i < numTestEntities; i++) {
 			if (asc) {
 				Assert.assertEquals(i, list.get(i).getLongValue());
-			}
-			else {
+			} else {
 				Assert.assertEquals(numTestEntities - 1 - i, list.get(i).getLongValue());
 			}
 		}
@@ -326,6 +325,34 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 		ResourceList<TestEntity> list = repo.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
 		Assert.assertEquals(4, list.get(0).getId().intValue());
+
+		PagedMetaInformation metaInformation = list.getMeta(PagedMetaInformation.class);
+		Assert.assertEquals(5, metaInformation.getTotalResourceCount().longValue());
+	}
+
+
+	@Test
+	public void testPagingLargeLimit() {
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+		querySpec.setOffset(1L);
+		querySpec.setLimit(10L);
+
+		ResourceList<TestEntity> list = repo.findAll(querySpec);
+		Assert.assertEquals(4, list.size());
+
+		PagedMetaInformation metaInformation = list.getMeta(PagedMetaInformation.class);
+		Assert.assertEquals(5, metaInformation.getTotalResourceCount().longValue());
+	}
+
+
+	@Test
+	public void testOffserAndNoLimit() {
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+		querySpec.setOffset(1L);
+		querySpec.setLimit(null);
+
+		ResourceList<TestEntity> list = repo.findAll(querySpec);
+		Assert.assertEquals(4, list.size());
 
 		PagedMetaInformation metaInformation = list.getMeta(PagedMetaInformation.class);
 		Assert.assertEquals(5, metaInformation.getTotalResourceCount().longValue());

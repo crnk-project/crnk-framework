@@ -37,7 +37,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	protected Map<String, Integer> selectionBindings;
 
 	public AbstractQueryExecutorImpl(EntityManager em, MetaDataObject meta, int numAutoSelections,
-			Map<String, Integer> selectionBindings) {
+									 Map<String, Integer> selectionBindings) {
 		this.em = em;
 		this.meta = meta;
 		this.numAutoSelections = numAutoSelections;
@@ -91,6 +91,11 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	}
 
 	@Override
+	public int getOffset() {
+		return offset;
+	}
+
+	@Override
 	public void setPaging(PagingSpec pagingSpec) {
 		OffsetLimitPagingSpec offsetLimit = pagingSpec.convert(OffsetLimitPagingSpec.class);
 		setOffset((int) offsetLimit.getOffset());
@@ -126,8 +131,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 				entityList.add((T) values[0]);
 			}
 			resultList = entityList;
-		}
-		else {
+		} else {
 			resultList = (List<T>) list;
 		}
 		return resultList;
@@ -143,11 +147,9 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 		}
 		if (!list.isEmpty()) {
 			return list.get(0);
-		}
-		else if (nullable) {
+		} else if (nullable) {
 			return null;
-		}
-		else {
+		} else {
 			throw new IllegalStateException("no result found");
 		}
 	}

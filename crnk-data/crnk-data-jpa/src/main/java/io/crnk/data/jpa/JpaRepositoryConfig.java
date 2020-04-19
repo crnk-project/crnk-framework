@@ -214,7 +214,7 @@ public class JpaRepositoryConfig<T> {
     }
 
     public boolean isTotalFetched(QuerySpec querySpec) {
-        return querySpec.getLimit() != null && isTotalAvailable()
+        return (querySpec.getOffset() != 0 || querySpec.getLimit() != null) && isTotalAvailable()
                 && getListMetaClass() != null
                 && PagedMetaInformation.class.isAssignableFrom(getListMetaClass());
     }

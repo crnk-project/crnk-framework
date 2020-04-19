@@ -31,5 +31,7 @@ public interface JpaQueryExecutor<T> {
 
 	int getLimit();
 
+	int getOffset();
+
 	void setPaging(PagingSpec paging);
 }
