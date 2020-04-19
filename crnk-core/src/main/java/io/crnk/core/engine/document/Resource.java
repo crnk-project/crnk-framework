@@ -1,6 +1,7 @@
 package io.crnk.core.engine.document;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ public class Resource extends ResourceIdentifier implements MetaContainer, Links
 	private ObjectNode meta;
 
 	@JsonInclude(Include.NON_EMPTY)
-	private Map<String, JsonNode> attributes = new HashMap<>();
+	private Map<String, JsonNode> attributes = new LinkedHashMap<>();
 
 	@JsonInclude(Include.NON_EMPTY)
 	private Map<String, Relationship> relationships = new HashMap<>();
