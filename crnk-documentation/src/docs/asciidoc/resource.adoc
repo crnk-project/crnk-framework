@@ -480,15 +480,38 @@ See http://jsonapi.org/format/#document-links for more information about linking
 	}
 ----
 
-By default links are serialized as:
+Links can be represented either as either simple String:
 
+----
+"http://example.com/articles/1/relationships/comments",
+----
+
+or as structured objects of type `Link` with
+`href`, `rel`, `anchor`, `params`, `describedBy` and `meta` fields:
+
+----
+"links": {
+	"self": "http://example.com/articles/1/relationships/comments",
+		"related": {
+			"href": "http://example.com/articles/1/comments",
+			"describedby": "http://example.com/schemas/article-comments",
+			"meta": {
+				"count": 10
+			}
+		}
+	}
+}
+----
+
+`LinksInformation` objects can hold either type. With `DefaultLink` there is a default implementation
+of  `Link` available. By default simple strings will be serialized as such:
 ----
 "links": {
   "self": "http://example.com/posts"
 }
 ----
 
-With `crnk.config.serialize.object.links=true` links get serialized as:
+This can be changed by setting the property `crnk.config.serialize.object.links=true`:
 
 ----
 "links": {

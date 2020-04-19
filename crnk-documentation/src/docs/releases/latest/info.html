@@ -1,11 +1,113 @@
+This release provides many incremental improvements over 3.1 together with experimental support for versioning
+and more support for the upcoming JSON:API 1.1.
+
+<h4>Versioning Support (experimental) <a href="https://github.com/crnk-project/crnk-framework/issues/238">#238</a></h4>
+
+This release brings experimental support for versioning of resources and fields based on content negotiation. Any resource
+and field can carry a version range to specify its availability. Crnk will disregard any resource and field with a version
+range that does not intersect with the request version. The HTTP Accept header is used to pass along the desired version
+as part of general content negotiation. This has the benefit that URLs remain constant across versions, greatly simplifying
+usability and linking. For a more detailed discussion, see here[https://blog.ploeh.dk/2015/06/22/rest-implies-content-negotiation/].
+An example looks like:
+
+<pre class="prettyprint">
+@JsonApiResource(type = "versionedTask")
+@JsonApiVersion(max = 5)
+public class VersionedTask {
+
+    public enum CompletionStatus {
+        DONE,
+        OPEN,
+        IN_PROGRESS
+    }
+
+    @JsonApiId
+    private Long id;
+
+    private String name;
+
+    @JsonApiVersion(min = 1, max = 3)
+    private boolean completed;
+
+    @JsonApiVersion(min = 5)
+    @JsonProperty("completed")
+    private CompletionStatus newCompleted;
+
+}
+</pre>
+
+<p>
+	For more details have a look <a href="http://www.crnk.io/releases/latest/documentation/#_jsonapiversion">here</a>.
+</p>
+
+
+<h4>Support for Object-based Links</h4>
+
+Links can be represented as either simple string or structured objects with <code>href</code>, <code>rel</code>, <code>anchor</code>,
+<code>params</code>, <code>describedBy</code> and <code>meta</code>. There is a new <code>Link</code> interface and DefaultLink implementation
+to model such objects. <code>LinksInformation</code> can now either hold Strings or <code>DefaultLink</code>. An example looks like:
+
+<pre class="prettyprint">
+"links": {
+	"self": "http://example.com/articles/1/relationships/comments",
+	"related": {
+		"href": "http://example.com/articles/1/comments",
+		"describedby": "http://example.com/schemas/article-comments",
+		"meta": {
+			"count": 10
+		}
+	}
+}
+</pre>
+
+More information can be found in <a href="https://jsonapi.org/format/1.1/#document-resource-object-links">https://jsonapi.org/format/1.1/#document-resource-object-links</a>
+and <a href="http://www.crnk.io/releases/latest/documentation/#_jsonapilinksinformation">http://www.crnk.io/releases/latest/documentation/#_jsonapilinksinformation</a>.
+
+<h4>Misc Improvements</h4>
+
 <ul>
-    <li>Improved logging for relationship inclusion mechanism. Set <code>io.crnk</code> to DEBUG to learn more
-        about how inclusions are loaded.
-    </li>
-    <li>Reenabled Spring Boot 1 support.</li>
-    <li>JSON-based filter parameters fixed to support renaming of attributes with @JsonProperty.</li>
-    <li>When using faceted search, the value map is sorted by total count in descending order.</li>
-    <li>Built-in ExceptionMappers can be overriden by custom ones</li>
-    <li>ExceptionMappers can implement Prioritizable</li>
-    <li>More documentation for ExceptionMappers</li>
+	<li>Improved logging for relationship inclusion mechanism. Set <code>io.crnk</code> to DEBUG to learn more
+		about how inclusions are loaded.
+	</li>
+	<li>Re-enabled Spring Boot 1 support upon request to be maintained a little while longer.</li>
+	<li>JSON-based filter parameters fixed to support renaming of attributes with @JsonProperty.</li>
+	<li>When using faceted search, the value map is sorted by total count in descending order.</li>
+	<li>Built-in ExceptionMappers can be overridden by custom ones by implementing the Prioritizable interface.</li>
+	<li>ExceptionMappers can implement Prioritizable</li>
+	<li>More documentation for ExceptionMappers</li>
+	<li>Meta-model is excluded from OpenAPI generation by default. <a href="https://github.com/crnk-project/crnk-framework/issues/625">#625</a></li>
+	<li>Non-ID fields can no longer be named <code>id</code>.</li>
+	<li>Bulk support through the BulkResourceRepository interface now supports HTTP DELETE operations.
+		This complements existing support for POST. PATCH has not yet been implemented.
+	</li>
+	<li>JPA repositories avoid issuing a count query in some situations where the configured offset, limit and
+		received result sets allow to by-pass it. Greatly improving performance in some situations! Where every bit of
+		performance is essential, the existing "has more" strategy rather than total count may also be of help.
+	</li>
+	<li>JAX-RS integration has an improved path handling. There will be some more work to harden this area
+		in the future to account for the different behavior of different frameworks.
+	</li>
+	<li>Refinements to the <a href="http://www.crnk.io/releases/latest/documentation/#_jpa">JPA-related documentation</a>. For example,
+		how to implement more advanced use cases where the entity and resource model do not fully match.
+	</li>
+	<li>
+		Better error message when the parsing of an enum parameter fails.
+	</li>
+	<li>The order of attributes is honored in the serialized REST documents. Attributes in the implementation and on the REST layer will have
+		the same order.
+	</li>
+	<li>A bug fix when resolving attribute paths from subtypes of a resource <a href="https://github.com/crnk-project/crnk-framework/issues/712">#712</a>.</li>
+	<li>Improvements to the Typescript generation for the java.util.Map data type <a href="https://github.com/crnk-project/crnk-framework/issues/709">#709</a></li>
+	<li>The CrnkExceptionMapper uses the JSON:API error fields <code>title</code> and <code>code</code> if <code>detail</code> is not available for better
+		error messages.
+	</li>
+	<li>New UrlBuilder interface introduced as public API that allows to customize the construction of URLs out of resource ids and QuerySpecs.</li>
 </ul>
+
+
+<h4>Acknowledgements</h4>
+
+A special thanks to Broad, Ralph, JB, PoffM, Christian, Sebastian,
+Kokogino, duncanportelli, Luka, Gianin, fjf2002, Tomasz, erjaimin for all
+the contributions to make this release happen!
+
