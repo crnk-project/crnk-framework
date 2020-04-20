@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.document.mapper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -20,6 +23,7 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +49,13 @@ public class DocumentMapper {
 	private boolean client;
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo, UrlBuilder urlBuilder) {
+			ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo, UrlBuilder urlBuilder) {
 		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, resultFactory, serverInfo, false, urlBuilder);
 	}
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo,
-						  boolean client, UrlBuilder urlBuilder) {
+			ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo,
+			boolean client, UrlBuilder urlBuilder) {
 		this.propertiesProvider = propertiesProvider;
 		this.client = client;
 		this.resultFactory = resultFactory;
@@ -77,12 +81,12 @@ public class DocumentMapper {
 	}
 
 	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
-														 PropertiesProvider propertiesProvider, ObjectMapper objectMapper) {
+			PropertiesProvider propertiesProvider, ObjectMapper objectMapper) {
 		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, resultFactory, objectMapper);
 	}
 
 	protected DocumentMapperUtil newDocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-													   PropertiesProvider propertiesProvider, UrlBuilder urlBuilder) {
+			PropertiesProvider propertiesProvider, UrlBuilder urlBuilder) {
 		return new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider, urlBuilder);
 	}
 
@@ -98,6 +102,8 @@ public class DocumentMapper {
 			return null;
 		}
 
+		int requestVersion = queryAdapter.getQueryContext().getRequestVersion();
+
 		ResourceMappingConfig resourceMapping = mappingConfig.getResourceMapping();
 
 		Document doc = new Document();
@@ -110,8 +116,58 @@ public class DocumentMapper {
 		addData(doc, response.getEntity(), queryAdapter, resourceMapping);
 
 		Result<Document> result = addRelationDataAndInclusions(doc, response.getEntity(), queryAdapter, mappingConfig);
+		result.doWork(it -> applyIgnoreEmpty(doc, queryAdapter, requestVersion));
 		result.doWork(it -> compact(doc, queryAdapter));
 		return result;
+	}
+
+	private void applyIgnoreEmpty(Document doc, QueryAdapter queryAdapter, int requestVersion) {
+		if (doc.getData().isPresent()) {
+			if (doc.isMultiple()) {
+				applyIgnoreEmpty(doc.getCollectionData().get(), requestVersion);
+			}
+			else {
+				applyIgnoreEmpty(doc.getSingleData().get(), requestVersion);
+			}
+			if (doc.getIncluded() != null) {
+				applyIgnoreEmpty(doc.getIncluded(), requestVersion);
+			}
+		}
+	}
+
+	private void applyIgnoreEmpty(List<Resource> resources, int requestVersion) {
+		if (resources != null) {
+			for (Resource resource : resources) {
+				applyIgnoreEmpty(resource, requestVersion);
+			}
+		}
+	}
+
+	private void applyIgnoreEmpty(Resource resource, int requestVersion) {
+		String type = resource.getType();
+		ResourceInformation resourceInformation = util.getResourceInformation(type);
+
+		Iterator<Map.Entry<String, Relationship>> iterator = resource.getRelationships().entrySet().iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<String, Relationship> entry = iterator.next();
+			ResourceField field = resourceInformation.findFieldByJsonName(entry.getKey(), requestVersion);
+			if (field != null && !isRelationshipIncluded(field, entry.getValue())) {
+				iterator.remove();
+			}
+		}
+	}
+
+
+	private boolean isRelationshipIncluded(ResourceField field, Relationship relationship) {
+		JsonIncludeStrategy includeStrategy = field.getJsonIncludeStrategy();
+		Nullable<Object> data = relationship.getData();
+		return JsonIncludeStrategy.DEFAULT.equals(includeStrategy)
+				|| data.isPresent() && data.get() != null && JsonIncludeStrategy.NOT_NULL.equals(includeStrategy)
+				|| JsonIncludeStrategy.NON_EMPTY.equals(includeStrategy) && data.isPresent() && !isDefaultRelationshipValue(data.get());
+	}
+
+	private boolean isDefaultRelationshipValue(Object o) {
+		return o == null || (o instanceof Collection) && ((Collection) o).isEmpty();
 	}
 
 	/**
@@ -125,7 +181,8 @@ public class DocumentMapper {
 			if (doc.getData().isPresent()) {
 				if (doc.isMultiple()) {
 					compact(doc.getCollectionData().get());
-				} else {
+				}
+				else {
 					compact(doc.getSingleData().get());
 				}
 			}
@@ -152,11 +209,12 @@ public class DocumentMapper {
 	}
 
 	private Result<Document> addRelationDataAndInclusions(Document doc, Object entity, QueryAdapter queryAdapter,
-														  DocumentMappingConfig mappingConfig) {
+			DocumentMappingConfig mappingConfig) {
 
 		if (doc.getData().isPresent() && !client) {
 			return includeLookupSetter.processInclusions(doc, entity, queryAdapter, mappingConfig);
-		} else {
+		}
+		else {
 			return resultFactory.just(doc);
 		}
 	}
@@ -170,7 +228,8 @@ public class DocumentMapper {
 					dataList.add(resourceMapper.toData(obj, queryAdapter, resourceMappingConfig));
 				}
 				doc.setData(Nullable.of(dataList));
-			} else {
+			}
+			else {
 				doc.setData(Nullable.of(resourceMapper.toData(entity, queryAdapter, resourceMappingConfig)));
 			}
 		}

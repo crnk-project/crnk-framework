@@ -1,6 +1,8 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,7 +21,9 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.LazyTask;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -190,6 +194,64 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		ObjectWriter writer = container.getObjectMapper().writerFor(Resource.class);
 		String json = writer.writeValueAsString(resource);
 		Assert.assertFalse(json.contains("\"id\""));
+	}
+
+	@Test
+	public void testJsonIncludeNonEmptyIgnoresNull() throws JsonProcessingException {
+		// note that desc and followup project make use of @JsonInclude.Include.NON_EMPTY
+		Schedule schedule = new Schedule();
+		schedule.setDesc(null);
+		schedule.setFollowupProject(null);
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		querySpec.includeRelation(PathSpec.of("followupProject"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+
+		Assert.assertFalse(resource.getAttributes().containsKey("description"));
+		Assert.assertFalse(resource.getRelationships().containsKey("followup"));
+	}
+
+
+	@Test
+	public void testJsonIncludeNonEmptyIgnoresEmptyList() throws JsonProcessingException {
+		// makes use of @JsonInclude.Include.NON_EMPTY
+		Schedule schedule = new Schedule();
+		schedule.setKeywords(Collections.emptyList());
+		schedule.setTasks(new ArrayList<>());
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		querySpec.includeRelation(PathSpec.of("tasks"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+
+		Assert.assertFalse(resource.getAttributes().containsKey("keywords"));
+		Assert.assertFalse(resource.getRelationships().containsKey("tasks"));
+	}
+
+	@Test
+	public void testJsonIncludeNonEmptyWritesNonEmpty() throws JsonProcessingException {
+		Project project = new Project();
+		project.setId(12L);
+
+		// note that desc and followup project make use of @JsonInclude.Include.NON_EMPTY
+		Schedule schedule = new Schedule();
+		schedule.setDesc("Hello");
+		schedule.setFollowupProject(project);
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		querySpec.includeRelation(PathSpec.of("followupProject"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+
+		Assert.assertTrue(resource.getAttributes().containsKey("description"));
+		Assert.assertTrue(resource.getRelationships().containsKey("followup"));
 	}
 
 	@Test

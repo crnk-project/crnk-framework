@@ -1,5 +1,8 @@
 package io.crnk.core.mock.models;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
@@ -23,11 +26,21 @@ public class Schedule {
 	private Project project;
 
 	@JsonProperty("description")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private String desc;
 
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
 	@JsonProperty("followup")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Project followupProject;
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private List<String> keywords;
+
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
+	@JsonProperty("followup")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private List<Task> tasks;
 
 	public Long getId() {
 		return id;
@@ -36,6 +49,22 @@ public class Schedule {
 	public Schedule setId(Long id) {
 		this.id = id;
 		return this;
+	}
+
+	public List<String> getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(List<String> keywords) {
+		this.keywords = keywords;
+	}
+
+	public List<Task> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<Task> tasks) {
+		this.tasks = tasks;
 	}
 
 	public String getName() {
