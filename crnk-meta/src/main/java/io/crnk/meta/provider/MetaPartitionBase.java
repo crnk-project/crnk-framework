@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.meta.model.MetaArrayType;
 import io.crnk.meta.model.MetaElement;
@@ -81,6 +82,13 @@ public abstract class MetaPartitionBase implements MetaPartition {
 
 				if (typeMapping.containsKey(type)) {
 					return Optional.of(typeMapping.get(type));
+				}
+
+				if(ClassUtils.getRawType(type) == Optional.class){
+					Optional<MetaElement> element = allocateMetaElement(((ParameterizedType) type).getActualTypeArguments()[0]);
+					if (element.isPresent()) {
+						return element;
+					}
 				}
 
 				if (type instanceof ParameterizedType) {

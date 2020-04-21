@@ -82,7 +82,7 @@ public class ResourceMapper {
 	private void setId(Resource resource, Object entity, ResourceInformation resourceInformation) {
 		ResourceField idField = resourceInformation.getIdField();
 		Object value = idField.getAccessor().getValue(entity);
-		if (isIncluded(idField, value)) {
+		if (isValueIncluded(idField, value)) {
 			resource.setId(resourceInformation.toIdString(value));
 		}
 	}
@@ -164,9 +164,11 @@ public class ResourceMapper {
 	}
 
 	protected void setAttribute(Resource resource, ResourceField field, Object value) {
-		if (isIncluded(field, value)) {
+		if (isValueIncluded(field, value)) { // Quick decision
 			JsonNode valueNode = objectMapper.valueToTree(value);
-			resource.getAttributes().put(field.getJsonName(), valueNode);
+			if (isNodeIncluded(field, valueNode)) { //  take decision based on serialization
+				resource.getAttributes().put(field.getJsonName(), valueNode);
+			}
 		}
 	}
 
@@ -175,7 +177,23 @@ public class ResourceMapper {
 		resource.getAttributes().put(field, valueNode);
 	}
 
-	private boolean isIncluded(ResourceField field, Object value) {
+	private boolean isNodeIncluded(ResourceField field, JsonNode node) {
+		JsonIncludeStrategy includeStrategy = field.getJsonIncludeStrategy();
+		return JsonIncludeStrategy.DEFAULT.equals(includeStrategy)
+				|| !isNullNodeValue(node) && JsonIncludeStrategy.NOT_NULL.equals(includeStrategy)
+				|| !isDefaultNodeValue(node) && JsonIncludeStrategy.NON_EMPTY.equals(includeStrategy);
+	}
+
+	protected boolean isDefaultNodeValue(JsonNode node) {
+		return isNullNodeValue(node) || (node.isObject() || node.isArray()) && node.size() == 0
+				|| node.asText().isEmpty() || node.isNumber() && node.asDouble() == 0d;
+	}
+
+	protected boolean isNullNodeValue(JsonNode node) {
+		return node == null || node.isNull();
+	}
+
+	private boolean isValueIncluded(ResourceField field, Object value) {
 		JsonIncludeStrategy includeStrategy = field.getJsonIncludeStrategy();
 		return JsonIncludeStrategy.DEFAULT.equals(includeStrategy) || value != null && JsonIncludeStrategy.NOT_NULL.equals(includeStrategy)
 				|| JsonIncludeStrategy.NON_EMPTY.equals(includeStrategy) && !isDefaultValue(value);

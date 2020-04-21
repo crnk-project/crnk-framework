@@ -1,16 +1,26 @@
 package io.crnk.meta;
 
+import java.util.Date;
+import java.util.UUID;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.test.mock.models.PrimitiveAttributeResource;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Date;
-import java.util.UUID;
-
 public class MetaLookupTest extends AbstractMetaTest {
 
+	@Test
+	public void testOptionalAttribute() {
+		MetaResource meta = resourceProvider.getMeta(PrimitiveAttributeResource.class);
+		MetaAttribute attribute = meta.getAttribute("optionalValue");
+		Assert.assertEquals("resources.primitiveAttribute.optionalValue", attribute.getId());
+		Assert.assertEquals(String.class, attribute.getType().getImplementationClass());
+	}
 
 	@Test
 	public void testPrimitiveFloat() {

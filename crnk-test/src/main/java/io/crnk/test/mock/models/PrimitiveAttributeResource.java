@@ -3,6 +3,7 @@ package io.crnk.test.mock.models;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -64,12 +65,22 @@ public class PrimitiveAttributeResource {
 
 	private Map<String, Set<String>> mapValueWithSetValue;
 
+	private Optional<String> optionalValue = Optional.empty();
+
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Optional<String> getOptionalValue() {
+		return optionalValue;
+	}
+
+	public void setOptionalValue(Optional<String> optionalValue) {
+		this.optionalValue = optionalValue;
 	}
 
 	public Map<String, Set<String>> getMapValueWithSetValue() {

@@ -181,6 +181,10 @@ public class DocumentMapperUtil {
 		return resourceRegistry.getEntry(resourceType).getResourceInformation();
 	}
 
+	public boolean hasResourceInformation(String resourceType) {
+		return resourceRegistry.hasEntry(resourceType);
+	}
+
 	public String getSelfUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object entity) {
 		Object id = resourceInformation.getId(entity);
 		return urlBuilder.buildUrl(queryContext, resourceInformation, id, null);

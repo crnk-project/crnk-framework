@@ -59,7 +59,7 @@ public class JacksonResourceFieldInformationProvider extends ResourceFieldInform
 			}
 			return Optional.of(strategy);
 		}
-		return Optional.of(JsonIncludeStrategy.DEFAULT);
+		return Optional.empty();
 	}
 
 	@Override

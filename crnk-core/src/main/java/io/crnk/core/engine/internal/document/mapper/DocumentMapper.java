@@ -145,14 +145,16 @@ public class DocumentMapper {
 
 	private void applyIgnoreEmpty(Resource resource, int requestVersion) {
 		String type = resource.getType();
-		ResourceInformation resourceInformation = util.getResourceInformation(type);
+		if(util.hasResourceInformation(type)) {
+			ResourceInformation resourceInformation = util.getResourceInformation(type);
 
-		Iterator<Map.Entry<String, Relationship>> iterator = resource.getRelationships().entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<String, Relationship> entry = iterator.next();
-			ResourceField field = resourceInformation.findFieldByJsonName(entry.getKey(), requestVersion);
-			if (field != null && !isRelationshipIncluded(field, entry.getValue())) {
-				iterator.remove();
+			Iterator<Map.Entry<String, Relationship>> iterator = resource.getRelationships().entrySet().iterator();
+			while (iterator.hasNext()) {
+				Map.Entry<String, Relationship> entry = iterator.next();
+				ResourceField field = resourceInformation.findFieldByJsonName(entry.getKey(), requestVersion);
+				if (field != null && !isRelationshipIncluded(field, entry.getValue())) {
+					iterator.remove();
+				}
 			}
 		}
 	}

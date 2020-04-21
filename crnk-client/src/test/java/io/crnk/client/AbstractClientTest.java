@@ -46,6 +46,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 		client.setActionStubFactory(JerseyActionStubFactory.newInstance());
 		// end::jerseyStubFactory[]
 		client.getHttpAdapter().setReceiveTimeout(10000000, TimeUnit.MILLISECONDS);
+		client.getObjectMapper().findAndRegisterModules();
 	}
 
 	protected void setupClient(CrnkClient client) {
@@ -119,6 +120,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 			property(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS, Boolean.toString(serializeLinksAsObjects));
 
 			feature = new CrnkTestFeature();
+			feature.getObjectMapper().findAndRegisterModules();
 
 			feature.addModule(new io.crnk.test.mock.TestModule());
 			feature.addModule(new ClientTestModule());

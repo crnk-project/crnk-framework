@@ -347,7 +347,6 @@ public class ClassUtils {
 	 * Please use tools like {@link io.crnk.core.engine.information.bean.BeanInformation} and
 	 * {@link io.crnk.core.engine.information.bean.BeanAttributeInformation} instead.
 	 */
-	@Deprecated
 	public static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;

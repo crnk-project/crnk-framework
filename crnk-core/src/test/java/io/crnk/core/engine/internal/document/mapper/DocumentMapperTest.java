@@ -1,16 +1,19 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.document.Document;
@@ -253,6 +256,32 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertTrue(resource.getAttributes().containsKey("description"));
 		Assert.assertTrue(resource.getRelationships().containsKey("followup"));
 	}
+
+	@Test
+	public void testOptionalNotSerializedIfEmpty() {
+		Schedule schedule = new Schedule();
+		schedule.setDueDate(Optional.empty());
+
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(new QuerySpec(Project.class));
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertFalse(resource.getAttributes().containsKey("dueDate"));
+	}
+
+	@Test
+	public void testOptionalSerializedIfSet() {
+		Schedule schedule = new Schedule();
+		schedule.setDueDate(Optional.of(OffsetDateTime.now()));
+
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(new QuerySpec(Project.class));
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+
+		Assert.assertTrue(resource.getAttributes().containsKey("dueDate"));
+		JsonNode node = resource.getAttributes().get("dueDate");
+		Assert.assertTrue(node.asText().length() > 0);
+	}
+
 
 	@Test
 	public void testCompactModeWithNullData() {

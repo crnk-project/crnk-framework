@@ -204,7 +204,7 @@ components:
       in: query
       name: fields
       schema:
-        default: id,stringValue,intValue,longValue,booleanValue,floatValue,shortValue,doubleValue,jsonNodeValue,arrayNodeValue,objectNodeValue,nullableLongValue,nullableBooleanValue,nullableByteValue,nullableShortValue,nullableIntegerValue,nullableFloatValue,nullableDoubleValue,uuidValue,dateValue,objectValue,mapValueWithEnumKey,mapValueWithListValue,mapValueWithSetValue
+        default: id,stringValue,intValue,longValue,booleanValue,floatValue,shortValue,doubleValue,jsonNodeValue,arrayNodeValue,objectNodeValue,nullableLongValue,nullableBooleanValue,nullableByteValue,nullableShortValue,nullableIntegerValue,nullableFloatValue,nullableDoubleValue,uuidValue,dateValue,objectValue,mapValueWithEnumKey,mapValueWithListValue,mapValueWithSetValue,optionalValue
         type: string
     PrimitiveAttributeInclude:
       description: primitiveAttribute relationships to include (csv)
@@ -224,7 +224,7 @@ components:
       in: query
       name: sort
       schema:
-        example: id,stringValue,intValue,longValue,booleanValue,floatValue,shortValue,doubleValue,jsonNodeValue,arrayNodeValue,objectNodeValue,nullableLongValue,nullableBooleanValue,nullableByteValue,nullableShortValue,nullableIntegerValue,nullableFloatValue,nullableDoubleValue,uuidValue,dateValue,objectValue,mapValueWithEnumKey,mapValueWithListValue,mapValueWithSetValue
+        example: id,stringValue,intValue,longValue,booleanValue,floatValue,shortValue,doubleValue,jsonNodeValue,arrayNodeValue,objectNodeValue,nullableLongValue,nullableBooleanValue,nullableByteValue,nullableShortValue,nullableIntegerValue,nullableFloatValue,nullableDoubleValue,uuidValue,dateValue,objectValue,mapValueWithEnumKey,mapValueWithListValue,mapValueWithSetValue,optionalValue
         type: string
     ProjectsFields:
       description: projects fields to include (csv)
@@ -1814,6 +1814,9 @@ components:
     PrimitiveAttributeObjectValueResourceAttribute:
       nullable: true
       type: object
+    PrimitiveAttributeOptionalValueResourceAttribute:
+      nullable: true
+      type: string
     PrimitiveAttributePatchResource:
       allOf:
       - $ref: '#/components/schemas/PrimitiveAttributeResourceReference'
@@ -1882,6 +1885,8 @@ components:
               $ref: '#/components/schemas/PrimitiveAttributeObjectNodeValueResourceAttribute'
             objectValue:
               $ref: '#/components/schemas/PrimitiveAttributeObjectValueResourceAttribute'
+            optionalValue:
+              $ref: '#/components/schemas/PrimitiveAttributeOptionalValueResourceAttribute'
             shortValue:
               $ref: '#/components/schemas/PrimitiveAttributeShortValueResourceAttribute'
             stringValue:
@@ -1934,6 +1939,8 @@ components:
               $ref: '#/components/schemas/PrimitiveAttributeObjectNodeValueResourceAttribute'
             objectValue:
               $ref: '#/components/schemas/PrimitiveAttributeObjectValueResourceAttribute'
+            optionalValue:
+              $ref: '#/components/schemas/PrimitiveAttributeOptionalValueResourceAttribute'
             shortValue:
               $ref: '#/components/schemas/PrimitiveAttributeShortValueResourceAttribute'
             stringValue:
@@ -1986,6 +1993,8 @@ components:
               $ref: '#/components/schemas/PrimitiveAttributeObjectNodeValueResourceAttribute'
             objectValue:
               $ref: '#/components/schemas/PrimitiveAttributeObjectValueResourceAttribute'
+            optionalValue:
+              $ref: '#/components/schemas/PrimitiveAttributeOptionalValueResourceAttribute'
             shortValue:
               $ref: '#/components/schemas/PrimitiveAttributeShortValueResourceAttribute'
             stringValue:
@@ -7129,6 +7138,11 @@ paths:
       - description: Filter by mapValueWithSetValue (csv)
         in: query
         name: filter[mapValueWithSetValue]
+        schema:
+          type: string
+      - description: Filter by optionalValue (csv)
+        in: query
+        name: filter[optionalValue]
         schema:
           type: string
       - $ref: '#/components/parameters/PrimitiveAttributeFields'
