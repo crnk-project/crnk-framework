@@ -1,18 +1,22 @@
 package io.crnk.core.engine.internal.utils;
 
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
-
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.concurrent.Callable;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 
 public class JsonApiUrlBuilder implements UrlBuilder {
 
@@ -102,14 +106,17 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 			}
 			url += "/";
 			url += StringUtils.join(",", strIds);
-		} else if (id != null) {
+		}
+		else if (id != null) {
 			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation, id);
-		} else {
+		}
+		else {
 			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
 		}
 		if (relationshipName != null && selfLink) {
 			url += "/relationships/" + relationshipName;
-		} else if (relationshipName != null) {
+		}
+		else if (relationshipName != null) {
 			url += "/" + relationshipName;
 		}
 
@@ -126,6 +133,15 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 		return urlBuilder.toString();
 	}
 
+	@Override
+	public String filterUrl(String url, QueryContext queryContext) {
+		UrlParameterBuilder urlBuilder = new UrlParameterBuilder(url);
+		if (queryContext != null) {
+			addPropagatedParameters(urlBuilder, queryContext.getRequestContext());
+		}
+		return urlBuilder.toString();
+	}
+
 	private void addPropagatedParameters(UrlParameterBuilder urlBuilder, HttpRequestContext requestContext) {
 		if (requestContext != null) {
 			for (String propagedParameter : propagatedParameters) {
@@ -137,7 +153,7 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 		}
 	}
 
-	class UrlParameterBuilder {
+	public class UrlParameterBuilder {
 
 		private StringBuilder builder = new StringBuilder();
 
@@ -169,7 +185,8 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 			if (firstParam) {
 				builder.append("?");
 				firstParam = false;
-			} else {
+			}
+			else {
 				builder.append("&");
 			}
 			builder.append(key);
@@ -188,7 +205,8 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 				for (Object element : (Collection<?>) value) {
 					addQueryParameter(key, (String) element);
 				}
-			} else {
+			}
+			else {
 				addQueryParameter(key, (String) value);
 			}
 		}

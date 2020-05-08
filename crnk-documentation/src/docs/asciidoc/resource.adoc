@@ -521,6 +521,41 @@ This can be changed by setting the property `crnk.config.serialize.object.links=
 }
 ----
 
+There are a variety of interfaces for built-in link types:
+
+- `SelfLinksInformation`
+- `RelatedLinksInformation`
+- `PagingLinksInformation`
+
+Such links will be populated automatically by Crnk if not specified otherwise.
+It is important to highlight that many links can and are derived from the `self` link.
+For example, if the `self` link is customized, all relationship links will be adjusted
+accordingly.
+
+TIP: If you have use cases where the link can be derived from the `self` link, it can
+  be the easiest solution to implement that logic directly in the getter:
+
+----
+	public static class ProjectLinks implements LinksInformation, SelfLinksInformation {
+
+		private String value;
+
+		private String self;
+
+		public String getValue() {
+			if(value == null && self != null){
+				return self + "/foo";
+			}
+			return value;
+		}
+		...
+	}
+----
+
+TIP: `CrnkBoot.getUrlBuilder()` gives access to the `UrlBuilder` class that allows the construction
+  of URLs from resources. Ìt is also, for example, defined as Spring bean and can be
+  injected into any class.
+
 
 anchor:jsonApiField[]
 

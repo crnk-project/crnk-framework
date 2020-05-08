@@ -2,11 +2,15 @@ package io.crnk.home;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Sets;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpHeaders;
@@ -16,6 +20,7 @@ import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
+import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.test.mock.ClassTestUtils;
@@ -100,6 +105,59 @@ public class HomeModuleTest {
 		JsonNode history = links.get("history");
 		Assert.assertNotNull(history);
 		Assert.assertEquals("http://localhost/tasks/history", history.asText());
+	}
+
+	@Test
+	public void checkUrlFilteringForChildRepositories() throws IOException {
+		// add filter to include additional parameter `test`
+		JsonApiUrlBuilder urlBuilder = (JsonApiUrlBuilder) boot.getUrlBuilder();
+		urlBuilder.addPropagatedParameter("test");
+
+		// e.g. /api/tasks/history/
+		HttpRequestContextBase context = Mockito.mock(HttpRequestContextBase.class);
+		Mockito.when(context.getMethod()).thenReturn("GET");
+		Mockito.when(context.getPath()).thenReturn("/tasks");
+		Map<String, Set<String>> parameters = new HashMap<>();
+		parameters.put("test", Sets.newHashSet("foo"));
+		Mockito.when(context.getRequestParameters()).thenReturn(parameters);
+		Mockito.when(context.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn(HttpHeaders.JSON_CONTENT_TYPE);
+		HttpRequestContextBaseAdapter contextAdapter = new HttpRequestContextBaseAdapter(context);
+
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpResponse response = requestDispatcher.process(contextAdapter).get().get();
+
+		ObjectReader reader = boot.getObjectMapper().readerFor(Document.class);
+		Document document = reader.readValue(response.getBody());
+
+		ObjectNode links = document.getLinks();
+		Assert.assertNotNull(links);
+		JsonNode history = links.get("history");
+		Assert.assertNotNull(history);
+		Assert.assertEquals("http://localhost/tasks/history?test=foo", history.asText());
+	}
+
+	@Test
+	public void checkUrlFilteringForRoot() throws IOException {
+		// add filter to include additional parameter `test`
+		JsonApiUrlBuilder urlBuilder = (JsonApiUrlBuilder) boot.getUrlBuilder();
+		urlBuilder.addPropagatedParameter("test");
+
+		// e.g. /api/tasks/history/
+		HttpRequestContextBase context = Mockito.mock(HttpRequestContextBase.class);
+		Mockito.when(context.getMethod()).thenReturn("GET");
+		Mockito.when(context.getPath()).thenReturn("/");
+		Map<String, Set<String>> parameters = new HashMap<>();
+		parameters.put("test", Sets.newHashSet("foo"));
+		Mockito.when(context.getRequestParameters()).thenReturn(parameters);
+		Mockito.when(context.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn(HttpHeaders.JSON_CONTENT_TYPE);
+		HttpRequestContextBaseAdapter contextAdapter = new HttpRequestContextBaseAdapter(context);
+
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpResponse response = requestDispatcher.process(contextAdapter).get().get();
+
+		ObjectReader reader = boot.getObjectMapper().readerFor(Document.class);
+		String body = new String(response.getBody());
+		Assert.assertTrue(body.contains("projects?test=foo"));
 	}
 
 	@Test

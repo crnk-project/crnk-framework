@@ -36,6 +36,7 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleExtensionAware;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.utils.Prioritizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,8 +79,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 	}
 
 	/**
-	 * Allows to customize to which request paths the Home module should trigger. Useful when letting the home module
-	 * work next to non-Crnk endpoints.
+	 * Allows to customize to which request paths the Home module should trigger. Useful when letting the home module work next to non-Crnk endpoints.
 	 */
 	public void addPathFilter(Predicate<HttpRequestContext> pathFilter) {
 		pathFilters.add(pathFilter);
@@ -106,6 +106,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 
 		@Override
 		public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
+			UrlBuilder urlBuilder = moduleContext.getModuleRegistry().getUrlBuilder();
+
 			Response response = chain.doFilter(filterRequestContext);
 			QueryContext queryContext = filterRequestContext.getQueryAdapter().getQueryContext();
 			JsonPath jsonPath = filterRequestContext.getJsonPath();
@@ -126,7 +128,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 						document.setLinks(links);
 					}
 					for (String listing : listings) {
-						links.put(listing, UrlUtils.concat(baseUrl, requestPath, listing));
+						String url = urlBuilder.filterUrl(UrlUtils.concat(baseUrl, requestPath, listing), queryContext);
+						links.put(listing, url);
 					}
 				}
 			}
@@ -198,23 +201,27 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 				if (useJsonHome) {
 					LOGGER.debug("using JSON home format");
 					boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
-					response = writeJsonHome(requestContext, pathList);
+					response = writeJsonHome(queryContext, pathList);
 					if (acceptsHome) {
 						response.setContentType(JSON_HOME_CONTENT_TYPE);
-					} else {
+					}
+					else {
 						response.setContentType(JSON_CONTENT_TYPE);
 					}
-				} else {
+				}
+				else {
 					LOGGER.debug("using JSON API format");
-					response = getResponse(requestContext, pathList);
+					response = getResponse(queryContext, pathList);
 					if (jsonapi) {
 						response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-					} else {
+					}
+					else {
 						response.setContentType(JSON_CONTENT_TYPE);
 					}
 				}
 				return resultFactory.just(response);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
 				Response response = exceptionMapperRegistry.toErrorResponse(e);
 				String contentType = jsonapi ? HttpHeaders.JSONAPI_CONTENT_TYPE : JSON_CONTENT_TYPE;
@@ -294,16 +301,19 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		return null;
 	}
 
-	private HttpResponse getResponse(HttpRequestContext requestContext, List<String> pathList) {
+	private HttpResponse getResponse(QueryContext queryContext, List<String> pathList) {
 		ObjectMapper objectMapper = moduleContext.getObjectMapper();
+		UrlBuilder urlBuilder = moduleContext.getModuleRegistry().getUrlBuilder();
 
-		String listingPath = getListingPath(requestContext);
+		String listingPath = getListingPath(queryContext.getRequestContext());
 
 		ObjectNode node = objectMapper.createObjectNode();
 		ObjectNode links = node.putObject("links");
 		for (String path : pathList) {
 			String id = UrlUtils.removeTrailingSlash(path);
-			links.put(id, UrlUtils.concat(listingPath, path));
+			String url = UrlUtils.concat(listingPath, path);
+			url = urlBuilder.filterUrl(url, queryContext);
+			links.put(id, url);
 		}
 
 		Map<String, String> serverInfo = moduleContext.getModuleRegistry().getServerInfo();
@@ -314,7 +324,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		} catch (JsonProcessingException e) {
+		}
+		catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -328,21 +339,24 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		return UrlUtils.concat(moduleContext.getResourceRegistry().getServiceUrlProvider().getUrl(), requestContext.getPath());
 	}
 
-	private HttpResponse writeJsonHome(HttpRequestContext requestContext, List<String> pathList) {
+	private HttpResponse writeJsonHome(QueryContext queryContext, List<String> pathList) {
 		ObjectMapper objectMapper = moduleContext.getObjectMapper();
+
+		UrlBuilder urlBuilder = moduleContext.getModuleRegistry().getUrlBuilder();
 
 		ObjectNode node = objectMapper.createObjectNode();
 		ObjectNode resourcesNode = node.putObject("resources");
 		for (String path : pathList) {
 			String tag = "tag:" + UrlUtils.removeTrailingSlash(path);
-			String href = path;
+			String href = urlBuilder.filterUrl(path, queryContext);
 			ObjectNode resourceNode = resourcesNode.putObject(tag);
 			resourceNode.put("href", href);
 		}
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		} catch (JsonProcessingException e) {
+		}
+		catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 
