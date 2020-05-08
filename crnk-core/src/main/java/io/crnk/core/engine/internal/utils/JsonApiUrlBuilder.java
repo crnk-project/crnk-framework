@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.utils;
 
 import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryContext;
@@ -32,6 +33,38 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 	@Override
 	public Set<String> getPropagatedParameters() {
 		return propagatedParameters;
+	}
+
+	@Override
+	public String buildUrl(QueryContext queryContext, Object resource) {
+		RegistryEntry entry = moduleRegistry.getResourceRegistry().findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return buildUrl(queryContext, resourceInformation, id, null);
+	}
+
+	@Override
+	public String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec) {
+		RegistryEntry entry = moduleRegistry.getResourceRegistry().findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return buildUrl(queryContext, resourceInformation, id, querySpec);
+	}
+
+	@Override
+	public String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec, String relationshipName) {
+		RegistryEntry entry = moduleRegistry.getResourceRegistry().findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return buildUrl(queryContext, resourceInformation, id, querySpec, relationshipName);
+	}
+
+	@Override
+	public String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec, String relationshipName, boolean selfLink) {
+		RegistryEntry entry = moduleRegistry.getResourceRegistry().findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return buildUrl(queryContext, resourceInformation, id, querySpec, relationshipName, selfLink);
 	}
 
 	@Override
@@ -86,7 +119,7 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 		QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
 		urlBuilder.addQueryParameters(urlMapper.serialize(querySpec, queryContext));
 
-		if(queryContext != null) {
+		if (queryContext != null) {
 			addPropagatedParameters(urlBuilder, queryContext.getRequestContext());
 		}
 

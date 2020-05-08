@@ -64,6 +64,7 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.UnkonwnMappingAware;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
@@ -391,6 +392,10 @@ public class CrnkBoot {
 			setupInstance(instance);
 		}
 		return instancesByType;
+	}
+
+	public UrlBuilder getUrlBuilder(){
+		return moduleRegistry.getUrlBuilder();
 	}
 
 	private <T> void setupInstance(T instance) {

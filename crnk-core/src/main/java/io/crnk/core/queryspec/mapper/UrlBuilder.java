@@ -26,6 +26,14 @@ public interface UrlBuilder {
 	 */
 	Set<String> getPropagatedParameters();
 
+	String buildUrl(QueryContext queryContext, Object resource);
+
+	String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec);
+
+	String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec, String relationshipName);
+
+	String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec, String relationshipName, boolean selfLink);
+
 	String buildUrl(QueryContext queryContext, ResourceInformation resourceInformation);
 
 	String buildUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id, QuerySpec querySpec);
