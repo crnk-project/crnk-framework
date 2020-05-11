@@ -184,7 +184,7 @@ public class ResourceInformation extends BeanInformationBase {
             }
         }
 
-        PreconditionUtil.verify(parentField != null, "resource {} is marked as nested but no parent relationship found");
+        PreconditionUtil.verify(parentField != null, "resource %s is marked as nested but no parent relationship found", this);
         childIdAccessor = new ResourceFieldAccessor() {
 
             @Override
@@ -238,7 +238,7 @@ public class ResourceInformation extends BeanInformationBase {
 
         if (parentAttribute != null || idAttribute != null) {
             if (!shouldBeNested()) {
-                LOGGER.warn("add @JsonApiResource(nested=true) to {} to mark it as being nested, in the future automatic discovery based on the id will be removed",
+                LOGGER.warn("add @JsonApiResource(nested=true) to %s to mark it as being nested, in the future automatic discovery based on the id will be removed",
                         implementationClass);
             }
 
