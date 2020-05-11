@@ -184,7 +184,9 @@ public class ResourceInformation extends BeanInformationBase {
             }
         }
 
-        PreconditionUtil.verify(parentField != null, "resource %s is marked as nested but no parent relationship found", this);
+        PreconditionUtil.verify(parentField != null, "resource %s is marked as nested but no parent relationship found. Since the " +
+				"resource is singular, it carries the same identifier as its parent (stored in the `@JsonApiId` field). To point to the parent, make sure " +
+				" the relationship is annotated with @JsonApiRelation(idField=<idField>).", this);
         childIdAccessor = new ResourceFieldAccessor() {
 
             @Override
