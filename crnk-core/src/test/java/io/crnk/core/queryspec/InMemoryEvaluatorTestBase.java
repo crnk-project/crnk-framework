@@ -256,6 +256,14 @@ public abstract class InMemoryEvaluatorTestBase {
 	}
 
 	@Test
+	public void testFilterNotInCollection() {
+		QuerySpec spec = new QuerySpec(Task.class);
+		spec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.NEQ, Arrays.asList("test1","test2")));
+		List<Task> results = evaluator.eval(tasks, spec);
+		Assert.assertEquals(3, results.size());
+	}
+
+	@Test
 	public void testFilterLE() {
 		QuerySpec spec = new QuerySpec(Task.class);
 		spec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.LE, 1L));
