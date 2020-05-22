@@ -18,6 +18,7 @@ import io.crnk.servlet.CrnkFilter;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.spring.exception.SpringExceptionModule;
 import io.crnk.spring.internal.SpringServiceDiscovery;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -48,29 +49,25 @@ public class CrnkCoreAutoConfiguration implements ApplicationContextAware {
 	@Autowired(required = false)
 	private List<CrnkBootConfigurer> configurers;
 
+	// instantiated outside of Spring to allow  easy access to UrlBuilder, ModuleRegistry, etc.
+	// without introducing too many dependencies
+	private SpringCrnkBoot boot = new SpringCrnkBoot();
+
+	private SpringServiceDiscovery serviceDiscovery;
+
 	@Autowired
 	public CrnkCoreAutoConfiguration(CrnkCoreProperties properties, ObjectMapper objectMapper) {
 		this.properties = properties;
 		this.objectMapper = objectMapper;
-	}
+		this.serviceDiscovery = new SpringServiceDiscovery();
 
-	@Bean
-	@ConditionalOnMissingBean(ServiceDiscovery.class)
-	public SpringServiceDiscovery discovery() {
-		return new SpringServiceDiscovery();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean(CrnkBoot.class)
-	public CrnkBoot crnkBoot(ServiceDiscovery serviceDiscovery) {
-		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(serviceDiscovery);
 		boot.setObjectMapper(objectMapper);
 
 		if (properties.getDomainName() != null && properties.getPathPrefix() != null) {
 			String baseUrl = properties.getDomainName() + properties.getPathPrefix();
 			boot.setServiceUrlProvider(new ConstantServiceUrlProvider(baseUrl));
 		}
-		boot.setServiceDiscovery(serviceDiscovery);
 		boot.setDefaultPageLimit(properties.getDefaultPageLimit());
 		boot.setMaxPageLimit(properties.getMaxPageLimit());
 		boot.setPropertiesProvider(new PropertiesProvider() {
@@ -99,39 +96,56 @@ public class CrnkCoreAutoConfiguration implements ApplicationContextAware {
 		});
 		boot.addModule(new ServletModule(boot.getModuleRegistry().getHttpRequestContextProvider()));
 		boot.addModule(new SpringExceptionModule());
+	}
 
+	@Bean
+	public ServiceDiscovery discovery() {
+		return serviceDiscovery;
+	}
+
+
+	public class SpringCrnkBoot extends CrnkBoot implements InitializingBean {
+
+		@Override
+		public void afterPropertiesSet() {
+			// careful with this because it will scan the service discovery
+			// and trigger loading many other beans. Used as initializer
+			// to allow the bean construction first and avoid circular dependencies
+			boot();
+		}
+	}
+
+	@Bean
+	public CrnkBoot crnkBoot() {
 		if (configurers != null) {
 			for (CrnkBootConfigurer configurer : configurers) {
 				configurer.configure(boot);
 			}
 		}
-
 		if (properties.getEnforceDotSeparator() != null) {
 			QuerySpecUrlMapper urlMapper = boot.getUrlMapper();
 			if (urlMapper instanceof DefaultQuerySpecUrlMapper) {
 				((DefaultQuerySpecUrlMapper) urlMapper).setEnforceDotPathSeparator(properties.getEnforceDotSeparator());
 			}
 		}
-
-		boot.boot();
 		return boot;
 	}
 
 	@Bean
 	@ConditionalOnMissingBean(ResourceRegistry.class)
-	public ResourceRegistry crnkResourceRegistry(CrnkBoot boot) {
+	public ResourceRegistry crnkResourceRegistry() {
 		return boot.getResourceRegistry();
 	}
 
 	@Bean
 	@ConditionalOnMissingBean(UrlBuilder.class)
-	public UrlBuilder crnkUrlBuilder(CrnkBoot boot) {
+	public UrlBuilder crnkUrlBuilder() {
 		return boot.getUrlBuilder();
 	}
 
 	@Bean
 	@ConditionalOnMissingBean(ModuleRegistry.class)
-	public ModuleRegistry crnkModuleRegistry(CrnkBoot boot) {
+	public ModuleRegistry crnkModuleRegistry() {
 		return boot.getModuleRegistry();
 	}
 
@@ -153,17 +167,14 @@ public class CrnkCoreAutoConfiguration implements ApplicationContextAware {
 	}
 
 	@Bean
-	public ResourceRegistry resourceRegistry(CrnkBoot boot) {
+	public ResourceRegistry resourceRegistry() {
 		return boot.getResourceRegistry();
-	}
-
-	@Bean
-	public ModuleRegistry moduleRegistry(CrnkBoot boot) {
-		return boot.getModuleRegistry();
 	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+
+		this.serviceDiscovery.setApplicationContext(applicationContext);
 	}
 }

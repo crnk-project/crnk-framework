@@ -36,8 +36,8 @@ public class CrnkCoreAutoConfigurationTest {
         CrnkCoreAutoConfiguration config = new CrnkCoreAutoConfiguration(properties, objectMapper);
         config.setApplicationContext(applicationContext);
 
-        SpringServiceDiscovery serviceDiscovery = Mockito.mock(SpringServiceDiscovery.class);
-        CrnkBoot boot = config.crnkBoot(serviceDiscovery);
+        CrnkBoot boot = config.crnkBoot();
+        boot.boot();
 
         PropertiesProvider propertiesProvider = boot.getPropertiesProvider();
         Assert.assertEquals("testDomain", propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN));
