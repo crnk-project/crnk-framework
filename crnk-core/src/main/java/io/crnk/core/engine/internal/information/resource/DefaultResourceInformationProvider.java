@@ -94,15 +94,6 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
         return information;
     }
 
-    private VersionRange getVersionRange(Class<?> resourceClass) {
-        JsonApiVersion annotation = resourceClass.getAnnotation(JsonApiVersion.class);
-        if (annotation != null) {
-            return VersionRange.of(annotation.min(), annotation.max());
-        }
-        return VersionRange.UNBOUNDED;
-    }
-
-
     @Override
     public String getResourceType(Class<?> resourceClass) {
         return getResourceType(resourceClass, false);

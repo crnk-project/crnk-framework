@@ -31,14 +31,7 @@ import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.InvalidResourceException;
-import io.crnk.core.resource.annotations.JsonApiRelation;
-import io.crnk.core.resource.annotations.JsonApiRelationId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonIncludeStrategy;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.resource.annotations.PatchStrategy;
-import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
-import io.crnk.core.resource.annotations.SerializeType;
+import io.crnk.core.resource.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +56,14 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 
 		String strEnforceIdName = propertiesProvider.getProperty(CrnkProperties.ENFORCE_ID_NAME);
 		this.enforceIdName = strEnforceIdName == null || Boolean.parseBoolean(strEnforceIdName);
+	}
+
+	protected VersionRange getVersionRange(Class<?> resourceClass) {
+		JsonApiVersion annotation = resourceClass.getAnnotation(JsonApiVersion.class);
+		if (annotation != null) {
+			return VersionRange.of(annotation.min(), annotation.max());
+		}
+		return VersionRange.UNBOUNDED;
 	}
 
 	@Override
@@ -105,8 +106,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 				InformationBuilder.FieldInformationBuilder fieldBuilder = informationBuilder.createResourceField();
 				buildResourceField(beanDesc, embedded, attributeDesc, fieldBuilder);
 				fields.add(fieldBuilder.build());
-			}
-			else if (attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent()) {
+			} else if (attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent()) {
 				relationIdFields.add(attributeDesc.getName());
 			}
 		}
@@ -162,8 +162,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		if (useFieldType(attributeDesc)) {
 			fieldBuilder.type(attributeDesc.getField().getType());
 			genericType = attributeDesc.getField().getGenericType();
-		}
-		else {
+		} else {
 			fieldBuilder.type(attributeDesc.getGetter().getReturnType());
 			genericType = attributeDesc.getGetter().getGenericReturnType();
 		}
@@ -185,8 +184,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 			boolean hasIdNameReference = relationAnnotation.isPresent() && relationAnnotation.get().idField().length() > 0;
 			if (hasIdNameReference) {
 				idFieldName = relationAnnotation.get().idField();
-			}
-			else {
+			} else {
 				idFieldName = attributeDesc.getName() + suffix;
 			}
 			BeanAttributeInformation idAttribute = beanDesc.getAttribute(idFieldName);

@@ -120,6 +120,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 						instanceBuilder, fields, OffsetLimitPagingSpec.class);
 		information.setValidator(new JpaOptimisticLockingValidator(meta));
 		information.setAccess(resourceAccess);
+		information.setVersionRange(getVersionRange(resourceClass));
 
 		ResourceField idField = information.getIdField();
 		BeanAttributeInformation idAttr = beanInformation.getAttribute(idField.getUnderlyingName());
