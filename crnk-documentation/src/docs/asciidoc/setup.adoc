@@ -283,9 +283,9 @@ A code below shows a sample ``web.xml`` file with properly defined and configure
 
 Crnk provides with:
 
-- `io-crnk:crnk-setup-spring` support for plain Spring 4 and 5.
-- `io-crnk:crnk-setup-spring-boot1` support for Spring Boot 1.x. This module is considered being deprecated and will be removed in the future.
-- `io-crnk:crnk-setup-spring-boot2` support for Spring Boot 2.x.
+- `io.crnk:crnk-setup-spring` support for plain Spring 4 and 5.
+- `io.crnk:crnk-setup-spring-boot1` support for Spring Boot 1.x. This module is considered being deprecated and will be removed in the future.
+- `io.crnk:crnk-setup-spring-boot2` support for Spring Boot 2.x.
 
 There is a `CrnkCoreAutoConfiguration` in  `crnk-setup-spring-boot2` that outlines
 the basic setup that can easily be applied to a Spring-only setup without Spring Boot using `crnk-setup-spring`:
@@ -293,7 +293,7 @@ the basic setup that can easily be applied to a Spring-only setup without Spring
 - It uses the `CrnkFilter` servlet filter to process requests.
 - Service discovery is performed with `SpringServiceDiscovery` using the Spring `ApplicationContext`.
 
-`io-crnk:crnk-setup-spring-boot1` and  `io-crnk:crnk-setup-spring-boot2` host Spring Boot auto configurations
+`io.crnk:crnk-setup-spring-boot1` and  `io.crnk:crnk-setup-spring-boot2` host Spring Boot auto configurations
 that are enabled if the presence of the particular Crnk module and/or Spring component. Each auto configuration
 can be enabled and disabled and may host further properties to reconfigure it. The following auto configurations are available:
 
