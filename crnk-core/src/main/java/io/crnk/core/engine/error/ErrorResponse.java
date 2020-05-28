@@ -41,7 +41,7 @@ public final class ErrorResponse {
 
 	public JsonApiResponse getResponse() {
 		return new JsonApiResponse()
-				.setEntity(data);
+				.setErrors(data);
 	}
 
 	@Override

@@ -13,7 +13,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ManyRelationshipRepository;
 import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,11 +54,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Serializable targetId = request.getId();
                 ResourceField field = request.getRelationshipField();
                 LOGGER.debug("setRelation {} on {} with {}", targetId, field, relationshipRepository);
-                if (relationshipRepository instanceof OneRelationshipRepository) {
-                    ((OneRelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
-                } else {
-                    ((LegacyRelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
-                }
+                ((OneRelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
                 return new JsonApiResponse();
             }
         };
@@ -80,12 +75,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Collection<?> targetIds = request.getIds();
                 ResourceField field = request.getRelationshipField();
                 LOGGER.debug("setRelations {} on {} with {}", targetIds, field, relationshipRepository);
-                if (relationshipRepository instanceof ManyRelationshipRepository) {
-                    ((ManyRelationshipRepository) relationshipRepository)
-                            .setRelations(source, targetIds, field.getUnderlyingName());
-                } else {
-                    ((LegacyRelationshipRepository) relationshipRepository).setRelations(source, targetIds, field.getUnderlyingName());
-                }
+                ((ManyRelationshipRepository) relationshipRepository)
+                        .setRelations(source, targetIds, field.getUnderlyingName());
                 return new JsonApiResponse();
             }
         };
@@ -106,12 +97,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Collection<?> targetIds = request.getIds();
                 ResourceField field = request.getRelationshipField();
                 LOGGER.debug("addRelation {} on {} with {}", targetIds, field, relationshipRepository);
-                if (relationshipRepository instanceof ManyRelationshipRepository) {
-                    ((ManyRelationshipRepository) relationshipRepository)
-                            .addRelations(source, targetIds, field.getUnderlyingName());
-                } else {
-                    ((LegacyRelationshipRepository) relationshipRepository).addRelations(source, targetIds, field.getUnderlyingName());
-                }
+                ((ManyRelationshipRepository) relationshipRepository)
+                        .addRelations(source, targetIds, field.getUnderlyingName());
                 return new JsonApiResponse();
             }
         };
@@ -132,13 +119,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Collection<?> targetIds = request.getIds();
                 ResourceField field = request.getRelationshipField();
                 LOGGER.debug("removeRelations {} on {} with {}", targetIds, field, relationshipRepository);
-                if (relationshipRepository instanceof ManyRelationshipRepository) {
-                    ((ManyRelationshipRepository) relationshipRepository)
-                            .removeRelations(source, targetIds, field.getUnderlyingName());
-                } else {
-                    ((LegacyRelationshipRepository) relationshipRepository)
-                            .removeRelations(source, targetIds, field.getUnderlyingName());
-                }
+                ((ManyRelationshipRepository) relationshipRepository)
+                        .removeRelations(source, targetIds, field.getUnderlyingName());
                 return new JsonApiResponse();
             }
         };
@@ -159,18 +141,13 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 
                 LOGGER.debug("findOneRelations for sourceId={} on {} with {}", sourceId, field, relationshipRepository);
                 Object resource;
-                if (relationshipRepository instanceof OneRelationshipRepository) {
-                    OneRelationshipRepository querySpecRepository = (OneRelationshipRepository) relationshipRepository;
-                    ResourceInformation targetResourceInformation =
-                            moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
-                                    .getResourceInformation();
-                    Map map = querySpecRepository
-                            .findOneRelations(Arrays.asList(sourceId), field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
-                    resource = map.get(sourceId);
-                } else {
-                    resource = ((LegacyRelationshipRepository) relationshipRepository)
-                            .findOneTarget(sourceId, field.getUnderlyingName(), request.getQueryParams());
-                }
+                OneRelationshipRepository querySpecRepository = (OneRelationshipRepository) relationshipRepository;
+                ResourceInformation targetResourceInformation =
+                        moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
+                                .getResourceInformation();
+                Map map = querySpecRepository
+                        .findOneRelations(Arrays.asList(sourceId), field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
+                resource = map.get(sourceId);
                 return getResponse(relationshipRepository, resource, request);
             }
         };
@@ -190,18 +167,13 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 
                 LOGGER.debug("findManyRelations for sourceId={} on {} with {}", sourceId, field, relationshipRepository);
                 Object resources;
-                if (relationshipRepository instanceof ManyRelationshipRepository) {
-                    ManyRelationshipRepository querySpecRepository = (ManyRelationshipRepository) relationshipRepository;
-                    ResourceInformation targetResourceInformation =
-                            moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
-                                    .getResourceInformation();
-                    Map map = querySpecRepository.findManyRelations(Arrays.asList(sourceId), field.getUnderlyingName(),
-                            request.getQuerySpec(targetResourceInformation));
-                    resources = map.get(sourceId);
-                } else {
-                    resources = ((LegacyRelationshipRepository) relationshipRepository)
-                            .findManyTargets(sourceId, field.getUnderlyingName(), request.getQueryParams());
-                }
+                ManyRelationshipRepository querySpecRepository = (ManyRelationshipRepository) relationshipRepository;
+                ResourceInformation targetResourceInformation =
+                        moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
+                                .getResourceInformation();
+                Map map = querySpecRepository.findManyRelations(Arrays.asList(sourceId), field.getUnderlyingName(),
+                        request.getQuerySpec(targetResourceInformation));
+                resources = map.get(sourceId);
                 return getResponse(relationshipRepository, resources, request);
             }
         };
@@ -301,7 +273,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
         return responseMap;
     }
 
-    public Object getRelationshipRepository() {
+    public Object getImplementation() {
         return relationshipRepository;
     }
 

@@ -1,32 +1,11 @@
 package io.crnk.core.engine.internal.jackson.mock.repositories;
 
 import io.crnk.core.engine.internal.jackson.mock.models.ClassB;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.LegacyResourceRepository;
+import io.crnk.core.repository.InMemoryResourceRepository;
 
-public class ClassBRepository implements LegacyResourceRepository<ClassB, Long> {
-	@Override
-	public ClassB findOne(Long aLong, QueryParams queryParams) {
-		return null;
-	}
+public class ClassBRepository extends InMemoryResourceRepository<ClassB, Long> {
 
-	@Override
-	public Iterable<ClassB> findAll(QueryParams queryParams) {
-		return null;
-	}
-
-	@Override
-	public Iterable<ClassB> findAll(Iterable<Long> longs, QueryParams queryParams) {
-		return null;
-	}
-
-	@Override
-	public <S extends ClassB> S save(S entity) {
-		return null;
-	}
-
-	@Override
-	public void delete(Long aLong) {
-
-	}
+    public ClassBRepository() {
+        super(ClassB.class);
+    }
 }

@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.filter;
 
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.filter.DocumentFilterChain;
@@ -52,7 +53,7 @@ public class FilterTest {
 		filterModule.addFilter(filter);
 
 		container = new CoreTestContainer();
-		container.setDefaultPackage();
+		container.addModule(new CoreTestModule());
 		container.addModule(filterModule);
 		container.boot();
 

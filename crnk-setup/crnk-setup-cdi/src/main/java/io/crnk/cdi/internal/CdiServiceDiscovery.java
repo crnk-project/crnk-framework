@@ -1,6 +1,6 @@
 package io.crnk.cdi.internal;
 
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import org.slf4j.Logger;
@@ -63,8 +63,8 @@ public class CdiServiceDiscovery implements ServiceDiscovery {
 		List<T> list = new ArrayList<>();
 		if (beanManager != null) {
 			Type type = clazz;
-			if (clazz == JsonApiExceptionMapper.class) {
-				TypeLiteral<JsonApiExceptionMapper<?>> typeLiteral = new TypeLiteral<JsonApiExceptionMapper<?>>() {
+			if (clazz == ExceptionMapper.class) {
+				TypeLiteral<ExceptionMapper<?>> typeLiteral = new TypeLiteral<ExceptionMapper<?>>() {
 				};
 				type = typeLiteral.getType();
 			}

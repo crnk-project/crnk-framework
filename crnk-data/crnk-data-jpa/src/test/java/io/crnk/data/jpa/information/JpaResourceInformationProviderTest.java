@@ -9,24 +9,26 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-import io.crnk.data.jpa.model.AnnotationMappedSuperclassEntity;
-import io.crnk.data.jpa.model.AnnotationTestEntity;
-import io.crnk.data.jpa.util.ResourceFieldComparator;
 import io.crnk.data.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.data.jpa.meta.JpaMetaProvider;
+import io.crnk.data.jpa.model.AnnotationMappedSuperclassEntity;
+import io.crnk.data.jpa.model.AnnotationTestEntity;
 import io.crnk.data.jpa.model.JpaResourcePathTestEntity;
 import io.crnk.data.jpa.model.JpaTransientTestEntity;
 import io.crnk.data.jpa.model.JsonapiResourcePathTestEntity;
 import io.crnk.data.jpa.model.ManyToManyOppositeEntity;
 import io.crnk.data.jpa.model.ManyToManyTestEntity;
 import io.crnk.data.jpa.model.OneToOneTestEntity;
+import io.crnk.data.jpa.model.ReadOnlyAnnotatedEntity;
 import io.crnk.data.jpa.model.RelatedEntity;
 import io.crnk.data.jpa.model.RenamedTestEntity;
 import io.crnk.data.jpa.model.TestEmbeddable;
 import io.crnk.data.jpa.model.TestEntity;
+import io.crnk.data.jpa.model.TestMappedSuperclass;
 import io.crnk.data.jpa.model.VersionedEntity;
+import io.crnk.data.jpa.util.ResourceFieldComparator;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import org.junit.Assert;
@@ -49,11 +51,36 @@ public class JpaResourceInformationProviderTest {
     @Before
     public void setup() {
         jpaMetaProvider = new JpaMetaProvider(Collections.emptySet());
-        MetaLookup lookup = new MetaLookup();
+        MetaLookupImpl lookup = new MetaLookupImpl();
         lookup.addProvider(jpaMetaProvider);
         builder = new JpaResourceInformationProvider(new NullPropertiesProvider());
         builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()),
-                new TypeParser(), new ObjectMapper()));
+                new TypeParser(), () -> new ObjectMapper()));
+    }
+
+    @Test
+    public void checkNotAcceptMappedSuperClass() throws SecurityException, IllegalArgumentException {
+        Assert.assertFalse(builder.accept(TestMappedSuperclass.class));
+    }
+
+    @Test
+    public void checkAcceptEntity() throws SecurityException, IllegalArgumentException {
+        Assert.assertTrue(builder.accept(TestEntity.class));
+    }
+
+    @Test
+    public void checkResourceAccessAnnotations() {
+        ResourceInformation information = builder.build(ReadOnlyAnnotatedEntity.class);
+        Assert.assertTrue(information.getAccess().isReadable());
+        Assert.assertFalse(information.getAccess().isPostable());
+        Assert.assertFalse(information.getAccess().isDeletable());
+        Assert.assertFalse(information.getAccess().isPatchable());
+        for (ResourceField field : information.getFields()) {
+            Assert.assertTrue(field.getAccess().isReadable());
+            Assert.assertFalse(field.getAccess().isPostable());
+            Assert.assertFalse(field.getAccess().isDeletable());
+            Assert.assertFalse(field.getAccess().isPatchable());
+        }
     }
 
     @Test
@@ -82,7 +109,7 @@ public class JpaResourceInformationProviderTest {
 
         ArrayList<ResourceField> relFields = new ArrayList<>(info.getRelationshipFields());
         relFields.sort(ResourceFieldComparator.INSTANCE);
-        assertEquals(4, relFields.size());
+        assertEquals(6, relFields.size());
         boolean found = false;
         for (ResourceField relField : relFields) {
             if (relField.getUnderlyingName().equals(TestEntity.ATTR_oneRelatedValue)) {

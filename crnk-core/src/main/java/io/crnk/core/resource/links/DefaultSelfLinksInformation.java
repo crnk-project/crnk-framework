@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class DefaultSelfLinksInformation implements SelfLinksInformation {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String self;
+	private Link self;
 
-	public String getSelf() {
+	public Link getSelf() {
 		return self;
 	}
 
-	public void setSelf(final String self) {
+	public void setSelf(final Link self) {
 		this.self = self;
 	}
 }

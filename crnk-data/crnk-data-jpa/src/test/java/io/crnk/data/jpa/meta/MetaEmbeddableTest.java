@@ -2,7 +2,7 @@ package io.crnk.data.jpa.meta;
 
 import io.crnk.data.jpa.model.TestEmbeddableBase;
 import io.crnk.data.jpa.model.TestEmbeddable;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaElement;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +17,7 @@ public class MetaEmbeddableTest {
 	@Before
 	public void setup() {
 		metaProvider = new JpaMetaProvider(Collections.emptySet());
-		MetaLookup lookup = new MetaLookup();
+		MetaLookupImpl lookup = new MetaLookupImpl();
 		lookup.addProvider(metaProvider);
 	}
 

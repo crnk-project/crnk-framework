@@ -64,8 +64,8 @@ public class WorkerRelationshipRepositoryAdapter implements RelationshipReposito
 	}
 
 	@Override
-	public Object getRelationshipRepository() {
-		return adapter.getRelationshipRepository();
+	public Object getImplementation() {
+		return adapter.getImplementation();
 	}
 
 	@Override

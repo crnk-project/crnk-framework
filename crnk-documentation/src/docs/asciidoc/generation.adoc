@@ -38,6 +38,75 @@ More improvements to the generates types are thinkable in the future, such as li
 the set of fields depending on the use case (inclusions, field sets, sorting, filtering) depending on the
 capability of that particular field. Contributions welcomed.
 
+## OpenAPI
+
+WARNING: This generator is still experimental. Feedback welcomed.
+
+`crnk-gen-openapi` provides a way to generate OpenAPI files. The OpenAPI Specification,
+originally known as the Swagger Specification, is a specification for machine-readable interface
+files for describing, producing, consuming, and visualizing RESTful web services.
+
+The OpenAPI generator allows the generation of:
+
+- specifications of paths for resources and related objects (like nested objects and enumeration types).
+- specifications of result documents (i.e. resources and any linking and meta information).
+- specifications of links information.
+- specifications of meta information.
+- specifications of standard errors
+- specifications of standard parameters
+
+If a `templateName` file is provided, it will override the `projectName`, `projectVersion`, and
+`projectDescription` passed into the generate step. Similarly, descriptions of operations can be
+overridden within the provided OpenAPI template file.
+
+There is a Gradle plugin to run OpenAPI (and other) generation. The setup looks like:
+
+[source]
+----
+buildscript {
+	dependencies {
+		classpath "io.crnk:crnk-gen-gradle:${version}"
+	}
+}
+
+apply plugin: 'crnk-gen'
+crnkGen {
+    runtime {
+        // Gradle classpath configuration to use
+        configuration = 'runtime'
+    }
+
+    // fork generation into new process to have clean environment
+    forked = true
+
+    // specify the package to look for resources
+    resourcePackages = ['io.crnk.test']
+
+    openapi {
+        // enable OpenAPI generation within Gradle plugin
+        enabled = true
+
+				// specify name of openapi template in the build dir to merge onto
+				templateName = "openapi-template.yml"
+
+				// specify name of API to display in the generated OpenAPI file
+				projectName = "Generated Title"
+
+				// specify version of the API to display in the generated OpenAPI file
+				projectVersion = "0.1.0"
+
+				// specify name of openapi template in the build dir to merge onto
+				projectDescription = "A generated description of the API."
+
+        // specify location of generated sources
+        genDir = file('src/resources')
+    }
+}
+crnkGen.init()
+----
+
+Applying `crnk-gen` results in a new `generateOpenapi` task to perform the generation.
+
 ## Typescript
 
 The Typescript generator allows the generation of:
@@ -80,7 +149,8 @@ buildscript {
 apply plugin: 'crnk-gen'
 crnkGen {
     runtime {
-        configuration = 'typescriptGenRuntime'
+        // Gradle classpath configuration to use
+        configuration = 'runtime'
     }
 
     // fork generation into new process to have clean environment
@@ -121,12 +191,27 @@ the generation:
 
 ## Gradle customizations
 
+
 Internally the Crnk Gradle plugin supports multiple ways of looking up the set of available resources and repositories
-to generate.
-The simplest way is by scanning the classpath for @JsonApiResource-annotated classes. More elaborate setups
-can also launch an application (e.g. with Spring or CDI) and extract the information from the running application.
-While the former is simpler to setup, the later can deal with all border cases like a repository being backed
-by something different than a @JsonApiResource-annotated class. For Spring this looks like:
+to generate. The simplest way is by scanning the classpath for `@JsonApiResource`-annotated classes.
+The classpath for scanning can be set through the use of a regular Gradle configuration object, for example:
+
+[source]
+----
+crnkGen{
+	runtime {
+		configuration = 'runtime'
+	}
+
+	...
+}
+crnkGen.init()
+----
+
+More elaborate setups can also launch an application (e.g. with Spring or CDI) and extract the information
+from the running application. While the former is simpler to setup, the later can deal with all border cases
+like a repository being backed by something different than a `@JsonApiResource`-annotated class. Such a
+Spring setup looks like:
 
 [source]
 ----
@@ -134,7 +219,7 @@ crnkGen{
 
     // launch a Spring application to extract information about available resources
 	runtime {
-		configuration = 'typescriptGenRuntime'
+		configuration = 'runtime'
         spring {
         	profile = 'test'
         	configuration = 'io.crnk.example.ExampleApplication'
@@ -148,9 +233,9 @@ crnkGen{
 crnkGen.init()
 ----
 
-Typically a test profile is used to bring the Spring application up in order to then extract the repositories for generation.
-
-
+Typically a test profile can used to bring the Spring application up as unit tests are supposed to be
+self-contained and allow the application to boot up. The repositories are then retrieved from the
+Spring dependency injection container.
 
 
 
@@ -199,7 +284,7 @@ crnkGen{
         title = "Api Documentation"
 
         // specify location of generated sources
-        genDir = file('build/generated/source/asciidoc')
+        genDir = file('build/generated/sources/asciidoc')
     }
 }
 crnkGen.init()

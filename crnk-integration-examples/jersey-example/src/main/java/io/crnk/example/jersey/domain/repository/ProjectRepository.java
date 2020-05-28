@@ -2,6 +2,7 @@ package io.crnk.example.jersey.domain.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.resource.meta.PagedMetaInformation;
@@ -30,51 +31,51 @@ public interface ProjectRepository extends ResourceRepository<Project, Long> {
 
 	class ProjectListLinks implements PagedLinksInformation {
 
-		private String first;
+		private Link first;
 
-		private String last;
+		private Link last;
 
-		private String next;
+		private Link next;
 
-		private String prev;
+		private Link prev;
 
 		@Override
-		public String getFirst() {
+		public Link getFirst() {
 			return first;
 		}
 
 		@Override
-		public void setFirst(String first) {
+		public void setFirst(Link first) {
 			this.first = first;
 		}
 
 		@Override
-		public String getLast() {
+		public Link getLast() {
 			return last;
 		}
 
 		@Override
-		public void setLast(String last) {
+		public void setLast(Link last) {
 			this.last = last;
 		}
 
 		@Override
-		public String getNext() {
+		public Link getNext() {
 			return next;
 		}
 
 		@Override
-		public void setNext(String next) {
+		public void setNext(Link next) {
 			this.next = next;
 		}
 
 		@Override
-		public String getPrev() {
+		public Link getPrev() {
 			return prev;
 		}
 
 		@Override
-		public void setPrev(String prev) {
+		public void setPrev(Link prev) {
 			this.prev = prev;
 		}
 

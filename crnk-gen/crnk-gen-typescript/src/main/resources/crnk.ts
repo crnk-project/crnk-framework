@@ -27,8 +27,8 @@ export interface ResourceError {
 }
 
 export interface Resource {
-	type: string;
-	id: string;
+	type?: string;
+	id?: string;
 	meta?: any;
 	links?: any;
 	errors?: Array<ResourceError>;

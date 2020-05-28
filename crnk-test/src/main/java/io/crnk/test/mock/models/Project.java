@@ -1,16 +1,18 @@
 package io.crnk.test.mock.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.links.DefaultLink;
+import io.crnk.core.resource.links.Link;
+import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.test.mock.models.types.ProjectData;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonApiResource(type = "projects")
 public class Project {
@@ -24,10 +26,10 @@ public class Project {
 
 	private ProjectData data;
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private List<Task> tasks = new ArrayList<>();
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private Task task;
 
 	@JsonApiLinksInformation
@@ -101,16 +103,28 @@ public class Project {
 		this.meta = meta;
 	}
 
-	public static class ProjectLinks implements LinksInformation {
+	public static class ProjectLinks implements SelfLinksInformation {
 
-		private String value;
+		private Link value;
 
-		public String getValue() {
+		private Link self;
+
+		public Link getValue() {
 			return value;
 		}
 
 		public void setValue(String value) {
-			this.value = value;
+			this.value = new DefaultLink(value);
+		}
+
+		@Override
+		public Link getSelf() {
+			return self;
+		}
+
+		@Override
+		public void setSelf(Link self) {
+			this.self = self;
 		}
 	}
 

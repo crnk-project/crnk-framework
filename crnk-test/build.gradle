@@ -14,6 +14,7 @@ dependencies {
 
 	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
 
 	compile 'org.eclipse.jetty:jetty-server:9.4.9.v20180320'
 	compile 'org.eclipse.jetty:jetty-security:9.4.9.v20180320'

@@ -3,6 +3,49 @@ anchor:dataaccess[]
 
 # Data Access
 
+anchor:in_memory[]
+
+## In-Memory
+
+There are many use cases where data is not accessed from an external data store, but rather is already
+available in-memory on the server or is sufficiently small to so.
+For this purpose Crnk offers `QuerySpec.apply(...)` and `InMemoryResourceRepository` to quickly build
+repositories to offer access to in-memory data structures. This implementations are well suited for
+up to a few thousands of resources.
+
+`QuerySpec.apply(...)` allows the sorting, filtering, and paging for a list of objects:
+
+[source,java]
+----
+@Override
+public ResourceList<Task> findAll(QuerySpec querySpec) {
+    List<Task> tasks = ...
+    return querySpec.apply(resources.values());
+}
+----
+
+Behind the scenes it makes use of `InMemoryEvaluator` that offers further customization options.
+While sorting makes use of `Comparable`, filtering makes use of `FilterOperator.matches(value1, value2)`.
+Custom `FilterOperator` implementations may extend the feature set of  `InMemoryEvaluator`. Paging
+is implemented by simply truncating the result list. Inclusions and field sets are honored by
+by the Crnk engine when returning results (other non-in-memory repositories may want to implement
+this functionality directly in the repository to avoid fetching undesired data in the first place).
+
+Based on `QuerySpec.apply(...)` there is a `InMemoryResourceRepository` that simply holds resources in a
+`ConcurrentHashMap`. `POST` and `PATCH` will insert and update resources in the map, while `DELETE` will remove
+them again. Next to holding small data sets, it is also well suited for *mocking of repositories*.
+For example,  `InMemoryResourceRepository` might be used in the early phases of development to instantly give consumers
+a fully working repository without having to do the actual implementation. Or it can be used as replacement
+for third-party repositories during testing.
+
+IMPORTANT: `QuerySpec.apply(...)` makes use of the information held in-memory. In that regard, it is
+  conceptually simple. Make sure the in-memory data fits requirements. For example,
+  some application may want to filter relationships bi-directionally. In this case the in-memory
+  data structures must maintain the relationship from both ends (like `project` and `tasks` relationships
+  in `Task` and `Project` resources respectively). This may already be given, happen when the repositories
+  perform a change, or through getters and setters that are also accessed by Crnk.
+
+
 anchor:jpa_module[]
 
 ## JPA
@@ -233,6 +276,26 @@ various techniques to customize the resource model:
 - Perform any kind of modification in your repository by overriding `findAll`, `save`, `create`,
   `delete`. Note that the repository itself must not necessarily return entity classes, but
    rather can also return a DTO.
+
+Next to modifying the set of attributes and relationships, an application may
+also want to apply more advanced filters (SQL `SUBSELECT`, `GROUP BY`, etc.).
+Thereby, it is recommended to continue following resource-oriented REST principles.
+Most notably, everything that can be sorted and filtered, should also be
+queryable. There are two typical scenarios:
+
+1. The desired complex filter is based on a single column. In this case,
+a new `FilterOperator` should be implemented just like any other existing operator
+like `EQ` and `LT`.
+
+2. The desired complex filter spans multiple columns and possibly tables.
+A basic solution can just exchange the entity for a DB view and make
+a new column available with the computed result used for filtering. Or a
+more advanced and performant solution can introduce the computed result
+as new (nested) resource. The later the advantage that the computed
+result is only evaluated when explicitly requested, either directly or through
+an inclusion. The new resources can be setup as DB view holding
+the computed result and a foreign key to the original table.
+
 
 
 ### Standalone Usage
@@ -474,150 +537,6 @@ implementation. This allows to:
 For more detailed information have a look at the current `ResourceMetaProvider`.
 
 
-
-
-## Activiti Module
-
-NOTE: This module is in new and in incubation. Feedback and improvements welcomed.
-
-There is an `ActivitiModule` for the https://www.activiti.org[Activiti] workflow engine that offers an alternative REST API.
-The motivation of `ActivitiModule` is to:
-
-- have a JSON:API compliant REST API to benefit from the resource-oriented architecture, linking, sorting, filtering, paging,
-  and client-side tooling of JSON:API.
-- have a type-safe, non-generic REST API that is tailored towards the use cases at hand. This means that for each process
-  and task definition, there is a dedicated repository and resource type for it. The resource is comprised of
-  both the static fields provided by Activiti (like `name`, `startTime` and `priority`) and the dynamic fields
-  stored by the application as process/task/form variables. Mapping to static resp. dynamic fields is done
-  automatically by the `ActivitiModule` and hidden from consumers. The repository implementations ensure a proper isolation of different types. And
-  the application is enabled, for example, to introduce custom security policies for each resource with
-  the `SecurityModule` or a `ResourceFilter`.
-
-This setup differs substantially from the API provided by Activiti that is implemented
-in generic fashion.
-
-### Setup
-
-The `ActivitiModule` comes within a small example application within the `src/main/test` directory that showcases its use.
-It sets up an approval flow where changes to the `Schedule` resource must be approved by a user.
-
-The `ActivitiModule` implements four resource base classes that match the equivalent Activiti classes:
-
-- `ExecutionResource`
-- `FormResource`
-- `ProcessInstanceResource`
-- `TaskResource`
-
-To setup a JSON:API repository for a process or task, the corresponding resource class can be subclassed and extended with
-the application specific fields. For example:
-
-[source,java]
-.ApprovalProcessInstance.java
-----
-include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalProcessInstance.java[tag=docs1]
-	...
-include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalProcessInstance.java[tag=docs2]
-----
-
-and
-
-[source,java]
-.ScheduleApprovalProcessInstance.java
-----
-include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/model/ScheduleApprovalProcessInstance.java[tag=docs1]
-	...
-include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/model/ScheduleApprovalProcessInstance.java[tag=docs2]
-----
-
-The example application makes use of an intermediate `ApprovalProcessInstance` base class to potentially share the approval
-logic among multiple entities in the future (if it would be real-world use case). `ScheduleApprovalProcessInstance` has
-the static fields of Activiti and a number of custom, dynamic fields like `resourceType`, `resourceId` and `newValues`.
-The dynamic fields will be mapped to to process, task resp. form variables.
-
-Notice the relation to `ApproveTask`, which is a task counter part extending from `TaskResource`. If a process has multiple
-tasks, you may introduce multiple such relationships.
-
-Finally, the setup of the `ActiviModule` looks like:
-
-[source,java]
-.ApprovalTestApplication.java
-----
-include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/ApprovalTestApplication.java[tag=activitiModule]
-----
-
-- `ActivitiModuleConfig` allows to register processes and tasks that then will be exposed as repositories.
-- `ScheduleApprovalProcessInstance`, `ApproveTask` and the `approveTask` relationship are registered.
-- `ApproveTask` is user task that is handled by submitting an `ApproveForm`.
-- `filterByProcessDefinitionKey` and `filterByTaskDefinitionKey` ensure that the two repositories
-  are isolated from other repositories for `GET`, `POST`, `PATCH` and `DELETE` operations.
-
-One could imagine to make this configuration also available through an annotation-based API in the future as it is
-closely related to the resource classes and fields.
-
-
-### Example application
-
-The example application goes a few steps further in the setup. The patterns of those steps might be of
-interest of consumers of the `ActivitiModule` as well.
-
-The workflow looks as follows:
-
-]
-.approval.bpmn20.xml
-----
-include::../../../../crnk-data/crnk-data-activiti/src/test/resources/approval.bpmn20.xml[]
-----
-
-There is a:
-
-- `approveScheduleTask` task requires a form submission by a user.
-- `approvalExclusiveGateway` checks whether the change was accepted.
-- `scheduleChangeApproved` invokes `${approvalManager.approved(execution)}` whereas `approvalManager` is a Java object
-  taking care of the approval handling and registered to `activiti.cfg.xml`.
-- `approvalManager.approved(...)` reconstructs the original request and forwards it to Crnk again to save the approved
-  changes. This means the regular `ScheduleRepository` implementation will be called in the same fashion as for
-   a typical request. Real world use cases may also need to save and reconstruct the security context.
-
-For the approval-related functionality a second module is registered:
-
-[source,java]
-.ApprovalTestApplication.java
-----
-include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/ApprovalTestApplication.java[tag=approvalModule]
-----
-
-- `ApprovalRepositoryDecorator` hooks into the request processing of the Crnk engine and intercepts
- all `PATCH` and `POST` requests for the `Schedule` resource. The decorator then may chooses to
- abort the request and start an approval flow instead with the help of `ApprovalManager`.
-- `ApprovalRelationshipRepository` introduces an additional relationship between the actual resources
-  and approval resources. It can be used, for example, by user interfaces to show the current status
-  of an open approval workflow. `ApprovalRelationshipRepository.getResourceFields` declares
-  the relationship field, meaning that the original application resource does not have to declare the
-  relationship. This may or may not be useful depending on how much control there is over the original resource
-  (for example there is no control over JPA entities).
-- `historic(...)` method specify the historic resource counterparts to query the history.
-
-The chosen setup leads to an approval system that is *fully transparent* to the actual repository implementations
-and can be added to any kind of repository.
-
-`ApprovalIntTest` showcases the example workflow by doing a change,
-starting the approval process, submitting a form and then verifying the changes have been saved.
-
-
-### Limitations
-
-- Currently the main entities of Activiti have been exposed. Configuration-related repositories
-  could be exposed as well in the future.
-- Historic repositories are still considered being experimental.
-- Activiti has a limited query API that is inherited by the application. Potentially `crnk-data-jpa` could help
-  out a bit in this area.
-- Multi-tenancy is not yet done out-of-the-box.
-- Activiti has been forked to Flowable. As of yet it is unclear whether one or both project
-  will survive in the long-term.
-
-
-
-
 anchor:facet_module[]
 
 ## Faceted Search
@@ -708,6 +627,20 @@ http://127.0.0.1:8080/api/facet?filter[name]=priority,name
 Facets are then ordered as specified by `filter[name]`.
 
 For more examples, see `InMemoryFacetProviderTest`.
+
+### Grouping
+
+To compute facets separately for each label of a particular facet, use the `GROUP` operator:
+
+----
+http://127.0.0.1:8080/api/facet?filter[values][GROUP]=priority,name
+----
+
+It works equivalent to SQL `GROUP BY` queries. In the example a count is computed for every pair of `priority` and `name`
+and returned as facet resource.
+
+WARNING: the GROUP operator needs for further performance tuning.
+
 
 
 ### Roadmap

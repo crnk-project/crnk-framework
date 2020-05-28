@@ -56,7 +56,7 @@ public class ReactiveRepositoryAdapterFactory implements RepositoryAdapterFactor
 
 	@Override
 	public ResourceRepositoryAdapter decorate(ResourceRepositoryAdapter adapter) {
-		Object implementation = adapter.getResourceRepository();
+		Object implementation = adapter.getImplementation();
 		if (implementation instanceof ReactiveResourceRepository) {
 			return adapter;
 		}
@@ -69,7 +69,7 @@ public class ReactiveRepositoryAdapterFactory implements RepositoryAdapterFactor
 
 	@Override
 	public RelationshipRepositoryAdapter decorate(RelationshipRepositoryAdapter adapter) {
-		Object implementation = adapter.getRelationshipRepository();
+		Object implementation = adapter.getImplementation();
 		if (implementation instanceof ReactiveRelationshipRepository) {
 			return adapter;
 		}

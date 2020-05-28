@@ -160,7 +160,7 @@ public abstract class AbstractProxiedObjectsClientTest extends AbstractClientTes
         taskScheduleRepo.setRelation(task, schedule.getId(), "schedule");
 
         // collection must be available as proxy
-        QuerySpec querySpec = new QuerySpec(Task.class);
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
         schedule = scheduleRepo.findOne(1L, querySpec);
         Collection<Task> proxiedTasks = schedule.getTasks();
         Assert.assertNotNull(proxiedTasks);
@@ -216,7 +216,7 @@ public abstract class AbstractProxiedObjectsClientTest extends AbstractClientTes
         task.setName("test");
         taskRepo.create(task);
 
-        QuerySpec querySpec = new QuerySpec(Task.class);
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
         schedule = scheduleRepo.findOne(1L, querySpec);
         Collection<Task> proxiedTasks = schedule.getTasks();
         ObjectProxy proxy = (ObjectProxy) proxiedTasks;

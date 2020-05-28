@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.information.resource.EmbeddableInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -20,12 +20,11 @@ import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.MethodNotAllowedException;
-import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
-import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.ProjectData;
 import io.crnk.core.mock.models.ProjectPatchStrategy;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
@@ -42,7 +41,6 @@ import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -76,7 +74,7 @@ public class DefaultResourceInformationProviderTest {
 
     private final ResourceInformationProviderContext context =
             new DefaultResourceInformationProviderContext(resourceInformationProvider,
-                    new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper());
+                    new DefaultInformationBuilder(new TypeParser()), new TypeParser(), () -> new ObjectMapper());
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -324,14 +322,14 @@ public class DefaultResourceInformationProviderTest {
 
     @Test
     public void shouldContainLinksInformationField() {
-        expectedException.expect(MultipleJsonApiMetaInformationException.class);
+        expectedException.expect(IllegalStateException.class);
 
         resourceInformationProvider.build(MultipleMetaInformationResource.class);
     }
 
     @Test
     public void shouldThrowExceptionOnMultipleLinksInformationFields() {
-        expectedException.expect(MultipleJsonApiLinksInformationException.class);
+        expectedException.expect(IllegalStateException.class);
 
         resourceInformationProvider.build(MultipleLinksInformationResource.class);
     }
@@ -350,30 +348,6 @@ public class DefaultResourceInformationProviderTest {
 
         assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior")
                 .contains(LookupIncludeBehavior.DEFAULT);
-    }
-
-    @Test
-    public void shouldInheritGlobalForDefaultLookupBehaviorWhenDefault() {
-        ResourceInformationProvider resourceInformationProviderWithProperty =
-                getResourceInformationProviderWithProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE, "true");
-        ResourceInformation resourceInformation =
-                resourceInformationProviderWithProperty.build(JsonResourceWithDefaultLookupBehaviorRelationship.class);
-
-        assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior")
-                .contains(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
-    }
-
-    @Test
-    public void shouldOverrideGlobalLookupBehavior() {
-        ResourceInformationProvider resourceInformationProviderWithProperty =
-                getResourceInformationProviderWithProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE, "true");
-        ResourceInformation resourceInformation =
-                resourceInformationProviderWithProperty.build(JsonResourceWithOverrideLookupBehaviorRelationship.class);
-
-        // Global says automatically always, but relationship says only when null.
-        // Relationship annotation should win in this case.
-        assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior")
-                .contains(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL);
     }
 
     private ResourceInformationProvider getResourceInformationProviderWithProperty(String key, String value) {
@@ -431,6 +405,24 @@ public class DefaultResourceInformationProviderTest {
         ResourceInformation resourceInformation = resourceInformationProvider.build(JsonApiRelationTypeCustomGetMethod.class);
 
         assertNull(resourceInformation.getRelationshipFields().get(0).getIdType());
+    }
+
+    @Test
+    public void holdsSingularEmbeddedObject() {
+        ResourceInformation resourceInformation = resourceInformationProvider.build(Project.class);
+        ResourceField dataField = resourceInformation.findFieldByUnderlyingName("data");
+        EmbeddableInformation embeddedType = dataField.getEmbeddedType();
+        Assert.assertNotNull(embeddedType);
+
+        Assert.assertEquals(ProjectData.class, embeddedType.getImplementationClass());
+
+        List<ResourceField> fields = embeddedType.getFields();
+        Assert.assertEquals(5, fields.size());
+
+        ResourceField statusField = embeddedType.findFieldByUnderlyingName("status");
+        EmbeddableInformation statusType = statusField.getEmbeddedType();
+        Assert.assertNotNull(statusType);
+        Assert.assertEquals(2, statusType.getFields().size());
     }
 
     @Test
@@ -701,7 +693,7 @@ public class DefaultResourceInformationProviderTest {
         @JsonIgnore
         private String field;
 
-        @JsonApiToOne
+        @JsonApiRelation
         private String getField() {
             return null;
         }
@@ -803,7 +795,7 @@ public class DefaultResourceInformationProviderTest {
         @JsonApiId
         public Long id;
 
-        @JsonApiToOne
+        @JsonApiRelation
         public String getField() {
             return null;
         }
@@ -812,7 +804,7 @@ public class DefaultResourceInformationProviderTest {
     @JsonApiResource(type = "differentTypesv2")
     private static class DifferentTypesv2 {
 
-        @JsonApiToOne
+        @JsonApiRelation
         public Future<String> field;
 
         @JsonApiId

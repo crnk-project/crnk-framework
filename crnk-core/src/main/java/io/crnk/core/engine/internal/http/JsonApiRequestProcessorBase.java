@@ -13,15 +13,6 @@ import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.dispatcher.path.FieldPath;
-import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
-import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
-import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.module.Module;
 import org.slf4j.Logger;
@@ -35,8 +26,11 @@ public class JsonApiRequestProcessorBase {
 
 	private Boolean acceptingPlainJson;
 
+	protected JsonApiRequestProcessorHelper helper;
+
 	public JsonApiRequestProcessorBase(Module.ModuleContext moduleContext) {
 		this.moduleContext = moduleContext;
+		helper = new JsonApiRequestProcessorHelper(moduleContext);
 	}
 
 	protected boolean isAcceptingPlainJson() {
@@ -100,28 +94,5 @@ public class JsonApiRequestProcessorBase {
 				.setDetail(detail)
 				.build()));
 		return new Response(responseDocument, 400);
-	}
-
-
-	protected JsonPath getJsonPath(HttpRequestContext requestContext) {
-		String path = requestContext.getPath();
-		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		TypeParser typeParser = moduleContext.getTypeParser();
-		return new PathBuilder(resourceRegistry, typeParser).build(path);
-	}
-
-	protected ResourceInformation getRequestedResource(JsonPath jsonPath) {
-		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		RegistryEntry registryEntry = jsonPath.getRootEntry();
-
-		ResourceField field = (jsonPath instanceof RelationshipsPath) ? ((RelationshipsPath) jsonPath).getRelationship()
-				: jsonPath instanceof FieldPath ? ((FieldPath) jsonPath).getField() : null;
-		if (field != null) {
-			String oppositeResourceType = field.getOppositeResourceType();
-			return resourceRegistry.getEntry(oppositeResourceType).getResourceInformation();
-		}
-		else {
-			return registryEntry.getResourceInformation();
-		}
 	}
 }

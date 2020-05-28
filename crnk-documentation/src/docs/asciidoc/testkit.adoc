@@ -1,0 +1,31 @@
+anchor:testkit[]
+
+# TestKit
+
+With `crnk-testkit` is in the early stages of providing utilities to facilitate testing.
+`RandomWalkLinkChecker` is a class that performs a random walk on an API endpoint by following
+all the links as specified by JSON:API. It will verify that each links provides a valid
+`2xx` response code. The setup looks like:
+
+[source,java]
+----
+CrnkClient client = ...
+HttpAdapter httpAdapter = client.getHttpAdapter();
+
+RandomWalkLinkChecker linkChecker = new RandomWalkLinkChecker(httpAdapter);
+linkChecker.setWalkLength(100);
+linkChecker.addStartUrl(...)
+
+linkChecker.performCheck();
+----
+
+More possibilities for automation in the future are to add checks for:
+
+- paging
+- filtering
+- sorting
+- security
+- field sets
+- ...
+
+

@@ -34,89 +34,86 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(CrnkSpringBootProperties.class)
 public class CrnkConfigV3 implements ApplicationContextAware {
 
-	private ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
-	private CrnkSpringBootProperties properties;
+    private CrnkSpringBootProperties properties;
 
-	private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	public CrnkConfigV3(CrnkSpringBootProperties properties, ObjectMapper objectMapper) {
-		this.properties = properties;
-		this.objectMapper = objectMapper;
-	}
+    @Autowired
+    public CrnkConfigV3(CrnkSpringBootProperties properties, ObjectMapper objectMapper) {
+        this.properties = properties;
+        this.objectMapper = objectMapper;
+    }
 
-	@Bean
-	@ConditionalOnMissingBean(ServiceDiscovery.class)
-	public SpringServiceDiscovery discovery() {
-		return new SpringServiceDiscovery();
-	}
+    @Bean
+    @ConditionalOnMissingBean(ServiceDiscovery.class)
+    public SpringServiceDiscovery discovery() {
+        return new SpringServiceDiscovery();
+    }
 
-	@Bean
-	@ConditionalOnMissingBean(CrnkBoot.class)
-	public CrnkBoot crnkBoot(ServiceDiscovery serviceDiscovery) {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setObjectMapper(objectMapper);
+    @Bean
+    @ConditionalOnMissingBean(CrnkBoot.class)
+    public CrnkBoot crnkBoot(ServiceDiscovery serviceDiscovery) {
+        CrnkBoot boot = new CrnkBoot();
+        boot.setObjectMapper(objectMapper);
 
-		if (properties.getDomainName() != null && properties.getPathPrefix() != null) {
-			String baseUrl = properties.getDomainName() + properties.getPathPrefix();
-			boot.setServiceUrlProvider(new ConstantServiceUrlProvider(baseUrl));
-		}
-		boot.setServiceDiscovery(serviceDiscovery);
-		boot.setDefaultPageLimit(properties.getDefaultPageLimit());
-		boot.setMaxPageLimit(properties.getMaxPageLimit());
-		boot.setPropertiesProvider(new PropertiesProvider() {
-			@Override
-			public String getProperty(String key) {
-				if (CrnkProperties.RESOURCE_SEARCH_PACKAGE.equals(key)) {
-					return properties.getResourcePackage();
-				}
-				if (CrnkProperties.RESOURCE_DEFAULT_DOMAIN.equals(key)) {
-					return properties.getDomainName();
-				}
-				if (CrnkProperties.WEB_PATH_PREFIX.equals(key)) {
-					return properties.getPathPrefix();
-				}
-				if (CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES.equals(key)) {
-					return String.valueOf(properties.getAllowUnknownAttributes());
-				}
-				if (CrnkProperties.ALLOW_UNKNOWN_PARAMETERS.equals(key)) {
-					return String.valueOf(properties.getAllowUnknownParameters());
-				}
-				if (CrnkProperties.RETURN_404_ON_NULL.equals(key)) {
-					return String.valueOf(properties.getReturn404OnNull());
-				}
-				return applicationContext.getEnvironment().getProperty(key);
-			}
-		});
-		boot.addModule(new ServletModule(boot.getModuleRegistry().getHttpRequestContextProvider()));
-		boot.boot();
-		return boot;
-	}
+        if (properties.getDomainName() != null && properties.getPathPrefix() != null) {
+            String baseUrl = properties.getDomainName() + properties.getPathPrefix();
+            boot.setServiceUrlProvider(new ConstantServiceUrlProvider(baseUrl));
+        }
+        boot.setServiceDiscovery(serviceDiscovery);
+        boot.setDefaultPageLimit(properties.getDefaultPageLimit());
+        boot.setMaxPageLimit(properties.getMaxPageLimit());
+        boot.setPropertiesProvider(new PropertiesProvider() {
+            @Override
+            public String getProperty(String key) {
+                if (CrnkProperties.RESOURCE_DEFAULT_DOMAIN.equals(key)) {
+                    return properties.getDomainName();
+                }
+                if (CrnkProperties.WEB_PATH_PREFIX.equals(key)) {
+                    return properties.getPathPrefix();
+                }
+                if (CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES.equals(key)) {
+                    return String.valueOf(properties.getAllowUnknownAttributes());
+                }
+                if (CrnkProperties.ALLOW_UNKNOWN_PARAMETERS.equals(key)) {
+                    return String.valueOf(properties.getAllowUnknownParameters());
+                }
+                if (CrnkProperties.RETURN_404_ON_NULL.equals(key)) {
+                    return String.valueOf(properties.getReturn404OnNull());
+                }
+                return applicationContext.getEnvironment().getProperty(key);
+            }
+        });
+        boot.addModule(new ServletModule(boot.getModuleRegistry().getHttpRequestContextProvider()));
+        boot.boot();
+        return boot;
+    }
 
-	@Bean
-	@ConditionalOnMissingBean(PagingBehavior.class)
-	public PagingBehavior<OffsetLimitPagingSpec> offsetLimitPagingBehavior() {
-		return new OffsetLimitPagingBehavior();
-	}
+    @Bean
+    @ConditionalOnMissingBean(PagingBehavior.class)
+    public PagingBehavior<OffsetLimitPagingSpec> offsetLimitPagingBehavior() {
+        return new OffsetLimitPagingBehavior();
+    }
 
-	@Bean
-	public SpringCrnkFilter springBootSampleCrnkFilter(CrnkBoot boot) {
-		return new SpringCrnkFilter(boot, properties);
-	}
+    @Bean
+    public SpringCrnkFilter springBootSampleCrnkFilter(CrnkBoot boot) {
+        return new SpringCrnkFilter(boot, properties);
+    }
 
-	@Bean
-	public ResourceRegistry resourceRegistry(CrnkBoot boot) {
-		return boot.getResourceRegistry();
-	}
+    @Bean
+    public ResourceRegistry resourceRegistry(CrnkBoot boot) {
+        return boot.getResourceRegistry();
+    }
 
-	@Bean
-	public ModuleRegistry moduleRegistry(CrnkBoot boot) {
-		return boot.getModuleRegistry();
-	}
+    @Bean
+    public ModuleRegistry moduleRegistry(CrnkBoot boot) {
+        return boot.getModuleRegistry();
+    }
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 }

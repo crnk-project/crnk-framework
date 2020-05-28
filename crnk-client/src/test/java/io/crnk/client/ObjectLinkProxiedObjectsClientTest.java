@@ -1,16 +1,17 @@
 package io.crnk.client;
 
+import java.util.concurrent.TimeUnit;
+
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.test.mock.ClientTestModule;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Class creates a CrnkClient to serialize links as JSON objects.<br />
  * All tests can be found in {@link AbstractProxiedObjectsClientTest}.
  */
+@Ignore
 public class ObjectLinkProxiedObjectsClientTest extends AbstractProxiedObjectsClientTest {
 
     @Override

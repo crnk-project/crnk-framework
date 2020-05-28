@@ -21,4 +21,6 @@ public interface ResultFactory {
 	boolean hasThreadContext();
 
 	<T> Result<T> attachContext(Result<T> result, Object context);
+
+	<T> Result<List<T>> all(List<Result<T>> results);
 }

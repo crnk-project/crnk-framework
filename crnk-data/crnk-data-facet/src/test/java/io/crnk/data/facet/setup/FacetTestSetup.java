@@ -23,6 +23,7 @@ public class FacetTestSetup {
 		SimpleModule testModule = new SimpleModule("test");
 		projectRepository = new FacetedProjectRepository();
 		testModule.addRepository(projectRepository);
+		testModule.addRepository(new FacetedTaskRepository()); // => not exposed
 
 		boot = new CrnkBoot();
 		boot.addModule(testModule);
@@ -34,7 +35,7 @@ public class FacetTestSetup {
 		boot.boot();
 
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(FacetResource.class);
-		repository = (FacetRepositoryImpl) entry.getResourceRepository().getResourceRepository();
+		repository = (FacetRepositoryImpl) entry.getResourceRepository().getImplementation();
 
 		for (int i = 0; i < 16; i++) {
 			String name = "project" + (int) Math.sqrt(i);

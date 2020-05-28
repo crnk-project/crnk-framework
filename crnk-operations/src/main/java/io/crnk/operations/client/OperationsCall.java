@@ -57,6 +57,16 @@ public class OperationsCall {
 		queuedOperations.add(queuedOperation);
 	}
 
+	public void add(HttpMethod method, String path) {
+		Operation operation = new Operation();
+		operation.setOp(method.toString());
+		operation.setPath(path);
+
+		QueuedOperation queuedOperation = new QueuedOperation();
+		queuedOperation.operation = operation;
+		queuedOperations.add(queuedOperation);
+	}
+
 	protected String computePath(HttpMethod method, Resource resource) {
 		if (method == HttpMethod.POST) {
 			return resource.getType();
@@ -84,7 +94,7 @@ public class OperationsCall {
 	protected <T> T fromResource(Document document, Class<T> clazz) {
 		CrnkClient crnk = client.getCrnk();
 		ClientDocumentMapper documentMapper = crnk.getDocumentMapper();
-		return (T) documentMapper.fromDocument(document, false);
+		return (T) documentMapper.fromDocument(document, false, crnk.getQueryContext());
 	}
 
 	public void execute() {

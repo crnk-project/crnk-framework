@@ -1,13 +1,11 @@
 package io.crnk.core.mock.models;
 
+import java.util.List;
+
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.util.List;
 
 @JsonApiResource(type = "lazy_tasks")
 public class LazyTask {
@@ -15,13 +13,13 @@ public class LazyTask {
 	@JsonApiId
 	private Long id;
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private List<Project> projects;
 
 	@JsonApiRelation(serialize = SerializeType.ONLY_ID)
 	private Project project;
 
-	@JsonApiToOne(lazy = true)
+	@JsonApiRelation
 	private Project lazyProject;
 
 	public Long getId() {

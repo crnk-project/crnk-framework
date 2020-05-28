@@ -12,6 +12,7 @@ import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Supplier;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaElement;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class MetaRelationshipRepositoryImpl implements RelationshipRepository<Me
 	}
 
 	private MetaElement getSource(String sourceId) {
-		MetaLookup lookup = lookupSupplier.get();
+		MetaLookupImpl lookup = (MetaLookupImpl) lookupSupplier.get();
 		MetaElement source = lookup.getMetaById().get(sourceId);
 		if (source == null) {
 			throw new ResourceNotFoundException(sourceId);
@@ -101,11 +102,11 @@ public class MetaRelationshipRepositoryImpl implements RelationshipRepository<Me
 		if (object == null) {
 			return null;
 		} else if (object instanceof MetaElement) {
-			return MetaUtils.adjustForRequest(lookupSupplier.get(), (MetaElement) object, queryContext);
+			return MetaUtils.adjustForRequest((MetaLookupImpl) lookupSupplier.get(), (MetaElement) object, queryContext);
 		} else {
 			PreconditionUtil.assertTrue("expected collection", object instanceof Collection);
 			List<MetaElement> results = new ArrayList<>();
-			MetaLookup lookup = lookupSupplier.get();
+			MetaLookupImpl lookup = (MetaLookupImpl) lookupSupplier.get();
 			for (MetaElement element : ((Collection<MetaElement>) object)) {
 				MetaElement adjustedElement = MetaUtils.adjustForRequest(lookup, element, queryContext);
 				if (adjustedElement != null) {

@@ -5,7 +5,7 @@ import io.crnk.data.jpa.meta.JpaMetaProvider;
 import io.crnk.data.jpa.query.ComputedAttributeRegistry;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 import io.crnk.data.jpa.query.JpaQueryFactoryContext;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.provider.MetaPartition;
 
 import javax.persistence.EntityManager;
@@ -33,7 +33,7 @@ public abstract class JpaQueryFactoryBase implements JpaQueryFactory {
 
 	protected static JpaQueryFactoryContext createDefaultContext(EntityManager em) {
 		JpaMetaProvider jpaMetaProvider = new JpaMetaProvider(Collections.emptySet());
-		MetaLookup metaLookup = new MetaLookup();
+		MetaLookupImpl metaLookup = new MetaLookupImpl();
 		metaLookup.addProvider(jpaMetaProvider);
 		return new JpaQueryFactoryContext() {
 			@Override

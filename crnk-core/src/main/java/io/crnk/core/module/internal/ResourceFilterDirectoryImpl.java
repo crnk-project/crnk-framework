@@ -1,8 +1,12 @@
 package io.crnk.core.module.internal;
 
-import io.crnk.core.boot.CrnkProperties;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterContext;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
@@ -10,18 +14,13 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ForbiddenException;
+import io.crnk.core.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
@@ -51,9 +50,10 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
             }
         }
 
+        ResourceFilterContext filterContext = () -> queryContext;
         FilterBehavior behavior = FilterBehavior.NONE;
         for (ResourceFilter filter : filters) {
-            behavior = behavior.merge(filter.filterResource(resourceInformation, method));
+            behavior = behavior.merge(filter.filterResource(filterContext, resourceInformation, method));
             if (behavior == FilterBehavior.FORBIDDEN) {
                 break;
             }
@@ -66,6 +66,7 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
     @Override
     public FilterBehavior get(ResourceField field, HttpMethod method, QueryContext queryContext) {
+    	PreconditionUtil.verify(field != null, "field cannot be null");
         Map<Object, FilterBehavior> map = getCache(method, queryContext);
 
         FilterBehavior behavior = map.get(field);
@@ -79,8 +80,9 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
         // TODO field.getAccess not fine-grained, should change in the future
         behavior = modifiable ? FilterBehavior.NONE : FilterBehavior.IGNORED;
 
+        ResourceFilterContext filterContext = () -> queryContext;
         for (ResourceFilter filter : filters) {
-            behavior = behavior.merge(filter.filterField(field, method));
+            behavior = behavior.merge(filter.filterField(filterContext, field, method));
             if (behavior == FilterBehavior.FORBIDDEN) {
                 break;
             }
@@ -89,8 +91,9 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
         if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
             // for relationships opposite site must also be accessible (at least with GET)
             String oppositeResourceType = field.getOppositeResourceType();
-            RegistryEntry oppositeRegistryEntry = resourceRegistry.getEntry(oppositeResourceType);
-            if (oppositeRegistryEntry != null) {
+
+            if (oppositeResourceType != null && resourceRegistry.hasEntry(oppositeResourceType)) {
+				RegistryEntry oppositeRegistryEntry = resourceRegistry.getEntry(oppositeResourceType);
                 ResourceInformation oppositeResourceInformation = oppositeRegistryEntry.getResourceInformation();
 
                 // consider checking more than GET? intersection/union of multiple?
@@ -131,14 +134,17 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
         FilterBehavior filterBehavior = get(field, method, queryContext);
         if (filterBehavior == FilterBehavior.NONE) {
             return true;
-        } else if (filterBehavior == FilterBehavior.FORBIDDEN || !allowIgnore) {
-            String resourceType = field.getParentResourceInformation().getResourceType();
+        }
+        if (filterBehavior == FilterBehavior.FORBIDDEN || !allowIgnore) {
+            String resourceType = field.getResourceInformation().getResourceType();
             throw new ForbiddenException("field '" + resourceType + "." + field.getJsonName() + "' cannot be accessed for " + method);
+        } else if (filterBehavior == FilterBehavior.UNAUTHORIZED || !allowIgnore) {
+            String resourceType = field.getResourceInformation().getResourceType();
+            throw new UnauthorizedException("field '" + resourceType + "." + field.getJsonName() + "' can only be access when logged in for " + method);
         } else {
             LOGGER.debug("ignoring field {}", field.getUnderlyingName());
             PreconditionUtil.verifyEquals(FilterBehavior.IGNORED, filterBehavior, "unknown behavior");
             return false;
         }
-
     }
 }

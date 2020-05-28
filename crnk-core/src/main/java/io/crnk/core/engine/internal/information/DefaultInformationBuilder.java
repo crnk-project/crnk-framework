@@ -5,19 +5,20 @@ import io.crnk.core.engine.information.repository.RelationshipRepositoryInformat
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.information.resource.EmbeddableInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceValidator;
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DefaultInformationBuilder implements InformationBuilder {
 
@@ -70,7 +72,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
     @Override
     public ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType, String resourcePath) {
         DefaultResource resource = new DefaultResource();
-        resource.resourceClass(resourceClass);
+        resource.implementationType(resourceClass);
         resource.resourceType(resourceType);
         resource.resourcePath(resourcePath);
         return resource;
@@ -151,6 +153,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
         private Class<? extends PagingSpec> pagingSpecType;
 
+        private VersionRange versionRange = VersionRange.UNBOUNDED;
+
         private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true, true);
 
         @Override
@@ -162,6 +166,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
             idStringMapper = information.getIdStringMapper();
             validator = information.getValidator();
             access = information.getAccess();
+            versionRange = information.getVersionRange();
             for (ResourceField fromField : information.getFields()) {
                 DefaultField field = new DefaultField();
                 field.from(fromField);
@@ -195,12 +200,6 @@ public class DefaultInformationBuilder implements InformationBuilder {
         }
 
         @Override
-        public DefaultResource resourceClass(Class<?> resourceClass) {
-            this.implementationType = resourceClass;
-            return this;
-        }
-
-        @Override
         public DefaultResource implementationType(Type implementationType) {
             this.implementationType = implementationType;
             return this;
@@ -224,14 +223,14 @@ public class DefaultInformationBuilder implements InformationBuilder {
             return this;
         }
 
-        @Override
-        public ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior) {
-            this.pagingSpecType = pagingBehavior.createEmptyPagingSpec().getClass();
+        public ResourceInformationBuilder pagingSpecType(Class<? extends PagingSpec> pagingSpecType) {
+            this.pagingSpecType = pagingSpecType;
             return this;
         }
 
-        public ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType) {
-            this.pagingSpecType = pagingSpecType;
+        @Override
+        public ResourceInformationBuilder versionRange(VersionRange versionRange) {
+            this.versionRange = versionRange;
             return this;
         }
 
@@ -246,6 +245,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
                     new ResourceInformation(typeParser, implementationType, resourceType, resourcePath, superResourceType,
                             fieldImpls, pagingSpecType);
             information.setAccess(access);
+            information.setVersionRange(versionRange);
             if (validator != null) {
                 information.setValidator(validator);
             }
@@ -253,6 +253,53 @@ public class DefaultInformationBuilder implements InformationBuilder {
                 information.setIdStringMapper(idStringMapper);
             }
             return information;
+        }
+    }
+
+    public class DefaultEmbeddableInformation implements EmbeddableInformationBuilder {
+
+        private Type implementationType;
+
+        private List<DefaultField> fields = new ArrayList<>();
+
+        public EmbeddableInformation build() {
+            EmbeddableInformation information = new EmbeddableInformation(implementationType, fields.stream().map(it -> it.build()).collect(Collectors.toList()));
+            return information;
+        }
+
+        @Override
+        public void from(EmbeddableInformation information) {
+            implementationType = information.getImplementationType();
+            for (ResourceField fromField : information.getFields()) {
+                DefaultField field = new DefaultField();
+                field.from(fromField);
+                fields.add(field);
+            }
+        }
+
+        @Override
+        public DefaultField addField() {
+            DefaultField field = new DefaultField();
+            fields.add(field);
+            return field;
+        }
+
+        @Override
+        public DefaultField addField(String name, ResourceFieldType type, Class<?> clazz) {
+            DefaultField field = new DefaultField();
+            field.jsonName(name);
+            field.underlyingName(name);
+            field.type(clazz);
+            field.genericType(clazz);
+            field.fieldType(type);
+            fields.add(field);
+            return field;
+        }
+
+        @Override
+        public EmbeddableInformationBuilder implementationType(Type implementationType) {
+            this.implementationType = implementationType;
+            return this;
         }
     }
 
@@ -276,6 +323,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
         private JsonIncludeStrategy jsonIncludeStrategy = JsonIncludeStrategy.DEFAULT;
 
+        private VersionRange versionRange = VersionRange.UNBOUNDED;
+
         private String oppositeName;
 
         private ResourceFieldAccessor accessor;
@@ -294,6 +343,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
         private boolean mappedBy;
 
+        private DefaultEmbeddableInformation embeddedTypeBuilder;
+
         @Override
         public void from(ResourceField field) {
             jsonName = field.getJsonName();
@@ -305,7 +356,9 @@ public class DefaultInformationBuilder implements InformationBuilder {
             access = field.getAccess();
             serializeType = field.getSerializeType();
             jsonIncludeStrategy = field.getJsonIncludeStrategy();
+            versionRange = field.getVersionRange();
             mappedBy = field.isMappedBy();
+            embeddedTypeBuilder = toBuilder(field.getEmbeddedType());
             if (fieldType == ResourceFieldType.RELATIONSHIP) {
                 relationshipRepositoryBehavior = field.getRelationshipRepositoryBehavior();
                 oppositeResourceType = field.getOppositeResourceType();
@@ -320,9 +373,20 @@ public class DefaultInformationBuilder implements InformationBuilder {
             patchStrategy = field.getPatchStrategy();
         }
 
+        private DefaultEmbeddableInformation toBuilder(EmbeddableInformation type) {
+            if (type == null) {
+                return null;
+            }
+            embeddedTypeBuilder = new DefaultEmbeddableInformation();
+            embeddedTypeBuilder.implementationType(type.getImplementationType());
+            for(ResourceField field : type.getFields()){
+                embeddedTypeBuilder.addField().from(field);
+            }
+            return embeddedTypeBuilder;
+        }
+
 
         public ResourceField build() {
-
             if (oppositeResourceType == null && fieldType == ResourceFieldType.RELATIONSHIP) {
                 // TODO consider separating informationBuilder from resourceType extraction
                 Class<?> elementType = ClassUtils.getRawType(ClassUtils.getElementType(genericType));
@@ -337,6 +401,10 @@ public class DefaultInformationBuilder implements InformationBuilder {
                     lookupIncludeBehavior,
                     access, idName, idType, idAccessor, relationshipRepositoryBehavior, this.patchStrategy);
             impl.setMappedBy(mappedBy);
+            impl.setVersionRange(versionRange);
+            if (embeddedTypeBuilder != null) {
+                impl.setEmbeddedType(embeddedTypeBuilder.build());
+            }
             if (accessor != null) {
                 impl.setAccessor(accessor);
             }
@@ -377,6 +445,18 @@ public class DefaultInformationBuilder implements InformationBuilder {
                 this.genericType = type;
             }
             return this;
+        }
+
+        @Override
+        public EmbeddableInformationBuilder embeddedType(Class<?> type) {
+        	if(genericType == null) {
+				genericType(type);
+			}
+            if (embeddedTypeBuilder == null) {
+                embeddedTypeBuilder = new DefaultEmbeddableInformation();
+                embeddedTypeBuilder.implementationType(type);
+            }
+            return embeddedTypeBuilder;
         }
 
         @Override
@@ -457,6 +537,12 @@ public class DefaultInformationBuilder implements InformationBuilder {
         @Override
         public FieldInformationBuilder setMappedBy(boolean mappedBy) {
             this.mappedBy = mappedBy;
+            return this;
+        }
+
+        @Override
+        public FieldInformationBuilder versionRange(VersionRange versionRange) {
+            this.versionRange = versionRange;
             return this;
         }
 

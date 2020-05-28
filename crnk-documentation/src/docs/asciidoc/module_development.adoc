@@ -23,7 +23,7 @@ Crnk provides three different, complementing mechanisms to hook into the request
 The `DocumentFilter` interface allows to intercept incoming requests and do
 any kind of validation, changes, monitoring, transaction handling, etc. `DocumentFilter` can be
 hooked into Crnk by setting up a module and registering the filter to the
-`ModuleContext`. Not that for every request, this interface is called exactly once.
+`ModuleContext`. Note that for every request, this interface is called exactly once.
 
 A request may span multiple repository accesses. To intercept the actual repository requests,
 implement the `RepositoryFilter` interface. `RepositoryFilter` has a number of methods
@@ -36,7 +36,7 @@ implementing the same Crnk repository interfaces. The decorated repository inste
 the actual repository will get called and it is up to the decorated repository of how to proceed
 with the request, usually by calling the actual repository. `RepositoryDecoratorFactory`
 can be registered with `ModuleContext.addRepositoryDecoratorFactory`. The factory gets
-notified about every repository registration and is then free do decorate it or not.
+notified about every repository registration and is then free to decorate it or not.
 
 
 anchor:modificationfilter[]
@@ -156,22 +156,32 @@ anchor:runtimerepository[]
 ## Create repositories at runtime
 
 Repositories are usually created at compile-time, either by making use of the various annotations or a module
-such as the ´JpaModule´. However, the module API also allows the creation of repositories at runtime.
+such as the `JpaModule`. However, the module API also allows the creation of repositories at runtime.
 There are two complementary mechanisms in place to achieve this and outlined in the next two sections.
 
 NOTE: this feature is in incubation, more refinements are expected in upcoming releases.
 
 ### Implementing repositories dynamically at runtime
 
-There are different possibilities to implement a repository at runtime:
+There are different possibilities to implement resources and repositories at runtime:
 
-- Create a matching resource class at runtime with a library like http://bytebuddy.net/#/ to follow the same
+1. Create resources classes at runtime with a library like http://bytebuddy.net/#/ to follow the same
   pattern as for any compile-time repository.
-- Make use of the `Resource` class. It is the generic JSON:API resource presentation within the Crnk engine.
-- Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
+
+2. `JsonAnyGetter` and `JsonAnySetter` annotations from Jackson allow to dynamically add properties to a resource.
+  Further implementing `ResourceTypeHolder` interface allows to manipulate the type of a resource. Together
+  the annotations allow the implementation of arbitrarily custom resources and type hierarchies. Note that
+  when making use of `ResourceTypeHolder` it may also become necessary to register the resource types
+  to the `ResourceRegistry` as `RegistryEntry` as outlined in the `Resource` example below.
+
+3. Make use of the `Resource` class. It is the generic JSON:API resource presentation within the Crnk engine.
+4. Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
   each `ResourceField` to specify how to read and write attributes (see below for `ResourceField` examples).
 
-In the following example we make use of the second option:
+The use of `JsonAnyGetter` and `JsonAnySetter` is simplest and recommended for most use case.
+An example is given in
+https://github.com/crnk-project/crnk-example/blob/master/crnk-example-service/src/main/java/io/crnk/example/service/model/PersonEntity.java[PersonEntity]
+Nevertheless the direct use of `Resource` opens up the possibility for more deeper control of everything:
 
 [source]
 .DynamicResourceRepository.java

@@ -37,7 +37,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	protected Map<String, Integer> selectionBindings;
 
 	public AbstractQueryExecutorImpl(EntityManager em, MetaDataObject meta, int numAutoSelections,
-			Map<String, Integer> selectionBindings) {
+									 Map<String, Integer> selectionBindings) {
 		this.em = em;
 		this.meta = meta;
 		this.numAutoSelections = numAutoSelections;
@@ -63,9 +63,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	public JpaQueryExecutor<T> fetch(List<String> attrPath) {
 		// include path an all prefix paths
 		MetaAttributePath path = meta.resolvePath(attrPath);
-		for (int i = 1; i <= path.length(); i++) {
-			fetchPaths.add(path.subPath(0, i));
-		}
+		fetchPaths.add(path);
 		return this;
 	}
 
@@ -90,6 +88,11 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	@Override
 	public int getLimit() {
 		return limit;
+	}
+
+	@Override
+	public int getOffset() {
+		return offset;
 	}
 
 	@Override
@@ -128,8 +131,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 				entityList.add((T) values[0]);
 			}
 			resultList = entityList;
-		}
-		else {
+		} else {
 			resultList = (List<T>) list;
 		}
 		return resultList;
@@ -145,11 +147,9 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 		}
 		if (!list.isEmpty()) {
 			return list.get(0);
-		}
-		else if (nullable) {
+		} else if (nullable) {
 			return null;
-		}
-		else {
+		} else {
 			throw new IllegalStateException("no result found");
 		}
 	}

@@ -1,12 +1,5 @@
 package io.crnk.meta.internal;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimitiveType;
-import io.crnk.meta.provider.MetaPartitionBase;
-
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.Collections;
@@ -15,6 +8,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.PathSpec;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.provider.MetaPartitionBase;
 
 public class BaseMetaPartition extends MetaPartitionBase {
 
@@ -39,6 +41,8 @@ public class BaseMetaPartition extends MetaPartitionBase {
 		registerPrimitiveType(JsonNode.class);
 		registerPrimitiveType(ObjectNode.class);
 		registerPrimitiveType(ArrayNode.class);
+		registerPrimitiveType(FilterOperator.class);
+		registerPrimitiveType(PathSpec.class);
 		registerPrimitiveType(byte[].class);
 		registerPrimitiveType(boolean[].class);
 		registerPrimitiveType(int[].class);
@@ -60,7 +64,8 @@ public class BaseMetaPartition extends MetaPartitionBase {
 		if (type instanceof Class) {
 			Class<?> objectType = mapPrimitiveType((Class) type);
 			return super.addElement(objectType, element);
-		} else {
+		}
+		else {
 			return super.addElement(type, element);
 		}
 	}

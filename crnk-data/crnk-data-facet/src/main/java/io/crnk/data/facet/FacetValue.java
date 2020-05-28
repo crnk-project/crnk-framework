@@ -1,53 +1,60 @@
 package io.crnk.data.facet;
 
 import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.resource.annotations.JsonApiEmbeddable;
 
+@JsonApiEmbeddable
 public class FacetValue implements Comparable<FacetValue> {
 
-	public static final String ATTR_LABEL = "label";
+    public static final String ATTR_LABEL = "label";
 
-	private String label;
+    private String label;
 
-	private Object value;
+    private Object value;
 
-	private FilterSpec filterSpec;
+    private FilterSpec filterSpec;
 
-	private long count;
+    private long count;
 
-	public String getLabel() {
-		return label;
-	}
+    @Override
+    public String toString() {
+        return FacetValue.class.getSimpleName() + "[label=" + label + ",value=" + value + ",count=" + count + "]";
+    }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public Object getValue() {
-		return value;
-	}
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	public void setValue(Object value) {
-		this.value = value;
-	}
+    public Object getValue() {
+        return value;
+    }
 
-	public FilterSpec getFilterSpec() {
-		return filterSpec;
-	}
+    public void setValue(Object value) {
+        this.value = value;
+    }
 
-	public void setFilterSpec(FilterSpec filterSpec) {
-		this.filterSpec = filterSpec;
-	}
+    public FilterSpec getFilterSpec() {
+        return filterSpec;
+    }
 
-	public long getCount() {
-		return count;
-	}
+    public void setFilterSpec(FilterSpec filterSpec) {
+        this.filterSpec = filterSpec;
+    }
 
-	public void setCount(long count) {
-		this.count = count;
-	}
+    public long getCount() {
+        return count;
+    }
 
-	@Override
-	public int compareTo(FacetValue o) {
-		return Long.compare(o.getCount(), count);
-	}
+    public void setCount(long count) {
+        this.count = count;
+    }
+
+    @Override
+    public int compareTo(FacetValue o) {
+        return Long.compare(o.getCount(), count);
+    }
 }

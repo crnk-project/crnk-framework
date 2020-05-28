@@ -1,5 +1,9 @@
 package io.crnk.data.jpa.internal.facet;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Map;
+
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -9,7 +13,7 @@ import io.crnk.data.facet.FacetResource;
 import io.crnk.data.facet.FacetValue;
 import io.crnk.data.facet.config.FacetInformation;
 import io.crnk.data.jpa.AbstractJpaJerseyTest;
-import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.query.criteria.JpaCriteriaQueryFactory;
 import org.junit.Assert;
@@ -17,9 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Map;
+import javax.persistence.EntityManager;
 
 public class JpaFacetProviderTest extends AbstractJpaJerseyTest {
 
@@ -43,9 +45,9 @@ public class JpaFacetProviderTest extends AbstractJpaJerseyTest {
 	}
 
 	@Override
-	protected void setupModule(JpaModule module, boolean server) {
+	protected void setupModule(JpaModuleConfig config, boolean server, EntityManager em) {
 		if (server) {
-			module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+			config.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
 		}
 	}
 
@@ -57,7 +59,7 @@ public class JpaFacetProviderTest extends AbstractJpaJerseyTest {
 
 		FacetResource nameFacets = list.get(0);
 		Assert.assertEquals("test_longValue", nameFacets.getId());
-		Assert.assertEquals("test", nameFacets.getType());
+		Assert.assertEquals("test", nameFacets.getResourceType());
 		Assert.assertEquals("longValue", nameFacets.getName());
 		Assert.assertEquals(Arrays.asList("3", "2", "1", "0"), nameFacets.getLabels());
 		Map<String, FacetValue> values = nameFacets.getValues();

@@ -1,18 +1,5 @@
 package io.crnk.core.engine.information.resource;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.crnk.core.engine.document.Document;
@@ -27,8 +14,6 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.exception.InvalidResourceException;
-import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
-import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
@@ -38,16 +23,25 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 /**
  * Holds information about the type of the resource.
  */
-public class ResourceInformation {
+public class ResourceInformation extends BeanInformationBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceInformation.class);
 
-    private final Class<?> implementationClass;
-
-    private final Type implementationType;
 
     private ResourceField parentField;
 
@@ -56,11 +50,6 @@ public class ResourceInformation {
      * JsonApiId annotation.
      */
     private ResourceField idField;
-
-    /**
-     * A set of resource's attribute fields.
-     */
-    private List<ResourceField> attributeFields;
 
     /**
      * A set of fields that contains non-standard Java types (List, Set, custom
@@ -104,14 +93,6 @@ public class ResourceInformation {
      */
     private String superResourceType;
 
-    private Map<String, ResourceField> fieldByJsonName = new HashMap<>();
-
-    private Map<String, ResourceField> fieldByUnderlyingName = new HashMap<>();
-
-    private Map<String, ResourceFieldAccessor> fieldAccessors = new HashMap<>();
-
-    private List<ResourceField> fields;
-
     private AnyResourceFieldAccessor anyFieldAccessor;
 
     private ResourceValidator validator;
@@ -123,7 +104,7 @@ public class ResourceInformation {
     private StringMapper idStringMapper = new StringMapper() {
         @Override
         public String toString(Object input) {
-            return input.toString();
+            return parser.toString(input);
         }
 
         @Override
@@ -138,6 +119,8 @@ public class ResourceInformation {
     private ResourceFieldAccessor parentIdAccessor;
 
     private boolean singularNesting;
+
+    private VersionRange versionRange = VersionRange.UNBOUNDED;
 
     public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String superResourceType,
                                List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
@@ -159,14 +142,13 @@ public class ResourceInformation {
     public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String resourcePath,
                                String superResourceType,
                                ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+        super(implementationType, fields);
         this.parser = parser;
-        this.implementationClass = ClassUtils.getRawType(implementationType);
-        this.implementationType = implementationType;
         this.resourceType = resourceType;
         this.resourcePath = resourcePath;
         this.superResourceType = superResourceType;
         this.instanceBuilder = instanceBuilder;
-        this.fields = fields;
+
         this.pagingSpecType = pagingSpecType;
 
         initFields();
@@ -202,7 +184,9 @@ public class ResourceInformation {
             }
         }
 
-        PreconditionUtil.verify(parentField != null, "resource {} is marked as nested but no parent relationship found");
+        PreconditionUtil.verify(parentField != null, "resource %s is marked as nested but no parent relationship found. Since the " +
+				"resource is singular, it carries the same identifier as its parent (stored in the `@JsonApiId` field). To point to the parent, make sure " +
+				" the relationship is annotated with @JsonApiRelation(idField=<idField>).", this);
         childIdAccessor = new ResourceFieldAccessor() {
 
             @Override
@@ -256,7 +240,7 @@ public class ResourceInformation {
 
         if (parentAttribute != null || idAttribute != null) {
             if (!shouldBeNested()) {
-                LOGGER.warn("add @JsonApiResource(nested=true) to {} to mark it as being nested, in the future automatic discovery based on the id will be removed",
+                LOGGER.warn("add @JsonApiResource(nested=true) to %s to mark it as being nested, in the future automatic discovery based on the id will be removed",
                         implementationClass);
             }
 
@@ -280,10 +264,11 @@ public class ResourceInformation {
                 parentField = optParentField.get();
             } else {
                 PreconditionUtil.verify(parentAttribute.getName().endsWith("Id"),
-                        "nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix or match in name with a @JsonApiRelationId annotated field on the resource, got %s for %s",
+                        "nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix or match in name with a @JsonApiRelationId annotated field on the resource, got %s for "
+                                + "%s",
                         parentAttribute.getName(), beanInformation.getImplementationClass());
 
-                parentField = findRelationshipFieldByName(relationshipName);
+                parentField = findFieldByUnderlyingName(relationshipName);
                 PreconditionUtil.verify(parentField != null,
                         "naming of relationship to parent resource and relationship identifier within resource identifier must "
                                 + "match, not found for %s of %s",
@@ -312,6 +297,10 @@ public class ResourceInformation {
                             + "found for '%s' of %s",
                     parentField.getUnderlyingName(), implementationClass);
         }
+    }
+
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
     }
 
     class NestedIdAccessor implements ResourceFieldAccessor {
@@ -384,12 +373,14 @@ public class ResourceInformation {
             anyFieldAccessor = new AnyResourceFieldAccessor() {
 
                 @Override
-                public Object getValue(Object resource, String name) {
+                @SuppressWarnings("unchecked")
+                public Map<String, Object> getValues(Object resource) {
                     try {
-                        return jsonAnyGetter.invoke(resource, name);
+                        Object o = jsonAnyGetter.invoke(resource);
+                        return (Map<String, Object>) o;
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw new ResourceException(
-                                String.format("Exception while reading %s.%s due to %s", resource, name, e.getMessage()), e);
+                                String.format("Exception while reading %s due to %s", resource, e.getMessage()), e);
                     }
                 }
 
@@ -418,7 +409,9 @@ public class ResourceInformation {
                 (jsonAnySetter != null && jsonAnyGetter == null);
     }
 
-    private void initFields() {
+    protected void initFields() {
+        super.initFields();
+
         if (fields != null) {
             List<ResourceField> idFields = ResourceFieldType.ID.filter(fields);
             if (idFields.size() > 1) {
@@ -426,82 +419,38 @@ public class ResourceInformation {
             }
 
             this.idField = idFields.isEmpty() ? null : idFields.get(0);
-
-            this.attributeFields = ResourceFieldType.ATTRIBUTE.filter(fields);
             this.relationshipFields = ResourceFieldType.RELATIONSHIP.filter(fields);
-
-            this.metaField = getMetaField(implementationClass, fields);
-            this.linksField = getLinksField(implementationClass, fields);
-
-            for (ResourceField resourceField : fields) {
-                resourceField.setResourceInformation(this);
-                fieldByJsonName.put(resourceField.getJsonName(), resourceField);
-                fieldByUnderlyingName.put(resourceField.getUnderlyingName(), resourceField);
-
-                fieldAccessors.put(resourceField.getUnderlyingName(), resourceField.getAccessor());
-                if (resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP && resourceField.hasIdField()) {
-                    fieldAccessors.put(resourceField.getIdName(), resourceField.getIdAccessor());
-
-                    // a non-JsonApiRelationId field can also be referenced => has its own ResourceField instance
-                    if (!fieldByUnderlyingName.containsKey(resourceField.getIdName())) {
-                        fieldByUnderlyingName.put(resourceField.getIdName(), resourceField);
-                    }
-                }
-            }
+            this.metaField = getField(implementationClass, ResourceFieldType.META_INFORMATION, fields);
+            this.linksField = getField(implementationClass, ResourceFieldType.LINKS_INFORMATION, fields);
         } else {
             this.relationshipFields = Collections.emptyList();
-            this.attributeFields = Collections.emptyList();
-            this.fieldAccessors = null;
             this.metaField = null;
             this.linksField = null;
             this.idField = null;
         }
     }
 
-    @Deprecated
-    public void setFields(List<ResourceField> fields) {
-        this.fields = fields;
-        this.initFields();
+    @Override
+    protected void initField(ResourceField resourceField) {
+        resourceField.setResourceInformation(this);
+        super.initField(resourceField);
     }
 
-    /**
-     * @param name name of regular field or field annotated with @JsonApiRelationId
-     * @return ResourceFieldAccessor to get and set values
-     */
-    public ResourceFieldAccessor getAccessor(String name) {
-        return fieldAccessors.get(name);
-    }
 
-    private static <T> ResourceField getMetaField(Class<T> resourceClass, Collection<ResourceField> classFields) {
-        List<ResourceField> metaFields = new ArrayList<>(1);
+    private static <T> ResourceField getField(Class<T> resourceClass, ResourceFieldType type, Collection<ResourceField> classFields) {
+        List<ResourceField> matches = new ArrayList<>(1);
         for (ResourceField field : classFields) {
-            if (field.getResourceFieldType() == ResourceFieldType.META_INFORMATION) {
-                metaFields.add(field);
+            if (field.getResourceFieldType() == type) {
+                matches.add(field);
             }
         }
 
-        if (metaFields.isEmpty()) {
+        if (matches.isEmpty()) {
             return null;
-        } else if (metaFields.size() > 1) {
-            throw new MultipleJsonApiMetaInformationException(resourceClass.getCanonicalName());
+        } else if (matches.size() > 1) {
+            throw new IllegalStateException("multiple " + type + " fields for + " + resourceClass.getCanonicalName());
         }
-        return metaFields.get(0);
-    }
-
-    private static <T> ResourceField getLinksField(Class<T> resourceClass, Collection<ResourceField> classFields) {
-        List<ResourceField> linksFields = new ArrayList<>(1);
-        for (ResourceField field : classFields) {
-            if (field.getResourceFieldType() == ResourceFieldType.LINKS_INFORMATION) {
-                linksFields.add(field);
-            }
-        }
-
-        if (linksFields.isEmpty()) {
-            return null;
-        } else if (linksFields.size() > 1) {
-            throw new MultipleJsonApiLinksInformationException(resourceClass.getCanonicalName());
-        }
-        return linksFields.get(0);
+        return matches.get(0);
     }
 
     public String getResourceType() {
@@ -523,14 +472,6 @@ public class ResourceInformation {
         return (ResourceInstanceBuilder<T>) instanceBuilder;
     }
 
-    public Type getImplementationType() {
-        return implementationType;
-    }
-
-    public Class<?> getImplementationClass() {
-        return implementationClass;
-    }
-
     /**
      * @Deprecated use {@link #getImplementationClass()}
      */
@@ -542,32 +483,17 @@ public class ResourceInformation {
         return idField;
     }
 
-    public List<ResourceField> getAttributeFields() {
-        return attributeFields;
-    }
-
     public List<ResourceField> getRelationshipFields() {
         return relationshipFields;
     }
 
-    public ResourceField findFieldByName(String name) {
-        return fieldByJsonName.get(name);
-    }
-
-    public ResourceField findFieldByUnderlyingName(String name) {
-        return fieldByUnderlyingName.get(name);
-    }
-
+    /**
+     * @deprecated use {@link #findFieldByJsonName(String, int)} with version instead.
+     */
+    @Deprecated
     public ResourceField findRelationshipFieldByName(String name) {
-        ResourceField resourceField = fieldByJsonName.get(name);
-        return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? resourceField
-                : null;
-    }
-
-    public ResourceField findAttributeFieldByName(String name) {
-        ResourceField resourceField = fieldByJsonName.get(name);
-        return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.ATTRIBUTE ? resourceField
-                : null;
+        ResourceField resourceField = findFieldByName(name);
+        return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? resourceField : null;
     }
 
     public ResourceField getMetaField() {
@@ -588,13 +514,12 @@ public class ResourceInformation {
         }
         ResourceInformation that = (ResourceInformation) o;
         return Objects.equals(implementationClass, that.implementationClass) && Objects.equals(resourceType, that.resourceType)
-                && Objects
-                .equals(resourcePath, that.resourcePath);
+                && Objects.equals(resourcePath, that.resourcePath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(implementationClass, resourceType, resourcePath);
+        return Objects.hash(resourceType);
     }
 
     /**
@@ -645,6 +570,9 @@ public class ResourceInformation {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Serializable parseIdString(String id) {
+        if (id == null) {
+            return null;
+        }
         return (Serializable) idStringMapper.parse(id);
     }
 
@@ -664,10 +592,6 @@ public class ResourceInformation {
         if (validator != null) {
             validator.validate(resource, requestDocument);
         }
-    }
-
-    public List<ResourceField> getFields() {
-        return Collections.unmodifiableList(fields);
     }
 
     public Class<? extends PagingSpec> getPagingSpecType() {
@@ -714,5 +638,16 @@ public class ResourceInformation {
     public ResourceFieldAccessor getParentIdAccessor() {
         PreconditionUtil.verify(isNested(), "not a nested resource, cannot access nested id accessor");
         return parentIdAccessor;
+    }
+
+    /**
+     * @return version range this field is applicable to. See also {@link @JsonApiVersion}
+     */
+    public VersionRange getVersionRange() {
+        return versionRange;
+    }
+
+    public void setVersionRange(VersionRange versionRange) {
+        this.versionRange = versionRange;
     }
 }

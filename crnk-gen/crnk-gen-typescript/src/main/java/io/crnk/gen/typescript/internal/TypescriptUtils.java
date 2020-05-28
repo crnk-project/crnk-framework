@@ -1,10 +1,12 @@
 package io.crnk.gen.typescript.internal;
 
+import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.gen.typescript.model.TSContainerElement;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSInterfaceType;
 import io.crnk.gen.typescript.model.TSModule;
 import io.crnk.gen.typescript.model.TSType;
+import io.crnk.meta.model.MetaDataObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -124,6 +126,13 @@ public class TypescriptUtils {
 	 * transforms "helloWorld" to "hello.world" to more closely resemble typical typescript naming.
 	 */
 	public static String toFileName(String name) {
+		// dots are treated as directories
+		int sep = name.lastIndexOf(".");
+		if (sep != -1) {
+			name = name.substring(sep + 1);
+		}
+
+		// move from camel case to lower case
 		char[] charArray = name.toCharArray();
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < charArray.length; i++) {
@@ -133,5 +142,14 @@ public class TypescriptUtils {
 			builder.append(Character.toLowerCase(charArray[i]));
 		}
 		return builder.toString();
+	}
+
+	public static String toClassName(MetaDataObject metaDataObject) {
+		String name = metaDataObject.getName();
+		int sep = name.lastIndexOf(".");
+		if (sep != -1) {
+			return StringUtils.firstToUpper(name.substring(sep + 1));
+		}
+		return name;
 	}
 }

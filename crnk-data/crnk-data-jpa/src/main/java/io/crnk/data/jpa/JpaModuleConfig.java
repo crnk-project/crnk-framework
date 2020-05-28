@@ -1,5 +1,9 @@
 package io.crnk.data.jpa;
 
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.data.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.data.jpa.internal.QueryFactoryDiscovery;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 
@@ -26,8 +30,30 @@ public class JpaModuleConfig {
 
     private boolean relationshipsEnabled = false;
 
+    private ResourceInformationProvider resourceInformationProvider;
+
     public JpaModuleConfig() {
     }
+
+    /**
+     * @return ResourceInformationProvider used to describe JPA classes.
+     */
+    protected ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider) {
+        if (resourceInformationProvider == null) {
+            resourceInformationProvider = new JpaResourceInformationProvider(propertiesProvider);
+        }
+        return resourceInformationProvider;
+    }
+
+    /**
+     * Sets the information builder to use to read JPA classes. See
+     * {@link JpaResourceInformationProvider}}
+     */
+    public void setResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
+        PreconditionUtil.verify(this.resourceInformationProvider == null, "already set");
+        this.resourceInformationProvider = resourceInformationProvider;
+    }
+
 
     public void setRepositoryFactory(JpaRepositoryFactory repositoryFactory) {
         this.repositoryFactory = repositoryFactory;

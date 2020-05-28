@@ -21,8 +21,21 @@ public class CrnkExceptionMapperTest {
 		ErrorResponse response = mapper.toErrorResponse(new SampleCrnkException());
 
 		assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR_500);
-		assertThat((Iterable<?>) response.getResponse().getEntity()).hasSize(1).extracting("title", "detail")
+		assertThat((Iterable<?>) response.getResponse().getErrors()).hasSize(1).extracting("title", "detail")
 				.containsExactly(tuple(TITLE1, DETAIL1));
+	}
+
+	@Test
+	public void shouldUseTitleIfDetailIsMissing() {
+		CrnkExceptionMapper mapper = new CrnkExceptionMapper();
+		ErrorResponse response = mapper.toErrorResponse(new SampleCrnkExceptionWithEmptyDetail());
+
+		assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR_500);
+		assertThat((Iterable<?>) response.getResponse().getErrors()).hasSize(1);
+
+		ErrorData errorData = response.getResponse().getErrors().get(0);
+		assertThat(errorData.getTitle()).isEqualTo(TITLE1);
+		assertThat(errorData.getDetail()).isNull();
 	}
 
 	@Test
@@ -91,6 +104,14 @@ public class CrnkExceptionMapperTest {
 
 		SampleCrnkException() {
 			super(HttpStatus.INTERNAL_SERVER_ERROR_500, ErrorData.builder().setTitle(TITLE1).setDetail(DETAIL1)
+					.setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR_500)).build());
+		}
+	}
+
+	private static class SampleCrnkExceptionWithEmptyDetail extends CrnkMappableException {
+
+		SampleCrnkExceptionWithEmptyDetail() {
+			super(HttpStatus.INTERNAL_SERVER_ERROR_500, ErrorData.builder().setTitle(TITLE1)
 					.setStatus(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR_500)).build());
 		}
 	}

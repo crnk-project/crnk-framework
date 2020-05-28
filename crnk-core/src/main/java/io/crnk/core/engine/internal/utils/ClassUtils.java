@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -346,7 +347,6 @@ public class ClassUtils {
 	 * Please use tools like {@link io.crnk.core.engine.information.bean.BeanInformation} and
 	 * {@link io.crnk.core.engine.information.bean.BeanAttributeInformation} instead.
 	 */
-	@Deprecated
 	public static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;
@@ -354,6 +354,8 @@ public class ClassUtils {
 			return getRawType(((ParameterizedType) type).getRawType());
 		} else if (type instanceof TypeVariable<?>) {
 			return getRawType(((TypeVariable<?>) type).getBounds()[0]);
+		} else if (type instanceof WildcardType) {
+			return getRawType(((WildcardType) type).getUpperBounds()[0]);
 		}
 		throw new IllegalStateException("unknown type: " + type);
 	}

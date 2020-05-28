@@ -11,31 +11,27 @@ import java.util.Map;
 
 public class RelationIdTestRepository extends ResourceRepositoryBase<RelationIdTestResource, Long> {
 
-	private static Map<Long, RelationIdTestResource> resources = new HashMap<>();
+    private Map<Long, RelationIdTestResource> resources = new HashMap<>();
 
-	public RelationIdTestRepository() {
-		super(RelationIdTestResource.class);
-	}
+    public RelationIdTestRepository() {
+        super(RelationIdTestResource.class);
+    }
 
-	public static void clear() {
-		resources.clear();
-	}
+    @Override
+    public ResourceList<RelationIdTestResource> findAll(QuerySpec querySpec) {
+        ResourceList<RelationIdTestResource> list = new DefaultResourceList<>();
+        list.addAll(querySpec.apply(resources.values()));
+        return list;
+    }
 
-	@Override
-	public ResourceList<RelationIdTestResource> findAll(QuerySpec querySpec) {
-		ResourceList<RelationIdTestResource> list = new DefaultResourceList<>();
-		list.addAll(querySpec.apply(resources.values()));
-		return list;
-	}
+    @Override
+    public <S extends RelationIdTestResource> S save(S entity) {
+        resources.put(entity.getId(), entity);
+        return entity;
+    }
 
-	@Override
-	public <S extends RelationIdTestResource> S save(S entity) {
-		resources.put(entity.getId(), entity);
-		return entity;
-	}
-
-	@Override
-	public void delete(Long id) {
-		resources.remove(id);
-	}
+    @Override
+    public void delete(Long id) {
+        resources.remove(id);
+    }
 }

@@ -1,17 +1,38 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.LazyTask;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.links.DefaultLink;
+import io.crnk.core.resource.links.DefaultSelfLinksInformation;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.utils.Nullable;
@@ -19,9 +40,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
@@ -56,9 +74,9 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 	public static class TaskLinks implements LinksInformation {
 
-		public String self = "something";
+		public Link self = new DefaultLink("something");
 
-		public String someLink = "link";
+		public Link someLink = new DefaultLink("link");
 
 	}
 
@@ -87,6 +105,31 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Project project = new Project();
 		project.setName("someProject");
 		project.setId(3L);
+		Task task = createTask(2, "sample task");
+		task.setProject(project);
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.includeRelation(Arrays.asList("project"));
+		QueryAdapter queryAdapter = toAdapter(querySpec);
+
+		DocumentMappingConfig config = mappingConfig.clone();
+		config.getResourceMapping().setSerializeSelfRelationshipLinks(false);
+
+		Document document = mapper.toDocument(toResponse(task), queryAdapter, config).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+
+		Relationship projectRel = resource.getRelationships().get("project");
+		ObjectNode links = projectRel.getLinks();
+		Assert.assertFalse(links.has("self"));
+		Assert.assertTrue(links.has("related"));
+	}
+
+	@Test
+	public void testOmitSelfRelatedLinks() {
+		Project project = new Project();
+		project.setName("someProject");
+		project.setId(3L);
 		LinksInformation links = new TaskLinks();
 		Task task = createTask(2, "sample task");
 		task.setLinksInformation(links);
@@ -97,7 +140,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
 		queryAdapter.setCompactMode(true);
 
-		Document document = mapper.toDocument(toResponse(task), queryAdapter, mappingConfig).get();
+		Document document = mapper.toDocument(toResponse(task), queryAdapter, mappingConfig.clone()).get();
 		Resource resource = document.getSingleData().get();
 		Assert.assertEquals("2", resource.getId());
 		Assert.assertEquals("tasks", resource.getType());
@@ -111,6 +154,134 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Resource projectResource = document.getIncluded().get(0);
 		Assert.assertNull(projectResource.getRelationships().get("tasks"));
 	}
+
+
+	@Test
+	public void testCustomSelfLinks() {
+		TaskLinks links = new TaskLinks();
+		links.self = new DefaultLink("http://something.else.net/api/tasks/3");
+		Task task = createTask(2, "sample task");
+		task.setLinksInformation(links);
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(task), queryAdapter, mappingConfig.clone()).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+		Assert.assertEquals("tasks", resource.getType());
+		Assert.assertEquals("http://something.else.net/api/tasks/3", getLinkText(resource.getLinks().get("self")));
+
+		Relationship projectRel = resource.getRelationships().get("project");
+		Assert.assertEquals("http://something.else.net/api/tasks/3/relationships/project", getLinkText(projectRel.getLinks().get("self")));
+	}
+
+
+	@Test
+	public void testJsonIncludeNonEmptyOnId() throws JsonProcessingException {
+		Project project = new Project();
+		project.setName("someProject");
+
+		// not that id makes use of @JsonInclude.Include.NON_EMPTY
+		project.setId(0L);
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		mapper.setClient(true);
+
+		Document document = mapper.toDocument(toResponse(project), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertNull(resource.getId());
+
+		ObjectWriter writer = container.getObjectMapper().writerFor(Resource.class);
+		String json = writer.writeValueAsString(resource);
+		Assert.assertFalse(json.contains("\"id\""));
+	}
+
+	@Test
+	public void testJsonIncludeNonEmptyIgnoresNull() throws JsonProcessingException {
+		// note that desc and followup project make use of @JsonInclude.Include.NON_EMPTY
+		Schedule schedule = new Schedule();
+		schedule.setDesc(null);
+		schedule.setFollowupProject(null);
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		querySpec.includeRelation(PathSpec.of("followupProject"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+
+		Assert.assertFalse(resource.getAttributes().containsKey("description"));
+		Assert.assertFalse(resource.getRelationships().containsKey("followup"));
+	}
+
+
+	@Test
+	public void testJsonIncludeNonEmptyIgnoresEmptyList() throws JsonProcessingException {
+		// makes use of @JsonInclude.Include.NON_EMPTY
+		Schedule schedule = new Schedule();
+		schedule.setKeywords(Collections.emptyList());
+		schedule.setTasks(new ArrayList<>());
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		querySpec.includeRelation(PathSpec.of("tasks"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+
+		Assert.assertFalse(resource.getAttributes().containsKey("keywords"));
+		Assert.assertFalse(resource.getRelationships().containsKey("tasks"));
+	}
+
+	@Test
+	public void testJsonIncludeNonEmptyWritesNonEmpty() throws JsonProcessingException {
+		Project project = new Project();
+		project.setId(12L);
+
+		// note that desc and followup project make use of @JsonInclude.Include.NON_EMPTY
+		Schedule schedule = new Schedule();
+		schedule.setDesc("Hello");
+		schedule.setFollowupProject(project);
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		querySpec.includeRelation(PathSpec.of("followupProject"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+
+		Assert.assertTrue(resource.getAttributes().containsKey("description"));
+		Assert.assertTrue(resource.getRelationships().containsKey("followup"));
+	}
+
+	@Test
+	public void testOptionalNotSerializedIfEmpty() {
+		Schedule schedule = new Schedule();
+		schedule.setDueDate(Optional.empty());
+
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(new QuerySpec(Project.class));
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertFalse(resource.getAttributes().containsKey("dueDate"));
+	}
+
+	@Test
+	public void testOptionalSerializedIfSet() {
+		Schedule schedule = new Schedule();
+		schedule.setDueDate(Optional.of(OffsetDateTime.now()));
+
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(new QuerySpec(Project.class));
+		Document document = mapper.toDocument(toResponse(schedule), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+
+		Assert.assertTrue(resource.getAttributes().containsKey("dueDate"));
+		JsonNode node = resource.getAttributes().get("dueDate");
+		Assert.assertTrue(node.asText().length() > 0);
+	}
+
 
 	@Test
 	public void testCompactModeWithNullData() {
@@ -129,7 +300,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Task task = createTask(2, "sample task");
 
 		TestLinksInformation links = new TestLinksInformation();
-		links.value = "linksValue";
+		links.value = new DefaultLink("linksValue");
 
 		TestMetaInformation meta = new TestMetaInformation();
 		meta.value = "metaValue";
@@ -146,7 +317,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	@Test
 	public void testResourceInformation() {
 		TestLinksInformation links = new TestLinksInformation();
-		links.value = "linksValue";
+		links.value = new DefaultLink("linksValue");
 
 		TestMetaInformation meta = new TestMetaInformation();
 		meta.value = "metaValue";
@@ -386,6 +557,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 		task1.setProject(project1);
 		task1.setProjectsInit(Arrays.asList(project2));
+		task1.setLinksInformation(new DefaultSelfLinksInformation());
 
 		// come back/converge to same task
 		project1.setTask(task2);
@@ -464,6 +636,27 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertEquals("sample category", resource.getAttributes().get("category").asText());
 	}
 
+	@Test
+	public void testAttributesOrdering() {
+		Task task = createTask(3, "sample task");
+		task.setCategory("sample category");
+		task.setName("sample name");
+		JsonApiResponse response = new JsonApiResponse();
+		response.setEntity(task);
+
+		Document document = mapper.toDocument(response, createAdapter(Task.class), mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("3", resource.getId());
+		Assert.assertEquals("tasks", resource.getType());
+		// check if the attributes are returned in alphabetical order as per the JsonPropertyOrder on Task
+		Assert.assertTrue(resource.getAttributes() instanceof LinkedHashMap);
+		Assert.assertEquals(resource.getAttributes().keySet(),
+				Stream.of("category", "completed", "deleted", "name", "otherTasks", "readOnlyValue", "status")
+						.collect(Collectors.toCollection(LinkedHashSet::new)));
+		Assert.assertEquals("sample name", resource.getAttributes().get("name").asText());
+		Assert.assertEquals("sample category", resource.getAttributes().get("category").asText());
+	}
+
 	private Project createProject(long id, String name) {
 		Project project = new Project();
 		project.setId(id);
@@ -475,6 +668,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Task task = new Task();
 		task.setId(id);
 		task.setName(name);
+		task.setLinksInformation(new DefaultSelfLinksInformation());
 		return task;
 	}
 
@@ -486,15 +680,15 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 	public static class TestLinksInformation implements LinksInformation {
 
-		public String value;
+		public Link value;
 
-		public String getValue() {
+		public Link getValue() {
 			return value;
 		}
 
 		// used to test the LinksInformationSerializer -> should not be serialized
 		@JsonIgnore
-		public String getOtherValue() {
+		public Link getOtherValue() {
 			return null;
 		}
 	}

@@ -1,5 +1,7 @@
 package io.crnk.servlet;
 
+import javax.servlet.ServletContext;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
@@ -14,14 +16,12 @@ import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import javax.servlet.ServletContext;
-
 public class ServletModuleTest {
 
 	@Test
 	public void testName() {
 		ImmediateResultFactory resultFactory = new ImmediateResultFactory();
-		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory);
+		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory, null);
 		ServletModule module = new ServletModule(provider);
 		Assert.assertEquals("servlet", module.getModuleName());
 	}
@@ -29,10 +29,10 @@ public class ServletModuleTest {
 	@Test
 	public void testSecurityProviderInstalled() {
 		ImmediateResultFactory resultFactory = new ImmediateResultFactory();
-		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory);
-		ServletModule module = new ServletModule(provider);
 
 		CrnkBoot boot = new CrnkBoot();
+		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory, boot.getModuleRegistry());
+		ServletModule module = new ServletModule(provider);
 		boot.addModule(module);
 		boot.boot();
 
@@ -41,16 +41,15 @@ public class ServletModuleTest {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
 		request.setRequestURI("/api/tasks");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-
 		request.addUserRole("guest");
 		request.addUserRole("admin");
 
 		provider.onRequestStarted(new HttpRequestContextBaseAdapter(new ServletRequestContext(servletContext, request,
 				response, "api", HttpHeaders.DEFAULT_CHARSET)));
 
-
-		Assert.assertFalse(securityProvider.isUserInRole("doesNotExist"));
-		Assert.assertTrue(securityProvider.isUserInRole("guest"));
-		Assert.assertTrue(securityProvider.isUserInRole("admin"));
+		Assert.assertFalse(securityProvider.isAuthenticated(null));
+		Assert.assertFalse(securityProvider.isUserInRole("doesNotExist", null));
+		Assert.assertTrue(securityProvider.isUserInRole("guest", null));
+		Assert.assertTrue(securityProvider.isUserInRole("admin", null));
 	}
 }

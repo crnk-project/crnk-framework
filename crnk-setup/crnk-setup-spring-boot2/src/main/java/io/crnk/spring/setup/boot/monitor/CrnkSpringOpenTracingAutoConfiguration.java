@@ -20,7 +20,9 @@ public class CrnkSpringOpenTracingAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(Tracer.class)
 	@ConditionalOnMissingBean(OpenTracingServerModule.class)
-	OpenTracingServerModule crnkOpenTracingServerModule(Tracer tracer) {
-		return new OpenTracingServerModule(tracer);
+	OpenTracingServerModule crnkOpenTracingServerModule(Tracer tracer, CrnkTracingProperties properties) {
+		OpenTracingServerModule module = new OpenTracingServerModule(tracer);
+		module.setUseSimpleTransactionNames(properties.getUseSimpleTransactionNames());
+		return module;
 	}
 }

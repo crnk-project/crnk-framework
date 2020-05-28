@@ -1,6 +1,9 @@
 package io.crnk.test.mock.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
@@ -8,10 +11,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @JsonApiResource(type = "schedule", resourcePath = "schedules")
 public class Schedule {
@@ -42,6 +42,9 @@ public class Schedule {
 
     @JsonApiRelation(serialize = SerializeType.EAGER)
     private ScheduleStatus status;
+
+    @JsonIgnore
+    private Map<String, Object> anyFields = new LinkedHashMap<>();
 
     private boolean delayed;
 
@@ -145,5 +148,15 @@ public class Schedule {
 
     public void setCustomData(Map<String, String> customData) {
         this.customData = customData;
+    }
+
+    @JsonAnyGetter
+    public Map<String,Object> getAnyFields() {
+        return anyFields;
+    }
+
+    @JsonAnySetter
+    public void setAnyFields(String name, Object value) {
+        anyFields.put(name, value);
     }
 }

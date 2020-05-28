@@ -1,16 +1,16 @@
 package io.crnk.data.facet;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiResource;
+
 @JsonApiResource(type = "facet")
 public class FacetResource {
 
-	public static final String ATTR_TYPE = "type";
+	public static final String ATTR_RESOURCE_TYPE = "resourceType";
 
 	public static final String ATTR_NAME = "name";
 
@@ -19,13 +19,24 @@ public class FacetResource {
 	@JsonApiId
 	private String id;
 
-	private String type;
+	private String resourceType;
 
 	private String name;
 
+	/**
+	 * List of all labels sorted by their total count in descending order.
+	 */
+	private List<String> labels;
+
+	/**
+	 * Mapping of label to its value. Sorted by total count in descending order.
+	 */
 	private Map<String, FacetValue> values = new HashMap<>();
 
-	private List<String> labels;
+	/**
+	 * Mapping of facet name to label of grouped value.
+	 */
+	private Map<String, String> groups = new HashMap<>();
 
 	public String getId() {
 		return id;
@@ -35,12 +46,12 @@ public class FacetResource {
 		this.id = id;
 	}
 
-	public String getType() {
-		return type;
+	public String getResourceType() {
+		return resourceType;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 	}
 
 	public String getName() {
@@ -65,5 +76,13 @@ public class FacetResource {
 
 	public void setLabels(List<String> labels) {
 		this.labels = labels;
+	}
+
+	public Map<String, String> getGroups() {
+		return groups;
+	}
+
+	public void setGroups(Map<String, String> groups) {
+		this.groups = groups;
 	}
 }

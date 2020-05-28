@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
@@ -45,14 +46,16 @@ public class HomeResourceFilteringTest {
 
 	@Test
 	public void checkDoesNotDoFiltering() throws IOException {
-		Mockito.when(filter.filterResource(Mockito.any(ResourceInformation.class), Mockito.eq(HttpMethod.GET))).
+		ResourceFilterContext filterContext = Mockito.any(ResourceFilterContext.class);
+		Mockito.when(filter.filterResource(filterContext, Mockito.any(ResourceInformation.class), Mockito.eq(HttpMethod.GET))).
 				thenReturn(FilterBehavior.NONE);
 		checkResponse(false);
 	}
 
 	@Test
 	public void checkDoesDoFiltering() throws IOException {
-		Mockito.when(filter.filterResource(Mockito.any(ResourceInformation.class), Mockito.eq(HttpMethod.GET))).
+		ResourceFilterContext filterContext = Mockito.any(ResourceFilterContext.class);
+		Mockito.when(filter.filterResource(filterContext, Mockito.any(ResourceInformation.class), Mockito.eq(HttpMethod.GET))).
 				thenReturn(FilterBehavior.FORBIDDEN);
 		checkResponse(true);
 	}

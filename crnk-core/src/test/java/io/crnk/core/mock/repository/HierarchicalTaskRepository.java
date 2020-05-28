@@ -10,29 +10,25 @@ import java.util.Map;
 
 public class HierarchicalTaskRepository extends ResourceRepositoryBase<HierarchicalTask, Long> {
 
-	private static Map<Long, HierarchicalTask> hierarchicalTasks = new HashMap<>();
+    private Map<Long, HierarchicalTask> hierarchicalTasks = new HashMap<>();
 
-	public HierarchicalTaskRepository() {
-		super(HierarchicalTask.class);
-	}
+    public HierarchicalTaskRepository() {
+        super(HierarchicalTask.class);
+    }
 
-	public static void clear() {
-		hierarchicalTasks.clear();
-	}
+    @Override
+    public DefaultResourceList<HierarchicalTask> findAll(QuerySpec querySpec) {
+        return querySpec.apply(hierarchicalTasks.values());
+    }
 
-	@Override
-	public DefaultResourceList<HierarchicalTask> findAll(QuerySpec querySpec) {
-		return querySpec.apply(hierarchicalTasks.values());
-	}
+    @Override
+    public <S extends HierarchicalTask> S save(S entity) {
+        hierarchicalTasks.put(entity.getId(), entity);
+        return null;
+    }
 
-	@Override
-	public <S extends HierarchicalTask> S save(S entity) {
-		hierarchicalTasks.put(entity.getId(), entity);
-		return null;
-	}
-
-	@Override
-	public void delete(Long id) {
-		hierarchicalTasks.remove(id);
-	}
+    @Override
+    public void delete(Long id) {
+        hierarchicalTasks.remove(id);
+    }
 }

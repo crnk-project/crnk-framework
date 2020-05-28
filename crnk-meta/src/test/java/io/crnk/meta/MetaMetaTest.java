@@ -97,13 +97,13 @@ public class MetaMetaTest {
 		MetaAttribute elementTypeAttr = meta.getAttribute("elementType");
 		Assert.assertNotNull(elementTypeAttr);
 		Assert.assertNotNull(elementTypeAttr.getType());
-		Assert.assertEquals("resources.meta.type.elementType", elementTypeAttr.getId());
+		Assert.assertEquals("resources.metaType.elementType", elementTypeAttr.getId());
 
 		MetaAttribute attrsAttr = meta.getAttribute("attributes");
 		Assert.assertNotNull(attrsAttr.getType());
 
 		MetaAttribute childrenAttr = meta.getAttribute("children");
-		Assert.assertEquals("resources.meta.element.children", childrenAttr.getId());
-		Assert.assertEquals("resources.meta.element$list", childrenAttr.getType().getId());
+		Assert.assertEquals("resources.metaElement.children", childrenAttr.getId());
+		Assert.assertEquals("resources.metaElement$list", childrenAttr.getType().getId());
 	}
 }

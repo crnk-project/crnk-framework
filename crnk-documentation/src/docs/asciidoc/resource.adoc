@@ -157,8 +157,8 @@ public class Task {
     ...
 }
 
-@JsonApiResource(type = "tasks")
-public class Task {
+@JsonApiResource(type = "project")
+public class Project {
 
     @JsonApiRelation(mappedBy="project")
     private Set<Task> tasks;
@@ -168,14 +168,28 @@ public class Task {
 ----
 
 The `project` and `tasks` field are linked through the `mappedBy` property by pointing from the non-owning
-to the owning field of the relationship. `project` as owning field will be used for all read and update operations.
+to the owning field of the relationship. `project` as owning field will be used for all read and update operations. This
+means:
+
+- for `GET /api/projects?include=tasks` and `GET /api/projects/{id}/tasks`, first the projects are loaded and then
+  a query is issued against the repository of `Task` with a filter `project.id = {list of project ids}`.
+- for `PATCH/POST/DELETE /api/project/{id}/tasks`, the request is forwarded
+  to the `Task` repository by setting the `project` field and saving the updated resources.
+- for `PATCH/POST /api/projects/{id}` the `tasks` attribute can by default not be modified because it is not the owner
+  of the relationships. But repositories are free to implement this functionality if desired.
+
+Behind the scenes `mappedBy` makes use of the `FORWARD_OPPOSITE` repository behavior whereas the opposite
+makes use of `FORWARD_OWNER` that are explained further down in this section. As such `mappedBy` can be
+considered to be a shortcut for setting various other notifications that is useful in many scenarios.
 The semantics of `mappedBy` matches with the concepts of, for example, JPA-related annotations.
 It is typical for single-valued fields like `project` to be the owner. Such fields are usually backed by something like
 a column in a database and are simple to read and write. In contrast,
 multi-valued fields like `tasks` can only be obtained by issuing a query against the single-valued counter-part.
+In such a setting, it might proof useful to to make use of <<jsonApiRelationId,@JsonApiRelationId>>
+on the owning side (introduced in the next section).
 
 @JsonApiRelation comes with a number of attributes to customize its behavior.
-<<jsonApiRelationId,@JsonApiRelation>> as complementary annotation is introduced in the subsequent section.
+<<jsonApiRelationId,@JsonApiRelationId>> as complementary annotation is introduced in the subsequent section.
 
 [source,java]
 ----
@@ -387,7 +401,21 @@ must be implemented*. Instead Crnk will automatically dispatch relationship requ
 opposite `ResourceRepository`. This allows to focus on the development of `ResourceRepository`.
 See <<relationshipRepository,RelationshipRepository>> for more information.
 
+Next to plain Java objects, many other libraries support this kind of semantic of having two attributes
+referring to the same data. For example in JPA this looks like:
 
+[source,java]
+----
+@JsonApiRelationId
+@Column(name = "project_id")
+private Long projectId;
+
+@OneToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "project_id", insertable = false, updatable = false)
+private ProjectEntity project;
+----
+
+Because two fields are mapped to the same column, one must be set to a read-only mode.
 
 ## JsonApiMetaInformation
 
@@ -452,15 +480,38 @@ See http://jsonapi.org/format/#document-links for more information about linking
 	}
 ----
 
-By default links are serialized as:
+Links can be represented either as either simple String:
 
+----
+"http://example.com/articles/1/relationships/comments",
+----
+
+or as structured objects of type `Link` with
+`href`, `rel`, `anchor`, `params`, `describedBy` and `meta` fields:
+
+----
+"links": {
+	"self": "http://example.com/articles/1/relationships/comments",
+		"related": {
+			"href": "http://example.com/articles/1/comments",
+			"describedby": "http://example.com/schemas/article-comments",
+			"meta": {
+				"count": 10
+			}
+		}
+	}
+}
+----
+
+`LinksInformation` objects can hold either type. With `DefaultLink` there is a default implementation
+of  `Link` available. By default simple strings will be serialized as such:
 ----
 "links": {
   "self": "http://example.com/posts"
 }
 ----
 
-With `crnk.config.serialize.object.links=true` links get serialized as:
+This can be changed by setting the property `crnk.config.serialize.object.links=true`:
 
 ----
 "links": {
@@ -469,6 +520,41 @@ With `crnk.config.serialize.object.links=true` links get serialized as:
   }
 }
 ----
+
+There are a variety of interfaces for built-in link types:
+
+- `SelfLinksInformation`
+- `RelatedLinksInformation`
+- `PagingLinksInformation`
+
+Such links will be populated automatically by Crnk if not specified otherwise.
+It is important to highlight that many links can and are derived from the `self` link.
+For example, if the `self` link is customized, all relationship links will be adjusted
+accordingly.
+
+TIP: If you have use cases where the link can be derived from the `self` link, it can
+  be the easiest solution to implement that logic directly in the getter:
+
+----
+	public static class ProjectLinks implements LinksInformation, SelfLinksInformation {
+
+		private String value;
+
+		private String self;
+
+		public String getValue() {
+			if(value == null && self != null){
+				return self + "/foo";
+			}
+			return value;
+		}
+		...
+	}
+----
+
+TIP: `CrnkBoot.getUrlBuilder()` gives access to the `UrlBuilder` class that allows the construction
+  of URLs from resources. Ìt is also, for example, defined as Spring bean and can be
+  injected into any class.
 
 
 anchor:jsonApiField[]
@@ -485,7 +571,7 @@ Field or getter annotated with `@JsonApiField` allows to define  the behavior of
 
 		...
 
-		@JsonApiField(postable = true, patchable = false)
+		@JsonApiField(postable=true, patchable=false, sortable=false, filterable=false)
 		private Long projectId;
 
 		...
@@ -524,8 +610,13 @@ Crnk comes with (partial) support for Jackson annotations. Currently supported a
 | `@JsonProperty.access`
 | Specifies whether an object can be read and/or written.
 
+| `JsonInclude.Include.NON_EMPTY` and `JsonInclude.Include.NON_NULL`
+| Specifies whether null and empty values are omitted from serialization.
+
 | `@JsonAnyGetter` and `@JsonAnySetter`
-| To map dynamic data structures to JSON.
+| To map dynamic data structures to JSON. For an example have a look at
+  https://github.com/crnk-project/crnk-example/blob/master/crnk-example-service/src/main/java/io/crnk/example/service/model/PersonEntity.java[PersonEntity]
+  from the example application.
 
 |===
 
@@ -533,6 +624,22 @@ Support for more annotations will be added in the future. PRs welcomed.
 
 
 anchor:nested_resources[]
+
+## Optional values
+
+Crnk comes with support for `java.util.Optional`. Serialization of such fields is omitted if no value is present.
+For this to work properly, the `Jdk8Module`` module must be registered with Jackson. It is available from:
+
+----
+	<dependency>
+		<groupId>com.fasterxml.jackson.datatype</groupId>
+		<artifactId>jackson-datatype-jdk8</artifactId>
+		<version>${JACKSON_VERSION}</version>
+	</dependency>
+----
+
+More information can be found in https://www.baeldung.com/jackson-optional.
+
 
 ## Nested Resources
 
@@ -605,4 +712,56 @@ to compute URLs.
 
 WARNING: Nesting is currently limited to a single level (and the possibility to have further relationships on the nested resource).
 
+
+## @JsonApiVersion
+
+WARNING: This feature is experimental
+
+Crnk supports versioning of resources and fields based on content negotiation.
+Any resource and field can carry a version range where it is available.
+Crnk will disregard any resource and field with a version range that does not intersect with the request version.
+The HTTP `Accept` header is used to pass along the desired version as part of general content negotiation.
+This has the benefit that URLs remain constant across versions, greatly simplifying usability and linking.
+For a more detailed discussion, see here[https://blog.ploeh.dk/2015/06/22/rest-implies-content-negotiation/].
+
+A versioned resource looks like:
+
+[source,java]
+.VersionedTask.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/VersionedTask.java[tags=docs]
+----
+
+- The resource itself is available up to version 5.
+- The field `completed` is only available from version 1 to 3.
+- The field `newCompleted` introduces a new flavor of `completed` making use of `CompletionStatus` rather than
+  a boolean. Through the use of `@JsonProperty` it is mapped to `completed` on the REST layer whereas
+  the Java side has access to both the old and new field.
+
+Crnk makes use of integer-based version number to signal major versions with breaking changes. There is
+no need for minor versions in this scheme. But applications are free to use additional minor versions in other contexts.
+
+A request than carries an accept header like:
+
+----
+GET /api/versionedTask HTTP/1.1
+Accept: application/vnd.api+json; version=2
+----
+
+Alternatively, the version can be passed as URL parameter (easier to use from a browser:
+
+----
+GET /api/versionedTask?version=2 HTTP/1.1
+Accept: application/vnd.api+json
+----
+
+<<client,CrnkClient>> supports setting the request version through `CrnkClient.setVersion(...)`.
+
+Not supported is:
+
+- ID fields cannot be versioned.
+- for multiple classes to serve the same resource for different version ranges.
+  For example, it is not possible to introduce a class `VersionedTaskV2.java`.
+  For most use cases it should be sufficient to redefine fields. This may change in the future
+- Meta and link fields cannot be versioned, this may change in the future.
 

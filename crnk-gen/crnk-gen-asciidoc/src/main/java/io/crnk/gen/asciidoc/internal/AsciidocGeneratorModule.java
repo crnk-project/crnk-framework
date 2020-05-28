@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.gen.asciidoc.AsciidocGeneratorConfig;
 import io.crnk.gen.base.GeneratorModule;
 import io.crnk.gen.base.GeneratorModuleConfigBase;
@@ -75,7 +76,8 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 		Set<MetaType> typeSet = new HashSet<>();
 		for (MetaResource resource : resources) {
 			for (MetaResourceField attribute : resource.getDeclaredAttributes()) {
-				if (!attribute.isAssociation() && !attribute.isLinks() && !attribute.isMeta()) {
+				if (!attribute.isAssociation() && attribute.getFieldType() != ResourceFieldType.META_INFORMATION
+						&& attribute.getFieldType() != ResourceFieldType.LINKS_INFORMATION) {
 					MetaType elementType = attribute.getType().getElementType();
 					collectTypes(typeSet, elementType);
 				}
@@ -106,8 +108,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 				AsciidocBuilder attrBuilder = newBuilder(resourceAnchor);
 				attrBuilder.appendFields(type.asDataObject());
 				attrBuilder.write(new File(outputDir, ATTRIBUTES_FILE));
-			}
-			else {
+			} else {
 				AsciidocBuilder literalsBuilder = newBuilder(resourceAnchor);
 				literalsBuilder.appendLiterals((MetaEnumType) type);
 				literalsBuilder.write(new File(outputDir, LITERALS_FILE));
@@ -132,8 +133,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 				for (MetaAttribute attr : dataType.getAttributes()) {
 					collectTypes(types, attr.getType().getElementType());
 				}
-			}
-			else if (type instanceof MetaEnumType) {
+			} else if (type instanceof MetaEnumType) {
 				types.add(type);
 			}
 		}
@@ -166,7 +166,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 		AsciidocBuilder indexBuilder = newBuilder(Collections.emptyList());
 		indexBuilder.startSection("Resources");
 
-		if(config.isGraphEnabled()) {
+		if (config.isGraphEnabled()) {
 			writeGraph(resources);
 			indexBuilder.writeInclude("graph");
 		}
@@ -205,9 +205,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 		descriptionBuilder.appendDescription(resource);
 		descriptionBuilder.write(new File(outputDir, DESCRIPTION_FILE));
 
-		List<String> exampleAnchor = new ArrayList<>(resourceAnchor);
-		exampleAnchor.add("examples");
-		AsciidocBuilder exampleBuilder = newBuilder(exampleAnchor);
+		AsciidocBuilder exampleBuilder = newBuilder(resourceAnchor, depth);
 		exampleBuilder.appendExamples(outputDir);
 		exampleBuilder.write(new File(outputDir, EXAMPLES_FILE));
 
@@ -322,7 +320,8 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 
 	private boolean isIncluded(MetaResource resource) {
 		return !config.getExcludes().stream()
-				.filter(it -> resource.getImplementationClass().getName().startsWith(it) || resource.getResourceType().startsWith(it))
+				.filter(it -> resource.getImplementationClass().getName().startsWith(it)
+						|| resource.getResourceType().startsWith(it) || resource.getResourcePath().startsWith(it))
 				.findFirst().isPresent();
 	}
 

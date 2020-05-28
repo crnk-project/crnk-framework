@@ -1,7 +1,7 @@
 package io.crnk.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.crnk.client.response.JsonLinksInformation;
+import io.crnk.core.resource.meta.JsonLinksInformation;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingBehavior;
@@ -76,7 +76,7 @@ public class PageNumberSizeClientTest extends AbstractClientTest {
 			repo.create(task);
 		}
 
-		QuerySpec querySpec = new QuerySpec(Schedule.class);
+		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.setPaging(new NumberSizePagingSpec(2, 5));
 		ResourceList<Task> list = repo.findAll(querySpec);
 		Assert.assertEquals(5, list.size());

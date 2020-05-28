@@ -1,164 +1,180 @@
 package io.crnk.test.mock.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.resource.ResourceTypeHolder;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.SerializeType;
+import io.crnk.core.resource.links.DefaultLink;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 
-import java.util.Collections;
-import java.util.List;
-
 @JsonApiResource(type = "tasks", pagingSpec = OffsetLimitPagingSpec.class)
-public class Task {
+public class Task implements ResourceTypeHolder {
 
-    @JsonApiId
-    private Long id;
+	@JsonApiId
+	private Long id;
 
-    private String name;
+	private String name;
 
-    @JsonApiRelation
-    private Project project;
+	@JsonApiRelation
+	private Project project;
 
-    @JsonApiRelation(serialize = SerializeType.ONLY_ID)
-    private Schedule schedule;
+	@JsonApiRelation(serialize = SerializeType.ONLY_ID)
+	private Schedule schedule;
 
-    @JsonApiRelation
-    private List<Project> projects = Collections.emptyList();
+	@JsonApiRelation
+	private ResourceList<Project> projects;
 
-    @JsonApiRelation
-    private Project includedProject;
+	@JsonApiRelation
+	private Project includedProject;
 
-    @JsonApiRelation
-    private List<Project> includedProjects;
+	@JsonApiRelation
+	private List<Project> includedProjects = new ArrayList<>();
 
-    @JsonApiMetaInformation
-    private TaskMeta metaInformation;
+	@JsonApiMetaInformation
+	private TaskMeta metaInformation = new TaskMeta();
 
-    @JsonApiLinksInformation
-    private TaskLinks linksInformation;
+	@JsonApiLinksInformation
+	private TaskLinks linksInformation = new TaskLinks();
 
-    public static class TaskLinks implements LinksInformation, SelfLinksInformation {
+	private String type;
 
-        public String value = "test";
+	@Override
+	public String getType() {
+		return type;
+	}
 
-        public String self;
+	@Override
+	public void setType(String type) {
+		this.type = type;
+	}
 
-        @Override
-        public String getSelf() {
-            return self;
-        }
+	public static class TaskLinks implements LinksInformation, SelfLinksInformation {
 
-        @Override
-        public void setSelf(String self) {
-            this.self = self;
-        }
-    }
+		public Link value = new DefaultLink("test");
 
-    public static class TaskMeta implements MetaInformation {
+		public Link self;
 
-        public String value = "test";
+		@Override
+		public Link getSelf() {
+			return self;
+		}
 
-    }
+		@Override
+		public void setSelf(Link self) {
+			this.self = self;
+		}
+	}
 
-    private List<Task> otherTasks;
+	public static class TaskMeta implements MetaInformation {
 
-    private TaskStatus status;
+		public String value = "test";
 
-    public TaskStatus getStatus() {
-        return status;
-    }
+	}
 
-    public void setStatus(TaskStatus status) {
-        this.status = status;
-    }
+	private List<Task> otherTasks;
 
-    public List<Task> getOtherTasks() {
-        return otherTasks;
-    }
+	private TaskStatus status;
 
-    public Task setOtherTasks(List<Task> otherTasks) {
-        this.otherTasks = otherTasks;
-        return this;
-    }
+	public TaskStatus getStatus() {
+		return status;
+	}
 
-    public Schedule getSchedule() {
-        return schedule;
-    }
+	public void setStatus(TaskStatus status) {
+		this.status = status;
+	}
 
-    public void setSchedule(Schedule schedule) {
-        this.schedule = schedule;
-    }
+	public List<Task> getOtherTasks() {
+		return otherTasks;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Task setOtherTasks(List<Task> otherTasks) {
+		this.otherTasks = otherTasks;
+		return this;
+	}
 
-    public Task setId(Long id) {
-        this.id = id;
-        return this;
-    }
+	public Schedule getSchedule() {
+		return schedule;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setSchedule(Schedule schedule) {
+		this.schedule = schedule;
+	}
 
-    public void setName(@SuppressWarnings("SameParameterValue") String name) {
-        this.name = name;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public Project getProject() {
-        return project;
-    }
+	public Task setId(Long id) {
+		this.id = id;
+		return this;
+	}
 
-    public void setProject(Project project) {
-        this.project = project;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public List<Project> getProjects() {
-        return projects;
-    }
+	public void setName(@SuppressWarnings("SameParameterValue") String name) {
+		this.name = name;
+	}
 
-    public void setProjects(List<Project> projects) {
-        this.projects = projects;
-    }
+	public Project getProject() {
+		return project;
+	}
 
-    public Project getIncludedProject() {
-        return includedProject;
-    }
+	public void setProject(Project project) {
+		this.project = project;
+	}
 
-    public void setIncludedProject(Project includedProject) {
-        this.includedProject = includedProject;
-    }
+	public ResourceList<Project> getProjects() {
+		return projects;
+	}
 
-    public List<Project> getIncludedProjects() {
-        return includedProjects;
-    }
+	public void setProjects(ResourceList<Project> projects) {
+		this.projects = projects;
+	}
 
-    public void setIncludedProjects(List<Project> includedProjects) {
-        this.includedProjects = includedProjects;
-    }
+	public Project getIncludedProject() {
+		return includedProject;
+	}
 
-    public TaskMeta getMetaInformation() {
-        return metaInformation;
-    }
+	public void setIncludedProject(Project includedProject) {
+		this.includedProject = includedProject;
+	}
 
-    public Task setMetaInformation(TaskMeta metaInformation) {
-        this.metaInformation = metaInformation;
-        return this;
-    }
+	public List<Project> getIncludedProjects() {
+		return includedProjects;
+	}
 
-    public TaskLinks getLinksInformation() {
-        return linksInformation;
-    }
+	public void setIncludedProjects(List<Project> includedProjects) {
+		this.includedProjects = includedProjects;
+	}
 
-    public Task setLinksInformation(TaskLinks linksInformation) {
-        this.linksInformation = linksInformation;
-        return this;
-    }
+	public TaskMeta getMetaInformation() {
+		return metaInformation;
+	}
+
+	public Task setMetaInformation(TaskMeta metaInformation) {
+		this.metaInformation = metaInformation;
+		return this;
+	}
+
+	public TaskLinks getLinksInformation() {
+		return linksInformation;
+	}
+
+	public Task setLinksInformation(TaskLinks linksInformation) {
+		this.linksInformation = linksInformation;
+		return this;
+	}
 }

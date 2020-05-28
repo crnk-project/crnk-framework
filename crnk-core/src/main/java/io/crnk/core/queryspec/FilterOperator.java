@@ -39,6 +39,18 @@ public class FilterOperator {
 
 	};
 
+	/**
+	 * Grouping based on facet
+	 */
+	public static final FilterOperator GROUP = new FilterOperator("GROUP") {
+
+		@Override
+		public boolean matches(Object value1, Object value2) {
+			throw new UnsupportedOperationException(); // handle differently
+		}
+
+	};
+
 
 	/**
 	 * Like operation. In case of in-memory filtering it makes use of "%" as
@@ -191,6 +203,9 @@ public class FilterOperator {
 
 		@Override
 		public boolean matches(Object value1, Object value2) {
+			if (value2 instanceof Collection) {
+				return !((Collection<?>) value2).contains(value1);
+			}
 			return !CompareUtils.isEquals(value1, value2);
 		}
 	};

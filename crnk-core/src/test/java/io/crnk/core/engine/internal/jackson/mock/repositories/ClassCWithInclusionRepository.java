@@ -1,32 +1,11 @@
 package io.crnk.core.engine.internal.jackson.mock.repositories;
 
 import io.crnk.core.engine.internal.jackson.mock.models.ClassCWithInclusion;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.LegacyResourceRepository;
+import io.crnk.core.repository.InMemoryResourceRepository;
 
-public class ClassCWithInclusionRepository implements LegacyResourceRepository<ClassCWithInclusion, Long> {
-	@Override
-	public ClassCWithInclusion findOne(Long aLong, QueryParams queryParams) {
-		return null;
-	}
+public class ClassCWithInclusionRepository extends InMemoryResourceRepository<ClassCWithInclusion, Long> {
 
-	@Override
-	public Iterable<ClassCWithInclusion> findAll(QueryParams queryParams) {
-		return null;
-	}
-
-	@Override
-	public Iterable<ClassCWithInclusion> findAll(Iterable<Long> longs, QueryParams queryParams) {
-		return null;
-	}
-
-	@Override
-	public <S extends ClassCWithInclusion> S save(S entity) {
-		return null;
-	}
-
-	@Override
-	public void delete(Long aLong) {
-
-	}
+    public ClassCWithInclusionRepository() {
+        super(ClassCWithInclusion.class);
+    }
 }

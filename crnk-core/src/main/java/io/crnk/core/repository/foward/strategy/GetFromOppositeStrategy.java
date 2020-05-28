@@ -13,6 +13,7 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -76,10 +77,10 @@ public class GetFromOppositeStrategy<T, I , D, J >
                     LinksInformation links = resourceList.getLinks();
                     if (links instanceof PagedLinksInformation) {
                         PagedLinksInformation pagedLinksInformation = (PagedLinksInformation) links;
-                        pagedLinksInformation.setFirst(null);
-                        pagedLinksInformation.setLast(null);
-                        pagedLinksInformation.setNext(null);
-                        pagedLinksInformation.setPrev(null);
+                        pagedLinksInformation.setFirst((Link)null);
+                        pagedLinksInformation.setLast((Link)null);
+                        pagedLinksInformation.setNext((Link)null);
+                        pagedLinksInformation.setPrev((Link)null);
                     }
                     return bulkResult;
                 }

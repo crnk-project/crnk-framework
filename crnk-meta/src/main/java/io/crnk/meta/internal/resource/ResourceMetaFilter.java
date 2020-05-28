@@ -1,5 +1,10 @@
 package io.crnk.meta.internal.resource;
 
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
@@ -27,13 +32,12 @@ import io.crnk.meta.model.resource.MetaResourceBase;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaProviderContext;
-
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceMetaFilter implements MetaFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceMetaFilter.class);
 
     private final MetaProviderContext context;
 
@@ -66,7 +70,7 @@ public class ResourceMetaFilter implements MetaFilter {
         Module.ModuleContext moduleContext = context.getModuleContext();
         RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(metaResource.getResourceType());
         ResourceInformation resourceInformation = entry.getResourceInformation();
-        ResourceField fieldInformation = resourceInformation.findFieldByName(field.getName());
+        ResourceField fieldInformation = resourceInformation.findFieldByUnderlyingName(field.getUnderlyingName());
 
         ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
         boolean readable =
@@ -147,7 +151,7 @@ public class ResourceMetaFilter implements MetaFilter {
                     ResourceInformation oppositeInformation = getResourceInformation(oppositeMeta, false);
                     ResourceField oppositeField = oppositeInformation.findFieldByUnderlyingName(field.getOppositeName());
                     PreconditionUtil.verify(oppositeField != null, "opposite field %s.%s not found",
-                            field.getParentResourceInformation().getResourceType(), field.getOppositeName());
+                            field.getResourceInformation().getResourceType(), field.getOppositeName());
                     try {
                         MetaAttribute oppositeAttr = oppositeMeta.getAttribute(oppositeField.getJsonName());
                         PreconditionUtil.assertNotNull(attr.getId() + " opposite not found", oppositeAttr);
@@ -159,7 +163,7 @@ public class ResourceMetaFilter implements MetaFilter {
                         throw new IllegalStateException(
                                 "failed to resolve opposite for field=" + field + ", oppositeTypeId=" + oppositeTypeId, e);
                     }
-                }else{
+                } else {
                     attr.setOwner(true);
                 }
             }
@@ -187,39 +191,39 @@ public class ResourceMetaFilter implements MetaFilter {
             MetaResourceBase parent = (MetaResourceBase) attr.getParent();
 
             ResourceInformation information = getResourceInformation(parent, true);
-            ResourceField field = information.findFieldByName(attr.getName());
+            ResourceField field = information.findFieldByUnderlyingName(attr.getUnderlyingName());
             PreconditionUtil.assertNotNull(attr.getName(), field);
 
             if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
                 String oppositeType = field.getOppositeResourceType();
                 String oppositeId = partition.getId(oppositeType);
                 Optional<MetaElement> optOppositeMeta = context.getMetaElement(oppositeId);
-                if (!optOppositeMeta.isPresent()) {
-                    throw new IllegalStateException(
-                            "opposite meta element '" + oppositeId + "' for element '" + element.getId() + "' not found");
-                }
+                if (optOppositeMeta.isPresent()) {
 
-                MetaResource oppositeMeta = (MetaResource) optOppositeMeta.get();
+                    MetaResource oppositeMeta = (MetaResource) optOppositeMeta.get();
 
-                if (field.isCollection()) {
-                    boolean isSet = Set.class.isAssignableFrom(field.getType());
-                    String suffix = (isSet ? "$set" : "$list");
-                    Optional<MetaElement> optMetaCollection = context.getMetaElement(oppositeId + suffix);
-                    MetaCollectionType metaCollection;
-                    if (optMetaCollection.isPresent()) {
-                        metaCollection = (MetaCollectionType) optMetaCollection.get();
+                    if (field.isCollection()) {
+                        boolean isSet = Set.class.isAssignableFrom(field.getType());
+                        String suffix = (isSet ? "$set" : "$list");
+                        Optional<MetaElement> optMetaCollection = context.getMetaElement(oppositeId + suffix);
+                        MetaCollectionType metaCollection;
+                        if (optMetaCollection.isPresent()) {
+                            metaCollection = (MetaCollectionType) optMetaCollection.get();
+                        } else {
+                            metaCollection = isSet ? new MetaSetType() : new MetaListType();
+                            metaCollection.setId(oppositeMeta.getId() + suffix);
+                            metaCollection.setName(oppositeMeta.getName() + suffix);
+                            metaCollection.setImplementationType(field.getGenericType());
+                            metaCollection.setElementType(oppositeMeta);
+                            partition.addElement(null, metaCollection);
+                        }
+                        attr.setType(metaCollection);
+
                     } else {
-                        metaCollection = isSet ? new MetaSetType() : new MetaListType();
-                        metaCollection.setId(oppositeMeta.getId() + suffix);
-                        metaCollection.setName(oppositeMeta.getName() + suffix);
-                        metaCollection.setImplementationType(field.getGenericType());
-                        metaCollection.setElementType(oppositeMeta);
-                        partition.addElement(null, metaCollection);
+                        attr.setType(oppositeMeta);
                     }
-                    attr.setType(metaCollection);
-
                 } else {
-                    attr.setType(oppositeMeta);
+                    LOGGER.info("opposite meta element '{}' for element '{}' not found", oppositeId, element.getId());
                 }
             } else {
                 Type implementationType = field.getGenericType();

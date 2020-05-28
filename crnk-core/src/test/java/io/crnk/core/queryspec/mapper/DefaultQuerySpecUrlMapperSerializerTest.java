@@ -1,19 +1,13 @@
 package io.crnk.core.queryspec.mapper;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.CustomPagingPojo;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
@@ -29,18 +23,27 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+
 public class DefaultQuerySpecUrlMapperSerializerTest {
 
-	private JsonApiUrlBuilder urlBuilder;
+	private UrlBuilder urlBuilder;
 
 	private ResourceRegistry resourceRegistry;
 
 	private DefaultQuerySpecUrlMapper urlMapper;
 
+	private QueryContext queryContext;
+
 	@Before
 	public void setup() {
 		CoreTestContainer container = new CoreTestContainer();
-		container.setPackage(MockConstants.TEST_MODELS_PACKAGE);
+		container.addModule(new CoreTestModule());
 		container.getBoot().getModuleRegistry().addPagingBehavior(new OffsetLimitPagingBehavior());
 		container.getBoot().getModuleRegistry().addPagingBehavior(new NumberSizePagingBehavior());
 		container.boot();
@@ -48,7 +51,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		urlMapper = (DefaultQuerySpecUrlMapper) container.getBoot().getUrlMapper();
 
 		resourceRegistry = container.getResourceRegistry();
-		urlBuilder = new JsonApiUrlBuilder(container.getModuleRegistry(), container.getQueryContext());
+		urlBuilder = container.getModuleRegistry().getUrlBuilder();
 	}
 
 	@Test
@@ -60,11 +63,12 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	public void testHttpsSchema() {
 		CoreTestContainer container = new CoreTestContainer();
 		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
-		container.setPackage(MockConstants.TEST_MODELS_PACKAGE);
+		container.addModule(new CoreTestModule());
 		container.getBoot().getModuleRegistry().addPagingBehavior(new OffsetLimitPagingBehavior());
 		container.boot();
+		queryContext = container.getQueryContext();
 
-		urlBuilder = new JsonApiUrlBuilder(container.getModuleRegistry(), container.getQueryContext());
+		urlBuilder = container.getModuleRegistry().getUrlBuilder();
 		check("https://127.0.0.1/tasks", null, new QuerySpec(Task.class));
 	}
 
@@ -72,11 +76,11 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	public void testPort() {
 		CoreTestContainer container = new CoreTestContainer();
 		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
-		container.setPackage(MockConstants.TEST_MODELS_PACKAGE);
+		container.addModule(new CoreTestModule());
 		container.getBoot().getModuleRegistry().addPagingBehavior(new OffsetLimitPagingBehavior());
 		container.boot();
 
-		urlBuilder = new JsonApiUrlBuilder(container.getModuleRegistry(), container.getQueryContext());
+		urlBuilder = container.getModuleRegistry().getUrlBuilder();
 		check("https://127.0.0.1:1234/tasks", null, new QuerySpec(Task.class));
 	}
 
@@ -84,7 +88,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	public void unknownResourceShouldThrowException() {
 		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
 		Class<?> notAResourceClass = String.class;
-		urlBuilder.buildUrl(entry.getResourceInformation(), null, new QuerySpec(notAResourceClass));
+		urlBuilder.buildUrl(queryContext, entry.getResourceInformation(), null, new QuerySpec(notAResourceClass));
 	}
 
 	@Test
@@ -232,7 +236,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		querySpec.setOffset(1L);
 
 		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
-		String actualUrl = urlBuilder.buildUrl(entry.getResourceInformation(), 1L, querySpec, "projects");
+		String actualUrl = urlBuilder.buildUrl(queryContext, entry.getResourceInformation(), 1L, querySpec, "projects");
 		assertEquals("http://127.0.0.1/tasks/1/relationships/projects?page[limit]=2&page[offset]=1", actualUrl);
 	}
 
@@ -278,7 +282,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 
 	private void check(String expectedUrl, Object id, QuerySpec querySpec) {
 		RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
-		String actualUrl = urlBuilder.buildUrl(entry.getResourceInformation(), id, querySpec);
+		String actualUrl = urlBuilder.buildUrl(queryContext, entry.getResourceInformation(), id, querySpec);
 		assertEquals(expectedUrl, actualUrl);
 	}
 }

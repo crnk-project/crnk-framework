@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal;
 
+import io.crnk.core.engine.http.DefaultHttpStatusBehavior;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
 import io.crnk.core.engine.internal.repository.DefaultRepositoryAdapterFactory;
@@ -9,31 +10,32 @@ import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformatio
 
 public class CoreModule implements Module {
 
-    public static final String NAME = "core";
+	public static final String NAME = "core";
 
-    static {
-        DefaultRegistryEntryBuilder.FAIL_ON_MISSING_REPOSITORY = false;
+	static {
+		DefaultRegistryEntryBuilder.FAIL_ON_MISSING_REPOSITORY = false;
 
-    }
+	}
 
-    private RepositoryInformationProvider defaultRepositoryInformationProvider =
-            new DefaultResourceRepositoryInformationProvider();
+	private RepositoryInformationProvider defaultRepositoryInformationProvider =
+			new DefaultResourceRepositoryInformationProvider();
 
-    @Override
-    public String getModuleName() {
-        return NAME;
-    }
+	@Override
+	public String getModuleName() {
+		return NAME;
+	}
 
-    @Override
-    public void setupModule(ModuleContext context) {
-        context.addRepositoryAdapterFactory(new DefaultRepositoryAdapterFactory(context.getModuleRegistry()));
-        if (defaultRepositoryInformationProvider != null) {
-            context.addRepositoryInformationBuilder(defaultRepositoryInformationProvider);
-        }
-        context.addRepositoryInformationBuilder(new DefaultRelationshipRepositoryInformationProvider());
-    }
+	@Override
+	public void setupModule(ModuleContext context) {
+		context.addHttpStatusBehavior(new DefaultHttpStatusBehavior());
+		context.addRepositoryAdapterFactory(new DefaultRepositoryAdapterFactory(context.getModuleRegistry()));
+		if (defaultRepositoryInformationProvider != null) {
+			context.addRepositoryInformationBuilder(defaultRepositoryInformationProvider);
+		}
+		context.addRepositoryInformationBuilder(new DefaultRelationshipRepositoryInformationProvider());
+	}
 
-    public void setDefaultRepositoryInformationProvider(RepositoryInformationProvider defaultRepositoryInformationProvider) {
-        this.defaultRepositoryInformationProvider = defaultRepositoryInformationProvider;
-    }
+	public void setDefaultRepositoryInformationProvider(RepositoryInformationProvider defaultRepositoryInformationProvider) {
+		this.defaultRepositoryInformationProvider = defaultRepositoryInformationProvider;
+	}
 }

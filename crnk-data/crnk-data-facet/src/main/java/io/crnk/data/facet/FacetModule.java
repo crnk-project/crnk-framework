@@ -1,5 +1,14 @@
 package io.crnk.data.facet;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -22,19 +31,12 @@ import io.crnk.data.facet.provider.InMemoryFacetProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacetModule.class);
 
 	private final FacetModuleConfig config;
+
 	private ModuleContext moduleContext;
 
 	private List<FacetModuleExtension> extensions;
@@ -115,30 +117,33 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 	private void collectInformation() {
 		Collection<RegistryEntry> entries = moduleContext.getResourceRegistry().getEntries();
 		for (RegistryEntry entry : entries) {
-			ResourceInformation resourceInformation = entry.getResourceInformation();
+			ResourceRepositoryInformation repoInfo = entry.getRepositoryInformation();
+			if (repoInfo != null && repoInfo.isExposed()) {
+				ResourceInformation resourceInformation = entry.getResourceInformation();
 
-			List<FacetInformation> informations = new ArrayList<>();
+				List<FacetInformation> informations = new ArrayList<>();
 
-			for (ResourceField field : resourceInformation.getFields()) {
-				ResourceFieldAccessor accessor = field.getAccessor();
-				if (accessor instanceof ReflectionFieldAccessor) {
-					ReflectionFieldAccessor reflectionFieldAccessor = (ReflectionFieldAccessor) accessor;
-					Field classField = reflectionFieldAccessor.getField();
-					if (classField == null) {
-						continue;
-					}
-					Facet annotation = classField.getAnnotation(Facet.class);
-					if (annotation != null) {
-						informations.add(toInformation(field, classField, annotation));
+				for (ResourceField field : resourceInformation.getFields()) {
+					ResourceFieldAccessor accessor = field.getAccessor();
+					if (accessor instanceof ReflectionFieldAccessor) {
+						ReflectionFieldAccessor reflectionFieldAccessor = (ReflectionFieldAccessor) accessor;
+						Field classField = reflectionFieldAccessor.getField();
+						if (classField == null) {
+							continue;
+						}
+						Facet annotation = classField.getAnnotation(Facet.class);
+						if (annotation != null) {
+							informations.add(toInformation(field, classField, annotation));
+						}
 					}
 				}
-			}
-			if (informations.size() > 0) {
-				LOGGER.debug("discovered facet for {}", resourceInformation.getResourceType());
-				FacetResourceInformation facetResourceInformation = new FacetResourceInformation();
-				informations.stream().forEach(it -> facetResourceInformation.addFacet(it));
-				facetResourceInformation.setType(resourceInformation.getResourceType());
-				config.addResource(facetResourceInformation);
+				if (informations.size() > 0) {
+					LOGGER.debug("discovered facet for {}", resourceInformation.getResourceType());
+					FacetResourceInformation facetResourceInformation = new FacetResourceInformation();
+					informations.stream().forEach(it -> facetResourceInformation.addFacet(it));
+					facetResourceInformation.setResourceType(resourceInformation.getResourceType());
+					config.addResource(facetResourceInformation);
+				}
 			}
 		}
 	}
@@ -151,7 +156,7 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 	}
 
 	private FacetResourceInformation setupDefaultProvider(FacetResourceInformation facetResourceInformation) {
-		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(facetResourceInformation.getType());
+		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(facetResourceInformation.getResourceType());
 
 		FacetProvider acceptedFacetProvider = null;
 		if (facetResourceInformation.getProvider() == null) {

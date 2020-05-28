@@ -1,127 +1,172 @@
 package io.crnk.test.mock.repository;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.LinksRepository;
+import io.crnk.core.repository.MetaRepository;
+import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.resource.links.*;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.LegacyLinksRepository;
-import io.crnk.legacy.repository.LegacyMetaRepository;
-import io.crnk.legacy.repository.LegacyResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Project.ProjectLinks;
 import io.crnk.test.mock.models.Project.ProjectMeta;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProjectRepository implements LegacyResourceRepository<Project, Long>, LegacyMetaRepository<Project>, LegacyLinksRepository<Project> {
+public class ProjectRepository implements ResourceRepository<Project, Long>, MetaRepository<Project>, LinksRepository<Project> {
 
-	private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
-	public static void clear() {
-		THREAD_LOCAL_REPOSITORY.clear();
-	}
+    public static void clear() {
+        THREAD_LOCAL_REPOSITORY.clear();
+    }
 
-	@Override
-	public <S extends Project> S save(S entity) {
-		entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
-		THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
+    @Override
+    public <S extends Project> S save(S entity) {
+        entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
+        THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
 
-		if (entity.getLinks() == null) {
-			entity.setLinks(new ProjectLinks());
-		}
-		if (entity.getLinks().getValue() == null) {
-			entity.getLinks().setValue("someLinkValue");
-		}
+        if (entity.getLinks() == null) {
+            entity.setLinks(new ProjectLinks());
+        }
+        if (entity.getLinks().getValue() == null) {
+            entity.getLinks().setValue("someLinkValue");
+        }
 
-		if (entity.getMeta() == null) {
-			entity.setMeta(new ProjectMeta());
-		}
-		if (entity.getMeta().getValue() == null) {
-			entity.getMeta().setValue("someMetaValue");
-		}
+        if (entity.getMeta() == null) {
+            entity.setMeta(new ProjectMeta());
+        }
+        if (entity.getMeta().getValue() == null) {
+            entity.getMeta().setValue("someMetaValue");
+        }
 
-		return entity;
-	}
+        return entity;
+    }
 
-	@Override
-	public Project findOne(Long aLong, QueryParams queryParams) {
-		Project project = THREAD_LOCAL_REPOSITORY.get(aLong);
-		if (project == null) {
-			throw new ResourceNotFoundException(Project.class.getCanonicalName());
-		}
-		return project;
-	}
+    @Override
+    public <S extends Project> S create(S resource) {
+        return save(resource);
+    }
 
-	@Override
-	public Iterable<Project> findAll(QueryParams queryParamss) {
-		return THREAD_LOCAL_REPOSITORY.values();
-	}
+    @Override
+    public Class<Project> getResourceClass() {
+        return Project.class;
+    }
 
-	@Override
-	public Iterable<Project> findAll(Iterable<Long> ids, QueryParams queryParams) {
-		List<Project> values = new LinkedList<>();
-		for (Project value : THREAD_LOCAL_REPOSITORY.values()) {
-			if (contains(value, ids)) {
-				values.add(value);
-			}
-		}
-		return values;
-	}
+    @Override
+    public Project findOne(Long aLong, QuerySpec querySpec) {
+        Project project = THREAD_LOCAL_REPOSITORY.get(aLong);
+        if (project == null) {
+            throw new ResourceNotFoundException(Project.class.getCanonicalName());
+        }
+        return project;
+    }
 
-	private boolean contains(Project value, Iterable<Long> ids) {
-		for (Long id : ids) {
-			if (value.getId().equals(id)) {
-				return true;
-			}
-		}
+    @Override
+    public ResourceList<Project> findAll(QuerySpec querySpec) {
+        DefaultResourceList<Project> list = new DefaultResourceList<>();
+        list.setMeta(getMetaInformation(list, querySpec, null));
+        list.setLinks(getLinksInformation(list, querySpec, null));
+        querySpec.apply(THREAD_LOCAL_REPOSITORY.values(), list);
+        return list;
+    }
 
-		return false;
-	}
+    @Override
+    public ResourceList<Project> findAll(Collection<Long> ids, QuerySpec querySpec) {
+        List<Project> values = new LinkedList<>();
+        for (Project value : THREAD_LOCAL_REPOSITORY.values()) {
+            if (contains(value, ids)) {
+                values.add(value);
+            }
+        }
+        return querySpec.apply(values);
+    }
 
-	@Override
-	public void delete(Long aLong) {
-		THREAD_LOCAL_REPOSITORY.remove(aLong);
-	}
+    private boolean contains(Project value, Iterable<Long> ids) {
+        for (Long id : ids) {
+            if (value.getId().equals(id)) {
+                return true;
+            }
+        }
 
-	@Override
-	public LinksInformation getLinksInformation(Iterable<Project> resources, QueryParams queryParams) {
-		ProjectsLinksInformation info = new ProjectsLinksInformation();
-		info.setLinkValue("testLink");
-		return info;
-	}
+        return false;
+    }
 
-	@Override
-	public MetaInformation getMetaInformation(Iterable<Project> resources, QueryParams queryParams) {
-		ProjectsMetaInformation info = new ProjectsMetaInformation();
-		info.setMetaValue("testMeta");
-		return info;
-	}
+    @Override
+    public void delete(Long aLong) {
+        THREAD_LOCAL_REPOSITORY.remove(aLong);
+    }
 
-	public static class ProjectsLinksInformation implements LinksInformation {
+    @Override
+    public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec, LinksInformation current) {
+        ProjectsLinksInformation info = new ProjectsLinksInformation();
+        info.setLinkValue("testLink");
+        return info;
+    }
 
-		private String linkValue;
+    @Override
+    public MetaInformation getMetaInformation(Collection<Project> resources, QuerySpec querySpec, MetaInformation current) {
+        ProjectsMetaInformation info = new ProjectsMetaInformation();
+        info.setMetaValue("testMeta");
+        return info;
+    }
 
-		public String getLinkValue() {
-			return linkValue;
-		}
+    public static class ProjectsLinksInformation extends DefaultPagedLinksInformation implements SelfLinksInformation, RelatedLinksInformation {
 
-		public void setLinkValue(String linkValue) {
-			this.linkValue = linkValue;
-		}
-	}
+        private Link linkValue;
 
-	public static class ProjectsMetaInformation implements MetaInformation {
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private Link self;
 
-		private String metaValue;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private Link related;
 
-		public String getMetaValue() {
-			return metaValue;
-		}
+        public Link getLinkValue() {
+            return linkValue;
+        }
 
-		public void setMetaValue(String metaValue) {
-			this.metaValue = metaValue;
-		}
-	}
+        public void setLinkValue(String linkValue) {
+            this.linkValue = new DefaultLink(linkValue);
+        }
+
+        @Override
+        public Link getSelf() {
+            return self;
+        }
+
+        @Override
+        public void setSelf(Link self) {
+            this.self = self;
+        }
+
+        @Override
+        public Link getRelated() {
+            return related;
+        }
+
+        @Override
+        public void setRelated(Link related) {
+            this.related = related;
+        }
+    }
+
+    public static class ProjectsMetaInformation extends DefaultPagedMetaInformation {
+
+        private String metaValue;
+
+        public String getMetaValue() {
+            return metaValue;
+        }
+
+        public void setMetaValue(String metaValue) {
+            this.metaValue = metaValue;
+        }
+    }
 }

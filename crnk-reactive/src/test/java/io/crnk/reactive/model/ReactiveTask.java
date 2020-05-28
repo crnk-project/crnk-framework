@@ -5,6 +5,8 @@ import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.links.DefaultLink;
+import io.crnk.core.resource.links.Link;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -28,17 +30,17 @@ public class ReactiveTask {
 
 	public static class TaskLinks implements LinksInformation, SelfLinksInformation {
 
-		public String value = "test";
+		public Link value = new DefaultLink("test");
 
-		public String self;
+		public Link self;
 
 		@Override
-		public String getSelf() {
+		public Link getSelf() {
 			return self;
 		}
 
 		@Override
-		public void setSelf(String self) {
+		public void setSelf(Link self) {
 			this.self = self;
 		}
 	}

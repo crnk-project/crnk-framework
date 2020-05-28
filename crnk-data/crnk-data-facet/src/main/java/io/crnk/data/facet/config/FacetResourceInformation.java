@@ -1,25 +1,25 @@
 package io.crnk.data.facet.config;
 
-import io.crnk.data.facet.provider.FacetProvider;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.crnk.data.facet.provider.FacetProvider;
+
 public class FacetResourceInformation {
 
-	private String type;
+	private String resourceType;
 
 	private FacetProvider provider;
 
 	private Map<String, FacetInformation> facets = new HashMap<>();
 
-	public String getType() {
-		return type;
+	public String getResourceType() {
+		return resourceType;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 	}
 
 	public FacetProvider getProvider() {

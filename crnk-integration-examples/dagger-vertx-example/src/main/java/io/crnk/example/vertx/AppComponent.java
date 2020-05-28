@@ -10,8 +10,8 @@ import javax.inject.Singleton;
 public interface AppComponent {
 
 
-	AppServer server();
+    AppServer server();
 
-	// void inject(MyFragment fragment);
-	// void inject(MyService service);
+    // void inject(MyFragment fragment);
+    // void inject(MyService service);
 }

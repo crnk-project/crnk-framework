@@ -1,5 +1,14 @@
 package io.crnk.example.springboot.simple;
 
+import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
+import javax.security.auth.message.config.AuthConfigFactory;
+
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
@@ -22,15 +31,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
-
-import javax.security.auth.message.config.AuthConfigFactory;
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
-
-import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Shows two kinds of test cases: RestAssured and CrnkClient.
@@ -65,7 +65,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
     @Test
     public void testRelationship() {
         RelationshipRepository<Project, Serializable, Task, Serializable> relRepo = client.getRepositoryForType(Project.class, Task.class);
-        QuerySpec querySpec = new QuerySpec(Project.class);
+        QuerySpec querySpec = new QuerySpec(Task.class);
         ResourceList<Task> tasks = relRepo.findManyTargets(123L, "tasks", querySpec);
         Assert.assertEquals(1, tasks.size());
     }
@@ -184,7 +184,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
     @Test
     public void testCreateTask() {
-        Map<String, Object> attributeMap = new ImmutableMap.Builder<String, Object>().put("my-name", "Getter Done")
+        Map<String, Object> attributeMap = new ImmutableMap.Builder<String, Object>().put("name", "Getter Done")
                 .put("description", "12345678901234567890").build();
 
         Map dataMap = ImmutableMap.of("data", ImmutableMap.of("type", "tasks", "attributes", attributeMap));
@@ -197,7 +197,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
     @Test
     public void testUpdateTask() {
-        Map<String, Object> attributeMap = new ImmutableMap.Builder<String, Object>().put("my-name", "Gotter Did")
+        Map<String, Object> attributeMap = new ImmutableMap.Builder<String, Object>().put("name", "Gotter Did")
                 .put("description", "12345678901234567890").build();
 
         Map dataMap = ImmutableMap.of("data", ImmutableMap.of("type", "tasks", "id", 1, "attributes", attributeMap));

@@ -1,15 +1,38 @@
-With this release the first version of Crnk 3.x is released. There
-have been many incremental improvements
-to the code base over the past year. In particular the relationship handling has been automated
-in a number of ways. 3.0 has taken the features and learnings from this time and improves upon some of the
+With this release comes a new major version of Crnk! There have been a great number of incremental improvements
+to the code base over the past year:
+
+<ul>
+    <li>Relationships handling got automated and simplified.</li>
+    <li>The JPA integration got simplified and more powerful.</li>
+    <li>Crnk got reactive and can be integrated with frameworks like Vert.x.</li>
+    <li>Support for code generation.</li>
+    <li>OpenTracing integration.</li>
+    <li>More powerful means to enforce authorization.</li>
+    <li>Nesting of resources for cleaner, more intuitive APIs.</li>
+    <li>Support for facetted search.</li>
+    <li>...</li>
+</ul>
+
+Crnk 3.0 has taken the features and learnings from this time and improves upon some of the
 configuration defaults. This in turn allows to setup resources and relationships
-more simply, more quickly and  with fewer lines of code. A variety of new features complement the release,
-most notably the generation of Asciidoc documentation and a type-safe query API.
-While being a major release, changes required should be minimal (see below).
+more simply, more quickly and  with fewer lines of code. All together has the potential
+to quite drastically reduce the code base. For example, in this subsequent example screenshot
+the JPA module has been combined with facetted search to create an advanced user screen
+with sorting, facets, paging and full-text search. No implementation necessary on the backend-side!
+
 <p>
-    A first BETA is available. Further BETA releases are going to finalize the new features
-    and providing more documentation and examples.
+<table>
+    <tr>
+        <td>
+            <img src="demo_app.png" width="60%">
+        </td>
+    </tr>
+</table>
 </p>
+
+<p>
+    The release is complemented by a number of new features. Most notably the generation of Asciidoc documentation
+    and a type-safe query API. While being a major release, changes required should be minimal (see below).
 
 
 <h4>Cleanup &amp; Migration</h4>
@@ -17,17 +40,29 @@ While being a major release, changes required should be minimal (see below).
 <ul>
     <li>
         The V2 suffixes have been removed from the repository interfaces. They have been in place for historic reasons
-        to replace QueryParams-based repositories. QueryParams carry new &quot;Legacy&quot; prefix.
+        to replace QueryParams-based repositories.
+    </li>
+    <li> QueryParams has been deprecated in favor of QuerySpec for a long time. With this release
+        QueryParams has been removed from crnk-core. It was a cause for substantial legacy and duplication
+        and its removal helped further streamline the implementation.
+        Should you still desire QueryParams support and cannot migrate for one reason or the other, it is possible
+        to take the past QuerySpec to QueryParams conversion and apply it outside of Crnk core in your own
+        repositories.
     </li>
     <li>
-        Repository interface make us of the Collection type rather than Iterable. The later can be quite cumbersome to
-        use
-        and not necessary for this particular use cases.
+        @JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy.
+        See below for more information. Be aware of the changed semantics. The property must only be
+        set on one side.
     </li>
     <li>
-        Resource identifier no longer must extend Serializable. There has been no requirements and complicated
-        their usage.
+        Repository interfaces make us of the Collection type rather than Iterable. The later was cumbersome to
+        use and not necessary for use cases at hand.
     </li>
+    <li>
+        Resource identifier no longer must extend Serializable. It was not a requirement and complicated
+        the handling of generic type arguments.
+    </li>
+    <li>Most deprecated methods have been removed.</li>
     <li>
         RelationshipRepositoryV2 and BulkRelationshipRepositoryV2 have been deprecated in favor
         of OneRelationshipRepository and ManyRelationshipRepository. The new repositories
@@ -51,11 +86,6 @@ While being a major release, changes required should be minimal (see below).
         Decorators have been removed form the JpaRepositoryConfig. The regular RepositoryDecoratorFactory can be
         used instead.
     </li>
-    <li>
-        @JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy.
-        See below for more information. Be aware of the changed semantics. The property must only be
-        set on one side.
-    </li>
     <li>New defaults for @JsonApiRelation.lookup and @JsonApiRelation.repositoryBehavior should
         allow to eliminate a large part of the custom configuration. For more information see below.
     </li>
@@ -66,8 +96,8 @@ While being a major release, changes required should be minimal (see below).
         crnk-activiti has been renamed to crnk-data-activiti and the Java package updated accordingly.
     </li>
     <li>
-        Let us know if you still continue to make use of QueryParams. Otherwise it is going to get dropped
-        in a subsequent Beta release.
+        The SecurityProvider interface gained a SecurityProviderContext parameter in order to more easily
+        integrate with reactive systems.
     </li>
 </ul>
 
@@ -172,20 +202,10 @@ the updated documentation and the new example in the
 More information is available in the documentation. Please provide feedback in this area!
 
 
-<h4>Go Faster with Graal Native</h4>
-
-<p>
-    <i>This feature will be available in a subsequent BETA release</i>
-</p>
-
-Sub-100ms startup times and reduced memory requirements to reduce cost and open up new application fields
-like serverless computing.
-
-
 <h4>Type-safe QuerySpec construction with a Crnk Annotation Processor</h4>
 
 <p>
-    <i>Available as a preview in the first BETA</i>
+    <i>Available as a preview in this release</i>
 </p>
 
 An annotation processor is introduced that allows the type-safe construction of QuerySpec and PathSpec.
@@ -244,10 +264,13 @@ of model-driven and test-driven documentation together with the standardization 
 can greatly help in writing consistent, documented REST endpoints.
 
 <p>
-<table>
+<table width="90%">
     <tr>
         <td>
-            <img src="asciidoc_example.png" width="70%">
+            <img src="asciidoc_graph.png" width="90%">
+        </td>
+        <td>
+            <img src="asciidoc_example.png" width="90%">
         </td>
     </tr>
 </table>
@@ -363,11 +386,6 @@ public class PostHeader {
 More information can be found <a href="documentation/#_nested_resources">here</a>.
 
 
-<h4>Enum support for Activiti</h4>
-
-crnk-data-jpa maps Enum types to Strings for Activiti. This to by-pass the regular Activiti serialization mechanism that
-treats the enum like a java.lang.Object by storing it is as serialized blob and not supporting filtering.
-
 
 <h4>More flexible EntityManager setup with JPA module</h4>
 
@@ -375,3 +393,126 @@ JpaModule.createServerModule(...) comes with a new flavor that allows to pass th
 as java.util.Supplier. Every time a repository makes use of the EntityManager, the supplier is called and must
 return an instance. The supplier together with the existing TransactionRunner
 allows for custom JPA setups and transaction handling.
+
+
+<h4>Presentation model for Crnk UI</h4>
+
+<p>
+    <i>Available as a preview in this release</i>
+</p>
+
+
+With this release we started refactoring the backend side of crnk-ui. It now offers a presentation
+model for all its managed resources:
+
+<p>
+    <img src="presentation_model.png" width="50%">
+</p>
+
+<ul>
+    <li>The presentation model consists of explorer and editor resources.</li>
+    <li>An editor resource represents a screen for a single resource that either can be viewed or edited.</li>
+    <li>An explorer resource represents a collection of resources displayed in table form with sorting, filtering,
+        paging.
+    </li>
+    <li>Each resource is composed of many different elements from tables, pagers, queries, forms and input elements.
+        All together make up the screen.
+    </li>
+</ul>
+
+In subsequent releases the presentation model will be refined and crnk-ui on the frontend side updated accordingly.
+But not only crnk-ui, any kind of  application can make use of it to build generic but still custom frontends.
+
+
+
+<h4>Singular Nested Resources</h4>
+
+Support for nested resources has been improved by introducing support singular nested resources. Thereby a parent can hold a single nested resource as
+single-valued relationships. Urls then look like:
+
+<p>
+    http://example.com/posts/1/header
+</p>
+
+
+<p>An example looks like:
+
+<pre class="prettyprint">
+@JsonApiResource(type = "header", nested = true)
+public class PostHeader {
+
+	@JsonApiId
+	@JsonApiRelationId
+	private String postId;
+
+	private String value;
+
+	@JsonApiRelation(opposite = "header", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
+	private Post post;
+
+	...
+}
+</pre>
+
+More information can be found <a href="documentation/#_nested_resources">here</a>.
+
+<h4>Specify access mode with @JsonApiResource</h4>
+
+@JsonApiResource has new properties to configure the allowed access modes to a resource:
+sortable, filterable, postable, readable, patchable and deletable. An example looks like:
+
+<pre class="prettyprint">
+@JsonApiResource(
+    type = "tasks", sortable = false, filterable = true,
+    postable = false, readable = false, patchable = false, deletable = false
+)
+public class AccessDeniedTestResource {
+
+    ...
+
+}
+</pre>
+
+The new properties match the ones from @JsonApiField and provide the base line for it.
+For example, if a resource does not allow filtering, none of its fields will.
+
+
+
+<h4>New Security-related repositories</h4>
+
+With
+
+<pre class="prettyprint">
+SecurityConfig.setExposeRepositories(true)
+</pre>
+
+the SecurityModule sets up repositories to make its internal rules available from the REST API:
+
+<ul>
+    <li>&lt;contextPath&gt;/security/callerPermission</li>
+    <li>&lt;contextPath&gt;/security/role</li>
+</ul>
+
+
+<h4>Support for GROUP operator by facets</h4>
+
+The FacetModule gained support for the GROUP operator:
+
+<pre class="prettyprint">
+http://127.0.0.1:8080/api/facet?filter[values][GROUP]=priority,name
+</pre>
+
+It works equivalent to SQL GROUP BY queries. In the example a facet count is computed for
+every pair of priority and name attribute.
+
+
+<h4>Support for JsonInclude.Include.NON_EMPTY</h4>
+
+For example in the subsequent snippet the default <i>0</i> value will be omitted:
+
+<pre class="prettyprint">
+@JsonApiId
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+private long id;
+</pre>

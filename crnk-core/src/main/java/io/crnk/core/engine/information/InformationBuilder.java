@@ -3,12 +3,13 @@ package io.crnk.core.engine.information;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.information.resource.EmbeddableInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonIncludeStrategy;
@@ -55,12 +56,6 @@ public interface InformationBuilder {
 
         FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);
 
-        /**
-         * @deprecated use {@link #implementationType(Type)}
-         */
-        @Deprecated
-        ResourceInformationBuilder resourceClass(Class<?> resourceClass);
-
         ResourceInformationBuilder implementationType(Type implementationType);
 
         ResourceInformationBuilder resourceType(String resourceType);
@@ -69,15 +64,23 @@ public interface InformationBuilder {
 
         ResourceInformationBuilder superResourceType(String superResourceType);
 
-        /**
-         * @deprecated use pagingSpecType
-         */
-        @Deprecated
-        ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior);
+        ResourceInformationBuilder pagingSpecType(Class<? extends PagingSpec> pagingSpecType);
 
-        ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType);
+        ResourceInformationBuilder versionRange(VersionRange versionRange);
 
         ResourceInformation build();
+
+    }
+
+    interface EmbeddableInformationBuilder {
+
+        void from(EmbeddableInformation information);
+
+        FieldInformationBuilder addField();
+
+        FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);
+
+        EmbeddableInformationBuilder implementationType(Type implementationType);
 
     }
 
@@ -97,6 +100,8 @@ public interface InformationBuilder {
         FieldInformationBuilder name(String name);
 
         FieldInformationBuilder type(Class<?> type);
+
+        EmbeddableInformationBuilder embeddedType(Class<?> type);
 
         FieldInformationBuilder genericType(Type genericType);
 
@@ -125,6 +130,8 @@ public interface InformationBuilder {
         FieldInformationBuilder patchStrategy(PatchStrategy patchStrategy);
 
         FieldInformationBuilder setMappedBy(boolean mappedBy);
+
+        FieldInformationBuilder versionRange(VersionRange versionRange);
     }
 
     RelationshipRepositoryInformationBuilder createRelationshipRepository(String sourceResourceType, String targeResourceType);

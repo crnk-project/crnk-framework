@@ -15,7 +15,13 @@ public enum FilterBehavior {
 	/**
 	 * Raises an exception.
 	 */
-	FORBIDDEN;
+	FORBIDDEN,
+
+	/**
+	 * Raises an exception for the user to authenticate.
+	 */
+	UNAUTHORIZED;
+
 
 	/**
 	 * FORBIDDEN wins over IGNORED, IGNORED wins over NONE.

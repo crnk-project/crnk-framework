@@ -1,148 +1,214 @@
 package io.crnk.core.engine.internal.utils;
 
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.query.QueryContext;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
-import io.crnk.legacy.queryParams.QueryParams;
-
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
-public class JsonApiUrlBuilder {
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.UrlBuilder;
 
-    private final QueryContext queryContext;
-
-    private final ModuleRegistry moduleRegistry;
+public class JsonApiUrlBuilder implements UrlBuilder {
 
 
-    public JsonApiUrlBuilder(ModuleRegistry moduleRegistry, QueryContext queryContext) {
-        this.queryContext = queryContext;
-        this.moduleRegistry = moduleRegistry;
-    }
+	private final ModuleRegistry moduleRegistry;
 
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams) {
-        return buildUrl(resourceInformation, id, queryParams, null);
-    }
+	private Set<String> propagatedParameters = new HashSet<>();
 
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec) {
-        return buildUrl(resourceInformation, id, querySpec, null);
-    }
+	public JsonApiUrlBuilder(ModuleRegistry moduleRegistry) {
+		this.moduleRegistry = moduleRegistry;
+	}
 
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QueryAdapter queryAdapter,
-                           String relationshipName) {
-        return buildUrl(resourceInformation, id, ((QuerySpecAdapter) queryAdapter).getQuerySpec(), relationshipName);
-    }
+	@Override
+	public void addPropagatedParameter(String name) {
+		propagatedParameters.add(name);
+	}
 
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {
-        return buildUrlInternal(resourceInformation, id, querySpec, relationshipName, true);
-    }
+	@Override
+	public Set<String> getPropagatedParameters() {
+		return propagatedParameters;
+	}
 
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName, boolean selfLink) {
-        return buildUrlInternal(resourceInformation, id, querySpec, relationshipName, selfLink);
-    }
+	@Override
+	public String buildUrl(QueryContext queryContext, Object resource) {
+		RegistryEntry entry = moduleRegistry.getResourceRegistry().findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return buildUrl(queryContext, resourceInformation, id, null);
+	}
 
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams, String relationshipName) {
-        return buildUrlInternal(resourceInformation, id, queryParams, relationshipName, true);
-    }
+	@Override
+	public String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec) {
+		RegistryEntry entry = moduleRegistry.getResourceRegistry().findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return buildUrl(queryContext, resourceInformation, id, querySpec);
+	}
 
-    private String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName, boolean selfLink) {
-        String url;
-        ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
-        if (id instanceof Collection) {
-            if (resourceInformation.isNested()) {
-                throw new UnsupportedOperationException("not yet implemented");
-            }
-            url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
-            Collection<?> ids = (Collection<?>) id;
-            Collection<String> strIds = new ArrayList<>();
-            for (Object idElem : ids) {
-                String strIdElem = resourceInformation.toIdString(idElem);
-                strIds.add(strIdElem);
-            }
-            url += "/";
-            url += StringUtils.join(",", strIds);
-        } else if (id != null) {
-            url = resourceRegistry.getResourceUrl(queryContext, resourceInformation, id);
-        } else {
-            url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
-        }
-        if (relationshipName != null && selfLink) {
-            url += "/relationships/" + relationshipName;
-        } else if (relationshipName != null) {
-            url += "/" + relationshipName;
-        }
+	@Override
+	public String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec, String relationshipName) {
+		RegistryEntry entry = moduleRegistry.getResourceRegistry().findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return buildUrl(queryContext, resourceInformation, id, querySpec, relationshipName);
+	}
 
-        UrlParameterBuilder urlBuilder = new UrlParameterBuilder(url);
+	@Override
+	public String buildUrl(QueryContext queryContext, Object resource, QuerySpec querySpec, String relationshipName, boolean selfLink) {
+		RegistryEntry entry = moduleRegistry.getResourceRegistry().findEntry(resource);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return buildUrl(queryContext, resourceInformation, id, querySpec, relationshipName, selfLink);
+	}
 
-        QuerySpec querySpec = (QuerySpec) query;
-        QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
-        urlBuilder.addQueryParameters(urlMapper.serialize(querySpec));
+	@Override
+	public String buildUrl(QueryContext queryContext, ResourceInformation resourceInformation) {
+		return buildUrl(queryContext, resourceInformation, null, null, null);
+	}
 
-        return urlBuilder.toString();
-    }
+	@Override
+	public String buildUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id, QuerySpec querySpec) {
+		return buildUrl(queryContext, resourceInformation, id, querySpec, null);
+	}
 
-    class UrlParameterBuilder {
+	@Override
+	public String buildUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {
+		return buildUrlInternal(queryContext, resourceInformation, id, querySpec, relationshipName, true);
+	}
 
-        private StringBuilder builder = new StringBuilder();
+	public String buildUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName, boolean selfLink) {
+		return buildUrlInternal(queryContext, resourceInformation, id, querySpec, relationshipName, selfLink);
+	}
 
-        private boolean firstParam;
+	private String buildUrlInternal(QueryContext queryContext, ResourceInformation resourceInformation, Object id, Object query, String relationshipName, boolean selfLink) {
+		String url;
+		ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
+		if (id instanceof Collection) {
+			if (resourceInformation.isNested()) {
+				throw new UnsupportedOperationException("not yet implemented");
+			}
+			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
+			Collection<?> ids = (Collection<?>) id;
+			Collection<String> strIds = new ArrayList<>();
+			for (Object idElem : ids) {
+				String strIdElem = resourceInformation.toIdString(idElem);
+				strIds.add(strIdElem);
+			}
+			url += "/";
+			url += StringUtils.join(",", strIds);
+		}
+		else if (id != null) {
+			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation, id);
+		}
+		else {
+			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
+		}
+		if (relationshipName != null && selfLink) {
+			url += "/relationships/" + relationshipName;
+		}
+		else if (relationshipName != null) {
+			url += "/" + relationshipName;
+		}
 
-        private String encoding = "UTF-8";
+		UrlParameterBuilder urlBuilder = new UrlParameterBuilder(url);
 
-        public UrlParameterBuilder(String baseUrl) {
-            builder.append(baseUrl);
-            firstParam = !baseUrl.contains("?");
-        }
+		QuerySpec querySpec = (QuerySpec) query;
+		QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
+		urlBuilder.addQueryParameters(urlMapper.serialize(querySpec, queryContext));
 
-        @Override
-        public String toString() {
-            return builder.toString();
-        }
+		if (queryContext != null) {
+			addPropagatedParameters(urlBuilder, queryContext.getRequestContext());
+		}
 
-        private void addQueryParameters(Map<String, ?> params) {
-            if (params != null && !params.isEmpty()) {
-                for (Map.Entry<String, ?> entry : params.entrySet()) {
-                    String key = entry.getKey();
-                    Object value = entry.getValue();
-                    addQueryParameter(key, value);
-                }
-            }
-        }
+		return urlBuilder.toString();
+	}
 
-        public void addQueryParameter(String key, final String value) {
-            if (firstParam) {
-                builder.append("?");
-                firstParam = false;
-            } else {
-                builder.append("&");
-            }
-            builder.append(key);
-            builder.append("=");
-            ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    builder.append(URLEncoder.encode(value, encoding));
-                    return null;
-                }
-            });
-        }
+	@Override
+	public String filterUrl(String url, QueryContext queryContext) {
+		UrlParameterBuilder urlBuilder = new UrlParameterBuilder(url);
+		if (queryContext != null) {
+			addPropagatedParameters(urlBuilder, queryContext.getRequestContext());
+		}
+		return urlBuilder.toString();
+	}
 
-        private void addQueryParameter(String key, Object value) {
-            if (value instanceof Collection) {
-                for (Object element : (Collection<?>) value) {
-                    addQueryParameter(key, (String) element);
-                }
-            } else {
-                addQueryParameter(key, (String) value);
-            }
-        }
-    }
+	private void addPropagatedParameters(UrlParameterBuilder urlBuilder, HttpRequestContext requestContext) {
+		if (requestContext != null) {
+			for (String propagedParameter : propagatedParameters) {
+				Set<String> propagatedValues = requestContext.getRequestParameters().get(propagedParameter);
+				if (propagatedValues != null) {
+					urlBuilder.addQueryParameter(propagedParameter, propagatedValues);
+				}
+			}
+		}
+	}
+
+	public class UrlParameterBuilder {
+
+		private StringBuilder builder = new StringBuilder();
+
+		private boolean firstParam;
+
+		private String encoding = "UTF-8";
+
+		public UrlParameterBuilder(String baseUrl) {
+			builder.append(baseUrl);
+			firstParam = !baseUrl.contains("?");
+		}
+
+		@Override
+		public String toString() {
+			return builder.toString();
+		}
+
+		private void addQueryParameters(Map<String, ?> params) {
+			if (params != null && !params.isEmpty()) {
+				for (Map.Entry<String, ?> entry : params.entrySet()) {
+					String key = entry.getKey();
+					Object value = entry.getValue();
+					addQueryParameter(key, value);
+				}
+			}
+		}
+
+		public void addQueryParameter(String key, final String value) {
+			if (firstParam) {
+				builder.append("?");
+				firstParam = false;
+			}
+			else {
+				builder.append("&");
+			}
+			builder.append(key);
+			builder.append("=");
+			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
+				@Override
+				public Object call() throws Exception {
+					builder.append(URLEncoder.encode(value, encoding));
+					return null;
+				}
+			});
+		}
+
+		private void addQueryParameter(String key, Object value) {
+			if (value instanceof Collection) {
+				for (Object element : (Collection<?>) value) {
+					addQueryParameter(key, (String) element);
+				}
+			}
+			else {
+				addQueryParameter(key, (String) value);
+			}
+		}
+	}
 }

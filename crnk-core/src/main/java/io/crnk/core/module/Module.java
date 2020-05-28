@@ -1,5 +1,7 @@
 package io.crnk.core.module;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -9,9 +11,12 @@ import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.information.NamingStrategy;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
@@ -27,8 +32,6 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-
-import java.util.List;
 
 /**
  * Interface for extensions that can be registered to Crnk to provide a
@@ -58,10 +61,10 @@ public interface Module {
 	 */
 	interface ModuleContext {
 
+		DocumentMapper getDocumentMapper();
+
 		/**
 		 * Sets the ResultFactory used. Can only be called once by all modules!
-		 *
-		 * @param resultFactory
 		 */
 		void setResultFactory(ResultFactory resultFactory);
 
@@ -97,7 +100,7 @@ public interface Module {
 		 *
 		 * @param resourceInformationProvider resource information builder
 		 */
-		void addResourceInformationBuilder(ResourceInformationProvider resourceInformationProvider);
+		void addResourceInformationProvider(ResourceInformationProvider resourceInformationProvider);
 
 		/**
 		 * Register the given {@link RepositoryInformationProvider} in Crnk.
@@ -131,27 +134,6 @@ public interface Module {
 		 * Adds the given repository for the given type.
 		 */
 		void addRepository(Object repository);
-
-		/**
-		 * Adds the given repository for the given type.
-		 *
-		 * @param resourceClass resource class
-		 * @param repository    resource
-		 * @deprecated use {@link #addRepository(Object)}
-		 */
-		@Deprecated
-		void addRepository(Class<?> resourceClass, Object repository);
-
-		/**
-		 * Adds the given resource for the given source and target type.
-		 *
-		 * @param sourceResourceClass source resource class
-		 * @param targetResourceClass target resource class
-		 * @param repository          resource
-		 * @deprecated use {@link #addRepository(Object)}
-		 */
-		@Deprecated
-		void addRepository(Class<?> sourceResourceClass, Class<?> targetResourceClass, Object repository);
 
 		/**
 		 * Adds a new exception mapper lookup.
@@ -189,8 +171,6 @@ public interface Module {
 
 		/**
 		 * Adds a repository decorator to intercept repository calls.
-		 *
-		 * @param RepositoryDecoratorFactory decorator
 		 */
 		void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decorator);
 
@@ -250,5 +230,11 @@ public interface Module {
 		void addRepositoryAdapterFactory(RepositoryAdapterFactory repositoryAdapterFactory);
 
 		ModuleRegistry getModuleRegistry();
+
+		void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior);
+
+		List<NamingStrategy> getNamingStrategies();
+
+		void addNamingStrategy(NamingStrategy namingStrategy);
 	}
 }

@@ -1,32 +1,33 @@
 package io.crnk.meta.model.resource;
 
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.VersionRange;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.model.MetaAttribute;
 
 /**
  * Field of a JSON API resource.
  */
-@JsonApiResource(type = "meta/resourceField")
+@JsonApiResource(type = "metaResourceField", resourcePath = "meta/resourceField")
 public class MetaResourceField extends MetaAttribute {
 
-	private boolean meta;
+	private ResourceFieldType fieldType;
 
-	private boolean links;
+	private VersionRange versionRange;
 
-	public boolean isMeta() {
-		return meta;
+	public ResourceFieldType getFieldType() {
+		return fieldType;
 	}
 
-	public void setMeta(boolean meta) {
-		this.meta = meta;
+	public void setFieldType(ResourceFieldType fieldType) {
+		this.fieldType = fieldType;
 	}
 
-	public boolean isLinks() {
-		return links;
+	public VersionRange getVersionRange() {
+		return versionRange;
 	}
 
-	public void setLinks(boolean links) {
-		this.links = links;
+	public void setVersionRange(VersionRange versionRange) {
+		this.versionRange = versionRange;
 	}
-
 }

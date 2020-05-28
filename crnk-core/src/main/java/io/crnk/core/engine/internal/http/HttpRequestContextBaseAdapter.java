@@ -6,7 +6,10 @@ import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.query.QueryContext;
 
+import java.net.URI;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,6 +28,35 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
         this.queryContext.setBaseUrl(base.getBaseUrl());
         this.queryContext.setAttributes(requestAttributes);
         this.queryContext.setRequestPath(base.getPath());
+        this.queryContext.setRequestVersion(getRequestVersion());
+        this.queryContext.setRequestContext(this);
+    }
+
+    /**
+     * @return get requested version from accept header. Fallback to URL parameter for ease of use.
+     */
+    private int getRequestVersion() {
+        String acceptHeader = base.getRequestHeader(HttpHeaders.HTTP_HEADER_ACCEPT);
+        if (acceptHeader != null) {
+            // retrieve from accept header by looking for version=x
+            Optional<Integer> requestVersion = Arrays.stream(acceptHeader.split("\\;"))
+                    .map(it -> it.replace(" ", ""))
+                    .filter(it -> it.startsWith(HttpHeaders.VERSION_ACCEPT_PARAMETER + "="))
+                    .map(it -> it.substring(HttpHeaders.VERSION_ACCEPT_PARAMETER.length() + 1).trim())
+                    .map(it -> Integer.parseInt(it))
+                    .findFirst();
+            if (requestVersion.isPresent()) {
+                return requestVersion.get();
+            }
+        }
+
+        // parameter-based fallback
+        Set<String> versions = base.getRequestParameters().get(HttpHeaders.VERSION_ACCEPT_PARAMETER);
+        if (versions != null) {
+            return Integer.parseInt(versions.iterator().next());
+        }
+
+        return -1;
     }
 
     public boolean hasResponse() {
@@ -91,6 +123,11 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
     }
 
     @Override
+    public Set<String> getRequestHeaderNames() {
+        return base.getRequestHeaderNames();
+    }
+
+    @Override
     public String getRequestHeader(String name) {
         return base.getRequestHeader(name);
     }
@@ -118,6 +155,11 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
     @Override
     public String getMethod() {
         return base.getMethod();
+    }
+
+    @Override
+    public URI getRequestUri() {
+        return base.getRequestUri();
     }
 
 

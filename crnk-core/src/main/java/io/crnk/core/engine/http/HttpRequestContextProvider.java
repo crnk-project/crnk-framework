@@ -1,11 +1,16 @@
 package io.crnk.core.engine.http;
 
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Supplier;
 
 public class HttpRequestContextProvider {
+
+
+	private final ModuleRegistry moduleRegistry;
 
 	private Supplier<ResultFactory> resultFactory;
 
@@ -20,8 +25,9 @@ public class HttpRequestContextProvider {
 		}
 	};
 
-	public HttpRequestContextProvider(Supplier<ResultFactory> resultFactory) {
+	public HttpRequestContextProvider(Supplier<ResultFactory> resultFactory, ModuleRegistry moduleRegistry) {
 		this.resultFactory = resultFactory;
+		this.moduleRegistry = moduleRegistry;
 	}
 
 	/**
@@ -42,7 +48,11 @@ public class HttpRequestContextProvider {
 
 	public void onRequestStarted(HttpRequestContext request) {
 		resultFactory.get().setThreadContext(request);
+
+		QueryContext queryContext = request.getQueryContext();
+		queryContext.initializeDefaults(moduleRegistry.getResourceRegistry());
 	}
+
 
 
 	public boolean hasThreadRequestContext() {

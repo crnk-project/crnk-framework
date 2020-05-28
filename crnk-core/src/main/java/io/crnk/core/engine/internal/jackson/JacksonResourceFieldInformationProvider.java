@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.jackson;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,13 +24,6 @@ import io.crnk.core.engine.internal.information.resource.AnnotatedFieldBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotatedMethodBuilder;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.resource.annotations.JsonIncludeStrategy;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Optional;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * A Jackson-backed implementation of the {@link ResourceFieldInformationProvider} interface.
@@ -46,10 +46,20 @@ public class JacksonResourceFieldInformationProvider extends ResourceFieldInform
 	public Optional<JsonIncludeStrategy> getJsonIncludeStrategy(BeanAttributeInformation attributeDesc) {
 		Optional<JsonInclude> includeAnnotation = attributeDesc.getAnnotation(JsonInclude.class);
 		if (includeAnnotation.isPresent()) {
-			JsonIncludeStrategy strategy = NON_NULL.equals(includeAnnotation.get().value()) ? JsonIncludeStrategy.NOT_NULL : JsonIncludeStrategy.DEFAULT;
+			JsonInclude.Include value = includeAnnotation.get().value();
+			JsonIncludeStrategy strategy;
+			if (NON_NULL.equals(value)) {
+				strategy = JsonIncludeStrategy.NOT_NULL;
+			}
+			else if (JsonInclude.Include.NON_EMPTY.equals(value)) {
+				strategy = JsonIncludeStrategy.NON_EMPTY;
+			}
+			else {
+				strategy = JsonIncludeStrategy.DEFAULT;
+			}
 			return Optional.of(strategy);
 		}
-		return Optional.of(JsonIncludeStrategy.DEFAULT);
+		return Optional.empty();
 	}
 
 	@Override

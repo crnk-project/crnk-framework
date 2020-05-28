@@ -4,7 +4,6 @@ import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
-import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
@@ -61,7 +60,7 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
     @Override
     public Schedule repositoryActionWithResourceResult(String msg) {
         ProjectRepository repository = new ProjectRepository();
-        Iterable<Project> projects = repository.findAll(new QueryParams());
+        Iterable<Project> projects = repository.findAll(new QuerySpec(Project.class));
         Iterator<Project> iterator = projects.iterator();
 
 

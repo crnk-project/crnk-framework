@@ -1,6 +1,9 @@
 package io.crnk.security.internal;
 
+import java.util.Collections;
+
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -9,34 +12,46 @@ import io.crnk.security.DataRoomFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-
 public class DataRoomMatcher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataRoomMatcher.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataRoomMatcher.class);
 
+	private Supplier<DataRoomFilter> filter;
 
-    private Supplier<DataRoomFilter> filter;
+	private SecurityProvider callerSecurityProvider;
 
-    public DataRoomMatcher(Supplier<DataRoomFilter> filter) {
-        this.filter = filter;
-    }
+	public DataRoomMatcher(Supplier<DataRoomFilter> filter, SecurityProvider callerSecurityProvider) {
+		this.filter = filter;
+		this.callerSecurityProvider = callerSecurityProvider;
+	}
 
-    public QuerySpec filter(QuerySpec querySpec, HttpMethod method) {
-        return filter.get().filter(querySpec, method);
-    }
+	public QuerySpec filter(QuerySpec querySpec, HttpMethod method) {
+		return filter.get().filter(querySpec, method, callerSecurityProvider);
+	}
 
-    public boolean checkMatch(Object resource, HttpMethod method) {
-        QuerySpec querySpec = filter(new QuerySpec(resource.getClass()), method);
-        DefaultResourceList<Object> list = querySpec.apply(Collections.singleton(resource));
-        return !list.isEmpty();
-    }
+	public QuerySpec filter(QuerySpec querySpec, HttpMethod method, SecurityProvider securityProvider) {
+		return filter.get().filter(querySpec, method, securityProvider);
+	}
 
-    public void verifyMatch(Object resource, HttpMethod method) {
-        boolean match = checkMatch(resource, method);
-        if (!match) {
-            LOGGER.error("dataroom prevented access to {} for {}", resource, method);
-            throw new ForbiddenException("not allowed to access resource");
-        }
-    }
+	public boolean checkMatch(Object resource, HttpMethod method) {
+		return checkMatch(resource, method, callerSecurityProvider);
+	}
+
+	public boolean checkMatch(Object resource, HttpMethod method, SecurityProvider securityProvider) {
+		QuerySpec querySpec = filter(new QuerySpec(resource.getClass()), method, securityProvider);
+		DefaultResourceList<Object> list = querySpec.apply(Collections.singleton(resource));
+		return !list.isEmpty();
+	}
+
+	public void verifyMatch(Object resource, HttpMethod method) {
+		verifyMatch(resource, method, callerSecurityProvider);
+	}
+
+	public void verifyMatch(Object resource, HttpMethod method, SecurityProvider securityProvider) {
+		boolean match = checkMatch(resource, method, securityProvider);
+		if (!match) {
+			LOGGER.warn("dataroom prevented access to {} for {}", resource, method);
+			throw new ForbiddenException("not allowed to access resource");
+		}
+	}
 }

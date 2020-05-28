@@ -1,13 +1,5 @@
 package io.crnk.operations.server;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -16,19 +8,25 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
+import io.crnk.core.engine.internal.http.JsonApiRequestProcessorHelper;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.UnauthorizedException;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.repository.BulkResourceRepository;
+import io.crnk.core.repository.decorate.Wrapper;
 import io.crnk.core.utils.Nullable;
 import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
@@ -37,256 +35,423 @@ import io.crnk.operations.server.order.DependencyOrderStrategy;
 import io.crnk.operations.server.order.OperationOrderStrategy;
 import io.crnk.operations.server.order.OrderedOperation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
 public class OperationsModule implements Module {
 
-	private OperationOrderStrategy orderStrategy = new DependencyOrderStrategy();
+    private OperationOrderStrategy orderStrategy = new DependencyOrderStrategy();
 
-	private List<io.crnk.operations.server.OperationFilter> filters = new CopyOnWriteArrayList<>();
+    private List<io.crnk.operations.server.OperationFilter> filters = new CopyOnWriteArrayList<>();
 
-	private ModuleContext moduleContext;
+    private ModuleContext moduleContext;
 
-	public static OperationsModule create() {
-		return new OperationsModule();
-	}
+    private boolean resumeOnError = false;
 
-	// protected for CDI
-	protected OperationsModule() {
-	}
+    private boolean includeChangedRelationships = true;
 
-	public void addFilter(io.crnk.operations.server.OperationFilter filter) {
-		this.filters.add(filter);
-	}
+    private boolean displayOperationResponseOnSuccess = true;
 
-	public void removeFilter(io.crnk.operations.server.OperationFilter filter) {
-		this.filters.remove(filter);
-	}
+    private JsonApiRequestProcessorHelper helper;
 
-	public OperationOrderStrategy getOrderStrategy() {
-		return orderStrategy;
-	}
+    public static OperationsModule create() {
+        return new OperationsModule();
+    }
 
-	public void setOrderStrategy(OperationOrderStrategy orderStrategy) {
-		this.orderStrategy = orderStrategy;
-	}
+    // protected for CDI
+    protected OperationsModule() {
+    }
 
-	public List<io.crnk.operations.server.OperationFilter> getFilters() {
-		return filters;
-	}
+    public void addFilter(io.crnk.operations.server.OperationFilter filter) {
+        this.filters.add(filter);
+    }
 
-	@Override
-	public String getModuleName() {
-		return "operations";
-	}
+    public void removeFilter(io.crnk.operations.server.OperationFilter filter) {
+        this.filters.remove(filter);
+    }
 
-	@Override
-	public void setupModule(ModuleContext context) {
-		this.moduleContext = context;
-		context.addHttpRequestProcessor(new io.crnk.operations.server.OperationsRequestProcessor(this, context));
-	}
+    public OperationOrderStrategy getOrderStrategy() {
+        return orderStrategy;
+    }
 
-	/**
-	 * @deprecated use {@link #apply(List, QueryContext)}
-	 */
-	@Deprecated
-	public List<OperationResponse> apply(List<Operation> operations) {
-		HttpRequestContextProvider httpRequestContextProvider =
-				moduleContext.getModuleRegistry().getHttpRequestContextProvider();
-		HttpRequestContext requestContext = httpRequestContextProvider.getRequestContext();
-		QueryContext queryContext = requestContext.getQueryContext();
-		return apply(operations, queryContext);
-	}
+    public void setOrderStrategy(OperationOrderStrategy orderStrategy) {
+        this.orderStrategy = orderStrategy;
+    }
 
-	/**
-	 * Applies the given set of operations.
-	 *
-	 * @return responses
-	 */
-	public List<OperationResponse> apply(List<Operation> operations, QueryContext queryContext) {
-		checkAccess(operations, queryContext);
-		enrichTypeIdInformation(operations);
+    public List<io.crnk.operations.server.OperationFilter> getFilters() {
+        return filters;
+    }
 
-		List<OrderedOperation> orderedOperations = orderStrategy.order(operations);
+    @Override
+    public String getModuleName() {
+        return "operations";
+    }
 
-		DefaultOperationFilterChain chain = new DefaultOperationFilterChain();
-		return chain.doFilter(new DefaultOperationFilterContext(orderedOperations));
-	}
+    @Override
+    public void setupModule(ModuleContext context) {
+        this.moduleContext = context;
+        this.helper = new JsonApiRequestProcessorHelper(context);
+        context.addHttpRequestProcessor(new io.crnk.operations.server.OperationsRequestProcessor(this, context));
+    }
 
-	/**
-	 * This is not strictly necessary, but allows to catch security issues early before accessing the individual repositories
-	 */
-	private void checkAccess(List<Operation> operations, QueryContext queryContext) {
-		for (Operation operation : operations) {
-			checkAccess(operation, queryContext);
-		}
-	}
+    /**
+     * Applies the given set of operations.
+     *
+     * @return responses
+     */
+    public List<OperationResponse> apply(List<Operation> operations, QueryContext queryContext) {
+        checkAccess(operations, queryContext);
+        enrichTypeIdInformation(operations, queryContext);
 
-	private void checkAccess(Operation operation, QueryContext queryContext) {
-		HttpMethod httpMethod = HttpMethod.valueOf(operation.getOp());
+        List<OrderedOperation> orderedOperations = orderStrategy.order(operations);
 
-		String path = OperationParameterUtils.parsePath(operation.getPath());
-		JsonPath jsonPath = (new PathBuilder(moduleContext.getResourceRegistry(), moduleContext.getTypeParser())).build(path);
-		if (jsonPath == null) {
-			throw new RepositoryNotFoundException(path);
-		}
+        DefaultOperationFilterChain chain = new DefaultOperationFilterChain();
+        return chain.doFilter(new DefaultOperationFilterContext(orderedOperations, queryContext));
+    }
 
-		RegistryEntry entry = jsonPath.getRootEntry();
-		ResourceInformation resourceInformation = entry.getResourceInformation();
+    /**
+     * This is not strictly necessary, but allows to catch security issues early before accessing the individual repositories
+     */
+    private void checkAccess(List<Operation> operations, QueryContext queryContext) {
+        for (Operation operation : operations) {
+            checkAccess(operation, queryContext);
+        }
+    }
 
-		ResourceFilterDirectory filterDirectory = moduleContext.getResourceFilterDirectory();
-		FilterBehavior filterBehavior = filterDirectory.get(resourceInformation, httpMethod, queryContext);
-		if (filterBehavior == FilterBehavior.FORBIDDEN) {
-			throw new ForbiddenException(resourceInformation, httpMethod);
-		}
-	}
+    private void checkAccess(Operation operation, QueryContext queryContext) {
+        HttpMethod httpMethod = HttpMethod.valueOf(operation.getOp());
 
-	private void enrichTypeIdInformation(List<Operation> operations) {
-		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		for (Operation operation : operations) {
-			if (operation.getOp().equalsIgnoreCase(HttpMethod.DELETE.toString())) {
-				String path = OperationParameterUtils.parsePath(operation.getPath());
-				JsonPath jsonPath = (new PathBuilder(resourceRegistry, moduleContext.getTypeParser())).build(path);
+        String path = OperationParameterUtils.parsePath(operation.getPath());
+        PathBuilder pathBuilder = new PathBuilder(moduleContext.getResourceRegistry(), moduleContext.getTypeParser());
+        JsonPath jsonPath = pathBuilder.build(path, queryContext);
+        if (jsonPath == null) {
+            throw new RepositoryNotFoundException(path);
+        }
 
-				RegistryEntry entry = jsonPath.getRootEntry();
-				String idString = entry.getResourceInformation().toIdString(jsonPath.getId());
+        RegistryEntry entry = jsonPath.getRootEntry();
+        ResourceInformation resourceInformation = entry.getResourceInformation();
 
-				Resource resource = new Resource();
-				resource.setType(jsonPath.getRootEntry().getResourceInformation().getResourceType());
-				resource.setId(idString);
-				operation.setValue(resource);
-			}
-		}
-	}
+        ResourceFilterDirectory filterDirectory = moduleContext.getResourceFilterDirectory();
+        FilterBehavior filterBehavior = filterDirectory.get(resourceInformation, httpMethod, queryContext);
+        if (filterBehavior == FilterBehavior.FORBIDDEN) {
+            throw new ForbiddenException(resourceInformation, httpMethod);
+        }
+        if (filterBehavior == FilterBehavior.UNAUTHORIZED) {
+            throw new UnauthorizedException(resourceInformation, httpMethod);
+        }
+    }
 
-	protected void fillinIgnoredOperations(OperationResponse[] responses) {
-		for (int i = 0; i < responses.length; i++) {
-			if (responses[i] == null) {
-				OperationResponse operationResponse = new OperationResponse();
-				operationResponse.setStatus(HttpStatus.PRECONDITION_FAILED_412);
-				responses[i] = operationResponse;
-			}
-		}
-	}
+    private void enrichTypeIdInformation(List<Operation> operations, QueryContext queryContext) {
+        ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+        for (Operation operation : operations) {
+            if (Arrays.asList(HttpMethod.DELETE.toString(), HttpMethod.GET.toString()).contains(operation.getOp())) {
+                String path = OperationParameterUtils.parsePath(operation.getPath());
+                PathBuilder pathBuilder = new PathBuilder(resourceRegistry, moduleContext.getTypeParser());
+                JsonPath jsonPath = pathBuilder.build(path, queryContext);
 
-	protected List<OperationResponse> executeOperations(List<OrderedOperation> orderedOperations) {
-		OperationResponse[] responses = new OperationResponse[orderedOperations.size()];
-		boolean successful = true;
-		for (OrderedOperation orderedOperation : orderedOperations) {
-			OperationResponse operationResponse = executeOperation(orderedOperation.getOperation());
-			responses[orderedOperation.getOrdinal()] = operationResponse;
+                RegistryEntry entry = jsonPath.getRootEntry();
+                String idString = entry.getResourceInformation().toIdString(jsonPath.getId());
 
-			int status = operationResponse.getStatus();
-			if (status >= 400) {
-				successful = false;
-				break;
-			}
-		}
+                Resource resource = new Resource();
+                resource.setType(jsonPath.getRootEntry().getResourceInformation().getResourceType());
+                resource.setId(idString);
+                operation.setValue(resource);
+            }
+        }
+    }
 
-		if (orderedOperations.size() > 1 && successful) {
-			fetchUpToDateResponses(orderedOperations, responses);
-		}
-
-		fillinIgnoredOperations(responses);
-		return Arrays.asList(responses);
-	}
-
-	protected void fetchUpToDateResponses(List<OrderedOperation> orderedOperations, OperationResponse[] responses) {
-		RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
-
-		// get current set of resources after all the updates have been applied
-		for (OrderedOperation orderedOperation : orderedOperations) {
-			Operation operation = orderedOperation.getOperation();
-			OperationResponse operationResponse = responses[orderedOperation.getOrdinal()];
-
-			boolean isPost = operation.getOp().equalsIgnoreCase(HttpMethod.POST.toString());
-			boolean isPatch = operation.getOp().equalsIgnoreCase(HttpMethod.PATCH.toString());
-			if (isPost || isPatch) {
-				Resource resource = operationResponse.getSingleData().get();
-
-				String path = resource.getType() + "/" + resource.getId();
-				String method = HttpMethod.GET.toString();
-
-				Map<String, Set<String>> parameters = new HashMap<>();
-				parameters.put("include", getLoadedRelationshipNames(resource));
-
-				Response response =
-						requestDispatcher.dispatchRequest(path, method, parameters, null);
-				copyDocument(operationResponse, response.getDocument());
-				operationResponse.setIncluded(null);
-			}
-		}
-	}
-
-	protected OperationResponse executeOperation(Operation operation) {
-		RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
+    protected void fillinIgnoredOperations(OperationResponse[] responses) {
+        for (int i = 0; i < responses.length; i++) {
+            if (responses[i] == null) {
+                OperationResponse operationResponse = new OperationResponse();
+                operationResponse.setStatus(HttpStatus.PRECONDITION_FAILED_412);
+                responses[i] = operationResponse;
+            }
+        }
+    }
 
 
-		String path = OperationParameterUtils.parsePath(operation.getPath());
-		Map<String, Set<String>> parameters = OperationParameterUtils.parseParameters(operation.getPath());
-		String method = operation.getOp();
-		Document requestBody = new Document();
-		requestBody.setData(Nullable.of(operation.getValue()));
+    protected PathBuilder getPathBuilder() {
+        ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+        TypeParser typeParser = moduleContext.getTypeParser();
+        return new PathBuilder(resourceRegistry, typeParser);
+    }
 
-		Response response =
-				requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
-		OperationResponse operationResponse = new OperationResponse();
-		operationResponse.setStatus(response.getHttpStatus());
-		copyDocument(operationResponse, response.getDocument());
-		return operationResponse;
-	}
+    protected List<OperationResponse> executeOperations(List<OrderedOperation> orderedOperations, QueryContext queryContext) {
+        OperationResponse[] responses = new OperationResponse[orderedOperations.size()];
+        boolean successful = true;
 
-	private Set<String> getLoadedRelationshipNames(Resource resourceBody) {
-		Set<String> result = new HashSet<>();
-		for (Map.Entry<String, Relationship> entry : resourceBody.getRelationships().entrySet()) {
-			if (entry.getValue() != null && entry.getValue().getData() != null) {
-				result.add(entry.getKey());
-			}
-		}
-		return result;
-	}
+        int index = 0;
 
-	private void copyDocument(OperationResponse operationResponse, Document document) {
-		if (document != null) {
-			operationResponse.setData(document.getData());
-			operationResponse.setMeta(document.getMeta());
-			operationResponse.setLinks(document.getLinks());
-			operationResponse.setErrors(document.getErrors());
-			operationResponse.setIncluded(document.getIncluded());
-		}
-	}
+        String bulkMethod = null;
+        String bulkType = null;
+        List<OrderedOperation> bulk = new ArrayList<>();
 
-	protected class DefaultOperationFilterContext implements OperationFilterContext {
+        PathBuilder pathBuilder = getPathBuilder();
 
-		private List<OrderedOperation> orderedOperations;
 
-		DefaultOperationFilterContext(List<OrderedOperation> orderedOperations) {
-			this.orderedOperations = orderedOperations;
-		}
+        while (index < orderedOperations.size()) {
+            OrderedOperation orderedOperation = orderedOperations.get(index);
+            index++;
 
-		public List<OrderedOperation> getOrderedOperations() {
-			return orderedOperations;
-		}
+            Operation operation = orderedOperation.getOperation();
+            String method = operation.getOp();
+            String path = OperationParameterUtils.parsePath(operation.getPath());
+            JsonPath jsonPath = pathBuilder.build(path, queryContext);
+            orderedOperation.setPath(jsonPath);
+            if (jsonPath == null) {
+                throw new BadRequestException("invalid path: " + operation.getPath());
+            }
+            String type = jsonPath.getRootEntry().getResourceInformation().getResourceType();
 
-		@Override
-		public ServiceDiscovery getServiceDiscovery() {
-			return moduleContext.getServiceDiscovery();
-		}
-	}
+            if (!method.equals(bulkMethod) || !type.equals(bulkType)) {
+                if (!bulk.isEmpty()) {
+                    boolean success = bulkExecuteOperations(bulk, responses);
+                    if (!success) {
+                        successful = false;
+                        if (!resumeOnError) {
+                            break;
+                        }
+                    }
+                    bulk.clear();
+                }
+                bulkMethod = method;
+                bulkType = type;
+            }
 
-	protected class DefaultOperationFilterChain implements OperationFilterChain {
+            bulk.add(orderedOperation);
+        }
 
-		protected int filterIndex = 0;
+        if (!bulk.isEmpty()) {
+            boolean success = bulkExecuteOperations(bulk, responses);
+            if (!success) {
+                successful = false;
+            }
+        }
 
-		@Override
-		public List<OperationResponse> doFilter(OperationFilterContext context) {
-			List<OperationFilter> filters = getFilters();
-			if (filterIndex == filters.size()) {
-				return executeOperations(context.getOrderedOperations());
-			}
-			else {
-				OperationFilter filter = filters.get(filterIndex);
-				filterIndex++;
-				return filter.filter(context, this);
-			}
-		}
-	}
+        if (orderedOperations.size() > 1 && ((!successful && resumeOnError) || (successful && displayOperationResponseOnSuccess))) {
+            fetchUpToDateResponses(orderedOperations, responses);
+        }
+
+        fillinIgnoredOperations(responses);
+        return Arrays.asList(responses);
+    }
+
+    private String getType(Operation operation) {
+        return operation.getValue().getType();
+    }
+
+    private boolean legacySetup;
+
+    private boolean bulkExecuteOperations(List<OrderedOperation> operations, OperationResponse[] responses) {
+        RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
+
+        OrderedOperation firstOperation = operations.get(0);
+
+        RegistryEntry rootEntry = firstOperation.getPath().getRootEntry();
+
+        if (supportsBulk(rootEntry)) {
+            String method = firstOperation.getOperation().getOp();
+
+            JsonPath repositoryPath = new ResourcePath(rootEntry, null);
+
+            PreconditionUtil.assertTrue(
+                method.equals(HttpMethod.POST.toString()) || method.equals(HttpMethod.DELETE.toString()) ,
+                "experimental bulk support is currently limited to POST and DELETE"
+            );
+
+            Document requestBody = new Document();
+            requestBody.setData(Nullable.of(operations.stream().map(it -> it.getOperation().getValue()).collect(Collectors.toList())));
+
+            Map<String, Set<String>> parameters = new HashMap<>();
+            Response response = requestDispatcher.dispatchRequest(repositoryPath.toString(), method, parameters, requestBody);
+
+            boolean success = response.getHttpStatus() < 400;
+            boolean hasContent = response.getHttpStatus() != 204;
+            for (int i = 0; i < operations.size(); i++) {
+                OrderedOperation orderedOperation = operations.get(i);
+                OperationResponse operationResponse = new OperationResponse();
+                operationResponse.setStatus(response.getHttpStatus());
+                if (displayOperationResponseOnSuccess || !success) {
+                    if (success && hasContent) {
+                        List<Resource> collectionData = response.getDocument().getCollectionData().get();
+                        Resource responseResourceBody = collectionData.get(0);
+                        operationResponse.setData(Nullable.of(responseResourceBody));
+                    }
+                    copyDocument(operationResponse, response.getDocument(), false);
+                }
+                responses[orderedOperation.getOrdinal()] = operationResponse;
+            }
+            return success;
+        } else {
+            boolean successful = true;
+            for (OrderedOperation orderedOperation : operations) {
+                Operation operation = orderedOperation.getOperation();
+                String path = OperationParameterUtils.parsePath(operation.getPath());
+                Map<String, Set<String>> parameters = OperationParameterUtils.parseParameters(operation.getPath());
+                String method = operation.getOp();
+                Document requestBody = new Document();
+                requestBody.setData(Nullable.of(operation.getValue()));
+
+                Response response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
+                boolean success = response.getHttpStatus() < 400;
+
+                OperationResponse operationResponse = new OperationResponse();
+                operationResponse.setStatus(response.getHttpStatus());
+                if (displayOperationResponseOnSuccess || !success) {
+                    copyDocument(operationResponse, response.getDocument(), true);
+                }
+                responses[orderedOperation.getOrdinal()] = operationResponse;
+
+                successful = successful && operationResponse.getStatus() < 400;
+                if (!successful && !resumeOnError) {
+                    return false;
+                }
+            }
+            return successful;
+        }
+
+    }
+
+    private boolean supportsBulk(RegistryEntry rootEntry) {
+        Object implementation = rootEntry.getResourceRepository().getImplementation();
+        boolean supported = implementation instanceof BulkResourceRepository;
+        if (!supported) {
+            Object wrapped = implementation;
+            while (wrapped instanceof Wrapper) {
+                wrapped = ((Wrapper) wrapped).getWrappedObject();
+                PreconditionUtil.verify(!(wrapped instanceof BulkResourceRepository),
+                        "non-bulk wrapper " + implementation + " wraps bulk repository " + wrapped + ", fix wrappers to support bulk operations to avoid performance issues");
+            }
+        }
+        return supported;
+    }
+
+    protected void fetchUpToDateResponses(List<OrderedOperation> orderedOperations, OperationResponse[] responses) {
+        RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
+        ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+
+        // get current set of resources after all the updates have been applied
+        for (OrderedOperation orderedOperation : orderedOperations) {
+            Operation operation = orderedOperation.getOperation();
+            OperationResponse operationResponse = responses[orderedOperation.getOrdinal()];
+
+            boolean isPost = operation.getOp().equalsIgnoreCase(HttpMethod.POST.toString());
+            boolean isPatch = operation.getOp().equalsIgnoreCase(HttpMethod.PATCH.toString());
+            boolean success = operationResponse.getStatus() < 400;
+            if (success && (isPost || isPatch)) {
+                Resource resource = operationResponse.getSingleData().get();
+
+                ResourceInformation resourceInformation = resourceRegistry.getBaseResourceInformation(resource.getType());
+                String path = resourceRegistry.getResourcePath(resourceInformation, resource.getId());
+                String method = HttpMethod.GET.toString();
+
+                Map<String, Set<String>> parameters = new HashMap<>();
+                if (includeChangedRelationships) {
+                    parameters.put("include", getLoadedRelationshipNames(resource));
+                }
+
+                Response response =
+                        requestDispatcher.dispatchRequest(path, method, parameters, null);
+                copyDocument(operationResponse, response.getDocument(), true);
+                operationResponse.setIncluded(null);
+            }
+        }
+    }
+
+    private Set<String> getLoadedRelationshipNames(Resource resourceBody) {
+        Set<String> result = new HashSet<>();
+        for (Map.Entry<String, Relationship> entry : resourceBody.getRelationships().entrySet()) {
+            if (entry.getValue() != null && entry.getValue().getData() != null) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    private void copyDocument(OperationResponse operationResponse, Document document, boolean copyData) {
+        if (document != null) {
+            if (copyData) {
+                operationResponse.setData(document.getData());
+            }
+            operationResponse.setMeta(document.getMeta());
+            operationResponse.setLinks(document.getLinks());
+            operationResponse.setErrors(document.getErrors());
+            operationResponse.setIncluded(document.getIncluded());
+        }
+    }
+
+    public boolean isResumeOnError() {
+        return resumeOnError;
+    }
+
+    public void setResumeOnError(boolean resumeOnError) {
+        this.resumeOnError = resumeOnError;
+    }
+
+    public boolean isIncludeChangedRelationships() {
+        return includeChangedRelationships;
+    }
+
+    public void setIncludeChangedRelationships(boolean includeChangedRelationships) {
+        this.includeChangedRelationships = includeChangedRelationships;
+    }
+
+    public boolean isDisplayOperationResponseOnSuccess() {
+        return displayOperationResponseOnSuccess;
+    }
+
+    public void setDisplayOperationResponseOnSuccess(boolean displayOperationResponseOnSuccess) {
+        this.displayOperationResponseOnSuccess = displayOperationResponseOnSuccess;
+    }
+
+    protected class DefaultOperationFilterContext implements OperationFilterContext {
+
+        private final QueryContext queryContext;
+
+        private List<OrderedOperation> orderedOperations;
+
+        DefaultOperationFilterContext(List<OrderedOperation> orderedOperations, QueryContext queryContext) {
+            this.orderedOperations = orderedOperations;
+            this.queryContext = queryContext;
+        }
+
+        public List<OrderedOperation> getOrderedOperations() {
+            return orderedOperations;
+        }
+
+        @Override
+        public ServiceDiscovery getServiceDiscovery() {
+            return moduleContext.getServiceDiscovery();
+        }
+
+        @Override
+        public QueryContext getQueryContext() {
+            return queryContext;
+        }
+    }
+
+    protected class DefaultOperationFilterChain implements OperationFilterChain {
+
+        protected int filterIndex = 0;
+
+        @Override
+        public List<OperationResponse> doFilter(OperationFilterContext context) {
+            List<OperationFilter> filters = getFilters();
+            if (filterIndex == filters.size()) {
+                return executeOperations(context.getOrderedOperations(), context.getQueryContext());
+            } else {
+                OperationFilter filter = filters.get(filterIndex);
+                filterIndex++;
+                return filter.filter(context, this);
+            }
+        }
+    }
 }

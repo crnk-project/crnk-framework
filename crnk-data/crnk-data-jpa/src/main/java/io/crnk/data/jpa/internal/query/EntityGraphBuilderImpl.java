@@ -1,12 +1,12 @@
 package io.crnk.data.jpa.internal.query;
 
-import io.crnk.meta.model.MetaAttributePath;
-
+import java.util.Set;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.Subgraph;
-import java.util.Set;
+
+import io.crnk.meta.model.MetaAttributePath;
 
 public class EntityGraphBuilderImpl implements EntityGraphBuilder {
 
@@ -25,7 +25,7 @@ public class EntityGraphBuilderImpl implements EntityGraphBuilder {
 			// ensure parent is fetched
 			MetaAttributePath parentPath = fetchPath.subPath(0, fetchPath.length() - 1);
 			Subgraph<Object> parentGraph = applyFetchPaths(graph, parentPath);
-			return parentGraph.addSubgraph(fetchPath.toString());
+			return parentGraph.addSubgraph(fetchPath.getLast().getName());
 		} else {
 			return graph.addSubgraph(fetchPath.toString());
 		}

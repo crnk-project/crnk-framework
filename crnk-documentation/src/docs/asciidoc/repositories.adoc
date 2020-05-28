@@ -133,9 +133,19 @@ the create, delete and update methods. `crnk-meta` accordingly reports
 insertable, updateable, deltable for such repositories as false.
 
 
+anchor:resource_bulk_repository[]
 
+## BulkResourceRepository
 
+WARNING: Experimental and only supports POST
 
+Similar to `ResourceRepository` but takes a list of resources for `create(...)`, `save(...)` and `delete(...)`.
+Allows a repository to process multiple resources at the same time. A request can be made in two ways:
+
+- The data section of the request document must includes a collection rather than a single data item.
+- A JSON Patch request whereas multiple changes to the same repository then access the bulk methods.
+
+For more information about bulk processing can be found <<operations,here>>.
 
 
 ## Query parameters with QuerySpec
@@ -151,9 +161,6 @@ QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameter
 is implemented by <<urlmapper,`QuerySpecUrlMapper`>> that may can also be extended, customized or replaced.
 
 For example showing its use URLs also have a look at the <<resource_repository,ResourceRepository>> section.
-
-
-### API
 
 The QuerySpec API looks like (further setters available as well):
 
@@ -201,7 +208,7 @@ the implementation of a repository as simple as possible.
 
 anchor:filtering[]
 
-### Basic Filtering
+## Basic Filtering
 
 NOTE: The JSON:API specification does not a mandate a specific filtering semantic. Instead
 it provides a recommendation that comes by default with Crnk. Depending on the data store
@@ -298,7 +305,7 @@ For example:
 
 anchor:nested_filtering[]
 
-### Nested Filtering
+## Nested Filtering
 
 WARNING: This feature is experimental. Please provide feedback.
 
@@ -355,7 +362,7 @@ or more simply:
 
 anchor:sorting[]
 
-### Sorting
+## Sorting
 
 Sorting information for the resources can be achieved by providing `sort` parameter.
 
@@ -375,10 +382,10 @@ SortSpec sortSpec = new SortSpec(PathSpec.of("person.address.city"), Direction.D
 
 anchor:pagination[]
 
-### Pagination
+## Pagination
 
 
-#### Offset/Limit Paging
+### Offset/Limit Paging
 
 Crnk comes by default with support for offset/limit paging:
 
@@ -387,7 +394,7 @@ Crnk comes by default with support for offset/limit paging:
 The parameters are then available with `QuerySpec.getPaging(type)` or the shortcuts `QuerySpec.getLimit` and `QuerySpec.getOffset`.
 
 
-#### Number/Size Paging
+## Number/Size Paging
 
 Support for number/size-based paging can be enabled by registering the `NumberSizePagingBehavior` in one of two ways:
 
@@ -403,7 +410,7 @@ a repository has been implemented with offset/limit paging, it works equally wel
 The conversion takes place automatically when invoking `QuerySpec.getPaging(desiredPagingType)`.
 
 
-#### Pagination Links
+### Pagination Links
 
 JSON:API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
 The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
@@ -424,7 +431,7 @@ The potential benefit of the second over the first approach is that it might be 
 determine whether more resources are available rather than counting all resources.
 This is typically achieved by querying `limit + 1` resources.
 
-#### Custom strategies
+### Custom strategies
 
 `OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec` and `NumberSizePagingBehavior` and `NumberSizePagingSpec`
 are two implementations of `PagingBehavior` and `PagingSpec`. Applications are free to add further implementations
@@ -452,7 +459,7 @@ by `NumberSizePagingBehavior` to translate `number` and `size` to `offset` and `
 that are based on `OffsetLimitPagingSpec`.
 
 
-### Sparse Fieldsets
+## Sparse Fieldsets
 
 Information about fields to include in the response can be achieved by providing `fields` parameter:
 
@@ -488,7 +495,7 @@ The QuerySpec for a particular resource type can be obtained with `QuerySpec.get
 
 anchor:urlmapper[]
 
-### URL Mapping
+## URL Mapping
 
 The mapping of request parameters to QuerySpec and back is implemented by `QuerySpecUrlMapper`.
 With `DefaultQuerySpecUrlMapper` there is a default implementation that follows the JSON:API
@@ -792,7 +799,7 @@ Sample exception is nothing more than a simple runtime exception:
 
 Class responsible for mapping the exception should:
 
-* implement ExceptionMapper interface
+* implement `ExceptionMapper` interface
 * available trough the used discovery mechanism or added trough a module.
 
 Sample exception mapper:
@@ -803,14 +810,60 @@ Sample exception mapper:
 include::../../../../crnk-test/src/main/java/io/crnk/test/mock/TestExceptionMapper.java[]
 ----
 
-On the server-side an exception should be mapped to an `ErrorResponse` object
+On the server-side an exception is mapped to an `ErrorResponse` object
 with `toErrorResponse`. It consists of an HTTP status and `ErrorData` (which is consistent with JSON:API error structure).
 On the client-side an `ExceptionMapper` returning `true` upon `accept(...)` is used to map an
 `ErrorResponse` back to an exception with `fromErrorResponse`.
 
-Note that the exception mapper is reponsible for providing the logging of exceptions with the
-appropriate log levels. Also have a look at the subsequent section about the validation module that takes
-care of JSR-303 bean validation exception mapping.
+Note that `ExceptionMapper` follow a number of important behaviors:
+
+- Built-in `ExceptionMapper` can be overridden by custom `ExceptionMapper` implementations. The later always takes precedence.
+- The `ExceptionMapper` is responsible for providing the logging of exceptions with the appropriate log levels.
+  Typically a `4xx` status causes a `WARN` log message, whereas `5xx` errors cause an `ERROR` log message.
+  Also have a look at the subsequent section about the validation module that takes
+  care of JSR-303 bean validation exception mapping.
+- `ExceptionMapper` target a given exception class. In case of type hierarchies, the closest `ExceptionMapper` is chosen.
+  For example, if there are `ExceptionMapper` implementations for both `RuntimeException` and `IllegalStateException`,
+  the mappers for `RuntimeException` is chosen if there is no direct mapper for `IllegalStateException`.
+- `ExceptionMapper` can implement the `Prioritizable` interface if multiple implementations target the
+  same exception type. But note that the type hierarchy still takes precedence.
+- The implementation of a custom `ExceptionMapper` can be skipped if the exception inherits from `CrnkMappableException`.
+
+There are a number of built-in exception mappers provided by crnk-core and the various modules:
+
+[cols="1,3", options="header"]
+|===
+|Status
+|Exception
+
+| 401
+| `UnauthorizedException`
+
+| 403
+| `ForbiddenException`
+
+| 404
+| `ResourceNotFoundException`
+
+| 405
+| `MethodNotAllowedException`
+
+| 409
+| `OptimisticLockException`
+
+| 422
+| `ConstraintViolationException`
+
+| 422
+| `ValidationException`
+
+| 500
+| `InternalServerErrorException`
+
+| 503
+| `TimeoutException`
+
+|===
 
 
 ## Meta Information

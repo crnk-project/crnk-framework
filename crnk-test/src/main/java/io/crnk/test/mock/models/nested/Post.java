@@ -2,6 +2,7 @@ package io.crnk.test.mock.models.nested;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -18,6 +19,7 @@ public class Post {
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "post", repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
 	private List<PostComment> comments;
 
+	@JsonProperty("postHeader")
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "post", repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
 	private PostHeader header;
 

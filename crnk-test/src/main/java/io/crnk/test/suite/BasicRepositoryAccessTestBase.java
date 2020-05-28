@@ -1,6 +1,8 @@
 package io.crnk.test.suite;
 
 import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
@@ -11,9 +13,14 @@ import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.test.mock.models.HistoricTask;
 import io.crnk.test.mock.models.Project;
+import io.crnk.test.mock.models.ReadOnlyTask;
+import io.crnk.test.mock.models.RelocatedTask;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.models.TaskSubType;
+import io.crnk.test.mock.repository.ProjectRepository;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -83,6 +90,87 @@ public abstract class BasicRepositoryAccessTestBase {
     }
 
     @Test
+    public void testNonPostableResource() {
+        ReadOnlyTask readOnlyTask = new ReadOnlyTask();
+        readOnlyTask.setId(12L);
+        ResourceRepository<ReadOnlyTask, Object> repository = testContainer.getRepositoryForType(ReadOnlyTask.class);
+        try {
+            repository.create(readOnlyTask);
+        } catch (MethodNotAllowedException e) {
+            // ok
+        }
+    }
+
+    @Test
+    public void testOverlappingPaths() {
+        HistoricTask task = new HistoricTask();
+        task.setId(13L);
+        task.setName("mySchedule");
+        ResourceRepository<HistoricTask, Object> repository = testContainer.getRepositoryForType(HistoricTask.class);
+        repository.create(task);
+        ResourceList<HistoricTask> historicTasks = repository.findAll(new QuerySpec(HistoricTask.class));
+        Assert.assertEquals(1, historicTasks.size());
+        ResourceList<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
+        Assert.assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void testRenamedPath() {
+        RelocatedTask task = new RelocatedTask();
+        task.setId(13L);
+        task.setName("mySchedule");
+        ResourceRepository<RelocatedTask, Object> repository = testContainer.getRepositoryForType(RelocatedTask.class);
+        repository.create(task);
+        ResourceList<RelocatedTask> historicTasks = repository.findAll(new QuerySpec(RelocatedTask.class));
+        Assert.assertEquals(1, historicTasks.size());
+
+        RegistryEntry entry = testContainer.getBoot().getResourceRegistry().getEntry(RelocatedTask.class);
+        Assert.assertEquals("taskNewPath", entry.getResourceInformation().getResourcePath());
+    }
+
+    @Test
+    public void testNonPatchableResource() {
+        ReadOnlyTask readOnlyTask = new ReadOnlyTask();
+        readOnlyTask.setId(12L);
+        ResourceRepository<ReadOnlyTask, Object> repository = testContainer.getRepositoryForType(ReadOnlyTask.class);
+        try {
+            repository.save(readOnlyTask);
+        } catch (MethodNotAllowedException e) {
+            // ok
+        }
+    }
+
+    @Test
+    public void testNonDeletableResource() {
+        ResourceRepository<ReadOnlyTask, Object> repository = testContainer.getRepositoryForType(ReadOnlyTask.class);
+        try {
+            repository.delete(12L);
+        } catch (MethodNotAllowedException e) {
+            // ok
+        }
+    }
+
+    @Test
+    public void testCreateAnyFields() {
+        Schedule schedule = new Schedule();
+        schedule.setName("mySchedule2");
+        schedule.setAnyFields("randomfield1", 1234);
+        schedule.setAnyFields("randomfield2", "test");
+
+        Schedule result = scheduleRepo.create(schedule);
+
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        ResourceList<Schedule> list = scheduleRepo.findAll(querySpec);
+        Assert.assertEquals(1, list.size());
+
+        Assert.assertFalse(result.getAnyFields().isEmpty());
+        Assert.assertEquals(1234, result.getAnyFields().get("randomfield1"));
+        Assert.assertEquals("test", result.getAnyFields().get("randomfield2"));
+
+    }
+
+
+    @Test
     public void testJsonApiResponseContentTypeReceived() throws IOException {
         String url = testContainer.getBaseUrl() + "/schedules";
         OkHttpClient client = new OkHttpClient();
@@ -121,6 +209,28 @@ public abstract class BasicRepositoryAccessTestBase {
         Assert.assertEquals(5, tasks.size());
         for (int i = 0; i < 5; i++) {
             Assert.assertEquals("task" + i, tasks.get(i).getName());
+        }
+    }
+
+    @Test
+    public void testResourceTypeHolderCarriesResourceType() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setName("task");
+        taskRepo.create(task);
+
+        TaskSubType subType = new TaskSubType();
+        subType.setId(13L);
+        subType.setName("task");
+        taskRepo.create(subType);
+
+        ResourceList<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
+        for (Task fetchedTask : tasks) {
+            if (fetchedTask.getId() == 13L) {
+                Assert.assertEquals("tasksSubType", fetchedTask.getType());
+            } else {
+                Assert.assertEquals("tasks", fetchedTask.getType());
+            }
         }
     }
 
@@ -365,15 +475,17 @@ public abstract class BasicRepositoryAccessTestBase {
         taskRepo.create(task);
 
         relRepo.addRelations(task, Arrays.asList(project0.getId(), project1.getId()), "projects");
-        List<Project> relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
+        ResourceList<Project> relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Project.class));
         Assert.assertEquals(2, relProjects.size());
-
         relRepo.setRelations(task, Arrays.asList(project1.getId()), "projects");
-        relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
+
+        relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Project.class));
         Assert.assertEquals(1, relProjects.size());
         Assert.assertEquals(project1.getId(), relProjects.get(0).getId());
-
-
+        ProjectRepository.ProjectsLinksInformation projectLinks = relProjects.getLinks(ProjectRepository.ProjectsLinksInformation.class);
+        ProjectRepository.ProjectsMetaInformation projecsMeta = relProjects.getMeta(ProjectRepository.ProjectsMetaInformation.class);
+        Assert.assertEquals("linkValue", projectLinks.getLinkValue().getHref());
+        Assert.assertEquals("metaValue", projecsMeta.getMetaValue());
         // TODO HTTP DELETE method with payload not supported? at least in
         // Jersey
 		/*
@@ -383,6 +495,40 @@ public abstract class BasicRepositoryAccessTestBase {
 		Assert.assertEquals(0, relProjects.size());
 		*/
     }
+
+
+    @Test
+    public void testRelatedInformation() {
+        Project project0 = new Project();
+        project0.setId(1L);
+        project0.setName("project0");
+        projectRepo.create(project0);
+
+        Project project1 = new Project();
+        project1.setId(2L);
+        project1.setName("project1");
+        projectRepo.create(project1);
+
+        Task task = new Task();
+        task.setId(3L);
+        task.setName("test");
+        taskRepo.create(task);
+
+        relRepo.setRelations(task, Arrays.asList(project0.getId(), project1.getId()), "projects");
+
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        querySpec.includeRelation(PathSpec.of("projects"));
+        Task queriedTask = taskRepo.findOne(task.getId(), querySpec);
+        ResourceList<Project> projects = queriedTask.getProjects();
+        Assert.assertEquals(2, projects.size());
+        ProjectRepository.ProjectsLinksInformation relationLinks = projects.getLinks(ProjectRepository.ProjectsLinksInformation.class);
+        Assert.assertEquals("linkValue", relationLinks.getLinkValue().getHref());
+        Assert.assertTrue(relationLinks.getSelf().getHref().endsWith("/tasks/3/relationships/projects"));
+        Assert.assertTrue(relationLinks.getRelated().getHref().endsWith("/tasks/3/projects"));
+        ProjectRepository.ProjectsMetaInformation relationMeta = projects.getMeta(ProjectRepository.ProjectsMetaInformation.class);
+        Assert.assertEquals("metaValue", relationMeta.getMetaValue());
+    }
+
 
     @Test
     public void testRenaming() {
@@ -410,4 +556,50 @@ public abstract class BasicRepositoryAccessTestBase {
         }
 
     }
+
+    @Test
+    public void includeFieldsWihtoutInclusion() {
+        Project project = new Project();
+        project.setId(1L);
+        project.setName("project");
+        projectRepo.create(project);
+
+        Task task = new Task();
+        task.setId(3L);
+        task.setName("test");
+        task.setProject(project);
+        taskRepo.create(task);
+
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        querySpec.includeField(PathSpec.of("id"));
+        querySpec.includeField(PathSpec.of("name"));
+        Task queriedTask = taskRepo.findOne(task.getId(), querySpec);
+        Assert.assertNull(queriedTask.getProject());
+        Assert.assertNotNull(queriedTask.getName());
+        Assert.assertNotNull(queriedTask.getId());
+    }
+
+    @Test
+    public void includeFieldsWithInclusion() {
+        Project project = new Project();
+        project.setId(1L);
+        project.setName("project");
+        projectRepo.create(project);
+
+        Task task = new Task();
+        task.setId(3L);
+        task.setName("test");
+        task.setProject(project);
+        taskRepo.create(task);
+
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        querySpec.includeField(PathSpec.of("id"));
+        querySpec.includeRelation(PathSpec.of("project"));
+        Task queriedTask = taskRepo.findOne(task.getId(), querySpec);
+        Assert.assertNotNull(queriedTask.getProject());
+        Assert.assertEquals("project", queriedTask.getProject().getName());
+        Assert.assertNull(queriedTask.getName());
+        Assert.assertNotNull(queriedTask.getId());
+    }
+
 }

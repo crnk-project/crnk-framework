@@ -10,6 +10,10 @@ public class EnumStringMapper<T> extends ToStringStringMapper<T> {
 
 	@Override
 	public T parse(String input) {
-		return (T) Enum.valueOf((Class<Enum>) clazz.asSubclass(Enum.class), input.trim());
+		try {
+			return (T) Enum.valueOf((Class<Enum>) clazz.asSubclass(Enum.class), input.trim());
+		} catch (IllegalArgumentException ex) {
+			throw new ParserException(ex.getMessage());
+		}
 	}
 }

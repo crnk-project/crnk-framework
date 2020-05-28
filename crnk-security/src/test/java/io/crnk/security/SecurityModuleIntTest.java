@@ -3,9 +3,10 @@ package io.crnk.security;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
-import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.UnauthorizedException;
+import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
@@ -16,6 +17,7 @@ import io.crnk.security.model.Project;
 import io.crnk.security.model.ProjectRepository;
 import io.crnk.security.model.Task;
 import io.crnk.security.model.TaskRepository;
+import io.crnk.security.model.TaskToProjectRepository;
 import io.crnk.test.JerseyTestBase;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
@@ -35,6 +37,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -56,18 +59,9 @@ public class SecurityModuleIntTest extends JerseyTestBase {
 
     private SecurityModule module;
 
-    private static void setBasicAuthentication(CrnkClient client, final String userName, final String password) {
-        OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
-        httpAdapter.addListener(new OkHttpAdapterListenerBase() {
+    private String userName;
 
-            @Override
-            public void onBuild(OkHttpClient.Builder builder) {
-                builder.authenticator(new TestAuthenticator(userName, password));
-            }
-
-        });
-
-    }
+    private String password;
 
     private static int responseCount(Response response) {
         Response priorResponse = response;
@@ -129,7 +123,20 @@ public class SecurityModuleIntTest extends JerseyTestBase {
         projectRepo = client.getRepositoryForType(Project.class);
         relRepo = client.getRepositoryForType(Task.class, Project.class);
 
-        setBasicAuthentication(client, "doe", "doePass");
+        userName = "doe";
+        password = "doePass";
+
+        OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
+        httpAdapter.addListener(new OkHttpAdapterListenerBase() {
+
+            @Override
+            public void onBuild(OkHttpClient.Builder builder) {
+                if (userName != null) {
+                    builder.authenticator(new TestAuthenticator(userName, password));
+                }
+            }
+
+        });
 
         TaskRepository.clear();
         ProjectRepository.clear();
@@ -183,20 +190,35 @@ public class SecurityModuleIntTest extends JerseyTestBase {
         taskRepo.create(task);
     }
 
+
+    @Test(expected = UnauthorizedException.class)
+    public void unauthorizedPost() {
+        userName = null; // do not authenticate
+
+        Task task = new Task();
+        task.setId(1L);
+        task.setName("test");
+        taskRepo.create(task);
+    }
+
     @Test
     public void disableSecurityModule() {
         module.setEnabled(false);
 
-        Assert.assertTrue(module.isAllowed(Project.class, ResourcePermission.ALL));
-        Assert.assertTrue(module.isAllowed(Task.class, ResourcePermission.ALL));
-        Assert.assertEquals(ResourcePermission.ALL, module.getResourcePermission(Task.class));
+        QueryContext queryContext = Mockito.mock(QueryContext.class);
+        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions(queryContext,"projects"));
+        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions(queryContext, "tasks"));
+        Assert.assertTrue(module.isAllowed(queryContext, Project.class, ResourcePermission.ALL));
+        Assert.assertTrue(module.isAllowed(queryContext, Task.class, ResourcePermission.ALL));
+        Assert.assertEquals(ResourcePermission.ALL, module.getResourcePermission(queryContext, Task.class));
     }
 
     @Test(expected = IllegalStateException.class)
     public void noIsRolesAllowedWhenDisabled() {
         module.setEnabled(false);
 
-        module.isUserInRole("whatever");
+        QueryContext queryContext = Mockito.mock(QueryContext.class);
+        module.isUserInRole(queryContext,"whatever");
     }
 
     @Test
@@ -271,7 +293,10 @@ public class SecurityModuleIntTest extends JerseyTestBase {
     private class TestApplication extends ResourceConfig {
 
         public TestApplication() {
-            property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, Project.class.getPackage().getName());
+            SimpleModule testModule = new SimpleModule("test");
+            testModule.addRepository(new ProjectRepository());
+            testModule.addRepository(new TaskRepository());
+            testModule.addRepository(new TaskToProjectRepository());
 
             // tag::setup[]
             Builder builder = SecurityConfig.builder();
@@ -289,6 +314,7 @@ public class SecurityModuleIntTest extends JerseyTestBase {
 
             CrnkFeature feature = new CrnkFeature();
             feature.addModule(module);
+            feature.addModule(testModule);
             // end::setup[]
             register(feature);
         }

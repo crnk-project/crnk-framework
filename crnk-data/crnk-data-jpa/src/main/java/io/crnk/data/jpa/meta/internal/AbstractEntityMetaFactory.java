@@ -1,14 +1,9 @@
 package io.crnk.data.jpa.meta.internal;
 
-import io.crnk.core.engine.information.bean.BeanAttributeInformation;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.data.jpa.meta.MetaEntityAttribute;
-import io.crnk.data.jpa.meta.MetaJpaDataObject;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimaryKey;
-
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -24,10 +19,15 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
+
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.data.jpa.meta.MetaEntityAttribute;
+import io.crnk.data.jpa.meta.MetaJpaDataObject;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimaryKey;
 
 public abstract class AbstractEntityMetaFactory<T extends MetaJpaDataObject> extends AbstractJpaDataObjectFactory<T> {
 
@@ -103,7 +103,7 @@ public abstract class AbstractEntityMetaFactory<T extends MetaJpaDataObject> ext
 	protected abstract T newDataObject();
 
 	@Override
-	protected MetaAttribute createAttribute(T metaDataObject, String name) {
+	protected MetaAttribute createAttribute(T metaDataObject, BeanAttributeInformation attrInformation, String name) {
 		MetaEntityAttribute attr = new MetaEntityAttribute();
 		attr.setName(name);
 		attr.setParent(metaDataObject, true);

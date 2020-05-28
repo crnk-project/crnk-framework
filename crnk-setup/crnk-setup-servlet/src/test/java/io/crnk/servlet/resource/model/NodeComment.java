@@ -1,19 +1,19 @@
 package io.crnk.servlet.resource.model;
 
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "node-comments")
 public class NodeComment extends AbstractResource {
 
 	private String comment;
 
-	@JsonApiToOne
+	@JsonApiRelation
 	private Node parent;
 
-	@JsonApiToOne
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Locale langLocale;
 
 	public NodeComment(Long id, String comment, Node parent, Locale langLocale) {

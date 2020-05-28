@@ -54,7 +54,7 @@ public class GeneratorPluginTest {
     public void checkGenerate() throws IOException {
         task.generate();
 
-        File genDir = new File(testProjectDir.getRoot(), "build/generated/source/typescript");
+        File genDir = new File(testProjectDir.getRoot(), "build/generated/sources/typescript");
         Assert.assertTrue(genDir.exists());
         Assert.assertTrue(new File(genDir, "projects.ts").exists());
     }

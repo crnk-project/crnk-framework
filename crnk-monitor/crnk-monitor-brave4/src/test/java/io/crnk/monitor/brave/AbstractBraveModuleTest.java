@@ -5,6 +5,7 @@ import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -13,7 +14,9 @@ import io.crnk.core.repository.ResourceRepository;
 import io.crnk.monitor.brave.mock.models.Project;
 import io.crnk.monitor.brave.mock.models.Task;
 import io.crnk.monitor.brave.mock.repository.ProjectRepository;
+import io.crnk.monitor.brave.mock.repository.ProjectToTaskRepository;
 import io.crnk.monitor.brave.mock.repository.TaskRepository;
+import io.crnk.monitor.brave.mock.repository.TaskToProjectRepository;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -94,17 +97,13 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
         ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
 
         // will resolve resource + relationship
-        Mockito.verify(serverReporter, Mockito.times(2)).report(serverSpanCaptor.capture());
+        Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
         List<Span> serverSpans = serverSpanCaptor.getAllValues();
         Span repositorySpan = serverSpans.get(0);
         Assert.assertEquals("crnk:post:/tasks/13/", repositorySpan.name());
         Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
         assertTag(repositorySpan, "lc", "crnk");
         assertTag(repositorySpan, "crnk.query", "?");
-
-        repositorySpan = serverSpans.get(1);
-        Assert.assertEquals("crnk:get:/projects/", repositorySpan.name());
-        Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
 
     }
 
@@ -230,7 +229,6 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 
         @SuppressWarnings("unchecked")
         public TestApplication() {
-            property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, getClass().getPackage().getName());
             property(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, "http://test.local");
 
             serverReporter = Mockito.mock(Reporter.class);
@@ -240,8 +238,15 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
                     .spanReporter(serverReporter)
                     .build();
 
+            SimpleModule testModule = new SimpleModule("test");
+            testModule.addRepository(new ProjectRepository());
+            testModule.addRepository(new TaskRepository());
+            testModule.addRepository(new TaskToProjectRepository());
+            testModule.addRepository(new ProjectToTaskRepository());
+
             CrnkFeature feature = new CrnkFeature();
             feature.addModule(BraveServerModule.create(tracing));
+            feature.addModule(testModule);
             register(feature);
         }
     }

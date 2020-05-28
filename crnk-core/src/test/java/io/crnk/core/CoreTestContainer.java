@@ -10,99 +10,99 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.MockConstants;
-import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.repository.ResourceRepository;
 import org.mockito.Mockito;
 
 public class CoreTestContainer {
 
-	public static final String BASE_URL = "http://127.0.0.1";
+    public static final String BASE_URL = "http://127.0.0.1";
 
-	private CrnkBoot boot = new CrnkBoot();
+    private CrnkBoot boot = new CrnkBoot();
 
-	private QueryContext queryContext;
+    private QueryContext queryContext;
 
-	private HttpRequestContextBase requestContextBase;
+    private HttpRequestContextBase requestContextBase;
 
-	private HttpRequestContextBaseAdapter requestContext;
+    private HttpRequestContextBaseAdapter requestContext;
 
-	public CoreTestContainer() {
-		MockRepositoryUtil.clear();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(BASE_URL));
-	}
+    public CoreTestContainer() {
+        boot.setServiceUrlProvider(new ConstantServiceUrlProvider(BASE_URL));
+    }
 
-	public void setDefaultPackage() {
-		setPackage(MockConstants.TEST_MODELS_PACKAGE);
-	}
+    public CrnkBoot getBoot() {
+        return boot;
+    }
 
-	public void setPackage(String packageName) {
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(packageName));
-	}
+    public void boot() {
+        ModuleRegistry moduleRegistry = boot.getModuleRegistry();
+        HttpRequestContextProvider httpRequestContextProvider = moduleRegistry.getHttpRequestContextProvider();
 
-	public CrnkBoot getBoot() {
-		return boot;
-	}
+        requestContextBase = Mockito.mock(HttpRequestContextBase.class);
+        requestContext = new HttpRequestContextBaseAdapter(requestContextBase);
+        queryContext = requestContext.getQueryContext();
+        queryContext.setRequestVersion(0);
+        queryContext.setBaseUrl(boot.getServiceUrlProvider().getUrl());
 
-	public void boot() {
-		ModuleRegistry moduleRegistry = boot.getModuleRegistry();
-		HttpRequestContextProvider httpRequestContextProvider = moduleRegistry.getHttpRequestContextProvider();
+        boot.boot();
+        httpRequestContextProvider.onRequestStarted(requestContext);
+    }
 
-		requestContextBase = Mockito.mock(HttpRequestContextBase.class);
-		requestContext = new HttpRequestContextBaseAdapter(requestContextBase);
-		queryContext = requestContext.getQueryContext();
-		queryContext.setBaseUrl(boot.getServiceUrlProvider().getUrl());
+    public QueryContext getQueryContext() {
+        return queryContext;
+    }
 
-		boot.boot();
-		httpRequestContextProvider.onRequestStarted(requestContext);
-	}
+    public QuerySpecAdapter toQueryAdapter(QuerySpec querySpec) {
+        ResourceRegistry resourceRegistry = boot.getResourceRegistry();
+        return new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
+    }
 
-	public QueryContext getQueryContext() {
-		return queryContext;
-	}
+    public void addModule(Module module) {
+        boot.addModule(module);
+    }
 
-	public QuerySpecAdapter toQueryAdapter(QuerySpec querySpec) {
-		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
-		return new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
-	}
+    public RegistryEntry getEntry(Class resourceClass) {
+        return boot.getResourceRegistry().getEntry(resourceClass);
+    }
 
-	public void addModule(Module module) {
-		boot.addModule(module);
-	}
+    public ModuleRegistry getModuleRegistry() {
+        return boot.getModuleRegistry();
+    }
 
-	public RegistryEntry getEntry(Class resourceClass) {
-		return boot.getResourceRegistry().getEntry(resourceClass);
-	}
+    public ResourceRegistry getResourceRegistry() {
+        return boot.getResourceRegistry();
+    }
 
-	public ModuleRegistry getModuleRegistry() {
-		return boot.getModuleRegistry();
-	}
+    public ObjectMapper getObjectMapper() {
+        return boot.getObjectMapper();
+    }
 
-	public ResourceRegistry getResourceRegistry() {
-		return boot.getResourceRegistry();
-	}
+    public DocumentMapper getDocumentMapper() {
+        return boot.getDocumentMapper();
+    }
 
-	public ObjectMapper getObjectMapper() {
-		return boot.getObjectMapper();
-	}
+    public HttpRequestContextBase getRequestContextBase() {
+        return requestContextBase;
+    }
 
-	public DocumentMapper getDocumentMapper() {
-		return boot.getDocumentMapper();
-	}
+    public HttpRequestContextBaseAdapter getRequestContext() {
+        return requestContext;
+    }
 
-	public HttpRequestContextBase getRequestContextBase() {
-		return requestContextBase;
-	}
+    public RegistryEntry getEntry(String resourceType) {
+        return getResourceRegistry().getEntry(resourceType);
+    }
 
-	public HttpRequestContextBaseAdapter getRequestContext() {
-		return requestContext;
-	}
+    public <T, I> ResourceRepository<T, I> getRepository(Class<T> resourceClass) {
+        return (ResourceRepository<T, I>) boot.getResourceRegistry().getEntry(resourceClass).getResourceRepository().getImplementation();
+    }
 
-	public RegistryEntry getEntry(String resourceType) {
-		return getResourceRegistry().getEntry(resourceType);
-	}
+    public Object getRepository(Class sourceClass, String fieldName) {
+        RegistryEntry entry = boot.getResourceRegistry().getEntry(sourceClass);
+        return entry.getRelationshipRepository(fieldName).getImplementation();
+
+    }
 }

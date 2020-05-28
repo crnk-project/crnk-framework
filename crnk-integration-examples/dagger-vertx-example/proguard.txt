@@ -29,7 +29,7 @@
 -dontoptimize
 
 
--keep class * implements io.crnk.core.engine.error.JsonApiExceptionMapper {
+-keep class * implements io.crnk.core.engine.error.ExceptionMapper {
 	*;
 }
 
@@ -63,7 +63,7 @@
   *;
 }
 
--keepclasseswithmembers public class io.crnk.example.vertx.VertxApplication {
+-keepclasseswithmembers public class io.crnk.example.vertx.AppMain {
     public static void main(java.lang.String[]);
 }
 

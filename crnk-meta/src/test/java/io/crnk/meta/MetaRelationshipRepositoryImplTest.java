@@ -19,7 +19,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	private MetaRelationshipRepositoryImpl repo;
 
-	private MetaLookup lookup;
+	private MetaLookupImpl lookup;
 
 	@Before
 	public void setup() {
@@ -27,7 +27,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 		resourceProvider = new ResourceMetaProvider();
 
-		lookup = new MetaLookup();
+		lookup = new MetaLookupImpl();
 		lookup.setModuleContext(container.getModuleRegistry().getContext());
 		lookup.addProvider(resourceProvider);
 		lookup.initialize();

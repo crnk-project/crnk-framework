@@ -100,8 +100,18 @@ public interface ResourceFieldInformationProvider {
     Optional<PatchStrategy> getPatchStrategy(BeanAttributeInformation attributeDesc);
 
     /**
-     * Returns whether the field is the owner of a relationships.
-     * @return
+     * @return Returns whether the field is the owner of a relationships.
      */
     Optional<String> getMappedBy(BeanAttributeInformation attributeDesc);
+
+    /**
+     * @return range of version the field is applicable to. By default {@link VersionRange#UNBOUNDED} will be used.
+     */
+    Optional<VersionRange> getVersionRange(BeanAttributeInformation attributeDesc);
+
+    /**
+     * Determines whether it is a structured type with fields on its own, typically by annotating it with
+     * {@link io.crnk.core.resource.annotations.JsonApiEmbeddable}.
+     */
+    boolean isEmbeddedType(BeanAttributeInformation attributeDesc);
 }

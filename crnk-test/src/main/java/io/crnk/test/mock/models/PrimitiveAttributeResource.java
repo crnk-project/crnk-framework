@@ -1,13 +1,17 @@
 package io.crnk.test.mock.models;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
-
-import java.util.Date;
-import java.util.UUID;
 
 @JsonApiResource(type = "primitiveAttribute")
 public class PrimitiveAttributeResource {
@@ -55,6 +59,13 @@ public class PrimitiveAttributeResource {
 
 	private Object objectValue;
 
+	private Map<TaskStatus, String> mapValueWithEnumKey;
+
+	private Map<Long, List<String>> mapValueWithListValue;
+
+	private Map<String, Set<String>> mapValueWithSetValue;
+
+	private Optional<String> optionalValue = Optional.empty();
 
 	public Long getId() {
 		return id;
@@ -62,6 +73,38 @@ public class PrimitiveAttributeResource {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Optional<String> getOptionalValue() {
+		return optionalValue;
+	}
+
+	public void setOptionalValue(Optional<String> optionalValue) {
+		this.optionalValue = optionalValue;
+	}
+
+	public Map<String, Set<String>> getMapValueWithSetValue() {
+		return mapValueWithSetValue;
+	}
+
+	public void setMapValueWithSetValue(Map<String, Set<String>> mapValueWithSetValue) {
+		this.mapValueWithSetValue = mapValueWithSetValue;
+	}
+
+	public Map<TaskStatus, String> getMapValueWithEnumKey() {
+		return mapValueWithEnumKey;
+	}
+
+	public void setMapValueWithEnumKey(Map<TaskStatus, String> mapValueWithEnumKey) {
+		this.mapValueWithEnumKey = mapValueWithEnumKey;
+	}
+
+	public Map<Long, List<String>> getMapValueWithListValue() {
+		return mapValueWithListValue;
+	}
+
+	public void setMapValueWithListValue(Map<Long, List<String>> mapValueWithListValue) {
+		this.mapValueWithListValue = mapValueWithListValue;
 	}
 
 	public UUID getUuidValue() {

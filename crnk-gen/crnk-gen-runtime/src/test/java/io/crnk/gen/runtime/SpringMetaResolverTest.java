@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.gen.base.GeneratorConfig;
 import io.crnk.gen.runtime.spring.SpringMetaResolver;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.spring.setup.boot.core.CrnkCoreAutoConfiguration;
 import io.crnk.test.mock.TestModule;

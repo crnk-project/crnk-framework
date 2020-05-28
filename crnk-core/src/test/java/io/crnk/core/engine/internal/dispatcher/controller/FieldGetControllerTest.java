@@ -31,7 +31,7 @@ public class FieldGetControllerTest extends ControllerTestBase {
 	@Test
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.build("tasks/1/project");
+		JsonPath jsonPath = pathBuilder.build("tasks/1/project", queryContext);
 		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
@@ -45,7 +45,7 @@ public class FieldGetControllerTest extends ControllerTestBase {
 	@Test
 	public void onRelationshipRequestShouldDenyIt() {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
+		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project", queryContext);
 		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
@@ -59,7 +59,7 @@ public class FieldGetControllerTest extends ControllerTestBase {
 	@Test
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.build("tasks");
+		JsonPath jsonPath = pathBuilder.build("tasks", queryContext);
 		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
@@ -74,7 +74,7 @@ public class FieldGetControllerTest extends ControllerTestBase {
 	public void onGivenRequestFieldResourceGetShouldHandleIt() {
 		// GIVEN
 
-		JsonPath jsonPath = pathBuilder.build("/tasks/1/project");
+		JsonPath jsonPath = pathBuilder.build("/tasks/1/project", queryContext);
 		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
@@ -89,7 +89,7 @@ public class FieldGetControllerTest extends ControllerTestBase {
 	public void onGivenRequestFieldResourcesGetShouldHandleIt() {
 		// GIVEN
 
-		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
+		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects", queryContext);
 		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
@@ -137,7 +137,7 @@ public class FieldGetControllerTest extends ControllerTestBase {
 		queryParams.includeRelation(PathSpec.of("includedTask"));
 
 		QueryAdapter queryAdapter = container.toQueryAdapter(queryParams);
-		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
+		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects", queryContext);
 		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
