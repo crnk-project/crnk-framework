@@ -21,3 +21,10 @@ continuation_indent_size = 4
 
 [*.bat]
 end_of_line = crlf
+
+# All OpenAPI test files in the OpenAPI generator
+[crnk-gen/crnk-gen-openapi/**.yaml]
+indent_style = space
+indent_size = 2
+continuation_indent_size = 4
+tab_width = 2

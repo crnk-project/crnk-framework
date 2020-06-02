@@ -949,15 +949,27 @@ components:
           type: string
       type: object
     CommentPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/CommentResourceReference'
-      - $ref: '#/components/schemas/CommentResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/CommentResourceReference'
+          - $ref: '#/components/schemas/CommentResourcePatchAttributes'
+      required:
+      - data
+      type: object
     CommentPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/CommentPostResourceData'
+      required:
+      - data
+      type: object
+    CommentPostResourceAttribute:
+      $ref: '#/components/schemas/PostResourceReference'
+    CommentPostResourceData:
       allOf:
       - $ref: '#/components/schemas/CommentPostResourceReference'
       - $ref: '#/components/schemas/CommentResourcePostAttributes'
-    CommentPostResourceAttribute:
-      $ref: '#/components/schemas/PostResourceReference'
     CommentPostResourceReference:
       properties:
         id:
@@ -971,9 +983,14 @@ components:
       - type
       type: object
     CommentPostResources:
-      items:
-        $ref: '#/components/schemas/CommentPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/CommentPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     CommentRelatedResourceAttribute:
       $ref: '#/components/schemas/NestedRelatedResourceReference'
     CommentResourceAttributes:
@@ -1092,15 +1109,27 @@ components:
       nullable: false
       type: string
     HeaderPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/HeaderResourceReference'
-      - $ref: '#/components/schemas/HeaderResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/HeaderResourceReference'
+          - $ref: '#/components/schemas/HeaderResourcePatchAttributes'
+      required:
+      - data
+      type: object
     HeaderPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/HeaderPostResourceData'
+      required:
+      - data
+      type: object
+    HeaderPostResourceAttribute:
+      $ref: '#/components/schemas/PostResourceReference'
+    HeaderPostResourceData:
       allOf:
       - $ref: '#/components/schemas/HeaderPostResourceReference'
       - $ref: '#/components/schemas/HeaderResourcePostAttributes'
-    HeaderPostResourceAttribute:
-      $ref: '#/components/schemas/PostResourceReference'
     HeaderPostResourceReference:
       properties:
         id:
@@ -1114,9 +1143,14 @@ components:
       - type
       type: object
     HeaderPostResources:
-      items:
-        $ref: '#/components/schemas/HeaderPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/HeaderPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     HeaderRelatedResourceAttribute:
       $ref: '#/components/schemas/NestedRelatedResourceReference'
     HeaderResourceAttributes:
@@ -1222,10 +1256,22 @@ components:
       nullable: true
       type: string
     HistoricTasksPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/HistoricTasksResourceReference'
-      - $ref: '#/components/schemas/HistoricTasksResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/HistoricTasksResourceReference'
+          - $ref: '#/components/schemas/HistoricTasksResourcePatchAttributes'
+      required:
+      - data
+      type: object
     HistoricTasksPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/HistoricTasksPostResourceData'
+      required:
+      - data
+      type: object
+    HistoricTasksPostResourceData:
       allOf:
       - $ref: '#/components/schemas/HistoricTasksPostResourceReference'
       - $ref: '#/components/schemas/HistoricTasksResourcePostAttributes'
@@ -1242,9 +1288,14 @@ components:
       - type
       type: object
     HistoricTasksPostResources:
-      items:
-        $ref: '#/components/schemas/HistoricTasksPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/HistoricTasksPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     HistoricTasksResourceAttributes:
       properties:
         attributes:
@@ -1376,10 +1427,22 @@ components:
       nullable: false
       type: string
     NestedRelatedPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/NestedRelatedResourceReference'
-      - $ref: '#/components/schemas/NestedRelatedResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/NestedRelatedResourceReference'
+          - $ref: '#/components/schemas/NestedRelatedResourcePatchAttributes'
+      required:
+      - data
+      type: object
     NestedRelatedPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/NestedRelatedPostResourceData'
+      required:
+      - data
+      type: object
+    NestedRelatedPostResourceData:
       allOf:
       - $ref: '#/components/schemas/NestedRelatedPostResourceReference'
       - $ref: '#/components/schemas/NestedRelatedResourcePostAttributes'
@@ -1396,9 +1459,14 @@ components:
       - type
       type: object
     NestedRelatedPostResources:
-      items:
-        $ref: '#/components/schemas/NestedRelatedPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/NestedRelatedPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     NestedRelatedResourceAttributes:
       properties:
         attributes:
@@ -1481,10 +1549,22 @@ components:
       nullable: true
       type: string
     NoAccessTaskPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/NoAccessTaskResourceReference'
-      - $ref: '#/components/schemas/NoAccessTaskResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/NoAccessTaskResourceReference'
+          - $ref: '#/components/schemas/NoAccessTaskResourcePatchAttributes'
+      required:
+      - data
+      type: object
     NoAccessTaskPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/NoAccessTaskPostResourceData'
+      required:
+      - data
+      type: object
+    NoAccessTaskPostResourceData:
       allOf:
       - $ref: '#/components/schemas/NoAccessTaskPostResourceReference'
       - $ref: '#/components/schemas/NoAccessTaskResourcePostAttributes'
@@ -1501,9 +1581,14 @@ components:
       - type
       type: object
     NoAccessTaskPostResources:
-      items:
-        $ref: '#/components/schemas/NoAccessTaskPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/NoAccessTaskPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     NoAccessTaskResourceAttributes:
       properties:
         attributes:
@@ -1613,12 +1698,24 @@ components:
       nullable: false
       type: string
     PostPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/PostResourceReference'
-      - $ref: '#/components/schemas/PostResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/PostResourceReference'
+          - $ref: '#/components/schemas/PostResourcePatchAttributes'
+      required:
+      - data
+      type: object
     PostPostHeaderResourceAttribute:
       $ref: '#/components/schemas/HeaderResourceReference'
     PostPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/PostPostResourceData'
+      required:
+      - data
+      type: object
+    PostPostResourceData:
       allOf:
       - $ref: '#/components/schemas/PostPostResourceReference'
       - $ref: '#/components/schemas/PostResourcePostAttributes'
@@ -1635,9 +1732,14 @@ components:
       - type
       type: object
     PostPostResources:
-      items:
-        $ref: '#/components/schemas/PostPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/PostPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     PostResourceAttributes:
       properties:
         attributes:
@@ -1818,10 +1920,22 @@ components:
       nullable: true
       type: string
     PrimitiveAttributePatchResource:
-      allOf:
-      - $ref: '#/components/schemas/PrimitiveAttributeResourceReference'
-      - $ref: '#/components/schemas/PrimitiveAttributeResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/PrimitiveAttributeResourceReference'
+          - $ref: '#/components/schemas/PrimitiveAttributeResourcePatchAttributes'
+      required:
+      - data
+      type: object
     PrimitiveAttributePostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/PrimitiveAttributePostResourceData'
+      required:
+      - data
+      type: object
+    PrimitiveAttributePostResourceData:
       allOf:
       - $ref: '#/components/schemas/PrimitiveAttributePostResourceReference'
       - $ref: '#/components/schemas/PrimitiveAttributeResourcePostAttributes'
@@ -1838,9 +1952,14 @@ components:
       - type
       type: object
     PrimitiveAttributePostResources:
-      items:
-        $ref: '#/components/schemas/PrimitiveAttributePostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/PrimitiveAttributePostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     PrimitiveAttributeResourceAttributes:
       properties:
         attributes:
@@ -2103,10 +2222,22 @@ components:
       nullable: true
       type: string
     ProjectsPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/ProjectsResourceReference'
-      - $ref: '#/components/schemas/ProjectsResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/ProjectsResourceReference'
+          - $ref: '#/components/schemas/ProjectsResourcePatchAttributes'
+      required:
+      - data
+      type: object
     ProjectsPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/ProjectsPostResourceData'
+      required:
+      - data
+      type: object
+    ProjectsPostResourceData:
       allOf:
       - $ref: '#/components/schemas/ProjectsPostResourceReference'
       - $ref: '#/components/schemas/ProjectsResourcePostAttributes'
@@ -2123,9 +2254,14 @@ components:
       - type
       type: object
     ProjectsPostResources:
-      items:
-        $ref: '#/components/schemas/ProjectsPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/ProjectsPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     ProjectsResourceAttributes:
       properties:
         attributes:
@@ -2246,10 +2382,22 @@ components:
       nullable: true
       type: string
     ReadOnlyTaskPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/ReadOnlyTaskResourceReference'
-      - $ref: '#/components/schemas/ReadOnlyTaskResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/ReadOnlyTaskResourceReference'
+          - $ref: '#/components/schemas/ReadOnlyTaskResourcePatchAttributes'
+      required:
+      - data
+      type: object
     ReadOnlyTaskPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/ReadOnlyTaskPostResourceData'
+      required:
+      - data
+      type: object
+    ReadOnlyTaskPostResourceData:
       allOf:
       - $ref: '#/components/schemas/ReadOnlyTaskPostResourceReference'
       - $ref: '#/components/schemas/ReadOnlyTaskResourcePostAttributes'
@@ -2266,9 +2414,14 @@ components:
       - type
       type: object
     ReadOnlyTaskPostResources:
-      items:
-        $ref: '#/components/schemas/ReadOnlyTaskPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/ReadOnlyTaskPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     ReadOnlyTaskResourceAttributes:
       properties:
         attributes:
@@ -2353,10 +2506,22 @@ components:
       nullable: true
       type: string
     RelationIdTestPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/RelationIdTestResourceReference'
-      - $ref: '#/components/schemas/RelationIdTestResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/RelationIdTestResourceReference'
+          - $ref: '#/components/schemas/RelationIdTestResourcePatchAttributes'
+      required:
+      - data
+      type: object
     RelationIdTestPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/RelationIdTestPostResourceData'
+      required:
+      - data
+      type: object
+    RelationIdTestPostResourceData:
       allOf:
       - $ref: '#/components/schemas/RelationIdTestPostResourceReference'
       - $ref: '#/components/schemas/RelationIdTestResourcePostAttributes'
@@ -2373,9 +2538,14 @@ components:
       - type
       type: object
     RelationIdTestPostResources:
-      items:
-        $ref: '#/components/schemas/RelationIdTestPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/RelationIdTestPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     RelationIdTestResourceAttributes:
       properties:
         attributes:
@@ -2532,10 +2702,22 @@ components:
       nullable: true
       type: string
     RelocatedTaskPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/RelocatedTaskResourceReference'
-      - $ref: '#/components/schemas/RelocatedTaskResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/RelocatedTaskResourceReference'
+          - $ref: '#/components/schemas/RelocatedTaskResourcePatchAttributes'
+      required:
+      - data
+      type: object
     RelocatedTaskPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/RelocatedTaskPostResourceData'
+      required:
+      - data
+      type: object
+    RelocatedTaskPostResourceData:
       allOf:
       - $ref: '#/components/schemas/RelocatedTaskPostResourceReference'
       - $ref: '#/components/schemas/RelocatedTaskResourcePostAttributes'
@@ -2552,9 +2734,14 @@ components:
       - type
       type: object
     RelocatedTaskPostResources:
-      items:
-        $ref: '#/components/schemas/RelocatedTaskPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/RelocatedTaskPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     RelocatedTaskResourceAttributes:
       properties:
         attributes:
@@ -2639,10 +2826,22 @@ components:
       nullable: false
       type: string
     RenamedIdPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/RenamedIdResourceReference'
-      - $ref: '#/components/schemas/RenamedIdResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/RenamedIdResourceReference'
+          - $ref: '#/components/schemas/RenamedIdResourcePatchAttributes'
+      required:
+      - data
+      type: object
     RenamedIdPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/RenamedIdPostResourceData'
+      required:
+      - data
+      type: object
+    RenamedIdPostResourceData:
       allOf:
       - $ref: '#/components/schemas/RenamedIdPostResourceReference'
       - $ref: '#/components/schemas/RenamedIdResourcePostAttributes'
@@ -2659,9 +2858,14 @@ components:
       - type
       type: object
     RenamedIdPostResources:
-      items:
-        $ref: '#/components/schemas/RenamedIdPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/RenamedIdPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     RenamedIdResourceAttributes:
       properties:
         attributes:
@@ -2755,10 +2959,22 @@ components:
       nullable: true
       type: string
     SchedulePatchResource:
-      allOf:
-      - $ref: '#/components/schemas/ScheduleResourceReference'
-      - $ref: '#/components/schemas/ScheduleResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/ScheduleResourceReference'
+          - $ref: '#/components/schemas/ScheduleResourcePatchAttributes'
+      required:
+      - data
+      type: object
     SchedulePostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/SchedulePostResourceData'
+      required:
+      - data
+      type: object
+    SchedulePostResourceData:
       allOf:
       - $ref: '#/components/schemas/SchedulePostResourceReference'
       - $ref: '#/components/schemas/ScheduleResourcePostAttributes'
@@ -2775,9 +2991,14 @@ components:
       - type
       type: object
     SchedulePostResources:
-      items:
-        $ref: '#/components/schemas/SchedulePostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/SchedulePostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     ScheduleProjectResourceAttribute:
       $ref: '#/components/schemas/ProjectsResourceReference'
     ScheduleProjectsResourceAttribute:
@@ -2916,10 +3137,22 @@ components:
       nullable: false
       type: integer
     ScheduleStatusPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/ScheduleStatusResourceReference'
-      - $ref: '#/components/schemas/ScheduleStatusResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/ScheduleStatusResourceReference'
+          - $ref: '#/components/schemas/ScheduleStatusResourcePatchAttributes'
+      required:
+      - data
+      type: object
     ScheduleStatusPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/ScheduleStatusPostResourceData'
+      required:
+      - data
+      type: object
+    ScheduleStatusPostResourceData:
       allOf:
       - $ref: '#/components/schemas/ScheduleStatusPostResourceReference'
       - $ref: '#/components/schemas/ScheduleStatusResourcePostAttributes'
@@ -2936,9 +3169,14 @@ components:
       - type
       type: object
     ScheduleStatusPostResources:
-      items:
-        $ref: '#/components/schemas/ScheduleStatusPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/ScheduleStatusPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     ScheduleStatusResourceAttribute:
       $ref: '#/components/schemas/ScheduleStatusResourceReference'
     ScheduleStatusResourceAttributes:
@@ -3077,10 +3315,22 @@ components:
       type: array
       uniqueItems: false
     TasksPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/TasksResourceReference'
-      - $ref: '#/components/schemas/TasksResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/TasksResourceReference'
+          - $ref: '#/components/schemas/TasksResourcePatchAttributes'
+      required:
+      - data
+      type: object
     TasksPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/TasksPostResourceData'
+      required:
+      - data
+      type: object
+    TasksPostResourceData:
       allOf:
       - $ref: '#/components/schemas/TasksPostResourceReference'
       - $ref: '#/components/schemas/TasksResourcePostAttributes'
@@ -3097,9 +3347,14 @@ components:
       - type
       type: object
     TasksPostResources:
-      items:
-        $ref: '#/components/schemas/TasksPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/TasksPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     TasksProjectResourceAttribute:
       $ref: '#/components/schemas/ProjectsResourceReference'
     TasksProjectsResourceAttribute:

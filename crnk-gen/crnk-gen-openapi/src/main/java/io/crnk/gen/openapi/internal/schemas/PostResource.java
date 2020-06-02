@@ -1,22 +1,19 @@
 package io.crnk.gen.openapi.internal.schemas;
 
 import io.crnk.meta.model.resource.MetaResource;
-import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-
-import java.util.Arrays;
 
 public class PostResource extends AbstractSchemaGenerator {
 
-  public PostResource(MetaResource metaResource) {
-    super(metaResource);
-  }
+	public PostResource(MetaResource metaResource) {
+		super(metaResource);
+	}
 
-  public Schema schema() {
-    return new ComposedSchema()
-        .allOf(
-            Arrays.asList(
-                new PostResourceReference(metaResource).$ref(),
-                new ResourcePostAttributes(metaResource).$ref()));
-  }
+	@Override
+	public Schema schema() {
+		return new ObjectSchema()
+				.addRequiredItem("data")
+				.addProperties("data", new PostResourceData(metaResource).$ref());
+	}
 }

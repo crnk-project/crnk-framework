@@ -321,10 +321,22 @@ components:
       nullable: true
       type: string
     SimpleTasksPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/SimpleTasksResourceReference'
-      - $ref: '#/components/schemas/SimpleTasksResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/SimpleTasksResourceReference'
+          - $ref: '#/components/schemas/SimpleTasksResourcePatchAttributes'
+      required:
+      - data
+      type: object
     SimpleTasksPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/SimpleTasksPostResourceData'
+      required:
+      - data
+      type: object
+    SimpleTasksPostResourceData:
       allOf:
       - $ref: '#/components/schemas/SimpleTasksPostResourceReference'
       - $ref: '#/components/schemas/SimpleTasksResourcePostAttributes'
@@ -341,9 +353,14 @@ components:
       - type
       type: object
     SimpleTasksPostResources:
-      items:
-        $ref: '#/components/schemas/SimpleTasksPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/SimpleTasksPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     SimpleTasksResourceAttributes:
       properties:
         attributes:
