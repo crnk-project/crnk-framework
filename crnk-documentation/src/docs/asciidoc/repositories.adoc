@@ -468,7 +468,7 @@ Information about fields to include in the response can be achieved by providing
 
 anchor:inclusion[]
 
-### Inclusion of Related Resources
+## Inclusion of Related Resources
 
 Information about relationships to include in the response can be achieved by providing an `include` parameter. Examples:
 
