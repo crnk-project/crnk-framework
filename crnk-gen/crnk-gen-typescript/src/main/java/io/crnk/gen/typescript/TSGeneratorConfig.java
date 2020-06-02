@@ -39,7 +39,7 @@ public class TSGeneratorConfig extends GeneratorModuleConfigBase {
 
     private File buildDir = null;
 
-    private TSResourceFormat format = TSResourceFormat.JSONAPI;
+    private TSResourceFormat format = TSResourceFormat.NGRX;
 
 
     @JsonIgnore
@@ -101,7 +101,7 @@ public class TSGeneratorConfig extends GeneratorModuleConfigBase {
     }
 
     public boolean getExpressions() {
-        return expressions && getFormat() == TSResourceFormat.JSONAPI;
+        return expressions && getFormat() != TSResourceFormat.PLAINJSON;
     }
 
     public void setExpressions(boolean expressions) {

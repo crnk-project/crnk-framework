@@ -41,13 +41,18 @@ public class GenerateTypescriptTaskTest {
 	private File outputDir;
 
 	@Test
-	public void testWithExpressions() throws IOException {
-		test(true, TSResourceFormat.JSONAPI);
+	public void testNgrxWithExpressions() throws IOException {
+		test(true, TSResourceFormat.NGRX);
 	}
 
 	@Test
-	public void testWithoutExpressions() throws IOException {
-		test(false, TSResourceFormat.JSONAPI);
+	public void testCrnkWithExpressions() throws IOException {
+		test(true, TSResourceFormat.NGRX_CRNK);
+	}
+
+	@Test
+	public void testCrnkWithoutExpressions() throws IOException {
+		test(false, TSResourceFormat.NGRX_CRNK);
 	}
 
 	@Test
@@ -84,18 +89,20 @@ public class GenerateTypescriptTaskTest {
 		assertExists("facet.ts");
 		assertExists("facet.value.ts");
 		assertExists("some/dotted.resource.ts");
-		if (resourceFormat == TSResourceFormat.PLAINJSON) {
-			assertExists("crnk.ts");
-
-			checkPrimitiveAttributes();
-		}
 		assertNotExists("tasks.links.ts");
 		assertNotExists("tasks.meta.ts");
 
-		checkSchedule(expressions, resourceFormat);
+		if (resourceFormat == TSResourceFormat.PLAINJSON) {
+			assertExists("crnk.ts");
+			checkPrimitiveAttributes();
+		} else if (resourceFormat == TSResourceFormat.NGRX) {
+			assertExists("crnk.ts");
+		}
+
 		checkProject();
+		checkSchedule(expressions, resourceFormat);
 		if (expressions) {
-			checkProjectData();
+			checkProjectData(resourceFormat);
 		}
 	}
 
@@ -148,10 +155,12 @@ public class GenerateTypescriptTaskTest {
 		return module;
 	}
 
-	private void checkProjectData() throws IOException {
-		String expectedSourceFileName = "expected_project_data.ts";
-		String actualSourcePath = "types/project.data.ts";
-		compare(expectedSourceFileName, actualSourcePath);
+	private void checkProjectData(TSResourceFormat format) throws IOException {
+		if (format == TSResourceFormat.NGRX_CRNK) {
+			String expectedSourceFileName = "expected_project_data.ts";
+			String actualSourcePath = "types/project.data.ts";
+			compare(expectedSourceFileName, actualSourcePath);
+		}
 	}
 
 	private void checkProject() throws IOException {
@@ -167,6 +176,8 @@ public class GenerateTypescriptTaskTest {
 		String expectedSourceFileName;
 		if (format == TSResourceFormat.PLAINJSON) {
 			expectedSourceFileName = "expected_schedule_plain_json.ts";
+		} else if (format == TSResourceFormat.NGRX) {
+			expectedSourceFileName = "expected_schedule_ngrx.ts";
 		} else if (expressions) {
 			expectedSourceFileName = "expected_schedule_with_expressions.ts";
 		} else {

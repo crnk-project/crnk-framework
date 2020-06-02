@@ -164,7 +164,7 @@ crnkGen {
         enabled = true
 
         // specify output format
-        format = 'PLAINJSON' // or 'JSONAPI'
+        format = 'PLAINJSON' // or 'NGRX'
 
         // specify location of generated sources
         genDir = file('src/resources')

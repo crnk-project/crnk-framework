@@ -1,10 +1,8 @@
 package io.crnk.gen.typescript.transform;
 
-import java.util.Arrays;
 import java.util.List;
 
 import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.gen.typescript.TSResourceFormat;
 import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSArrayType;
@@ -199,7 +197,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	private static void generateResourceFields(TSMetaTransformationContext context, TSInterfaceType interfaceType,
 											   MetaDataObject meta) {
 
-		boolean jsonapi = context.getResourceFormat() == TSResourceFormat.JSONAPI;
+		boolean jsonapi = context.getResourceFormat() != TSResourceFormat.PLAINJSON;
 
 		if (jsonapi) {
 			TSInterfaceType attributesType = new TSInterfaceType();
