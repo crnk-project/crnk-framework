@@ -88,35 +88,6 @@ export const applyQueryParams = function (baseQuery: Query, additionalParams: Qu
 	}
 };
 
-export const toQueryPath = function (attributePath: string | Expression<any>): string {
-	const strAttributePath = attributePath.toString();
-
-	const pathElements = strAttributePath.split('.');
-
-	const searchPath = [];
-
-	for (let i = 0; i < pathElements.length; i++) {
-		if (pathElements[i] === 'attributes') {
-			// nothing to do
-		}
-		else if (pathElements[i] === 'relationships' && i < pathElements.length - 2) {
-			const relationshipName = pathElements[i + 1];
-			const dataType = pathElements[i + 2];
-			if (dataType === 'data' || dataType === 'reference') {
-				searchPath.push(relationshipName);
-				i += 2;
-			}
-			else {
-				throw new Error('cannot map relationship path in ' + attributePath + ', got ' + dataType +
-					' but expected data or reference');
-			}
-		}
-		else {
-			searchPath.push(pathElements[i]);
-		}
-	}
-	return _.join(searchPath, '.');
-};
 
 export class QueryError extends Error {
 

@@ -81,4 +81,27 @@ public class CrnkLibrary {
 		}
 		throw new IllegalStateException(primitiveName);
 	}
+
+	/**
+	 * Set-up without dependency to deprecated crnk npm library.
+	 */
+	public static void initNgrx(String packageName) {
+		EXPRESSION_SOURCE.setName("crnk");
+		EXPRESSION_SOURCE.setDirectory(null);
+		EXPRESSION_SOURCE.setNpmPackage(packageName);
+
+		STUB_SOURCE.setName("crnk");
+		STUB_SOURCE.setDirectory(null);
+		STUB_SOURCE.setNpmPackage(packageName);
+	}
+
+	@Deprecated
+	public static void initCrnk() {
+		EXPRESSION_SOURCE.setNpmPackage("@crnk/angular-ngrx");
+		EXPRESSION_SOURCE.setDirectory("expression");
+		EXPRESSION_SOURCE.setName(null);
+		STUB_SOURCE.setNpmPackage("@crnk/angular-ngrx");
+		STUB_SOURCE.setDirectory("stub");
+		STUB_SOURCE.setName(null);
+	}
 }

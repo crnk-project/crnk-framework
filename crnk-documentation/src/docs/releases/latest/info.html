@@ -8,5 +8,14 @@
 	<li><code>UrlBuilder</code> is available from CrnkBoot and, in case of Spring, as bean for injection.
 		It allows the easy construction (and manipulation) of URLs.
 	</li>
+	<li>
+		CrnkCoreAutoConfiguration has been refined to make it more robust against cyclic dependencies between repositories, <code>CrnkBoot</code> and other
+		components. This avoids some situations where Spring either fails or partially loads the application.
+	</li>
+	<li>
+		The Typescript generation has been simplified to not have a dependency to the (deprecated) Crnk NPM library. This has already be in place for
+		our plain JSON format. Now the same approach is taken for the regular JSON:API format. A dependency to <code>ngrx-json-api</code> still remains
+		that in the future may also become optional.
+	</li>
 </ul>
 

@@ -65,7 +65,7 @@ public class NgrxJsonApiLibrary {
 	private NgrxJsonApiLibrary() {
 	}
 
-	public static void initJsonApi() {
+	public static void initNgrx() {
 		SOURCE.setName(null);
 		SOURCE.setNpmPackage("ngrx-json-api");
 
