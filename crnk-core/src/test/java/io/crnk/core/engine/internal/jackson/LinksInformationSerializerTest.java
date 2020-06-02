@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.jackson;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.resource.links.*;
 import org.junit.Assert;
@@ -19,6 +20,7 @@ public class LinksInformationSerializerTest {
 	private DefaultPagedLinksInformation pagedLink;
 	private TestCustomLinksInformation customLink;
 	private TestCustomStringBasedLinksInformation customStringLink;
+	private TestCustomNamedLinksInformation customNamedLink;
 
 	@Before
 	public void setup() {
@@ -32,6 +34,7 @@ public class LinksInformationSerializerTest {
 
 		customLink = new TestCustomLinksInformation("http://www.imdb.com");
 		customStringLink = new TestCustomStringBasedLinksInformation("http://www.imdb.com");
+		customNamedLink = new TestCustomNamedLinksInformation("http://www.imdb.com");
 	}
 
 	/*@Test
@@ -75,6 +78,10 @@ public class LinksInformationSerializerTest {
 
 		serialized = mapper.writeValueAsString(customStringLink);
 		expected = createSingleLinkJson(OBJECT_LINK, "imdb", customStringLink.getImdb());
+		Assert.assertEquals(expected, serialized);
+
+		serialized = mapper.writeValueAsString(customNamedLink);
+		expected = createSingleLinkJson(OBJECT_LINK, "imdb-link", customNamedLink.getImdbLink());
 		Assert.assertEquals(expected, serialized);
 	}
 
@@ -143,4 +150,17 @@ public class LinksInformationSerializerTest {
 		}
 	}
 
+	public static class TestCustomNamedLinksInformation implements LinksInformation {
+
+		private String imdbLink;
+
+		TestCustomNamedLinksInformation(String imdbLink) {
+			this.imdbLink = imdbLink;
+		}
+
+		@JsonProperty("imdb-link")
+		public String getImdbLink() {
+			return imdbLink;
+		}
+	}
 }

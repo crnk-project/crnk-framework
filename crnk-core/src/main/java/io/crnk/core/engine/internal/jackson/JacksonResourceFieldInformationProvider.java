@@ -97,9 +97,9 @@ public class JacksonResourceFieldInformationProvider extends ResourceFieldInform
 
 	@Override
 	public Optional<String> getJsonName(BeanAttributeInformation attributeDesc) {
-		Optional<JsonProperty> ignoreAnnotation = attributeDesc.getAnnotation(JsonProperty.class);
-		if (ignoreAnnotation.isPresent() && !ignoreAnnotation.get().value().isEmpty()) {
-			return Optional.of(ignoreAnnotation.get().value());
+		Optional<String> resolvedJsonPropertyName = context.getPropertyNameResolver().getJsonName(attributeDesc);
+		if (resolvedJsonPropertyName.isPresent()) {
+			return resolvedJsonPropertyName;
 		}
 
 		Method getter = attributeDesc.getGetter();

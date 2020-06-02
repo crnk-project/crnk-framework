@@ -12,6 +12,7 @@ import io.crnk.core.resource.links.LinksInformation;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 /**
  * Serializes {@link LinksInformation} objects as JSON objects instead of simple JSON attributes.
@@ -20,8 +21,11 @@ public class LinksInformationSerializer extends JsonSerializer<LinksInformation>
 
 	private Boolean serializeLinksAsObjects;
 
-	LinksInformationSerializer(Boolean serializeLinksAsObjects) {
+	private JacksonPropertyNameResolver propertyNameResolver;
+
+	LinksInformationSerializer(Boolean serializeLinksAsObjects, JacksonPropertyNameResolver propertyNameResolver) {
 		this.serializeLinksAsObjects = serializeLinksAsObjects;
+		this.propertyNameResolver = propertyNameResolver;
 	}
 
 	@Override
@@ -34,13 +38,15 @@ public class LinksInformationSerializer extends JsonSerializer<LinksInformation>
 
 		for (String attrName : info.getAttributeNames()) {
 			BeanAttributeInformation attribute = info.getAttribute(attrName);
+			String name = propertyNameResolver.getJsonName(attribute)
+					.orElse(attrName);
 			Object objLinkValue = attribute.getValue(value);
 			Link linkValue = objLinkValue instanceof String ? new DefaultLink((String) objLinkValue) : (Link) objLinkValue;
 			if (linkValue != null) {
 				if (!serializeLinksAsObjects && !shouldSerializeLink(linkValue)) { // Return a simple String link
-					gen.writeStringField(attrName, linkValue.getHref());
+					gen.writeStringField(name, linkValue.getHref());
 				} else {
-					gen.writeObjectField(attrName, linkValue);
+					gen.writeObjectField(name, linkValue);
 				}
 			}
 		}

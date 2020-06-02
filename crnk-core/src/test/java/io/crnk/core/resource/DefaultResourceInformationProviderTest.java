@@ -14,6 +14,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationProviderConte
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
+import io.crnk.core.engine.internal.jackson.JacksonPropertyNameResolver;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
@@ -74,7 +75,7 @@ public class DefaultResourceInformationProviderTest {
 
     private final ResourceInformationProviderContext context =
             new DefaultResourceInformationProviderContext(resourceInformationProvider,
-                    new DefaultInformationBuilder(new TypeParser()), new TypeParser(), () -> new ObjectMapper());
+                    new DefaultInformationBuilder(new TypeParser()), new TypeParser(), () -> new ObjectMapper(), new JacksonPropertyNameResolver());
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();

@@ -35,6 +35,7 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 
 		context = Mockito.mock(ResourceInformationProviderContext.class);
 		Mockito.when(context.getObjectMapper()).thenReturn(objectMapper);
+		Mockito.when(context.getPropertyNameResolver()).thenReturn(new JacksonPropertyNameResolver());
 
 		sut = new JacksonResourceFieldInformationProvider();
 		sut.init(context);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
+import io.crnk.core.engine.internal.jackson.JacksonPropertyNameResolver;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.utils.Supplier;
@@ -16,12 +17,15 @@ public class DefaultResourceInformationProviderContext implements ResourceInform
     private ResourceInformationProvider provider;
     private TypeParser typeParser;
 
+    private JacksonPropertyNameResolver propertyNameResolver;
+
     public DefaultResourceInformationProviderContext(ResourceInformationProvider provider, InformationBuilder informationBuilder,
-                                                     TypeParser typeParser, Supplier<ObjectMapper> objectMapper) {
+                                                     TypeParser typeParser, Supplier<ObjectMapper> objectMapper, JacksonPropertyNameResolver propertyNameResolver) {
         this.provider = provider;
         this.typeParser = typeParser;
         this.informationBuilder = informationBuilder;
         this.objectMapper = objectMapper;
+        this.propertyNameResolver = propertyNameResolver;
 
         PreconditionUtil.assertNotNull("informationBuilder is null", informationBuilder);
         PreconditionUtil.assertNotNull("typeParser is null", typeParser);
@@ -53,4 +57,9 @@ public class DefaultResourceInformationProviderContext implements ResourceInform
         PreconditionUtil.assertNotNull("objectMapper is null", objectMapper);
         return objectMapper.get();
     }
+
+	@Override
+	public JacksonPropertyNameResolver getPropertyNameResolver() {
+		return propertyNameResolver;
+	}
 }

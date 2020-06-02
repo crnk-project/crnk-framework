@@ -2,6 +2,7 @@ package io.crnk.core.engine.information.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonPropertyNameResolver;
 import io.crnk.core.engine.parser.TypeParser;
 
 public interface ResourceInformationProviderContext {
@@ -15,4 +16,6 @@ public interface ResourceInformationProviderContext {
 	InformationBuilder getInformationBuilder();
 
 	ObjectMapper getObjectMapper();
+
+	JacksonPropertyNameResolver getPropertyNameResolver();
 }

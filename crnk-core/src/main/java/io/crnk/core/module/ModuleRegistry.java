@@ -30,6 +30,7 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import io.crnk.core.engine.internal.jackson.JacksonPropertyNameResolver;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
 import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
@@ -299,7 +300,7 @@ public class ModuleRegistry {
 			InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
 			DefaultResourceInformationProviderContext context =
 					new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,
-							() -> objectMapper);
+							() -> objectMapper, new JacksonPropertyNameResolver());
 			resourceInformationProvider.init(context);
 		}
 		return resourceInformationProvider;
