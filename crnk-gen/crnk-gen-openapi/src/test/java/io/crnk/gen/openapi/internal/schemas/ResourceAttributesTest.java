@@ -3,27 +3,28 @@ package io.crnk.gen.openapi.internal.schemas;
 import io.crnk.gen.openapi.internal.MetaResourceBaseTest;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ResourceAttributesTest extends MetaResourceBaseTest {
 
   @Test
   void schema() {
     Schema schema = new ResourceAttributes(metaResource).schema();
-    Assert.assertTrue(schema instanceof ObjectSchema);
 
-    Assert.assertTrue(schema.getProperties().containsKey("attributes"));
-    Assert.assertEquals(1, schema.getProperties().size());
+    assertNotNull(schema);
+    assertEquals(ObjectSchema.class, schema.getClass());
+    assertIterableEquals(singleton("attributes"), schema.getProperties().keySet());
 
-    Schema attributes = (Schema) schema.getProperties().get("attributes");
-    Assert.assertTrue(attributes instanceof ObjectSchema);
-    Assert.assertTrue(attributes.getProperties().containsKey("name"));
-    Assert.assertEquals(1, attributes.getProperties().size());
+    Schema attributesSchema = ((ObjectSchema) schema).getProperties().get("attributes");
+    assertEquals(ObjectSchema.class, attributesSchema.getClass());
+    assertIterableEquals(singleton("name"), attributesSchema.getProperties().keySet());
 
-    Schema name = (Schema) attributes.getProperties().get("name");
-    Assert.assertEquals(
-        "#/components/schemas/ResourceTypeNameResourceAttribute",
-        name.get$ref());
+    Schema nameSchema = ((ObjectSchema) attributesSchema).getProperties().get("name");
+    assertEquals("#/components/schemas/ResourceTypeNameResourceAttribute", nameSchema.get$ref());
   }
 }
