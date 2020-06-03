@@ -14,6 +14,7 @@ public class PostResourceDataTest extends MetaResourceBaseTest {
 
 	@Test
 	public void schema() {
+		additionalMetaResourceField.setInsertable(true);
 		final Schema dataSchema = new PostResourceData(metaResource).schema();
 
 		assertNotNull(dataSchema);

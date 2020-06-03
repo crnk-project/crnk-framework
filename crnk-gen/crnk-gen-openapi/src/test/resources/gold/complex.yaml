@@ -954,6 +954,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/CommentResourceReference'
           - $ref: '#/components/schemas/CommentResourcePatchAttributes'
+          - $ref: '#/components/schemas/CommentResourcePatchRelationships'
       required:
       - data
       type: object
@@ -970,6 +971,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/CommentPostResourceReference'
       - $ref: '#/components/schemas/CommentResourcePostAttributes'
+      - $ref: '#/components/schemas/CommentResourcePostRelationships'
     CommentPostResourceReference:
       properties:
         id:
@@ -997,36 +999,85 @@ components:
       properties:
         attributes:
           properties:
-            post:
-              $ref: '#/components/schemas/CommentPostResourceAttribute'
-            related:
-              $ref: '#/components/schemas/CommentRelatedResourceAttribute'
             value:
               $ref: '#/components/schemas/CommentValueResourceAttribute'
+          type: object
+      type: object
+    CommentResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /comment/{id}
+              format: uri
+              type: string
           type: object
       type: object
     CommentResourcePatchAttributes:
       properties:
         attributes:
           properties:
-            post:
-              $ref: '#/components/schemas/CommentPostResourceAttribute'
-            related:
-              $ref: '#/components/schemas/CommentRelatedResourceAttribute'
             value:
               $ref: '#/components/schemas/CommentValueResourceAttribute'
+          type: object
+      type: object
+    CommentResourcePatchRelationships:
+      properties:
+        relationships:
+          properties:
+            post:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/PostResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/PostResourceReference'
+              type: object
+            related:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/NestedRelatedResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/NestedRelatedResourceReference'
+              type: object
           type: object
       type: object
     CommentResourcePostAttributes:
       properties:
         attributes:
           properties:
-            post:
-              $ref: '#/components/schemas/CommentPostResourceAttribute'
-            related:
-              $ref: '#/components/schemas/CommentRelatedResourceAttribute'
             value:
               $ref: '#/components/schemas/CommentValueResourceAttribute'
+          type: object
+      type: object
+    CommentResourcePostRelationships:
+      properties:
+        relationships:
+          properties:
+            post:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/PostResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/PostResourceReference'
+              type: object
+            related:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/NestedRelatedResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/NestedRelatedResourceReference'
+              type: object
           type: object
       type: object
     CommentResourceReference:
@@ -1054,6 +1105,49 @@ components:
             $ref: '#/components/schemas/CommentResourceReference'
           type: array
       type: object
+    CommentResourceRelationships:
+      description: Relationships between the resource and other JSON:API resources
+      properties:
+        relationships:
+          properties:
+            post:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/PostResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/PostResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /comment/{id}/post
+                      type: string
+                    self:
+                      default: /comment/{id}/relationships/post
+                      type: string
+                  type: object
+              type: object
+            related:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/NestedRelatedResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/NestedRelatedResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /comment/{id}/related
+                      type: string
+                    self:
+                      default: /comment/{id}/relationships/related
+                      type: string
+                  type: object
+              type: object
+          type: object
+      type: object
     CommentResourceResponseSchema:
       allOf:
       - $ref: '#/components/schemas/Success'
@@ -1066,12 +1160,8 @@ components:
       allOf:
       - $ref: '#/components/schemas/CommentResourceReference'
       - $ref: '#/components/schemas/CommentResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/CommentResourceRelationships'
+      - $ref: '#/components/schemas/CommentResourceLinks'
       required:
       - attributes
     CommentResourcesResponseSchema:
@@ -1114,6 +1204,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/HeaderResourceReference'
           - $ref: '#/components/schemas/HeaderResourcePatchAttributes'
+          - $ref: '#/components/schemas/HeaderResourcePatchRelationships'
       required:
       - data
       type: object
@@ -1130,6 +1221,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/HeaderPostResourceReference'
       - $ref: '#/components/schemas/HeaderResourcePostAttributes'
+      - $ref: '#/components/schemas/HeaderResourcePostRelationships'
     HeaderPostResourceReference:
       properties:
         id:
@@ -1157,36 +1249,85 @@ components:
       properties:
         attributes:
           properties:
-            post:
-              $ref: '#/components/schemas/HeaderPostResourceAttribute'
-            related:
-              $ref: '#/components/schemas/HeaderRelatedResourceAttribute'
             value:
               $ref: '#/components/schemas/HeaderValueResourceAttribute'
+          type: object
+      type: object
+    HeaderResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /header/{id}
+              format: uri
+              type: string
           type: object
       type: object
     HeaderResourcePatchAttributes:
       properties:
         attributes:
           properties:
-            post:
-              $ref: '#/components/schemas/HeaderPostResourceAttribute'
-            related:
-              $ref: '#/components/schemas/HeaderRelatedResourceAttribute'
             value:
               $ref: '#/components/schemas/HeaderValueResourceAttribute'
+          type: object
+      type: object
+    HeaderResourcePatchRelationships:
+      properties:
+        relationships:
+          properties:
+            post:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/PostResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/PostResourceReference'
+              type: object
+            related:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/NestedRelatedResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/NestedRelatedResourceReference'
+              type: object
           type: object
       type: object
     HeaderResourcePostAttributes:
       properties:
         attributes:
           properties:
-            post:
-              $ref: '#/components/schemas/HeaderPostResourceAttribute'
-            related:
-              $ref: '#/components/schemas/HeaderRelatedResourceAttribute'
             value:
               $ref: '#/components/schemas/HeaderValueResourceAttribute'
+          type: object
+      type: object
+    HeaderResourcePostRelationships:
+      properties:
+        relationships:
+          properties:
+            post:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/PostResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/PostResourceReference'
+              type: object
+            related:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/NestedRelatedResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/NestedRelatedResourceReference'
+              type: object
           type: object
       type: object
     HeaderResourceReference:
@@ -1214,6 +1355,49 @@ components:
             $ref: '#/components/schemas/HeaderResourceReference'
           type: array
       type: object
+    HeaderResourceRelationships:
+      description: Relationships between the resource and other JSON:API resources
+      properties:
+        relationships:
+          properties:
+            post:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/PostResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/PostResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /header/{id}/post
+                      type: string
+                    self:
+                      default: /header/{id}/relationships/post
+                      type: string
+                  type: object
+              type: object
+            related:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/NestedRelatedResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/NestedRelatedResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /header/{id}/related
+                      type: string
+                    self:
+                      default: /header/{id}/relationships/related
+                      type: string
+                  type: object
+              type: object
+          type: object
+      type: object
     HeaderResourceResponseSchema:
       allOf:
       - $ref: '#/components/schemas/Success'
@@ -1226,12 +1410,8 @@ components:
       allOf:
       - $ref: '#/components/schemas/HeaderResourceReference'
       - $ref: '#/components/schemas/HeaderResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/HeaderResourceRelationships'
+      - $ref: '#/components/schemas/HeaderResourceLinks'
       required:
       - attributes
     HeaderResourcesResponseSchema:
@@ -1304,6 +1484,19 @@ components:
               $ref: '#/components/schemas/HistoricTasksNameResourceAttribute'
           type: object
       type: object
+    HistoricTasksResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /tasks/history/{id}
+              format: uri
+              type: string
+          type: object
+      type: object
     HistoricTasksResourcePatchAttributes:
       properties:
         attributes:
@@ -1357,12 +1550,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/HistoricTasksResourceReference'
       - $ref: '#/components/schemas/HistoricTasksResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/HistoricTasksResourceLinks'
       required:
       - attributes
     HistoricTasksResourcesResponseSchema:
@@ -1431,7 +1619,6 @@ components:
         data:
           allOf:
           - $ref: '#/components/schemas/NestedRelatedResourceReference'
-          - $ref: '#/components/schemas/NestedRelatedResourcePatchAttributes'
       required:
       - data
       type: object
@@ -1445,7 +1632,6 @@ components:
     NestedRelatedPostResourceData:
       allOf:
       - $ref: '#/components/schemas/NestedRelatedPostResourceReference'
-      - $ref: '#/components/schemas/NestedRelatedResourcePostAttributes'
     NestedRelatedPostResourceReference:
       properties:
         id:
@@ -1467,22 +1653,17 @@ components:
       required:
       - data
       type: object
-    NestedRelatedResourceAttributes:
+    NestedRelatedResourceLinks:
+      description: Links related to the resource
       properties:
-        attributes:
-          properties: {}
-          type: object
-      type: object
-    NestedRelatedResourcePatchAttributes:
-      properties:
-        attributes:
-          properties: {}
-          type: object
-      type: object
-    NestedRelatedResourcePostAttributes:
-      properties:
-        attributes:
-          properties: {}
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /nestedRelated/{id}
+              format: uri
+              type: string
           type: object
       type: object
     NestedRelatedResourceReference:
@@ -1521,13 +1702,7 @@ components:
     NestedRelatedResourceSchema:
       allOf:
       - $ref: '#/components/schemas/NestedRelatedResourceReference'
-      - $ref: '#/components/schemas/NestedRelatedResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/NestedRelatedResourceLinks'
       required:
       - attributes
     NestedRelatedResourcesResponseSchema:
@@ -1553,7 +1728,6 @@ components:
         data:
           allOf:
           - $ref: '#/components/schemas/NoAccessTaskResourceReference'
-          - $ref: '#/components/schemas/NoAccessTaskResourcePatchAttributes'
       required:
       - data
       type: object
@@ -1567,7 +1741,6 @@ components:
     NoAccessTaskPostResourceData:
       allOf:
       - $ref: '#/components/schemas/NoAccessTaskPostResourceReference'
-      - $ref: '#/components/schemas/NoAccessTaskResourcePostAttributes'
     NoAccessTaskPostResourceReference:
       properties:
         id:
@@ -1597,16 +1770,17 @@ components:
               $ref: '#/components/schemas/NoAccessTaskNameResourceAttribute'
           type: object
       type: object
-    NoAccessTaskResourcePatchAttributes:
+    NoAccessTaskResourceLinks:
+      description: Links related to the resource
       properties:
-        attributes:
-          properties: {}
-          type: object
-      type: object
-    NoAccessTaskResourcePostAttributes:
-      properties:
-        attributes:
-          properties: {}
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /noAccessTask/{id}
+              format: uri
+              type: string
           type: object
       type: object
     NoAccessTaskResourceReference:
@@ -1646,12 +1820,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/NoAccessTaskResourceReference'
       - $ref: '#/components/schemas/NoAccessTaskResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/NoAccessTaskResourceLinks'
       required:
       - attributes
     NoAccessTaskResourcesResponseSchema:
@@ -1702,7 +1871,7 @@ components:
         data:
           allOf:
           - $ref: '#/components/schemas/PostResourceReference'
-          - $ref: '#/components/schemas/PostResourcePatchAttributes'
+          - $ref: '#/components/schemas/PostResourcePatchRelationships'
       required:
       - data
       type: object
@@ -1718,7 +1887,7 @@ components:
     PostPostResourceData:
       allOf:
       - $ref: '#/components/schemas/PostPostResourceReference'
-      - $ref: '#/components/schemas/PostResourcePostAttributes'
+      - $ref: '#/components/schemas/PostResourcePostRelationships'
     PostPostResourceReference:
       properties:
         id:
@@ -1740,34 +1909,77 @@ components:
       required:
       - data
       type: object
-    PostResourceAttributes:
+    PostResourceLinks:
+      description: Links related to the resource
       properties:
-        attributes:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
           properties:
-            comments:
-              $ref: '#/components/schemas/PostCommentsResourceAttribute'
-            postHeader:
-              $ref: '#/components/schemas/PostPostHeaderResourceAttribute'
+            self:
+              default: /post/{id}
+              format: uri
+              type: string
           type: object
       type: object
-    PostResourcePatchAttributes:
+    PostResourcePatchRelationships:
       properties:
-        attributes:
+        relationships:
           properties:
             comments:
-              $ref: '#/components/schemas/PostCommentsResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/CommentResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/CommentResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
             postHeader:
-              $ref: '#/components/schemas/PostPostHeaderResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/HeaderResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/HeaderResourceReference'
+              type: object
           type: object
       type: object
-    PostResourcePostAttributes:
+    PostResourcePostRelationships:
       properties:
-        attributes:
+        relationships:
           properties:
             comments:
-              $ref: '#/components/schemas/PostCommentsResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/CommentResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/CommentResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
             postHeader:
-              $ref: '#/components/schemas/PostPostHeaderResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/HeaderResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/HeaderResourceReference'
+              type: object
           type: object
       type: object
     PostResourceReference:
@@ -1795,6 +2007,55 @@ components:
             $ref: '#/components/schemas/PostResourceReference'
           type: array
       type: object
+    PostResourceRelationships:
+      description: Relationships between the resource and other JSON:API resources
+      properties:
+        relationships:
+          properties:
+            comments:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/CommentResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/CommentResourceReference'
+                    type: array
+                    uniqueItems: false
+                links:
+                  properties:
+                    related:
+                      default: /post/{id}/comments
+                      type: string
+                    self:
+                      default: /post/{id}/relationships/comments
+                      type: string
+                  type: object
+              type: object
+            postHeader:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/HeaderResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/HeaderResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /post/{id}/postHeader
+                      type: string
+                    self:
+                      default: /post/{id}/relationships/postHeader
+                      type: string
+                  type: object
+              type: object
+          type: object
+      type: object
     PostResourceResponseSchema:
       allOf:
       - $ref: '#/components/schemas/Success'
@@ -1806,13 +2067,8 @@ components:
     PostResourceSchema:
       allOf:
       - $ref: '#/components/schemas/PostResourceReference'
-      - $ref: '#/components/schemas/PostResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/PostResourceRelationships'
+      - $ref: '#/components/schemas/PostResourceLinks'
       required:
       - attributes
     PostResourcesResponseSchema:
@@ -2014,6 +2270,19 @@ components:
               $ref: '#/components/schemas/PrimitiveAttributeUuidValueResourceAttribute'
           type: object
       type: object
+    PrimitiveAttributeResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /primitiveAttribute/{id}
+              format: uri
+              type: string
+          type: object
+      type: object
     PrimitiveAttributeResourcePatchAttributes:
       properties:
         attributes:
@@ -2159,12 +2428,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/PrimitiveAttributeResourceReference'
       - $ref: '#/components/schemas/PrimitiveAttributeResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/PrimitiveAttributeResourceLinks'
       required:
       - attributes
     PrimitiveAttributeResourcesResponseSchema:
@@ -2227,6 +2491,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/ProjectsResourceReference'
           - $ref: '#/components/schemas/ProjectsResourcePatchAttributes'
+          - $ref: '#/components/schemas/ProjectsResourcePatchRelationships'
       required:
       - data
       type: object
@@ -2241,6 +2506,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/ProjectsPostResourceReference'
       - $ref: '#/components/schemas/ProjectsResourcePostAttributes'
+      - $ref: '#/components/schemas/ProjectsResourcePostRelationships'
     ProjectsPostResourceReference:
       properties:
         id:
@@ -2272,10 +2538,19 @@ components:
               $ref: '#/components/schemas/ProjectsDescriptionResourceAttribute'
             name:
               $ref: '#/components/schemas/ProjectsNameResourceAttribute'
-            task:
-              $ref: '#/components/schemas/ProjectsTaskResourceAttribute'
-            tasks:
-              $ref: '#/components/schemas/ProjectsTasksResourceAttribute'
+          type: object
+      type: object
+    ProjectsResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /projects/{id}
+              format: uri
+              type: string
           type: object
       type: object
     ProjectsResourcePatchAttributes:
@@ -2288,10 +2563,36 @@ components:
               $ref: '#/components/schemas/ProjectsDescriptionResourceAttribute'
             name:
               $ref: '#/components/schemas/ProjectsNameResourceAttribute'
+          type: object
+      type: object
+    ProjectsResourcePatchRelationships:
+      properties:
+        relationships:
+          properties:
             task:
-              $ref: '#/components/schemas/ProjectsTaskResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/TasksResourceReference'
+              type: object
             tasks:
-              $ref: '#/components/schemas/ProjectsTasksResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/TasksResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
           type: object
       type: object
     ProjectsResourcePostAttributes:
@@ -2304,10 +2605,36 @@ components:
               $ref: '#/components/schemas/ProjectsDescriptionResourceAttribute'
             name:
               $ref: '#/components/schemas/ProjectsNameResourceAttribute'
+          type: object
+      type: object
+    ProjectsResourcePostRelationships:
+      properties:
+        relationships:
+          properties:
             task:
-              $ref: '#/components/schemas/ProjectsTaskResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/TasksResourceReference'
+              type: object
             tasks:
-              $ref: '#/components/schemas/ProjectsTasksResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/TasksResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
           type: object
       type: object
     ProjectsResourceReference:
@@ -2335,6 +2662,55 @@ components:
             $ref: '#/components/schemas/ProjectsResourceReference'
           type: array
       type: object
+    ProjectsResourceRelationships:
+      description: Relationships between the resource and other JSON:API resources
+      properties:
+        relationships:
+          properties:
+            task:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/TasksResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /projects/{id}/task
+                      type: string
+                    self:
+                      default: /projects/{id}/relationships/task
+                      type: string
+                  type: object
+              type: object
+            tasks:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/TasksResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                    uniqueItems: false
+                links:
+                  properties:
+                    related:
+                      default: /projects/{id}/tasks
+                      type: string
+                    self:
+                      default: /projects/{id}/relationships/tasks
+                      type: string
+                  type: object
+              type: object
+          type: object
+      type: object
     ProjectsResourceResponseSchema:
       allOf:
       - $ref: '#/components/schemas/Success'
@@ -2347,12 +2723,8 @@ components:
       allOf:
       - $ref: '#/components/schemas/ProjectsResourceReference'
       - $ref: '#/components/schemas/ProjectsResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/ProjectsResourceRelationships'
+      - $ref: '#/components/schemas/ProjectsResourceLinks'
       required:
       - attributes
     ProjectsResourcesResponseSchema:
@@ -2386,7 +2758,6 @@ components:
         data:
           allOf:
           - $ref: '#/components/schemas/ReadOnlyTaskResourceReference'
-          - $ref: '#/components/schemas/ReadOnlyTaskResourcePatchAttributes'
       required:
       - data
       type: object
@@ -2400,7 +2771,6 @@ components:
     ReadOnlyTaskPostResourceData:
       allOf:
       - $ref: '#/components/schemas/ReadOnlyTaskPostResourceReference'
-      - $ref: '#/components/schemas/ReadOnlyTaskResourcePostAttributes'
     ReadOnlyTaskPostResourceReference:
       properties:
         id:
@@ -2430,16 +2800,17 @@ components:
               $ref: '#/components/schemas/ReadOnlyTaskNameResourceAttribute'
           type: object
       type: object
-    ReadOnlyTaskResourcePatchAttributes:
+    ReadOnlyTaskResourceLinks:
+      description: Links related to the resource
       properties:
-        attributes:
-          properties: {}
-          type: object
-      type: object
-    ReadOnlyTaskResourcePostAttributes:
-      properties:
-        attributes:
-          properties: {}
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /readOnlyTask/{id}
+              format: uri
+              type: string
           type: object
       type: object
     ReadOnlyTaskResourceReference:
@@ -2479,12 +2850,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/ReadOnlyTaskResourceReference'
       - $ref: '#/components/schemas/ReadOnlyTaskResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/ReadOnlyTaskResourceLinks'
       required:
       - attributes
     ReadOnlyTaskResourcesResponseSchema:
@@ -2511,6 +2877,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/RelationIdTestResourceReference'
           - $ref: '#/components/schemas/RelationIdTestResourcePatchAttributes'
+          - $ref: '#/components/schemas/RelationIdTestResourcePatchRelationships'
       required:
       - data
       type: object
@@ -2525,6 +2892,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/RelationIdTestPostResourceReference'
       - $ref: '#/components/schemas/RelationIdTestResourcePostAttributes'
+      - $ref: '#/components/schemas/RelationIdTestResourcePostRelationships'
     RelationIdTestPostResourceReference:
       properties:
         id:
@@ -2552,22 +2920,19 @@ components:
           properties:
             name:
               $ref: '#/components/schemas/RelationIdTestNameResourceAttribute'
-            testLookupAlways:
-              $ref: '#/components/schemas/RelationIdTestTestLookupAlwaysResourceAttribute'
-            testLookupNone:
-              $ref: '#/components/schemas/RelationIdTestTestLookupNoneResourceAttribute'
-            testLookupWhenNull:
-              $ref: '#/components/schemas/RelationIdTestTestLookupWhenNullResourceAttribute'
-            testMultipleValues:
-              $ref: '#/components/schemas/RelationIdTestTestMultipleValuesResourceAttribute'
-            testNested:
-              $ref: '#/components/schemas/RelationIdTestTestNestedResourceAttribute'
-            testResourceIdRef:
-              $ref: '#/components/schemas/RelationIdTestTestResourceIdRefResourceAttribute'
-            testSerializeEager:
-              $ref: '#/components/schemas/RelationIdTestTestSerializeEagerResourceAttribute'
-            testSerializeOnlyId:
-              $ref: '#/components/schemas/RelationIdTestTestSerializeOnlyIdResourceAttribute'
+          type: object
+      type: object
+    RelationIdTestResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /relationIdTest/{id}
+              format: uri
+              type: string
           type: object
       type: object
     RelationIdTestResourcePatchAttributes:
@@ -2576,22 +2941,90 @@ components:
           properties:
             name:
               $ref: '#/components/schemas/RelationIdTestNameResourceAttribute'
+          type: object
+      type: object
+    RelationIdTestResourcePatchRelationships:
+      properties:
+        relationships:
+          properties:
             testLookupAlways:
-              $ref: '#/components/schemas/RelationIdTestTestLookupAlwaysResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testLookupNone:
-              $ref: '#/components/schemas/RelationIdTestTestLookupNoneResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testLookupWhenNull:
-              $ref: '#/components/schemas/RelationIdTestTestLookupWhenNullResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testMultipleValues:
-              $ref: '#/components/schemas/RelationIdTestTestMultipleValuesResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ScheduleResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
             testNested:
-              $ref: '#/components/schemas/RelationIdTestTestNestedResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/RelationIdTestResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/RelationIdTestResourceReference'
+              type: object
             testResourceIdRef:
-              $ref: '#/components/schemas/RelationIdTestTestResourceIdRefResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testSerializeEager:
-              $ref: '#/components/schemas/RelationIdTestTestSerializeEagerResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testSerializeOnlyId:
-              $ref: '#/components/schemas/RelationIdTestTestSerializeOnlyIdResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
           type: object
       type: object
     RelationIdTestResourcePostAttributes:
@@ -2600,22 +3033,90 @@ components:
           properties:
             name:
               $ref: '#/components/schemas/RelationIdTestNameResourceAttribute'
+          type: object
+      type: object
+    RelationIdTestResourcePostRelationships:
+      properties:
+        relationships:
+          properties:
             testLookupAlways:
-              $ref: '#/components/schemas/RelationIdTestTestLookupAlwaysResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testLookupNone:
-              $ref: '#/components/schemas/RelationIdTestTestLookupNoneResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testLookupWhenNull:
-              $ref: '#/components/schemas/RelationIdTestTestLookupWhenNullResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testMultipleValues:
-              $ref: '#/components/schemas/RelationIdTestTestMultipleValuesResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ScheduleResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
             testNested:
-              $ref: '#/components/schemas/RelationIdTestTestNestedResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/RelationIdTestResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/RelationIdTestResourceReference'
+              type: object
             testResourceIdRef:
-              $ref: '#/components/schemas/RelationIdTestTestResourceIdRefResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testSerializeEager:
-              $ref: '#/components/schemas/RelationIdTestTestSerializeEagerResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
             testSerializeOnlyId:
-              $ref: '#/components/schemas/RelationIdTestTestSerializeOnlyIdResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
           type: object
       type: object
     RelationIdTestResourceReference:
@@ -2643,6 +3144,163 @@ components:
             $ref: '#/components/schemas/RelationIdTestResourceReference'
           type: array
       type: object
+    RelationIdTestResourceRelationships:
+      description: Relationships between the resource and other JSON:API resources
+      properties:
+        relationships:
+          properties:
+            testLookupAlways:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /relationIdTest/{id}/testLookupAlways
+                      type: string
+                    self:
+                      default: /relationIdTest/{id}/relationships/testLookupAlways
+                      type: string
+                  type: object
+              type: object
+            testLookupNone:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /relationIdTest/{id}/testLookupNone
+                      type: string
+                    self:
+                      default: /relationIdTest/{id}/relationships/testLookupNone
+                      type: string
+                  type: object
+              type: object
+            testLookupWhenNull:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /relationIdTest/{id}/testLookupWhenNull
+                      type: string
+                    self:
+                      default: /relationIdTest/{id}/relationships/testLookupWhenNull
+                      type: string
+                  type: object
+              type: object
+            testMultipleValues:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ScheduleResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                    uniqueItems: false
+                links:
+                  properties:
+                    related:
+                      default: /relationIdTest/{id}/testMultipleValues
+                      type: string
+                    self:
+                      default: /relationIdTest/{id}/relationships/testMultipleValues
+                      type: string
+                  type: object
+              type: object
+            testNested:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/RelationIdTestResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/RelationIdTestResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /relationIdTest/{id}/testNested
+                      type: string
+                    self:
+                      default: /relationIdTest/{id}/relationships/testNested
+                      type: string
+                  type: object
+              type: object
+            testResourceIdRef:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /relationIdTest/{id}/testResourceIdRef
+                      type: string
+                    self:
+                      default: /relationIdTest/{id}/relationships/testResourceIdRef
+                      type: string
+                  type: object
+              type: object
+            testSerializeEager:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /relationIdTest/{id}/testSerializeEager
+                      type: string
+                    self:
+                      default: /relationIdTest/{id}/relationships/testSerializeEager
+                      type: string
+                  type: object
+              type: object
+            testSerializeOnlyId:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /relationIdTest/{id}/testSerializeOnlyId
+                      type: string
+                    self:
+                      default: /relationIdTest/{id}/relationships/testSerializeOnlyId
+                      type: string
+                  type: object
+              type: object
+          type: object
+      type: object
     RelationIdTestResourceResponseSchema:
       allOf:
       - $ref: '#/components/schemas/Success'
@@ -2655,12 +3313,8 @@ components:
       allOf:
       - $ref: '#/components/schemas/RelationIdTestResourceReference'
       - $ref: '#/components/schemas/RelationIdTestResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/RelationIdTestResourceRelationships'
+      - $ref: '#/components/schemas/RelationIdTestResourceLinks'
       required:
       - attributes
     RelationIdTestResourcesResponseSchema:
@@ -2750,6 +3404,19 @@ components:
               $ref: '#/components/schemas/RelocatedTaskNameResourceAttribute'
           type: object
       type: object
+    RelocatedTaskResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /taskNewPath/{id}
+              format: uri
+              type: string
+          type: object
+      type: object
     RelocatedTaskResourcePatchAttributes:
       properties:
         attributes:
@@ -2803,12 +3470,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/RelocatedTaskResourceReference'
       - $ref: '#/components/schemas/RelocatedTaskResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/RelocatedTaskResourceLinks'
       required:
       - attributes
     RelocatedTaskResourcesResponseSchema:
@@ -2830,7 +3492,6 @@ components:
         data:
           allOf:
           - $ref: '#/components/schemas/RenamedIdResourceReference'
-          - $ref: '#/components/schemas/RenamedIdResourcePatchAttributes'
       required:
       - data
       type: object
@@ -2844,7 +3505,6 @@ components:
     RenamedIdPostResourceData:
       allOf:
       - $ref: '#/components/schemas/RenamedIdPostResourceReference'
-      - $ref: '#/components/schemas/RenamedIdResourcePostAttributes'
     RenamedIdPostResourceReference:
       properties:
         id:
@@ -2866,22 +3526,17 @@ components:
       required:
       - data
       type: object
-    RenamedIdResourceAttributes:
+    RenamedIdResourceLinks:
+      description: Links related to the resource
       properties:
-        attributes:
-          properties: {}
-          type: object
-      type: object
-    RenamedIdResourcePatchAttributes:
-      properties:
-        attributes:
-          properties: {}
-          type: object
-      type: object
-    RenamedIdResourcePostAttributes:
-      properties:
-        attributes:
-          properties: {}
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /renamedId/{id}
+              format: uri
+              type: string
           type: object
       type: object
     RenamedIdResourceReference:
@@ -2920,13 +3575,7 @@ components:
     RenamedIdResourceSchema:
       allOf:
       - $ref: '#/components/schemas/RenamedIdResourceReference'
-      - $ref: '#/components/schemas/RenamedIdResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/RenamedIdResourceLinks'
       required:
       - attributes
     RenamedIdResourcesResponseSchema:
@@ -2964,6 +3613,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/ScheduleResourceReference'
           - $ref: '#/components/schemas/ScheduleResourcePatchAttributes'
+          - $ref: '#/components/schemas/ScheduleResourcePatchRelationships'
       required:
       - data
       type: object
@@ -2978,6 +3628,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/SchedulePostResourceReference'
       - $ref: '#/components/schemas/ScheduleResourcePostAttributes'
+      - $ref: '#/components/schemas/ScheduleResourcePostRelationships'
     SchedulePostResourceReference:
       properties:
         id:
@@ -3019,14 +3670,19 @@ components:
               $ref: '#/components/schemas/ScheduleDescriptionResourceAttribute'
             name:
               $ref: '#/components/schemas/ScheduleNameResourceAttribute'
-            project:
-              $ref: '#/components/schemas/ScheduleProjectResourceAttribute'
-            projects:
-              $ref: '#/components/schemas/ScheduleProjectsResourceAttribute'
-            status:
-              $ref: '#/components/schemas/ScheduleStatusResourceAttribute'
-            taskSet:
-              $ref: '#/components/schemas/ScheduleTaskSetResourceAttribute'
+          type: object
+      type: object
+    ScheduleResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /schedules/{id}
+              format: uri
+              type: string
           type: object
       type: object
     ScheduleResourcePatchAttributes:
@@ -3041,14 +3697,60 @@ components:
               $ref: '#/components/schemas/ScheduleDescriptionResourceAttribute'
             name:
               $ref: '#/components/schemas/ScheduleNameResourceAttribute'
+          type: object
+      type: object
+    ScheduleResourcePatchRelationships:
+      properties:
+        relationships:
+          properties:
             project:
-              $ref: '#/components/schemas/ScheduleProjectResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+              type: object
             projects:
-              $ref: '#/components/schemas/ScheduleProjectsResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
             status:
-              $ref: '#/components/schemas/ScheduleStatusResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleStatusResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleStatusResourceReference'
+              type: object
             taskSet:
-              $ref: '#/components/schemas/ScheduleTaskSetResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/TasksResourceReference'
+                      type: array
+                      uniqueItems: true
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                    uniqueItems: true
+              type: object
           type: object
       type: object
     ScheduleResourcePostAttributes:
@@ -3063,14 +3765,60 @@ components:
               $ref: '#/components/schemas/ScheduleDescriptionResourceAttribute'
             name:
               $ref: '#/components/schemas/ScheduleNameResourceAttribute'
+          type: object
+      type: object
+    ScheduleResourcePostRelationships:
+      properties:
+        relationships:
+          properties:
             project:
-              $ref: '#/components/schemas/ScheduleProjectResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+              type: object
             projects:
-              $ref: '#/components/schemas/ScheduleProjectsResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
             status:
-              $ref: '#/components/schemas/ScheduleStatusResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleStatusResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleStatusResourceReference'
+              type: object
             taskSet:
-              $ref: '#/components/schemas/ScheduleTaskSetResourceAttribute'
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/TasksResourceReference'
+                      type: array
+                      uniqueItems: true
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                    uniqueItems: true
+              type: object
           type: object
       type: object
     ScheduleResourceReference:
@@ -3098,6 +3846,97 @@ components:
             $ref: '#/components/schemas/ScheduleResourceReference'
           type: array
       type: object
+    ScheduleResourceRelationships:
+      description: Relationships between the resource and other JSON:API resources
+      properties:
+        relationships:
+          properties:
+            project:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /schedules/{id}/project
+                      type: string
+                    self:
+                      default: /schedules/{id}/relationships/project
+                      type: string
+                  type: object
+              type: object
+            projects:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+                links:
+                  properties:
+                    related:
+                      default: /schedules/{id}/projects
+                      type: string
+                    self:
+                      default: /schedules/{id}/relationships/projects
+                      type: string
+                  type: object
+              type: object
+            status:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleStatusResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleStatusResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /schedules/{id}/status
+                      type: string
+                    self:
+                      default: /schedules/{id}/relationships/status
+                      type: string
+                  type: object
+              type: object
+            taskSet:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/TasksResourceReference'
+                      type: array
+                      uniqueItems: true
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/TasksResourceReference'
+                    type: array
+                    uniqueItems: true
+                links:
+                  properties:
+                    related:
+                      default: /schedules/{id}/taskSet
+                      type: string
+                    self:
+                      default: /schedules/{id}/relationships/taskSet
+                      type: string
+                  type: object
+              type: object
+          type: object
+      type: object
     ScheduleResourceResponseSchema:
       allOf:
       - $ref: '#/components/schemas/Success'
@@ -3110,12 +3949,8 @@ components:
       allOf:
       - $ref: '#/components/schemas/ScheduleResourceReference'
       - $ref: '#/components/schemas/ScheduleResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/ScheduleResourceRelationships'
+      - $ref: '#/components/schemas/ScheduleResourceLinks'
       required:
       - attributes
     ScheduleResourcesResponseSchema:
@@ -3187,6 +4022,19 @@ components:
               $ref: '#/components/schemas/ScheduleStatusDescriptionResourceAttribute'
           type: object
       type: object
+    ScheduleStatusResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /scheduleStatus/{id}
+              format: uri
+              type: string
+          type: object
+      type: object
     ScheduleStatusResourcePatchAttributes:
       properties:
         attributes:
@@ -3240,12 +4088,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/ScheduleStatusResourceReference'
       - $ref: '#/components/schemas/ScheduleStatusResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/ScheduleStatusResourceLinks'
       required:
       - attributes
     ScheduleStatusResourcesResponseSchema:
@@ -3320,6 +4163,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/TasksResourceReference'
           - $ref: '#/components/schemas/TasksResourcePatchAttributes'
+          - $ref: '#/components/schemas/TasksResourcePatchRelationships'
       required:
       - data
       type: object
@@ -3334,6 +4178,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/TasksPostResourceReference'
       - $ref: '#/components/schemas/TasksResourcePostAttributes'
+      - $ref: '#/components/schemas/TasksResourcePostRelationships'
     TasksPostResourceReference:
       properties:
         id:
@@ -3367,66 +4212,175 @@ components:
       properties:
         attributes:
           properties:
-            includedProject:
-              $ref: '#/components/schemas/TasksIncludedProjectResourceAttribute'
-            includedProjects:
-              $ref: '#/components/schemas/TasksIncludedProjectsResourceAttribute'
             name:
               $ref: '#/components/schemas/TasksNameResourceAttribute'
             otherTasks:
               $ref: '#/components/schemas/TasksOtherTasksResourceAttribute'
-            project:
-              $ref: '#/components/schemas/TasksProjectResourceAttribute'
-            projects:
-              $ref: '#/components/schemas/TasksProjectsResourceAttribute'
-            schedule:
-              $ref: '#/components/schemas/TasksScheduleResourceAttribute'
             status:
               $ref: '#/components/schemas/TasksStatusResourceAttribute'
+          type: object
+      type: object
+    TasksResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /tasks/{id}
+              format: uri
+              type: string
           type: object
       type: object
     TasksResourcePatchAttributes:
       properties:
         attributes:
           properties:
-            includedProject:
-              $ref: '#/components/schemas/TasksIncludedProjectResourceAttribute'
-            includedProjects:
-              $ref: '#/components/schemas/TasksIncludedProjectsResourceAttribute'
             name:
               $ref: '#/components/schemas/TasksNameResourceAttribute'
             otherTasks:
               $ref: '#/components/schemas/TasksOtherTasksResourceAttribute'
-            project:
-              $ref: '#/components/schemas/TasksProjectResourceAttribute'
-            projects:
-              $ref: '#/components/schemas/TasksProjectsResourceAttribute'
-            schedule:
-              $ref: '#/components/schemas/TasksScheduleResourceAttribute'
             status:
               $ref: '#/components/schemas/TasksStatusResourceAttribute'
+          type: object
+      type: object
+    TasksResourcePatchRelationships:
+      properties:
+        relationships:
+          properties:
+            includedProject:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+              type: object
+            includedProjects:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
+            project:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+              type: object
+            projects:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
+            schedule:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
           type: object
       type: object
     TasksResourcePostAttributes:
       properties:
         attributes:
           properties:
-            includedProject:
-              $ref: '#/components/schemas/TasksIncludedProjectResourceAttribute'
-            includedProjects:
-              $ref: '#/components/schemas/TasksIncludedProjectsResourceAttribute'
             name:
               $ref: '#/components/schemas/TasksNameResourceAttribute'
             otherTasks:
               $ref: '#/components/schemas/TasksOtherTasksResourceAttribute'
-            project:
-              $ref: '#/components/schemas/TasksProjectResourceAttribute'
-            projects:
-              $ref: '#/components/schemas/TasksProjectsResourceAttribute'
-            schedule:
-              $ref: '#/components/schemas/TasksScheduleResourceAttribute'
             status:
               $ref: '#/components/schemas/TasksStatusResourceAttribute'
+          type: object
+      type: object
+    TasksResourcePostRelationships:
+      properties:
+        relationships:
+          properties:
+            includedProject:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+              type: object
+            includedProjects:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
+            project:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+              type: object
+            projects:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+              type: object
+            schedule:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+              type: object
           type: object
       type: object
     TasksResourceReference:
@@ -3454,6 +4408,115 @@ components:
             $ref: '#/components/schemas/TasksResourceReference'
           type: array
       type: object
+    TasksResourceRelationships:
+      description: Relationships between the resource and other JSON:API resources
+      properties:
+        relationships:
+          properties:
+            includedProject:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /tasks/{id}/includedProject
+                      type: string
+                    self:
+                      default: /tasks/{id}/relationships/includedProject
+                      type: string
+                  type: object
+              type: object
+            includedProjects:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+                links:
+                  properties:
+                    related:
+                      default: /tasks/{id}/includedProjects
+                      type: string
+                    self:
+                      default: /tasks/{id}/relationships/includedProjects
+                      type: string
+                  type: object
+              type: object
+            project:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ProjectsResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /tasks/{id}/project
+                      type: string
+                    self:
+                      default: /tasks/{id}/relationships/project
+                      type: string
+                  type: object
+              type: object
+            projects:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      items:
+                        $ref: '#/components/schemas/ProjectsResourceReference'
+                      type: array
+                      uniqueItems: false
+                    type: array
+                  - items:
+                      $ref: '#/components/schemas/ProjectsResourceReference'
+                    type: array
+                    uniqueItems: false
+                links:
+                  properties:
+                    related:
+                      default: /tasks/{id}/projects
+                      type: string
+                    self:
+                      default: /tasks/{id}/relationships/projects
+                      type: string
+                  type: object
+              type: object
+            schedule:
+              properties:
+                data:
+                  oneOf:
+                  - items:
+                      $ref: '#/components/schemas/ScheduleResourceReference'
+                    type: array
+                  - $ref: '#/components/schemas/ScheduleResourceReference'
+                links:
+                  properties:
+                    related:
+                      default: /tasks/{id}/schedule
+                      type: string
+                    self:
+                      default: /tasks/{id}/relationships/schedule
+                      type: string
+                  type: object
+              type: object
+          type: object
+      type: object
     TasksResourceResponseSchema:
       allOf:
       - $ref: '#/components/schemas/Success'
@@ -3466,12 +4529,8 @@ components:
       allOf:
       - $ref: '#/components/schemas/TasksResourceReference'
       - $ref: '#/components/schemas/TasksResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/TasksResourceRelationships'
+      - $ref: '#/components/schemas/TasksResourceLinks'
       required:
       - attributes
     TasksResourcesResponseSchema:

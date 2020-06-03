@@ -16,6 +16,7 @@ class PatchResourceTest extends MetaResourceBaseTest {
 
 	@Test
 	void schema() {
+		relationshipMetaResourceField.setUpdatable(true);
 		Schema requestSchema = new PatchResource(metaResource).schema();
 
 		ObjectSchema topLevelSchema = (ObjectSchema) requestSchema;
@@ -25,6 +26,6 @@ class PatchResourceTest extends MetaResourceBaseTest {
 		List<Schema> allOf = ((ComposedSchema) dataSchema).getAllOf();
 		assertEquals(2, allOf.size());
 		assertEquals("#/components/schemas/ResourceTypeResourceReference", allOf.get(0).get$ref());
-		assertEquals("#/components/schemas/ResourceTypeResourcePatchAttributes", allOf.get(1).get$ref());
+		assertEquals("#/components/schemas/ResourceTypeResourcePatchRelationships", allOf.get(1).get$ref());
 	}
 }

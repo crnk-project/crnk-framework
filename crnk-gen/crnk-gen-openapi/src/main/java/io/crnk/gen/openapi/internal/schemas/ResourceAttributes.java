@@ -1,32 +1,18 @@
 package io.crnk.gen.openapi.internal.schemas;
 
 import io.crnk.gen.openapi.internal.OASUtils;
-import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
+import io.crnk.meta.model.resource.MetaResourceField;
 
-import java.util.Map;
-import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toMap;
 
-public class ResourceAttributes extends AbstractSchemaGenerator {
+public class ResourceAttributes extends AbstractResourceAttributes {
 
-  private final Map<String, Schema> attributes;
-
-  public ResourceAttributes(MetaResource metaResource) {
-    super(metaResource);
-    attributes = OASUtils.attributes(metaResource, false)
-        .collect(
-            Collectors.toMap(
-                MetaElement::getName,
-                e -> new ResourceAttribute(metaResource, e).$ref()));
-  }
-
-  public Schema schema() {
-    return new ObjectSchema()
-        .addProperties(
-            "attributes",
-            new ObjectSchema()
-                .properties(attributes));
-  }
+	public ResourceAttributes(MetaResource metaResource) {
+		super(metaResource, "attributes",
+				OASUtils.notAssociationAttributes(metaResource, false)
+						.collect(toMap(
+								MetaResourceField::getName,
+								e -> new ResourceAttribute(metaResource, e).$ref())));
+	}
 }

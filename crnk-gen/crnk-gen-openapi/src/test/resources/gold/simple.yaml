@@ -369,6 +369,19 @@ components:
               $ref: '#/components/schemas/SimpleTasksNameResourceAttribute'
           type: object
       type: object
+    SimpleTasksResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /simpleTasks/{id}
+              format: uri
+              type: string
+          type: object
+      type: object
     SimpleTasksResourcePatchAttributes:
       properties:
         attributes:
@@ -422,12 +435,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/SimpleTasksResourceReference'
       - $ref: '#/components/schemas/SimpleTasksResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/SimpleTasksResourceLinks'
       required:
       - attributes
     SimpleTasksResourcesResponseSchema:

@@ -1,5 +1,6 @@
 package io.crnk.gen.openapi.internal.schemas;
 
+import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -15,8 +16,11 @@ public class PatchResource extends AbstractSchemaGenerator {
 	public Schema schema() {
 		return new ObjectSchema()
 				.addRequiredItem("data")
-				.addProperties("data", new ComposedSchema()
-						.addAllOfItem(new ResourceReference(metaResource).$ref())
-						.addAllOfItem(new ResourcePatchAttributes(metaResource).$ref()));
+				.addProperties("data", new ComposedSchema().allOf(
+						OASUtils.getIncludedSchemaRefs(
+								new ResourceReference(metaResource),
+								new ResourcePatchAttributes(metaResource),
+								new ResourcePatchRelationships(metaResource)
+						)));
 	}
 }
