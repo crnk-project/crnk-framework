@@ -345,9 +345,9 @@ components:
         id:
           $ref: '#/components/schemas/SimpleTasksIdResourceAttribute'
         type:
-          description: The JSON:API resource type (SimpleTasks)
+          description: The JSON:API resource type (simpleTasks)
           enum:
-          - SimpleTasks
+          - simpleTasks
           type: string
       required:
       - type
@@ -390,9 +390,9 @@ components:
         id:
           $ref: '#/components/schemas/SimpleTasksIdResourceAttribute'
         type:
-          description: The JSON:API resource type (SimpleTasks)
+          description: The JSON:API resource type (simpleTasks)
           enum:
-          - SimpleTasks
+          - simpleTasks
           type: string
       required:
       - id
