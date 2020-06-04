@@ -975,9 +975,9 @@ components:
         id:
           $ref: '#/components/schemas/CommentIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Comment)
+          description: The JSON:API resource type (comment)
           enum:
-          - Comment
+          - comment
           type: string
       required:
       - type
@@ -1034,9 +1034,9 @@ components:
         id:
           $ref: '#/components/schemas/CommentIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Comment)
+          description: The JSON:API resource type (comment)
           enum:
-          - Comment
+          - comment
           type: string
       required:
       - id
@@ -1135,9 +1135,9 @@ components:
         id:
           $ref: '#/components/schemas/HeaderIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Header)
+          description: The JSON:API resource type (header)
           enum:
-          - Header
+          - header
           type: string
       required:
       - type
@@ -1194,9 +1194,9 @@ components:
         id:
           $ref: '#/components/schemas/HeaderIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Header)
+          description: The JSON:API resource type (header)
           enum:
-          - Header
+          - header
           type: string
       required:
       - id
@@ -1280,9 +1280,9 @@ components:
         id:
           $ref: '#/components/schemas/HistoricTasksIdResourceAttribute'
         type:
-          description: The JSON:API resource type (HistoricTasks)
+          description: The JSON:API resource type (historicTasks)
           enum:
-          - HistoricTasks
+          - historicTasks
           type: string
       required:
       - type
@@ -1325,9 +1325,9 @@ components:
         id:
           $ref: '#/components/schemas/HistoricTasksIdResourceAttribute'
         type:
-          description: The JSON:API resource type (HistoricTasks)
+          description: The JSON:API resource type (historicTasks)
           enum:
-          - HistoricTasks
+          - historicTasks
           type: string
       required:
       - id
@@ -1451,9 +1451,9 @@ components:
         id:
           $ref: '#/components/schemas/NestedRelatedIdResourceAttribute'
         type:
-          description: The JSON:API resource type (NestedRelated)
+          description: The JSON:API resource type (nestedRelated)
           enum:
-          - NestedRelated
+          - nestedRelated
           type: string
       required:
       - type
@@ -1490,9 +1490,9 @@ components:
         id:
           $ref: '#/components/schemas/NestedRelatedIdResourceAttribute'
         type:
-          description: The JSON:API resource type (NestedRelated)
+          description: The JSON:API resource type (nestedRelated)
           enum:
-          - NestedRelated
+          - nestedRelated
           type: string
       required:
       - id
@@ -1573,9 +1573,9 @@ components:
         id:
           $ref: '#/components/schemas/NoAccessTaskIdResourceAttribute'
         type:
-          description: The JSON:API resource type (NoAccessTask)
+          description: The JSON:API resource type (noAccessTask)
           enum:
-          - NoAccessTask
+          - noAccessTask
           type: string
       required:
       - type
@@ -1614,9 +1614,9 @@ components:
         id:
           $ref: '#/components/schemas/NoAccessTaskIdResourceAttribute'
         type:
-          description: The JSON:API resource type (NoAccessTask)
+          description: The JSON:API resource type (noAccessTask)
           enum:
-          - NoAccessTask
+          - noAccessTask
           type: string
       required:
       - id
@@ -1724,9 +1724,9 @@ components:
         id:
           $ref: '#/components/schemas/PostIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Post)
+          description: The JSON:API resource type (post)
           enum:
-          - Post
+          - post
           type: string
       required:
       - type
@@ -1775,9 +1775,9 @@ components:
         id:
           $ref: '#/components/schemas/PostIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Post)
+          description: The JSON:API resource type (post)
           enum:
-          - Post
+          - post
           type: string
       required:
       - id
@@ -1944,9 +1944,9 @@ components:
         id:
           $ref: '#/components/schemas/PrimitiveAttributeIdResourceAttribute'
         type:
-          description: The JSON:API resource type (PrimitiveAttribute)
+          description: The JSON:API resource type (primitiveAttribute)
           enum:
-          - PrimitiveAttribute
+          - primitiveAttribute
           type: string
       required:
       - type
@@ -2127,9 +2127,9 @@ components:
         id:
           $ref: '#/components/schemas/PrimitiveAttributeIdResourceAttribute'
         type:
-          description: The JSON:API resource type (PrimitiveAttribute)
+          description: The JSON:API resource type (primitiveAttribute)
           enum:
-          - PrimitiveAttribute
+          - primitiveAttribute
           type: string
       required:
       - id
@@ -2246,9 +2246,9 @@ components:
         id:
           $ref: '#/components/schemas/ProjectsIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Projects)
+          description: The JSON:API resource type (projects)
           enum:
-          - Projects
+          - projects
           type: string
       required:
       - type
@@ -2315,9 +2315,9 @@ components:
         id:
           $ref: '#/components/schemas/ProjectsIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Projects)
+          description: The JSON:API resource type (projects)
           enum:
-          - Projects
+          - projects
           type: string
       required:
       - id
@@ -2406,9 +2406,9 @@ components:
         id:
           $ref: '#/components/schemas/ReadOnlyTaskIdResourceAttribute'
         type:
-          description: The JSON:API resource type (ReadOnlyTask)
+          description: The JSON:API resource type (readOnlyTask)
           enum:
-          - ReadOnlyTask
+          - readOnlyTask
           type: string
       required:
       - type
@@ -2447,9 +2447,9 @@ components:
         id:
           $ref: '#/components/schemas/ReadOnlyTaskIdResourceAttribute'
         type:
-          description: The JSON:API resource type (ReadOnlyTask)
+          description: The JSON:API resource type (readOnlyTask)
           enum:
-          - ReadOnlyTask
+          - readOnlyTask
           type: string
       required:
       - id
@@ -2530,9 +2530,9 @@ components:
         id:
           $ref: '#/components/schemas/RelationIdTestIdResourceAttribute'
         type:
-          description: The JSON:API resource type (RelationIdTest)
+          description: The JSON:API resource type (relationIdTest)
           enum:
-          - RelationIdTest
+          - relationIdTest
           type: string
       required:
       - type
@@ -2623,9 +2623,9 @@ components:
         id:
           $ref: '#/components/schemas/RelationIdTestIdResourceAttribute'
         type:
-          description: The JSON:API resource type (RelationIdTest)
+          description: The JSON:API resource type (relationIdTest)
           enum:
-          - RelationIdTest
+          - relationIdTest
           type: string
       required:
       - id
@@ -2726,9 +2726,9 @@ components:
         id:
           $ref: '#/components/schemas/RelocatedTaskIdResourceAttribute'
         type:
-          description: The JSON:API resource type (RelocatedTask)
+          description: The JSON:API resource type (relocatedTask)
           enum:
-          - RelocatedTask
+          - relocatedTask
           type: string
       required:
       - type
@@ -2771,9 +2771,9 @@ components:
         id:
           $ref: '#/components/schemas/RelocatedTaskIdResourceAttribute'
         type:
-          description: The JSON:API resource type (RelocatedTask)
+          description: The JSON:API resource type (relocatedTask)
           enum:
-          - RelocatedTask
+          - relocatedTask
           type: string
       required:
       - id
@@ -2850,9 +2850,9 @@ components:
         id:
           $ref: '#/components/schemas/RenamedIdIdResourceAttribute'
         type:
-          description: The JSON:API resource type (RenamedId)
+          description: The JSON:API resource type (renamedId)
           enum:
-          - RenamedId
+          - renamedId
           type: string
       required:
       - type
@@ -2889,9 +2889,9 @@ components:
         id:
           $ref: '#/components/schemas/RenamedIdIdResourceAttribute'
         type:
-          description: The JSON:API resource type (RenamedId)
+          description: The JSON:API resource type (renamedId)
           enum:
-          - RenamedId
+          - renamedId
           type: string
       required:
       - id
@@ -2983,9 +2983,9 @@ components:
         id:
           $ref: '#/components/schemas/ScheduleIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Schedule)
+          description: The JSON:API resource type (schedule)
           enum:
-          - Schedule
+          - schedule
           type: string
       required:
       - type
@@ -3078,9 +3078,9 @@ components:
         id:
           $ref: '#/components/schemas/ScheduleIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Schedule)
+          description: The JSON:API resource type (schedule)
           enum:
-          - Schedule
+          - schedule
           type: string
       required:
       - id
@@ -3161,9 +3161,9 @@ components:
         id:
           $ref: '#/components/schemas/ScheduleStatusIdResourceAttribute'
         type:
-          description: The JSON:API resource type (ScheduleStatus)
+          description: The JSON:API resource type (scheduleStatus)
           enum:
-          - ScheduleStatus
+          - scheduleStatus
           type: string
       required:
       - type
@@ -3208,9 +3208,9 @@ components:
         id:
           $ref: '#/components/schemas/ScheduleStatusIdResourceAttribute'
         type:
-          description: The JSON:API resource type (ScheduleStatus)
+          description: The JSON:API resource type (scheduleStatus)
           enum:
-          - ScheduleStatus
+          - scheduleStatus
           type: string
       required:
       - id
@@ -3339,9 +3339,9 @@ components:
         id:
           $ref: '#/components/schemas/TasksIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Tasks)
+          description: The JSON:API resource type (tasks)
           enum:
-          - Tasks
+          - tasks
           type: string
       required:
       - type
@@ -3434,9 +3434,9 @@ components:
         id:
           $ref: '#/components/schemas/TasksIdResourceAttribute'
         type:
-          description: The JSON:API resource type (Tasks)
+          description: The JSON:API resource type (tasks)
           enum:
-          - Tasks
+          - tasks
           type: string
       required:
       - id
