@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.jackson;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.resource.links.*;
 import org.junit.Assert;
@@ -70,11 +71,11 @@ public class LinksInformationSerializerTest {
 		Assert.assertTrue(serialized.contains(createSingleLinkJson(OBJECT_LINK, "next", pagedLink.getNext().getHref(), false)));
 
 		serialized = mapper.writeValueAsString(customLink);
-		expected = createSingleLinkJson(OBJECT_LINK, "imdb", customLink.getImdb().getHref());
+		expected = createMultiLinkJson(OBJECT_LINK, Arrays.asList("imdb", "another-imdb"), Arrays.asList(customLink.getImdb().getHref(), customLink.getAnotherImdb().getHref()));
 		Assert.assertEquals(expected, serialized);
 
 		serialized = mapper.writeValueAsString(customStringLink);
-		expected = createSingleLinkJson(OBJECT_LINK, "imdb", customStringLink.getImdb());
+		expected = createMultiLinkJson(OBJECT_LINK, Arrays.asList("imdb", "another_imdb"), Arrays.asList(customStringLink.getImdb(), customStringLink.getAnotherImdb()));
 		Assert.assertEquals(expected, serialized);
 	}
 
@@ -121,12 +122,20 @@ public class LinksInformationSerializerTest {
 
 		private Link imdb;
 
+		@JsonProperty("another-imdb")
+		private Link anotherImdb;
+
 		TestCustomLinksInformation(String imdb) {
 			this.imdb = new DefaultLink(imdb);
+			this.anotherImdb = new DefaultLink(imdb);
 		}
 
 		public Link getImdb() {
 			return imdb;
+		}
+
+		public Link getAnotherImdb() {
+			return anotherImdb;
 		}
 	}
 
@@ -134,12 +143,20 @@ public class LinksInformationSerializerTest {
 
 		private String imdb;
 
+		@JsonProperty("another_imdb")
+		private String anotherImdb;
+
 		TestCustomStringBasedLinksInformation(String imdb) {
 			this.imdb = imdb;
+			this.anotherImdb = imdb;
 		}
 
 		public String getImdb() {
 			return imdb;
+		}
+
+		public String getAnotherImdb() {
+			return anotherImdb;
 		}
 	}
 
