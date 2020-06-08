@@ -191,6 +191,14 @@ number of resources should be counted or whether just the presence of a subseque
 is checked (by querying `limit + 1` entities). By default the total resources
 are counted. Have a look at the <<pagination>> section for more information.
 
+Further, pagination requires a total order among records to avoid recordings jumping in different
+positions. Databases typically do not guarantee  that the same query does result in the same
+result order if no sorting criteria is specified resulting in a total order. For this reason
+Crnk automatically adds the primary key as sort critiera if total order is not given.
+If you make use of composite primary keys, also make sure to be aware of
+https://stackoverflow.com/questions/8139437/how-to-set-the-column-order-of-a-composite-primary-key-using-jpa-hibernate
+and `JpaQuery.setAlphabeticEmbeddableElementOrder(...)`.
+
 
 ### Criteria API and QueryDSL
 

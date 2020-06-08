@@ -50,6 +50,8 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 
 	protected boolean ensureTotalOrder = true;
 
+	protected boolean alphabeticEmbeddableElementOrder = true;
+
 	protected MetaDataObject parentMeta;
 
 	protected List<?> parentIds;
@@ -119,6 +121,13 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 		this.ensureTotalOrder = ensureTotalOrder;
 		return this;
 	}
+
+	@Override
+	public JpaQuery<T> setAlphabeticEmbeddableElementOrder(boolean alphabeticEmbeddableElementOrder) {
+		this.alphabeticEmbeddableElementOrder = alphabeticEmbeddableElementOrder;
+		return this;
+	}
+
 
 	@Override
 	public JpaQuery<T> addFilter(FilterSpec filters) {
