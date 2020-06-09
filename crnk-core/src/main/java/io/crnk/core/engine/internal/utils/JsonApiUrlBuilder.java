@@ -98,6 +98,9 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 				throw new UnsupportedOperationException("not yet implemented");
 			}
 			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
+			if (url == null) {
+				return null;
+			}
 			Collection<?> ids = (Collection<?>) id;
 			Collection<String> strIds = new ArrayList<>();
 			for (Object idElem : ids) {
@@ -112,6 +115,9 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 		}
 		else {
 			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
+		}
+		if (url == null) {
+			return null;
 		}
 		if (relationshipName != null && selfLink) {
 			url += "/relationships/" + relationshipName;
@@ -153,7 +159,7 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 		}
 	}
 
-	public class UrlParameterBuilder {
+	public static class UrlParameterBuilder {
 
 		private StringBuilder builder = new StringBuilder();
 
@@ -162,6 +168,7 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 		private String encoding = "UTF-8";
 
 		public UrlParameterBuilder(String baseUrl) {
+			PreconditionUtil.verify(baseUrl != null, "baseUrl must not be null");
 			builder.append(baseUrl);
 			firstParam = !baseUrl.contains("?");
 		}
@@ -171,7 +178,7 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 			return builder.toString();
 		}
 
-		private void addQueryParameters(Map<String, ?> params) {
+		public void addQueryParameters(Map<String, ?> params) {
 			if (params != null && !params.isEmpty()) {
 				for (Map.Entry<String, ?> entry : params.entrySet()) {
 					String key = entry.getKey();
@@ -200,7 +207,7 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 			});
 		}
 
-		private void addQueryParameter(String key, Object value) {
+		public void addQueryParameter(String key, Object value) {
 			if (value instanceof Collection) {
 				for (Object element : (Collection<?>) value) {
 					addQueryParameter(key, (String) element);

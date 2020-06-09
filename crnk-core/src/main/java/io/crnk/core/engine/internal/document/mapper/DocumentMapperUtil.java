@@ -27,7 +27,10 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.mapper.UrlBuilder;
-import io.crnk.core.resource.links.*;
+import io.crnk.core.resource.links.Link;
+import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.links.RelatedLinksInformation;
+import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -47,7 +50,7 @@ public class DocumentMapperUtil {
 	private static SerializerUtil serializerUtil;
 
 	public DocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-							  PropertiesProvider propertiesProvider, UrlBuilder urlBuilder) {
+			PropertiesProvider propertiesProvider, UrlBuilder urlBuilder) {
 		this.urlBuilder = urlBuilder;
 		this.resourceRegistry = resourceRegistry;
 		this.objectMapper = objectMapper;
@@ -58,18 +61,19 @@ public class DocumentMapperUtil {
 	}
 
 	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
-															List<ResourceField> fields, boolean relation) {
+			List<ResourceField> fields, boolean relation) {
 		Map<String, Set<PathSpec>> includedFieldsSet = queryAdapter != null ? queryAdapter.getIncludedFields() : null;
 		Set<PathSpec> includedFields = includedFieldsSet != null ? includedFieldsSet.get(resourceInformation.getResourceType()) : null;
 		if (noResourceIncludedFieldsSpecified(includedFields)) {
 			return fields;
-		} else {
+		}
+		else {
 			return computeRequestedFields(includedFields, relation, queryAdapter, resourceInformation, fields);
 		}
 	}
 
 	private static List<ResourceField> computeRequestedFields(Set<PathSpec> includedFields, boolean relation,
-															  QueryAdapter queryAdapter, ResourceInformation resourceInformation, List<ResourceField> fields) {
+			QueryAdapter queryAdapter, ResourceInformation resourceInformation, List<ResourceField> fields) {
 
 		if (relation) {
 			// for relations consider both "include" and "fields"
@@ -103,17 +107,19 @@ public class DocumentMapperUtil {
 		return typeIncludedFields == null || typeIncludedFields.isEmpty();
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> List<T> toList(Object entity) {
 		if (entity instanceof List) {
 			return (List) entity;
-		} else if (entity instanceof Iterable) {
+		}
+		else if (entity instanceof Iterable) {
 			ArrayList<T> result = new ArrayList<>();
 			for (Object element : (Iterable) entity) {
 				result.add((T) element);
 			}
 			return result;
-		} else {
+		}
+		else {
 			return Collections.singletonList((T) entity);
 		}
 	}
