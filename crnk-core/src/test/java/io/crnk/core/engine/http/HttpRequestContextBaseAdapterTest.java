@@ -56,6 +56,16 @@ public class HttpRequestContextBaseAdapterTest {
         Assert.assertEquals(3, adapter.getQueryContext().getRequestVersion());
     }
 
+	@Test
+	public void testRequestVersionInAcceptHeaderInMiddle() {
+		Mockito.when(base.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn("application/json;version=3,text/html");
+
+		adapter = new HttpRequestContextBaseAdapter(base);
+		Assert.assertFalse(adapter.accepts("application/xy"));
+		Assert.assertTrue(adapter.accepts("application/json"));
+		Assert.assertEquals(3, adapter.getQueryContext().getRequestVersion());
+	}
+
     @Test
     public void testRequestVersionAsParameter() {
         Map<String, Set<String>> parameters = new HashMap<>();
