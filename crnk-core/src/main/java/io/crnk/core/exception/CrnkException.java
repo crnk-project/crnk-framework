@@ -5,6 +5,8 @@ package io.crnk.core.exception;
  */
 public abstract class CrnkException extends RuntimeException {
 
+	private String url;
+
 	public CrnkException(String message) {
 		super(message);
 	}
@@ -12,4 +14,13 @@ public abstract class CrnkException extends RuntimeException {
 	public CrnkException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
 }

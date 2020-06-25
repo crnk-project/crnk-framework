@@ -1,5 +1,9 @@
 package io.crnk.client.internal;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapterResponse;
@@ -18,10 +22,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ClientStubBaseTest {
 
@@ -52,7 +52,7 @@ public class ClientStubBaseTest {
 		Mockito.when(response.body()).thenReturn("");
 		Mockito.when(response.code()).thenReturn(404);
 
-		RuntimeException exception = stub.handleError(response);
+		RuntimeException exception = stub.handleError(null, response);
 		Assert.assertTrue(exception instanceof ResourceNotFoundException);
 	}
 
@@ -62,7 +62,7 @@ public class ClientStubBaseTest {
 		Mockito.when(response.body()).thenReturn("");
 		Mockito.when(response.code()).thenReturn(500);
 
-		RuntimeException exception = stub.handleError(response);
+		RuntimeException exception = stub.handleError(null, response);
 		Assert.assertTrue(exception instanceof InternalServerErrorException);
 	}
 
@@ -72,7 +72,7 @@ public class ClientStubBaseTest {
 		Mockito.when(response.body()).thenReturn("");
 		Mockito.when(response.code()).thenReturn(599);
 
-		RuntimeException exception = stub.handleError(response);
+		RuntimeException exception = stub.handleError(null, response);
 		Assert.assertTrue(exception instanceof ClientException);
 		Assert.assertTrue(exception.getCause() instanceof IOException);
 	}
@@ -88,7 +88,7 @@ public class ClientStubBaseTest {
 		Mockito.when(response.body()).thenReturn(body);
 		Mockito.when(response.code()).thenReturn(500);
 
-		RuntimeException exception = stub.handleError(response);
+		RuntimeException exception = stub.handleError(null, response);
 		Assert.assertTrue(exception instanceof InternalServerErrorException);
 	}
 
@@ -105,7 +105,7 @@ public class ClientStubBaseTest {
 				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		Mockito.when(response.code()).thenReturn(404);
 
-		RuntimeException exception = stub.handleError(response);
+		RuntimeException exception = stub.handleError(null, response);
 		Assert.assertTrue(exception instanceof ResourceNotFoundException);
 		Assert.assertEquals("detail", exception.getMessage());
 	}
@@ -122,7 +122,7 @@ public class ClientStubBaseTest {
 		Mockito.when(response.getResponseHeader(HttpHeaders.HTTP_CONTENT_TYPE)).thenReturn("not json api");
 		Mockito.when(response.code()).thenReturn(404);
 
-		RuntimeException exception = stub.handleError(response);
+		RuntimeException exception = stub.handleError(null, response);
 		Assert.assertTrue(exception instanceof ResourceNotFoundException);
 		Assert.assertNull(exception.getMessage());
 	}
