@@ -100,6 +100,7 @@ public abstract class BasicRepositoryAccessTestBase {
 		}
 		catch (MethodNotAllowedException e) {
 			// ok
+			Assert.assertNotNull(e.getUrl());
 		}
 	}
 
@@ -140,6 +141,7 @@ public abstract class BasicRepositoryAccessTestBase {
 		}
 		catch (MethodNotAllowedException e) {
 			// ok
+			Assert.assertNotNull(e.getUrl());
 		}
 	}
 
@@ -151,6 +153,7 @@ public abstract class BasicRepositoryAccessTestBase {
 		}
 		catch (MethodNotAllowedException e) {
 			// ok
+			Assert.assertNotNull(e.getUrl());
 		}
 	}
 

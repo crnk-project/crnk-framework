@@ -378,7 +378,7 @@ public class ResourcePostControllerTest extends ControllerTestBase {
             Assert.fail("should not be allowed to create a relationship with an invalid resource");
 		}
 		catch (RepositoryNotFoundException e) {
-            Assert.assertEquals("Repository for a resource not found: notAResource", e.getMessage());
+            Assert.assertTrue(e.getMessage().contains("Repository for a resource not found: notAResource"));
         }
     }
 

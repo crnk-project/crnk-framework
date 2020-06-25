@@ -175,7 +175,7 @@ public class SecurityModuleTest {
             securityModule.checkInit();
             Assert.fail();
         } catch (RepositoryNotFoundException e) {
-            Assert.assertEquals("Repository for a resource not found: doesNotExist", e.getMessage());
+            Assert.assertTrue(e.getMessage().contains("Repository for a resource not found: doesNotExist"));
         }
     }
 
