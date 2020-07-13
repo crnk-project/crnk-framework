@@ -263,8 +263,8 @@ public class OperationsModule implements Module {
             JsonPath repositoryPath = new ResourcePath(rootEntry, null);
 
             PreconditionUtil.assertTrue(
-                method.equals(HttpMethod.POST.toString()) || method.equals(HttpMethod.DELETE.toString()) ,
-                "experimental bulk support is currently limited to POST and DELETE"
+                method.equals(HttpMethod.POST.toString()) || method.equals(HttpMethod.DELETE.toString()) || method.equals(HttpMethod.PATCH.toString()) ,
+                "experimental bulk support is currently limited to POST, PATCH and DELETE"
             );
 
             Document requestBody = new Document();
