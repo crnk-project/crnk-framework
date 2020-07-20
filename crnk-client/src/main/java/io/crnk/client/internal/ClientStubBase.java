@@ -2,8 +2,13 @@ package io.crnk.client.internal;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.ClientException;
 import io.crnk.client.ClientFormat;
@@ -19,10 +24,20 @@ import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.CrnkException;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.DefaultQueryPathResolver;
+import io.crnk.core.queryspec.internal.JsonFilterSpecMapper;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.QueryPathResolver;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
 import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.meta.JsonLinksInformation;
@@ -33,6 +48,9 @@ import org.slf4j.LoggerFactory;
 public class ClientStubBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClientStubBase.class);
+	protected final boolean filterCriteriaInRequestBody;
+	protected final JsonFilterSpecMapper filterSpecMapper;
+	protected final ObjectMapper compactMapper;
 
 	protected CrnkClient client;
 
@@ -41,14 +59,47 @@ public class ClientStubBase {
 	protected Class<?> resourceClass;
 
 
-	public ClientStubBase(CrnkClient client, UrlBuilder urlBuilder, Class<?> resourceClass) {
+	public ClientStubBase(CrnkClient client, UrlBuilder urlBuilder, Class<?> resourceClass, boolean filterCriteriaInRequestBody) {
 		this.client = client;
 		this.urlBuilder = urlBuilder;
 		this.resourceClass = resourceClass;
+		this.filterCriteriaInRequestBody = filterCriteriaInRequestBody;
+		if (filterCriteriaInRequestBody) {
+			QuerySpecUrlContext context = new QuerySpecUrlContext() {
+				@Override
+				public ResourceRegistry getResourceRegistry() {
+					return client.getRegistry();
+				}
+
+				@Override
+				public TypeParser getTypeParser() {
+					return client.getModuleRegistry().getTypeParser();
+				}
+
+				@Override
+				public ObjectMapper getObjectMapper() {
+					return client.getObjectMapper();
+				}
+
+				@Override
+				public UrlBuilder getUrlBuilder() {
+					return client.getModuleRegistry().getUrlBuilder();
+				}
+			};
+			Map<String, FilterOperator> supportedOperators = new DefaultQuerySpecUrlMapper().getSupportedOperators().stream().collect(Collectors.toMap(
+					FilterOperator::getName, Function.identity()));
+			QueryPathResolver pathResolver = new DefaultQueryPathResolver();
+			pathResolver.init(context);
+			filterSpecMapper = new JsonFilterSpecMapper(context, supportedOperators, FilterOperator.EQ, pathResolver);
+			compactMapper = new ObjectMapper();
+		} else {
+			filterSpecMapper = null;
+			compactMapper = null;
+		}
 	}
 
-	protected Object executeGet(String requestUrl, ResponseType responseType) {
-		return execute(requestUrl, responseType, HttpMethod.GET, null);
+	protected Object executeGet(String requestUrl, String body, ResponseType responseType) {
+		return execute(requestUrl, responseType, HttpMethod.GET, body);
 	}
 
 	protected Object executeDelete(String requestUrl) {
@@ -174,6 +225,20 @@ public class ClientStubBase {
 			return new ClientException(response.code(), response.message());
 		}
 	}
+
+	protected String serializeFilter(QuerySpec querySpec, ResourceInformation resourceInformation) {
+		if (querySpec.getFilters() == null || querySpec.getFilters().isEmpty()) {
+			return null;
+		}
+		JsonNode jsonNode = filterSpecMapper.serialize(resourceInformation, querySpec.getFilters(), client.getQueryContext());
+		try {
+			return compactMapper.writeValueAsString(jsonNode);
+		} catch (
+				JsonProcessingException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 
 	public enum ResponseType {
 		NONE, RESOURCE, RESOURCES
