@@ -322,6 +322,7 @@ public class CrnkClient {
 		setupServiceDiscovery();
 		initHttpAdapter();
 
+		setupUrlMapper();
 		setupPagingBehavior();
 		initObjectMapper();
 		configureObjectMapper();
@@ -334,6 +335,17 @@ public class CrnkClient {
 		Optional<Module> plainJsonModule = moduleRegistry.getModules().stream().filter(it -> it.getModuleName().equals("plain-json")).findFirst();
 		if (plainJsonModule.isPresent()) {
 			format = ClientFormat.PLAINJSON;
+		}
+	}
+
+	private void setupUrlMapper() {
+		if (filterCriteriaInRequestBody) {
+			QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
+			if (urlMapper instanceof DefaultQuerySpecUrlMapper) {
+				((DefaultQuerySpecUrlMapper) urlMapper).setFilterCriteriaInRequestBody(filterCriteriaInRequestBody);
+			} else {
+				throw new IllegalStateException("Need DefaultQuerySpecUrlMapper for filterCriteriaInRequestBody option");
+			}
 		}
 	}
 

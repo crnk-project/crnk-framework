@@ -39,7 +39,11 @@ public class HttpClientRequest implements HttpAdapterRequest {
         this.listeners = listeners;
         this.requestBody = requestBody;
         if (method == HttpMethod.GET) {
-            requestBase = new HttpGet(url);
+        	if (requestBody == null || requestBody.isEmpty()) {
+				requestBase = new HttpGet(url);
+			} else {
+        		requestBase = new HttpGetWithBody(url, requestBody, CONTENT_TYPE);
+			}
         } else if (method == HttpMethod.POST) {
             HttpPost post = new HttpPost(url);
             post.setEntity(new StringEntity(requestBody, CONTENT_TYPE));

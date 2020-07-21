@@ -9,10 +9,7 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.core.engine.http.HttpResponse;
-import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.core.engine.http.*;
 import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.module.Module;
 import org.slf4j.Logger;
@@ -70,7 +67,7 @@ public class JsonApiRequestProcessorBase {
 
 	protected Document getRequestDocument(HttpRequestContext requestContext) throws JsonProcessingException {
 		byte[] requestBody = requestContext.getRequestBody();
-		if (requestBody != null && requestBody.length > 0) {
+		if (requestBody != null && requestBody.length > 0 && !HttpMethod.GET.toString().equals(requestContext.getMethod())) {
 			ObjectMapper objectMapper = moduleContext.getObjectMapper();
 			try {
 				return objectMapper.readerFor(Document.class).readValue(requestBody);

@@ -1,5 +1,6 @@
 package io.crnk.core.mock;
 
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.query.QueryContext;
@@ -87,7 +88,7 @@ public class TestHttpRequestContext implements HttpRequestContext {
 
 	@Override
 	public String getMethod() {
-		return null;
+		return HttpMethod.GET.toString();
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package io.crnk.core.queryspec.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -202,7 +203,7 @@ public class DefaultQuerySpecUrlMapper
 					deserializeUnknown(querySpec, parameter);
 			}
 		}
-		if (filterCriteriaInRequestBody) {
+		if (filterCriteriaInRequestBody && HttpMethod.GET.toString().equals(queryContext.getRequestContext().getMethod())) {
 			parseFilterFromBody(resourceInformation, queryContext, rootQuerySpec);
 		}
 
