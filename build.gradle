@@ -14,13 +14,18 @@ buildscript {
         classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
 
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-
+		classpath "com.github.rmee:jdk-bootstrap:${RMEE_GRADLE_VERSION}"
         classpath 'com.bmuschko:gradle-docker-plugin:3.2.8'
     }
 }
 
 wrapper {
     gradleVersion = '5.2.1'
+}
+
+apply plugin: 'jdk-bootstrap'
+jdk {
+	useAdoptOpenJdk8(JDK_VERSION)
 }
 
 // note that a production build creates javadoc, sources jars and signatures undesired during development

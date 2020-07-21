@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 ##############################################################################
 ##
@@ -28,7 +28,7 @@ APP_NAME="Gradle"
 APP_BASE_NAME=`basename "$0"`
 
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-DEFAULT_JVM_OPTS=""
+DEFAULT_JVM_OPTS='"-Xmx64m"'
 
 # Use the maximum available, or set MAX_FD != -1 to use that value.
 MAX_FD="maximum"
@@ -65,6 +65,69 @@ case "`uname`" in
 esac
 
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+
+JDK_DOWNLOAD_URL="https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08/OpenJDK8U-jdk_x64_JDK_OS_hotspot_8u202b08.JDK_DIST_SUFFIX"
+JDK_VERSION="8u202-b08"
+
+JDK_CACHE_DIR="${APP_HOME}/.gradle/jdk"
+
+if [ -z "${JAVA_HOME_OVERRIDE}" ]; then
+  JAVA_HOME="${JDK_CACHE_DIR}/jdk-${JDK_VERSION}";
+else
+  JAVA_HOME="${JAVA_HOME_OVERRIDE}"
+fi
+
+if ! [ -d "${JAVA_HOME}" ]; then
+
+  mkdir -p "${JDK_CACHE_DIR}" || die "java: Fatal error while creating local cache directory: ${JDK_CACHE_DIR}"
+
+  if [ "$cygwin" = "true" -o "$msys" = "true" ] ; then
+    JDK_ENV="windows-x64"
+    JDK_OS="windows"
+    JDK_DOWNLOAD_URL="${JDK_DOWNLOAD_URL/JDK_DIST_SUFFIX/zip}"
+    JDK_DOWNLOAD_FILE="${JDK_CACHE_DIR}/jdk-${JDK_VERSION}.zip"
+  else
+    [ "$darwin" = true ] && JDK_ENV="osx-x64" || JDK_ENV="linux-x64"
+    [ "$darwin" = true ] && JDK_OS="mac" || JDK_OS="linux"
+    JDK_DOWNLOAD_URL="${JDK_DOWNLOAD_URL/JDK_DIST_SUFFIX/tar.gz}"
+    JDK_DOWNLOAD_FILE="${JDK_CACHE_DIR}/jdk-${JDK_VERSION}.tar.gz"
+  fi
+
+  JDK_DOWNLOAD_URL="${JDK_DOWNLOAD_URL/JDK_ENV/${JDK_ENV}}"
+  JDK_DOWNLOAD_URL="${JDK_DOWNLOAD_URL/JDK_OS/${JDK_OS}}"
+
+  echo "Downloading JDK from $JDK_DOWNLOAD_URL"
+
+  curl -L "${JDK_DOWNLOAD_URL}" --output "${JDK_DOWNLOAD_FILE}" || \
+    die "java: Fatal error. Could not download JDK from URL: ${JDK_DOWNLOAD_URL}"
+
+  if [ "$cygwin" = "true" -o "$msys" = "true" ] ; then
+    unzip "${JDK_DOWNLOAD_FILE}" -d "${JDK_CACHE_DIR}/" || \
+	  die "java: Fatal error. Could not unzip the downloaded archive: ${JDK_DOWNLOAD_FILE}"
+  else
+     tar xfz "${JDK_DOWNLOAD_FILE}" -C "${JDK_CACHE_DIR}/" || \
+	   die "java: Fatal error. Could not gnu-unzip and untar the downloaded archive: ${JDK_DOWNLOAD_FILE}"
+  fi
+
+  # deal with different naming conventions on OSX
+  if [ -d "${JDK_CACHE_DIR}/jdk${JDK_VERSION}/Contents" ] ; then
+     mv "${JDK_CACHE_DIR}/jdk${JDK_VERSION}/Contents/Home" "${JDK_CACHE_DIR}/jdk-${JDK_VERSION}"
+     rm -R "${JDK_CACHE_DIR}/jdk${JDK_VERSION}"
+  fi
+
+  if [ -d "${JDK_CACHE_DIR}/jdk${JDK_VERSION}" ] ; then
+    mv "${JDK_CACHE_DIR}/jdk${JDK_VERSION}" "${JDK_CACHE_DIR}/jdk-${JDK_VERSION}"
+  fi
+
+  if [ -d "${JDK_CACHE_DIR}/${JDK_VERSION}-${JDK_OS}_x64" ] ; then
+  	mv "${JDK_CACHE_DIR}/${JDK_VERSION}-${JDK_OS}_x64" "${JDK_CACHE_DIR}/jdk-${JDK_VERSION}"
+  fi
+
+  chmod -R u+w,g+w "${JAVA_HOME}"
+
+  echo "Installed JDK from ${JDK_DOWNLOAD_URL} into ${JAVA_HOME}"
+fi
 
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
