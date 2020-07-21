@@ -12,11 +12,7 @@ import io.crnk.core.mock.models.CustomPagingPojo;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.queryspec.Direction;
-import io.crnk.core.queryspec.FilterOperator;
-import io.crnk.core.queryspec.FilterSpec;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.SortSpec;
+import io.crnk.core.queryspec.*;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import org.junit.Assert;
@@ -49,6 +45,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		container.boot();
 
 		urlMapper = (DefaultQuerySpecUrlMapper) container.getBoot().getUrlMapper();
+		urlMapper.setFilterCriteriaInRequestBody(false);
 
 		resourceRegistry = container.getResourceRegistry();
 		urlBuilder = container.getModuleRegistry().getUrlBuilder();
@@ -277,5 +274,13 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
 		String actualUrl = urlBuilder.buildUrl(queryContext, entry.getResourceInformation(), id, querySpec);
 		assertEquals(expectedUrl, actualUrl);
+	}
+
+	@Test
+	public void testFilterNotAddedToUrlWhenInHttpBody() {
+		urlMapper.setFilterCriteriaInRequestBody(true);
+		QuerySpec querySpec = new QuerySpec(Schedule.class);
+		querySpec.addFilter(new FilterSpec(PathSpec.of("desc"), FilterOperator.EQ, "test"));
+		check("http://127.0.0.1/schedules", null, querySpec);
 	}
 }
