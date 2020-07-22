@@ -65,32 +65,7 @@ public class ClientStubBase {
 		this.resourceClass = resourceClass;
 		this.filterCriteriaInRequestBody = filterCriteriaInRequestBody;
 		if (filterCriteriaInRequestBody) {
-			QuerySpecUrlContext context = new QuerySpecUrlContext() {
-				@Override
-				public ResourceRegistry getResourceRegistry() {
-					return client.getRegistry();
-				}
-
-				@Override
-				public TypeParser getTypeParser() {
-					return client.getModuleRegistry().getTypeParser();
-				}
-
-				@Override
-				public ObjectMapper getObjectMapper() {
-					return client.getObjectMapper();
-				}
-
-				@Override
-				public UrlBuilder getUrlBuilder() {
-					return client.getModuleRegistry().getUrlBuilder();
-				}
-			};
-			Map<String, FilterOperator> supportedOperators = new DefaultQuerySpecUrlMapper().getSupportedOperators().stream().collect(Collectors.toMap(
-					FilterOperator::getName, Function.identity()));
-			QueryPathResolver pathResolver = new DefaultQueryPathResolver();
-			pathResolver.init(context);
-			filterSpecMapper = new JsonFilterSpecMapper(context, supportedOperators, FilterOperator.EQ, pathResolver);
+			filterSpecMapper = ((DefaultQuerySpecUrlMapper) client.getUrlMapper()).getJsonParser();
 			compactMapper = new ObjectMapper();
 		} else {
 			filterSpecMapper = null;

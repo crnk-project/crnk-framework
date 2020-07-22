@@ -2,17 +2,20 @@ package io.crnk.client;
 
 import io.crnk.client.http.apache.HttpClientAdapter;
 import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -43,7 +46,10 @@ public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 	@Override
 	protected TestApplication configure() {
 		TestApplication app = super.configure();
-		app.setProperties(Collections.singletonMap(CrnkProperties.FILTER_CRITERIA_IN_HTTP_BODY, Boolean.TRUE.toString()));
+		Map<String, String> properties = new HashMap<>();
+		properties.put(CrnkProperties.FILTER_CRITERIA_IN_HTTP_BODY, Boolean.TRUE.toString());
+		properties.put(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES, Boolean.TRUE.toString());
+		app.setProperties(properties);
 		return app;
 	}
 
@@ -51,6 +57,7 @@ public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 	protected void setupClient(CrnkClient client) {
 		client.setHttpAdapter(new HttpClientAdapter());
 		client.setFilterCriteriaInRequestBody(true);
+		((DefaultQuerySpecUrlMapper) client.getUrlMapper()).setAllowUnknownAttributes(true);
 	}
 
 	@Test
@@ -81,5 +88,14 @@ public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 		ResourceList<Project> projects = projectRepo.findAll(querySpec);
 		assertNotNull(projects);
 		assertEquals(5, projects.size());
+	}
+
+	@Test(expected = InternalServerErrorException.class)
+	public void testUnknownFilterAttributeIsPassedToServer() {
+		ResourceRepository<Project, Long> projectRepo = client.getRepositoryForType(Project.class);
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		String unknownPath = "unknown";
+		querySpec.addFilter(PathSpec.of(unknownPath).filter(FilterOperator.EQ, 1));
+		projectRepo.findAll(querySpec);
 	}
 }

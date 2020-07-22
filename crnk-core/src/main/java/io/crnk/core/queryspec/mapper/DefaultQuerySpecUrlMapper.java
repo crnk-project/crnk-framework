@@ -95,6 +95,10 @@ public class DefaultQuerySpecUrlMapper
 		jsonParser = new JsonFilterSpecMapper(ctx, supportedOperators, defaultOperator, pathResolver);
 	}
 
+	public JsonFilterSpecMapper getJsonParser() {
+		return jsonParser;
+	}
+
 	/**
 	 * @return true if attribute paths must be separated with ".". Ealier
 	 * Crnk versions did made use of brackets
