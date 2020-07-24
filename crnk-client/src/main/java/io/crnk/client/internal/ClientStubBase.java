@@ -66,7 +66,7 @@ public class ClientStubBase {
 		this.filterCriteriaInRequestBody = filterCriteriaInRequestBody;
 		if (filterCriteriaInRequestBody) {
 			filterSpecMapper = ((DefaultQuerySpecUrlMapper) client.getUrlMapper()).getJsonParser();
-			compactMapper = new ObjectMapper();
+			compactMapper = client.getObjectMapper();
 		} else {
 			filterSpecMapper = null;
 			compactMapper = null;
