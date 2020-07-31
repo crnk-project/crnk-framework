@@ -58,8 +58,8 @@ public class OkHttpRequest implements HttpAdapterRequest {
 
     @Override
     public HttpAdapterResponse execute() throws IOException {
-        Request request = builder.build();
         listeners.stream().forEach(it -> it.onRequest(this));
+        Request request = builder.build();
         Response response = client.newCall(request).execute();
         OkHttpResponse adapterResponse = new OkHttpResponse(response);
         listeners.stream().forEach(it -> it.onResponse(this, adapterResponse));
