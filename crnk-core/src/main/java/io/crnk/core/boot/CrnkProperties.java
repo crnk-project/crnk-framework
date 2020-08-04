@@ -152,9 +152,17 @@ public class CrnkProperties {
      * <p>
      * Set a boolean whether Crnk should throw
      * {@link io.crnk.core.exception.ResourceNotFoundException ResourceNotFoundException} if related resources are missing.
-     * </p>
+     * </p>crnk.config.resource.request.filterCriteriaInHttp
      * <p>Set this to <code>false</code> to ignore missing related resources.</p>
      */
     public static final String EXCEPTION_ON_MISSING_RELATED_RESOURCE = "crnk.config.serialize.relation.exceptionOnMissingRelatedResource";
+
+	/**
+	 * <p>Set a boolean if crnk should send filter criteria in the HTTP GET request body.</p>
+	 * <p>By default and in compliance with the JSON API Spec, the filter has to be sent as query param in the URL.
+	 * But this might result in errors related to the maximum supported length of URLs, especially with nested filters.
+	 * Sending the parameters in the request body will allow for longer, more complex filters.</p>
+	 */
+	public static final String FILTER_CRITERIA_IN_HTTP_BODY = "crnk.config.resource.request.filterCriteriaInHttpBody";
 
 }

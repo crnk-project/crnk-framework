@@ -3,6 +3,7 @@ package io.crnk.core.queryspec.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,6 +58,8 @@ public class DefaultQuerySpecUrlMapper
 	private boolean ignoreParseExceptions;
 
 	private boolean allowUnknownParameters = false;
+
+	private boolean filterCriteriaInRequestBody;
 
 	protected QuerySpecUrlContext context;
 
@@ -89,6 +93,10 @@ public class DefaultQuerySpecUrlMapper
 		pathResolver.init(context);
 
 		jsonParser = new JsonFilterSpecMapper(ctx, supportedOperators, defaultOperator, pathResolver);
+	}
+
+	public JsonFilterSpecMapper getJsonParser() {
+		return jsonParser;
 	}
 
 	/**
@@ -178,6 +186,9 @@ public class DefaultQuerySpecUrlMapper
 					deserializeSort(querySpec, parameter, queryContext);
 					break;
 				case FILTER:
+					if (filterCriteriaInRequestBody) {
+						throw new IllegalStateException("Filter URL parameter not supported when in body mode");
+					}
 					deserializeFilter(querySpec, parameter, queryContext);
 					break;
 				case INCLUDE:
@@ -196,6 +207,9 @@ public class DefaultQuerySpecUrlMapper
 					deserializeUnknown(querySpec, parameter);
 			}
 		}
+		if (filterCriteriaInRequestBody && HttpMethod.GET.toString().equals(queryContext.getRequestContext().getMethod())) {
+			parseFilterFromBody(resourceInformation, queryContext, rootQuerySpec);
+		}
 
 		RegistryEntry entry = context.getResourceRegistry().getEntry(resourceInformation.getResourceType());
 		PagingBehavior<PagingSpec> pagingBehavior = entry.getPagingBehavior();
@@ -210,6 +224,20 @@ public class DefaultQuerySpecUrlMapper
 		}
 
 		return rootQuerySpec;
+	}
+
+	private void parseFilterFromBody(ResourceInformation resourceInformation, QueryContext queryContext, QuerySpec rootQuerySpec) {
+		byte[] requestBody = queryContext.getRequestContext().getRequestBody();
+		if (requestBody != null && requestBody.length > 0) {
+			try {
+				String body = new String(requestBody, StandardCharsets.UTF_8);
+				JsonNode jsonNode = context.getObjectMapper().readTree(body);
+				List<FilterSpec> filterSpecs = jsonParser.deserialize(jsonNode, resourceInformation, queryContext);
+				filterSpecs.forEach(rootQuerySpec::addFilter);
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+		}
 	}
 
 	private static void put(Map<String, Set<String>> map, String key, String value) {
@@ -270,7 +298,9 @@ public class DefaultQuerySpecUrlMapper
 
 			boolean isRoot = querySpec == rootQuerySpec;
 
-			serializeFilters(querySpec, resourceInformation, map, isRoot, queryContext);
+			if (! filterCriteriaInRequestBody) {
+				serializeFilters(querySpec, resourceInformation, map, isRoot, queryContext);
+			}
 			serializeSorting(querySpec, resourceInformation, map, isRoot, queryContext);
 			serializeIncludedFields(querySpec, resourceInformation, map, isRoot, queryContext);
 			serializeIncludedRelations(querySpec, resourceInformation, map, isRoot, queryContext);
@@ -705,5 +735,13 @@ public class DefaultQuerySpecUrlMapper
 
 	public QueryPathResolver getPathResolver() {
 		return pathResolver;
+	}
+
+	public boolean isFilterCriteriaInRequestBody() {
+		return filterCriteriaInRequestBody;
+	}
+
+	public void setFilterCriteriaInRequestBody(boolean filterCriteriaInRequestBody) {
+		this.filterCriteriaInRequestBody = filterCriteriaInRequestBody;
 	}
 }

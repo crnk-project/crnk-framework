@@ -134,6 +134,8 @@ public class CrnkClient {
 
 	private ClientProxyFactory configuredProxyFactory;
 
+	private boolean filterCriteriaInRequestBody;
+
 	public enum ClientType {
 		SIMPLE_lINKS,
 
@@ -274,13 +276,13 @@ public class CrnkClient {
 			}
 
 			@Override
-			public <T> DefaultResourceList<T> getCollection(Class<T> resourceClass, String url) {
+			public <T> DefaultResourceList<T> getCollection(Class<T> resourceClass, String url, String body) {
 				RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 				// TODO add decoration
 				final ResourceRepositoryStubImpl<T, ?> repositoryStub =
-						new ResourceRepositoryStubImpl<>(CrnkClient.this, resourceClass, resourceInformation, urlBuilder);
-				return repositoryStub.findAll(url);
+						new ResourceRepositoryStubImpl<>(CrnkClient.this, resourceClass, resourceInformation, urlBuilder, filterCriteriaInRequestBody);
+				return repositoryStub.findAll(url, body);
 
 			}
 		});
@@ -320,6 +322,7 @@ public class CrnkClient {
 		setupServiceDiscovery();
 		initHttpAdapter();
 
+		setupUrlMapper();
 		setupPagingBehavior();
 		initObjectMapper();
 		configureObjectMapper();
@@ -332,6 +335,17 @@ public class CrnkClient {
 		Optional<Module> plainJsonModule = moduleRegistry.getModules().stream().filter(it -> it.getModuleName().equals("plain-json")).findFirst();
 		if (plainJsonModule.isPresent()) {
 			format = ClientFormat.PLAINJSON;
+		}
+	}
+
+	private void setupUrlMapper() {
+		if (filterCriteriaInRequestBody) {
+			QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
+			if (urlMapper instanceof DefaultQuerySpecUrlMapper) {
+				((DefaultQuerySpecUrlMapper) urlMapper).setFilterCriteriaInRequestBody(filterCriteriaInRequestBody);
+			} else {
+				throw new IllegalStateException("Need DefaultQuerySpecUrlMapper for filterCriteriaInRequestBody option");
+			}
 		}
 	}
 
@@ -415,7 +429,7 @@ public class CrnkClient {
 		ModuleUtils.adaptInformation(resourceInformation, moduleRegistry);
 
 		final ResourceRepository repositoryStub = (ResourceRepository) decorate(
-				new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder)
+				new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder, filterCriteriaInRequestBody)
 		);
 
 		// create interface for it!
@@ -486,7 +500,7 @@ public class CrnkClient {
 		}
 
 		final Object relationshipRepositoryStub = decorate(
-				new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder)
+				new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder, filterCriteriaInRequestBody)
 		);
 
 		RelationshipRepositoryAdapter adapter = new RelationshipRepositoryAdapterImpl(field, moduleRegistry, relationshipRepositoryStub);
@@ -543,7 +557,7 @@ public class CrnkClient {
 						, null
 						, PagingSpec.class
 				);
-		return (ResourceRepository<Resource, String>) decorate(new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder));
+		return (ResourceRepository<Resource, String>) decorate(new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder, filterCriteriaInRequestBody));
 	}
 
 	/**
@@ -558,7 +572,7 @@ public class CrnkClient {
 						PagingSpec.class);
 		return (RelationshipRepository<Resource, String, Resource, String>) decorate(
 				new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation,
-						urlBuilder));
+						urlBuilder, filterCriteriaInRequestBody));
 	}
 
 
@@ -733,5 +747,10 @@ public class CrnkClient {
 		public boolean isInitialized(Class<?> clazz) {
 			return super.getEntry(clazz) != null;
 		}
+	}
+
+	public void setFilterCriteriaInRequestBody(boolean filterCriteriaInRequestBody) {
+		PreconditionUtil.verify(!initialized, "CrnkClient already initialized, cannot add filters to body");
+		this.filterCriteriaInRequestBody = filterCriteriaInRequestBody;
 	}
 }

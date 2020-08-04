@@ -543,7 +543,9 @@ public class CrnkBoot {
 		if (moduleRegistry.getUrlMapper() == null) {
 			List<QuerySpecUrlMapper> list = serviceDiscovery.getInstancesByType(QuerySpecUrlMapper.class);
 			if (list.isEmpty()) {
-				moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
+				DefaultQuerySpecUrlMapper urlMapper = new DefaultQuerySpecUrlMapper();
+				urlMapper.setFilterCriteriaInRequestBody("true".equals(propertiesProvider.getProperty(CrnkProperties.FILTER_CRITERIA_IN_HTTP_BODY)));
+				moduleRegistry.setUrlMapper(urlMapper);
 			}
 			else {
 				moduleRegistry.setUrlMapper(list.get(0));

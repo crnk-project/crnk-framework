@@ -42,7 +42,7 @@ public class ClientStubBaseTest {
 
 		urlBuilder = Mockito.mock(JsonApiUrlBuilder.class);
 
-		stub = new ClientStubBase(client, urlBuilder, Task.class);
+		stub = new ClientStubBase(client, urlBuilder, Task.class, false);
 	}
 
 	@Test

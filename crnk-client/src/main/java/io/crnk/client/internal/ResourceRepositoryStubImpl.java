@@ -11,7 +11,6 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
-import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.queryspec.QuerySpec;
@@ -37,8 +36,8 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 
 
 	public ResourceRepositoryStubImpl(CrnkClient client, Class<T> resourceClass, ResourceInformation resourceInformation,
-									  UrlBuilder urlBuilder) {
-		super(client, urlBuilder, resourceClass);
+									  UrlBuilder urlBuilder, boolean filterCriteriaInRequestBody) {
+		super(client, urlBuilder, resourceClass, filterCriteriaInRequestBody);
 		this.resourceInformation = resourceInformation;
 	}
 
@@ -171,19 +170,27 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 	public DefaultResourceList<T> findAll(QuerySpec querySpec) {
 		verifyQuerySpec(querySpec);
 		String url = urlBuilder.buildUrl(client.getQueryContext(), resourceInformation, null, querySpec);
-		return findAll(url);
+		String body = null;
+		if (filterCriteriaInRequestBody) {
+			body = serializeFilter(querySpec, resourceInformation);
+		}
+		return findAll(url, body);
 	}
 
 	@Override
 	public DefaultResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
 		verifyQuerySpec(querySpec);
 		String url = urlBuilder.buildUrl(client.getQueryContext(), resourceInformation, ids, querySpec);
-		return findAll(url);
+		String body = null;
+		if (filterCriteriaInRequestBody) {
+			body = serializeFilter(querySpec, resourceInformation);
+		}
+		return findAll(url, body);
 	}
 
 	@SuppressWarnings("unchecked")
-	public DefaultResourceList<T> findAll(String url) {
-		return (DefaultResourceList<T>) executeGet(url, ResponseType.RESOURCES);
+	public DefaultResourceList<T> findAll(String url, String body) {
+		return (DefaultResourceList<T>) executeGet(url, body, ResponseType.RESOURCES);
 	}
 
 	protected void verifyQuerySpec(QuerySpec querySpec) {
@@ -196,7 +203,7 @@ public class ResourceRepositoryStubImpl<T, I> extends ClientStubBase
 
 	@SuppressWarnings("unchecked")
 	protected T findOne(String url) {
-		return (T) executeGet(url, ResponseType.RESOURCE);
+		return (T) executeGet(url, null, ResponseType.RESOURCE);
 	}
 
 }
