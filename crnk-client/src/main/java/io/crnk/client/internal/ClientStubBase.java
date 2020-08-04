@@ -1,20 +1,9 @@
 package io.crnk.client.internal;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.client.ClientException;
-import io.crnk.client.ClientFormat;
-import io.crnk.client.CrnkClient;
-import io.crnk.client.ResponseBodyException;
-import io.crnk.client.TransportException;
+import io.crnk.client.*;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
@@ -27,23 +16,23 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryContext;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.CrnkException;
-import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.DefaultQueryPathResolver;
 import io.crnk.core.queryspec.internal.JsonFilterSpecMapper;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
-import io.crnk.core.queryspec.mapper.QueryPathResolver;
-import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
 import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.meta.JsonLinksInformation;
 import io.crnk.core.resource.meta.JsonMetaInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public class ClientStubBase {
 
@@ -125,8 +114,7 @@ public class ClientStubBase {
 				if (Resource.class.equals(resourceClass)) {
 					Document document = objectMapper.readValue(body, format.getDocumentClass());
 					return toResourceResponse(document, objectMapper);
-				}
-				else {
+				} else {
 					Document document = objectMapper.readValue(body, format.getDocumentClass());
 
 					ClientDocumentMapper documentMapper = client.getDocumentMapper();
@@ -135,8 +123,7 @@ public class ClientStubBase {
 				}
 			}
 			return null;
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new TransportException(e);
 		}
 	}
@@ -153,8 +140,7 @@ public class ClientStubBase {
 				list.setLinks(new JsonLinksInformation(document.getMeta(), objectMapper));
 			}
 			return list;
-		}
-		else {
+		} else {
 			return data;
 		}
 	}
@@ -191,12 +177,10 @@ public class ClientStubBase {
 			Throwable throwable = mapper.get().fromErrorResponse(errorResponse);
 			if (throwable instanceof RuntimeException) {
 				return (RuntimeException) throwable;
-			}
-			else {
+			} else {
 				return new ClientException(response.code(), response.message(), throwable);
 			}
-		}
-		else {
+		} else {
 			return new ClientException(response.code(), response.message());
 		}
 	}
@@ -205,11 +189,15 @@ public class ClientStubBase {
 		if (querySpec.getFilters() == null || querySpec.getFilters().isEmpty()) {
 			return null;
 		}
-		JsonNode jsonNode = filterSpecMapper.serialize(resourceInformation, querySpec.getFilters(), client.getQueryContext());
+		// filter lists without operator does not work well with JSON serialization -> replace with AND expression
+		List<FilterSpec> filters = querySpec.getFilters();
+		if (filters.size() > 1) {
+			filters = Collections.singletonList(FilterSpec.and(filters));
+		}
+		JsonNode jsonNode = filterSpecMapper.serialize(resourceInformation, filters, client.getQueryContext());
 		try {
 			return compactMapper.writeValueAsString(jsonNode);
-		} catch (
-				JsonProcessingException e) {
+		} catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 	}

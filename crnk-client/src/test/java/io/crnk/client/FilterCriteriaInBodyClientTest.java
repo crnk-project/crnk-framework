@@ -5,24 +5,21 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.crnk.client.http.apache.HttpClientAdapter;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.exception.InternalServerErrorException;
-import io.crnk.core.queryspec.FilterOperator;
-import io.crnk.core.queryspec.FilterSpec;
-import io.crnk.core.queryspec.PathSpec;
-import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.*;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.PrimitiveAttributeResource;
 import io.crnk.test.mock.models.Project;
+import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.repository.ProjectRepository;
+import io.crnk.test.mock.repository.TaskRepository;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -30,26 +27,29 @@ import static org.junit.Assert.assertEquals;
 public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 	private static final int PROJECT_COUNT = 10;
 
-	private ResourceRepository<Project, Long> projectRepo;
-	private ResourceRepository<PrimitiveAttributeResource, Object> primitiveRepo;
+	private final ProjectRepository projectRepository = new ProjectRepository();
+	private final TaskRepository taskRepository = new TaskRepository();
 
 	@Before
 	public void setup() {
 		super.setup();
-		projectRepo = client.getRepositoryForType(Project.class);
 		createProjects();
-		primitiveRepo = client.getRepositoryForType(PrimitiveAttributeResource.class);
 	}
 
 	private void createProjects() {
-		OffsetDateTime dueBase = OffsetDateTime.now();
 		for (int i = 0; i < PROJECT_COUNT; i++) {
+			Task task = new Task();
+			task.setId((long) i);
+			task.setName("Task " + i);
+			taskRepository.create(task);
 			Project project = new Project();
+			project.setId((long) i);
 			project.setName("Project " + (char) ('A' + i));
+			project.getTasks().add(task);
 			if (i == 5) {
 				project.setDescription("Test");
 			}
-			projectRepo.create(project);
+			projectRepository.create(project);
 		}
 	}
 
@@ -74,6 +74,7 @@ public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 
 	@Test
 	public void testWithoutFilter() {
+		ResourceRepository<Project, Long> projectRepo = client.getRepositoryForType(Project.class);
 		ResourceList<Project> projects = projectRepo.findAll(new QuerySpec(Project.class));
 		assertNotNull(projects);
 		assertEquals(PROJECT_COUNT, projects.size());
@@ -83,6 +84,7 @@ public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 	public void testWithSingleFilter() {
 		QuerySpec querySpec = new QuerySpec(Project.class);
 		querySpec.addFilter(PathSpec.of("id").filter(FilterOperator.LT, 5));
+		ResourceRepository<Project, Long> projectRepo = client.getRepositoryForType(Project.class);
 		ResourceList<Project> projects = projectRepo.findAll(querySpec);
 		assertNotNull(projects);
 		assertEquals(4, projects.size());
@@ -94,6 +96,7 @@ public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 		querySpec.addFilter(FilterSpec.or(
 				PathSpec.of("id").filter(FilterOperator.LT, 5),
 				PathSpec.of("description").filter(FilterOperator.EQ, "Test")));
+		ResourceRepository<Project, Long> projectRepo = client.getRepositoryForType(Project.class);
 		ResourceList<Project> projects = projectRepo.findAll(querySpec);
 		assertNotNull(projects);
 		assertEquals(5, projects.size());
@@ -116,12 +119,14 @@ public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 		QuerySpec querySpec = new QuerySpec(PrimitiveAttributeResource.class);
 		Date max = DateUtils.addDays(now, 1);
 		querySpec.addFilter(PathSpec.of("dateValue").filter(FilterOperator.LT, max));
+		ResourceRepository<PrimitiveAttributeResource, Long> primitiveRepo = client.getRepositoryForType(PrimitiveAttributeResource.class);
 		ResourceList<PrimitiveAttributeResource> resources = primitiveRepo.findAll(querySpec);
 		assertNotNull(resources);
 		assertEquals(1, resources.size());
 	}
 
 	private void createResource(Date date) {
+		ResourceRepository<PrimitiveAttributeResource, Long> primitiveRepo = client.getRepositoryForType(PrimitiveAttributeResource.class);
 		PrimitiveAttributeResource resource = new PrimitiveAttributeResource();
 		resource.setId(1L);
 		resource.setDateValue(date);
@@ -136,8 +141,20 @@ public class FilterCriteriaInBodyClientTest extends AbstractClientTest {
 		QuerySpec querySpec = new QuerySpec(PrimitiveAttributeResource.class);
 		LocalDate max = LocalDate.now().plusDays(-1);
 		querySpec.addFilter(PathSpec.of("dateValue").filter(FilterOperator.GT, max));
+		ResourceRepository<PrimitiveAttributeResource, Long> primitiveRepo = client.getRepositoryForType(PrimitiveAttributeResource.class);
 		ResourceList<PrimitiveAttributeResource> resources = primitiveRepo.findAll(querySpec);
 		assertNotNull(resources);
 		assertEquals(1, resources.size());
+	}
+
+	@Test
+	public void testListOfFiltersIsSerializedCorrectly() {
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		querySpec.addFilter(PathSpec.of("tasks.id").filter(FilterOperator.EQ, Arrays.asList(3L, 4L)));
+		querySpec.addFilter(PathSpec.of("tasks.name").filter(FilterOperator.EQ, Arrays.asList("Task 4", "Task 5")));
+		ResourceRepository<Project, Long> projectRepo = client.getRepositoryForType(Project.class);
+		ResourceList<Project> projects = projectRepo.findAll(querySpec);
+		assertNotNull(projects);
+		assertEquals(1, projects.size());
 	}
 }
