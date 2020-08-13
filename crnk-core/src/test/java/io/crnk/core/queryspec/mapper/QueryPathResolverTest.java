@@ -89,7 +89,8 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
     @Test
     public void checkUnknownAttributesFailsByDefault() {
         ResourceInformation resourceInformation = resourceRegistry.getEntry(Task.class).getResourceInformation();
-        List<String> jsonPath = Arrays.asList("doesNotExists");
+        String attributeName = "doesNotExists";
+        List<String> jsonPath = Arrays.asList(attributeName);
 
         try {
             resolver.resolve(resourceInformation, jsonPath, QueryPathResolver.NamingType.JAVA, "test", queryContext);
@@ -98,6 +99,9 @@ public class QueryPathResolverTest extends AbstractQuerySpecTest {
             // ok
             Assert.assertEquals(HttpStatus.BAD_REQUEST_400, e.getHttpStatus());
             Assert.assertEquals("test", e.getErrorData().getSourceParameter());
+            Assert.assertEquals("Failed to resolve path to field '" +
+								attributeName+"' from " +
+								resourceInformation.getResourceType(), e.getErrorData().getDetail());
         }
     }
 
