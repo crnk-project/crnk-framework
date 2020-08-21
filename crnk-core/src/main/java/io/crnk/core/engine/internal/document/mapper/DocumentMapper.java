@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -13,17 +14,23 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.queryspec.mapper.UrlBuilder;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonIncludeStrategy;
+import io.crnk.core.resource.links.DefaultSelfLinksInformation;
+import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +118,8 @@ public class DocumentMapper {
 		addErrors(doc, response.getErrors());
 		util.setMeta(doc, response.getMetaInformation());
 		if (mappingConfig.getResourceMapping().getSerializeLinks()) {
-			util.setLinks(doc, response.getLinksInformation(), queryAdapter);
+			LinksInformation linksInformation = enrichSelfLink(response.getLinksInformation(), queryAdapter);
+			util.setLinks(doc, linksInformation, queryAdapter);
 		}
 		addData(doc, response.getEntity(), queryAdapter, resourceMapping);
 
@@ -119,6 +127,30 @@ public class DocumentMapper {
 		result.doWork(it -> applyIgnoreEmpty(doc, queryAdapter, requestVersion));
 		result.doWork(it -> compact(doc, queryAdapter));
 		return result;
+	}
+
+	private LinksInformation enrichSelfLink(LinksInformation linksInformation, QueryAdapter queryAdapter) {
+		if (!queryAdapter.getCompactMode()) {
+			QueryContext queryContext = queryAdapter.getQueryContext();
+			if (queryContext != null) {
+				HttpRequestContext requestContext = queryContext.getRequestContext();
+				if (requestContext != null && (linksInformation == null || linksInformation instanceof SelfLinksInformation)) {
+					SelfLinksInformation selfLinksInformation = (SelfLinksInformation) linksInformation;
+					URI requestUri = requestContext.getRequestUri();
+					if ((selfLinksInformation == null || selfLinksInformation.getSelf() == null) && requestUri != null) {
+						if (selfLinksInformation == null) {
+							selfLinksInformation = new DefaultSelfLinksInformation();
+							linksInformation = selfLinksInformation;
+						}
+
+						JsonApiUrlBuilder.UrlParameterBuilder urlBuilder = new JsonApiUrlBuilder.UrlParameterBuilder(requestUri.toString());
+						urlBuilder.addQueryParameters(requestContext.getRequestParameters());
+						selfLinksInformation.setSelf(urlBuilder.toString());
+					}
+				}
+			}
+		}
+		return linksInformation;
 	}
 
 	private void applyIgnoreEmpty(Document doc, QueryAdapter queryAdapter, int requestVersion) {
@@ -145,7 +177,7 @@ public class DocumentMapper {
 
 	private void applyIgnoreEmpty(Resource resource, int requestVersion) {
 		String type = resource.getType();
-		if(util.hasResourceInformation(type)) {
+		if (util.hasResourceInformation(type)) {
 			ResourceInformation resourceInformation = util.getResourceInformation(type);
 
 			Iterator<Map.Entry<String, Relationship>> iterator = resource.getRelationships().entrySet().iterator();

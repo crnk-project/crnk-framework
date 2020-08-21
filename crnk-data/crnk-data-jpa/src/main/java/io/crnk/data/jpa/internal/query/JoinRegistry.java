@@ -80,6 +80,7 @@ public class JoinRegistry<F, E> {
 		return backend.joinMapValue(currentCriteriaPath, pathElement, mapPathElement.getKey());
 	}
 
+
 	public F getOrCreateJoin(MetaAttributePath path, JoinType defaultJoinType) {
 		if (path.length() == 0) {
 			return backend.getRoot();
@@ -102,7 +103,12 @@ public class JoinRegistry<F, E> {
 		F join = joinMap.get(path);
 		if (join == null) {
 			JoinType joinType = query.getJoinType(path, defaultJoinType);
-			join = backend.doJoin(targetAttr, joinType, parent);
+			if(targetAttr instanceof MetaMapAttribute){
+				MetaMapAttribute targetMapAttr = (MetaMapAttribute) targetAttr;
+				join = backend.joinMapRelation(parent, targetMapAttr, targetMapAttr.getKey());
+			}else {
+				join = backend.doJoin(targetAttr, joinType, parent);
+			}
 			joinMap.put(path, join);
 		}
 		return join;

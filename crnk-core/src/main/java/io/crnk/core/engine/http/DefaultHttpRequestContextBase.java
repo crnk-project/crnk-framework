@@ -28,4 +28,5 @@ public abstract class DefaultHttpRequestContextBase implements HttpRequestContex
 	}
 
 	protected abstract URI getNativeRequestUri();
+
 }

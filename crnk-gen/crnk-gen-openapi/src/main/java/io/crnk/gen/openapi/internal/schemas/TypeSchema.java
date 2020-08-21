@@ -12,8 +12,8 @@ public class TypeSchema extends AbstractSchemaGenerator {
 
   public Schema schema() {
     Schema typeSchema = new StringSchema()
-        .description("The JSON:API resource type (" + metaResource.getName() + ")");
-    typeSchema.addEnumItemObject(metaResource.getName());
+        .description("The JSON:API resource type (" + metaResource.getResourceType() + ")");
+    typeSchema.addEnumItemObject(metaResource.getResourceType());
     return typeSchema;
   }
 }

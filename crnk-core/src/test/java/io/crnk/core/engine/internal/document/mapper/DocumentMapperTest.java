@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,6 +72,14 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertNull(relationship.getLinks());
 	}
 
+	@Test
+	public void testSerializeRootSelfLink() {
+		Task task = createTask(2, "sample task");
+		QueryAdapter adapter = createAdapter(Task.class);
+		Mockito.when(container.getRequestContextBase().getRequestUri()).thenReturn(URI.create("http://localhost/api/foo"));
+		Document document = mapper.toDocument(toResponse(task), adapter, mappingConfig).get();
+		Assert.assertEquals("http://localhost/api/foo", getLinkText(document.getLinks().get("self")));
+	}
 
 	public static class TaskLinks implements LinksInformation {
 

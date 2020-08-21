@@ -2,7 +2,7 @@ package io.crnk.core.resource.links;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-public class DefaultPagedLinksInformation implements PagedLinksInformation {
+public class DefaultPagedLinksInformation implements PagedLinksInformation, SelfLinksInformation {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Link first;
@@ -15,6 +15,9 @@ public class DefaultPagedLinksInformation implements PagedLinksInformation {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Link prev;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Link self;
 
 	@Override
 	public Link getFirst() {
@@ -54,5 +57,15 @@ public class DefaultPagedLinksInformation implements PagedLinksInformation {
 	@Override
 	public void setPrev(Link prev) {
 		this.prev = prev;
+	}
+
+	@Override
+	public Link getSelf() {
+		return self;
+	}
+
+	@Override
+	public void setSelf(Link self) {
+		this.self = self;
 	}
 }

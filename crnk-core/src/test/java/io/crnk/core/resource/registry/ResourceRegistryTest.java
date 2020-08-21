@@ -131,7 +131,7 @@ public class ResourceRegistryTest {
 	public void onNonExistingTypeShouldThrowException() {
 		assertThatThrownBy(() -> resourceRegistry.getEntry("nonExistingType"))
 				.isInstanceOf(RepositoryNotFoundException.class)
-				.hasMessage("Repository for a resource not found: nonExistingType");
+				.hasMessageContaining("Repository for a resource not found: nonExistingType");
 	}
 
 

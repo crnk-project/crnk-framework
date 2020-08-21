@@ -370,6 +370,11 @@ public class QuerydslQueryBackend<T>
 	}
 
 	@Override
+	public Expression<?> joinMapRelation(Expression<?> currentCriteriaPath, MetaAttribute pathElement, Object key) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
 	public Class<?> getJavaElementType(Expression<?> expression) {
 		if (expression instanceof CollectionExpressionBase) {
 			return ((CollectionExpressionBase) expression).getElementType();

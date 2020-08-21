@@ -115,7 +115,7 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
     public RegistryEntry getEntry(String resourceType) {
         RegistryEntry entry = resourcesByType.get(resourceType);
         if (entry == null) {
-            throw new RepositoryNotFoundException(resourceType);
+            throw new RepositoryNotFoundException(resourceType, resourcesByType.keySet());
         }
         return entry;
     }

@@ -219,6 +219,9 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
 	protected String getId(String resourceType) {
 		ResourceRegistry resourceRegistry = this.context.getModuleContext().getResourceRegistry();
+		if(!resourceRegistry.hasEntry(resourceType)){
+			return null;
+		}
 		RegistryEntry entry = resourceRegistry.getEntry(resourceType);
 		if (idPrefix != null) {
 			return idPrefix + resourceType.replace('/', '.');

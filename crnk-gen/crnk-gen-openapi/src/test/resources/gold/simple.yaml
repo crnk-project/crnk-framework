@@ -321,10 +321,22 @@ components:
       nullable: true
       type: string
     SimpleTasksPatchResource:
-      allOf:
-      - $ref: '#/components/schemas/SimpleTasksResourceReference'
-      - $ref: '#/components/schemas/SimpleTasksResourcePatchAttributes'
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/SimpleTasksResourceReference'
+          - $ref: '#/components/schemas/SimpleTasksResourcePatchAttributes'
+      required:
+      - data
+      type: object
     SimpleTasksPostResource:
+      properties:
+        data:
+          $ref: '#/components/schemas/SimpleTasksPostResourceData'
+      required:
+      - data
+      type: object
+    SimpleTasksPostResourceData:
       allOf:
       - $ref: '#/components/schemas/SimpleTasksPostResourceReference'
       - $ref: '#/components/schemas/SimpleTasksResourcePostAttributes'
@@ -333,23 +345,41 @@ components:
         id:
           $ref: '#/components/schemas/SimpleTasksIdResourceAttribute'
         type:
-          description: The JSON:API resource type (SimpleTasks)
+          description: The JSON:API resource type (simpleTasks)
           enum:
-          - SimpleTasks
+          - simpleTasks
           type: string
       required:
       - type
       type: object
     SimpleTasksPostResources:
-      items:
-        $ref: '#/components/schemas/SimpleTasksPostResource'
-      type: array
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/SimpleTasksPostResourceData'
+          type: array
+      required:
+      - data
+      type: object
     SimpleTasksResourceAttributes:
       properties:
         attributes:
           properties:
             name:
               $ref: '#/components/schemas/SimpleTasksNameResourceAttribute'
+          type: object
+      type: object
+    SimpleTasksResourceLinks:
+      description: Links related to the resource
+      properties:
+        links:
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          properties:
+            self:
+              default: /simpleTasks/{id}
+              format: uri
+              type: string
           type: object
       type: object
     SimpleTasksResourcePatchAttributes:
@@ -373,9 +403,9 @@ components:
         id:
           $ref: '#/components/schemas/SimpleTasksIdResourceAttribute'
         type:
-          description: The JSON:API resource type (SimpleTasks)
+          description: The JSON:API resource type (simpleTasks)
           enum:
-          - SimpleTasks
+          - simpleTasks
           type: string
       required:
       - id
@@ -405,12 +435,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/SimpleTasksResourceReference'
       - $ref: '#/components/schemas/SimpleTasksResourceAttributes'
-      - properties:
-          links:
-            type: object
-          relationships:
-            type: object
-        type: object
+      - $ref: '#/components/schemas/SimpleTasksResourceLinks'
       required:
       - attributes
     SimpleTasksResourcesResponseSchema:
