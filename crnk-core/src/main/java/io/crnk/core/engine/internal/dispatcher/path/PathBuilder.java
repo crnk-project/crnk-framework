@@ -189,7 +189,7 @@ public class PathBuilder {
                 "expected opposite field {} of {} to be a relationship", oppositeField, field);
         if (!oppositeInformation.isNested()) {
             LOGGER.debug("cannot process field={} because opposite={} is not an nested resource", field, oppositeInformation);
-            throw new BadRequestException("invalid url, cannot specify ID of related resource");
+            throw new BadRequestException("cannot access relationship by ID for non-nested resources, double-check the requested url");
         }
 
         PreconditionUtil.verify(oppositeField != null, "nested resource must specify opposite on relationship from parent to child, got null for %s", field);
