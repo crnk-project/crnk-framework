@@ -97,7 +97,7 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	}
 
 	protected String getPath(ResourceInformation resourceInformation, Object repository) { // NOSONAR contract ok
-		return resourceInformation.getResourceType();
+		return resourceInformation.getResourcePath();
 	}
 
 	protected boolean isExposed(ResourceInformation resourceInformation, Object repository) {
