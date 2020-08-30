@@ -241,7 +241,7 @@ gradle.beforeProject { Project project ->
                     githubRepo = 'crnk-project/crnk-framework'
                     githubReleaseNotesFile = 'README.md'
 
-                    publish = !releaseBuild
+                    publish = true // !releaseBuild
 
                     version {
                         name = project.version
