@@ -2,11 +2,7 @@ package io.crnk.client.internal;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -135,6 +131,40 @@ class ClientResourceUpsert extends ResourceUpsert {
     protected RuntimeException newBodyException(String message, IOException e) {
         throw new ResponseBodyException(message, e);
     }
+
+    @Override
+	protected Optional<Result> processMappedByRelationship(Object newResource, Relationship relationship, ResourceField field, Resource resource,
+														   ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
+		if (!relationship.getData().isPresent()) {
+			ObjectNode links = relationship.getLinks();
+			ObjectNode meta = relationship.getMeta();
+			if (links != null) {
+				// create proxy to lazy load relations
+				PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType(), "expected {} to be a relationship", field.getJsonName());
+				Class elementType = field.getElementType();
+				Class collectionClass = field.getType();
+
+				JsonNode relatedNode = links.get("related");
+				if (relatedNode != null) {
+					String url = null;
+					if (relatedNode.has(SerializerUtil.HREF)) {
+						JsonNode hrefNode = relatedNode.get(SerializerUtil.HREF);
+						if (hrefNode != null) {
+							url = hrefNode.asText().trim();
+						}
+					} else {
+						url = relatedNode.asText().trim();
+					}
+					Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url, links, meta);
+					field.getAccessor().setValue(newResource, proxy);
+				}
+			}
+			return Optional.empty();
+		} else {
+			// set elements
+			return super.processMappedByRelationship(newResource, relationship, field, resource, resourceInformation, queryAdapter);
+		}
+	}
 
     @Override
     protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry,

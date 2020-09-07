@@ -14,6 +14,7 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -35,6 +36,7 @@ import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 public class ResourcePostControllerTest extends ControllerTestBase {
@@ -433,9 +435,11 @@ public class ResourcePostControllerTest extends ControllerTestBase {
         assertThat(projectsResponse.getDocument().getSingleData().get().getRelationships().get("tasks").getCollectionData().get()
                 .get(0).getId()).isEqualTo(taskId.toString());
 
-        Mockito.verify(modificationFilter, Mockito.times(1))
-                .modifyManyRelationship(Mockito.any(), Mockito.any(ResourceField.class),
-                        Mockito.eq(ResourceRelationshipModificationType.SET), Mockito.eq(taskIds));
+		ResourceModificationFilter resourceModificationFilter = Mockito.verify(modificationFilter, Mockito.times(4));
+        resourceModificationFilter.modifyAttribute(Mockito.any(), Mockito.any(ResourceField.class),
+				Mockito.any(), Mockito.any());
+        resourceModificationFilter.modifyManyRelationship(Mockito.any(), Mockito.any(ResourceField.class),
+				Mockito.eq(ResourceRelationshipModificationType.SET), Mockito.eq(taskIds));
     }
 
 
