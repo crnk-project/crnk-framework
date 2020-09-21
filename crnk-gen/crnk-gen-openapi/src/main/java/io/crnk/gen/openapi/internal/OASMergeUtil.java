@@ -100,6 +100,9 @@ public class OASMergeUtil {
   }
 
   static List<String> mergeTags(List<String> thisTags, List<String> thatTags) {
+    if (thisTags == null) {
+      return thatTags;
+    }
     return Stream.concat(thisTags.stream(), thatTags.stream())
         .distinct()
         .sorted()
