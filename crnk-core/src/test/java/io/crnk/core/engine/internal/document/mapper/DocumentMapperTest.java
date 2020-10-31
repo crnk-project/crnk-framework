@@ -78,7 +78,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		QueryAdapter adapter = createAdapter(Task.class);
 		Mockito.when(container.getRequestContextBase().getRequestUri()).thenReturn(URI.create("http://localhost/api/foo"));
 		Document document = mapper.toDocument(toResponse(task), adapter, mappingConfig).get();
-		Assert.assertEquals("http://localhost/api/foo", getLinkText(document.getLinks().get("self")));
+		Assert.assertEquals("http://127.0.0.1/api/foo", getLinkText(document.getLinks().get("self")));
 	}
 
 	public static class TaskLinks implements LinksInformation {

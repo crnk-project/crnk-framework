@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.engine.url.ServiceUrlProvider;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -143,7 +145,8 @@ public class DocumentMapper {
 							linksInformation = selfLinksInformation;
 						}
 
-						JsonApiUrlBuilder.UrlParameterBuilder urlBuilder = new JsonApiUrlBuilder.UrlParameterBuilder(requestUri.toString());
+						String selfLinkUrl = UrlUtils.concat(queryAdapter.getResourceRegistry().getServiceUrlProvider().getUrl(), requestContext.getPath());
+						JsonApiUrlBuilder.UrlParameterBuilder urlBuilder = new JsonApiUrlBuilder.UrlParameterBuilder(selfLinkUrl);
 						urlBuilder.addQueryParameters(requestContext.getRequestParameters());
 						selfLinksInformation.setSelf(urlBuilder.toString());
 					}
