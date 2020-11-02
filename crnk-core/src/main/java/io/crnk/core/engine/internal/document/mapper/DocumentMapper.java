@@ -145,8 +145,8 @@ public class DocumentMapper {
 							linksInformation = selfLinksInformation;
 						}
 
-						String selfLinkUrl = UrlUtils.concat(queryAdapter.getResourceRegistry().getServiceUrlProvider().getUrl(), requestContext.getPath());
-						JsonApiUrlBuilder.UrlParameterBuilder urlBuilder = new JsonApiUrlBuilder.UrlParameterBuilder(selfLinkUrl);
+						JsonApiUrlBuilder.UrlParameterBuilder urlBuilder = new JsonApiUrlBuilder.UrlParameterBuilder(UrlUtils.concat(queryAdapter.getQueryContext().getBaseUrl(),
+								requestContext.getPath()));
 						urlBuilder.addQueryParameters(requestContext.getRequestParameters());
 						selfLinksInformation.setSelf(urlBuilder.toString());
 					}
