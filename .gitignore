@@ -132,3 +132,6 @@ build
 node_modules
 
 temp
+
+# MacOS
+.DS_Store
