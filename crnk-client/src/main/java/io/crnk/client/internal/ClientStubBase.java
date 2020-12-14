@@ -124,7 +124,7 @@ public class ClientStubBase {
 				list.setMeta(new JsonMetaInformation(document.getMeta(), objectMapper));
 			}
 			if (document.getLinks() != null) {
-				list.setLinks(new JsonLinksInformation(document.getMeta(), objectMapper));
+				list.setLinks(new JsonLinksInformation(document.getLinks(), objectMapper));
 			}
 			return list;
 		}
