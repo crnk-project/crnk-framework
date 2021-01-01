@@ -19,7 +19,7 @@ https://img.shields.io/bintray/v/crnk-project/maven/crnk-core.svg
 
 ## What is Crnk?
 
-Crnk is an implementation of the [JSON API](https://http://jsonapi.org/) specification and recommendations in Java to
+Crnk is an implementation of the [JSON API](https://jsonapi.org/) specification and recommendations in Java to
 facilitate building RESTful applications. It provides many conventions and building blocks that application can benefit from.
 This includes features such as  sorting, filtering, pagination, requesting complex object graphs, sparse
 field sets, attaching links to data or atomically execute multiple operations. Further integration
