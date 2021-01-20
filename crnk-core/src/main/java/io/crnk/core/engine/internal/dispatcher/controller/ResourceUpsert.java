@@ -155,7 +155,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		ResourceField field = resourceInformation.findFieldByJsonName(attributeJsonName, queryContext.getRequestVersion());
 
 		if (field == null && resourceInformation.hasJsonField(attributeJsonName)) {
-			throw new BadRequestException(String.format("attribute %s not available for version {}", attributeJsonName, queryContext.getRequestVersion()));
+			throw new BadRequestException(String.format("attribute %s not available for version %s", attributeJsonName, queryContext.getRequestVersion()));
 		} else if (field != null) {
 			PreconditionUtil.verifyEquals(ResourceFieldType.ATTRIBUTE, field.getResourceFieldType(), "expected %s being an attribute", attributeJsonName);
 		}
