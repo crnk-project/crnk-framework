@@ -1,0 +1,24 @@
+name: build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Ubuntu AdoptOpenJDK 8
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+    - name: Set Gradle Wrapper Permissions
+      run: chmod +x gradlew
+    - name: Build
+      run: ./gradlew build

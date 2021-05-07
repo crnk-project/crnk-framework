@@ -8,7 +8,7 @@ https://img.shields.io/bintray/v/crnk-project/maven/crnk-core.svg
 
 -->
 
-[![Build Status](https://travis-ci.org/crnk-project/crnk-framework.svg?branch=master)](https://travis-ci.org/crnk-project/crnk-framework)
+[![Build Status](https://github.com/crnk-project/crnk-framework/workflows/build/badge.svg)](https://github.com/crnk-project/crnk-framework/actions)
 [![Gitter](https://img.shields.io/gitter/room/crkn-io/lobby.svg)](https://gitter.im/crnk-io/Lobby)
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://github.com/crnk-project/crnk-framework/blob/master/LICENSE.txt)
 [![Coverage Status](https://coveralls.io/repos/github/crnk-project/crnk-framework/badge.svg?branch=master)](https://coveralls.io/github/crnk-project/crnk-framework?branch=master)
@@ -200,7 +200,7 @@ Note as part of the build a local Node installation is downloaded to build the f
 * [Source code](https://github.com/crnk-project/crnk-framework/)
 * [Issue tracker](https://github.com/crnk-project/crnk-framework/issues)
 * [Forum](https://gitter.im/crnk-io/Lobby)
-* [Build](https://travis-ci.org/crnk-project/crnk-framework/)
+* [Build](https://github.com/crnk-project/crnk-framework/actions)
 
 
 ## Endorsements
