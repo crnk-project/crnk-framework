@@ -7,6 +7,8 @@ import io.crnk.gen.gradle.internal.RuntimeClassLoaderFactory;
 import io.crnk.gen.runtime.RuntimeMetaResolver;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
@@ -25,6 +27,7 @@ public class InMemoryGeneratorTask extends DefaultTask implements GeneratorTaskC
         setDescription("generate Typescript stubs from a Crnk setup");
     }
 
+    @Internal
     public GeneratorModule getModule() {
         return module;
     }
@@ -62,6 +65,7 @@ public class InMemoryGeneratorTask extends DefaultTask implements GeneratorTaskC
         }
     }
 
+    @Internal
     protected RuntimeMetaResolver getRuntime() {
         GeneratorConfig config = getConfig();
         String runtimeClass = config.computeMetaResolverClassName();

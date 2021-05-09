@@ -15,10 +15,12 @@ import io.crnk.home.HomeModule;
 import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.ui.internal.UIHttpRequestProcessor;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+@Ignore // UI module currently disabled/not maintained
 public class UIModuleTest {
 
 

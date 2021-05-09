@@ -25,30 +25,13 @@ released every three years.
 
 ## Repository
 
-Crnk Maven artifacts are available from Bintray/JCenter.
+Release artifacts are available on Maven Central:
 
-https://bintray.com/crnk-project
-
-In Gradle it looks like:
-
-```
-repositories {
-   jcenter()
-}
-```
-
-Note that due to performance/reliability issues, releases are only intermittently pushed to Maven Central.
-It is highly recommended for project to go with JCenter as well.
-
-Stable releases hosted on Bintray/JCenter are also available from:
-
-https://bintray.com/crnk-project/maven
-https://dl.bintray.com/crnk-project/maven/
+https://mvnrepository.com/artifact/io.crnk
 
 Most recent builds are available from (for a limited period of time):
 
-https://bintray.com/crnk-project/mavenLatest
-https://dl.bintray.com/crnk-project/mavenLatest/
+TODO move from Bintray to GitHub Packages.
 
 
 ## BOM

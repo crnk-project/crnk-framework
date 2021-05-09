@@ -29,6 +29,7 @@ import io.crnk.example.springboot.domain.repository.ProjectRepository.ProjectLis
 import org.apache.catalina.authenticator.jaspic.AuthConfigFactoryImpl;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
@@ -71,6 +72,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
     }
 
     @Test
+	@Ignore // currently not maintained
     public void testUi() {
         Response response = RestAssured.given().when().get("/api/browse/");
         response.then().assertThat().statusCode(200);
