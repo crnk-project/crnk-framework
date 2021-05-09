@@ -18,7 +18,7 @@ def bomGenerator = {
 
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
+		maven(MavenPublication) {
 			pom.withXml bomGenerator
 		}
 	}

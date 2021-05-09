@@ -23,10 +23,7 @@ import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.TaskRepository;
 import net.javacrumbs.jsonunit.fluent.JsonFluentAssert;
 import org.apache.catalina.authenticator.jaspic.AuthConfigFactoryImpl;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.ObjectProvider;
@@ -166,6 +163,7 @@ public class BasicSpringBoot1Test {
 	}
 
 	@Test
+	@Ignore // currently not maintained
 	public void testUiModuleRunning() {
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
