@@ -1,14 +1,18 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import com.google.common.collect.ImmutableMap;
+import io.crnk.core.CoreTestContainer;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -77,8 +81,30 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Task task = createTask(2, "sample task");
 		QueryAdapter adapter = createAdapter(Task.class);
 		Mockito.when(container.getRequestContextBase().getRequestUri()).thenReturn(URI.create("http://localhost/api/foo"));
+		Mockito.when(container.getRequestContextBase().getPath()).thenReturn("/api/foo");
 		Document document = mapper.toDocument(toResponse(task), adapter, mappingConfig).get();
-		Assert.assertEquals("http://localhost/api/foo", getLinkText(document.getLinks().get("self")));
+		Assert.assertEquals(CoreTestContainer.BASE_URL + "/api/foo", getLinkText(document.getLinks().get("self")));
+	}
+
+	@Test
+	public void shouldSerializeRootSelfLinkWithQueryParams() {
+		Task task = createTask(2, "sample task");
+		QueryAdapter adapter = createAdapter(Task.class);
+		String queryParams = "?someParam=someValue&someOtherParam=someOtherValue";
+
+		// setup mocks
+		Mockito.when(container.getRequestContextBase().getRequestUri()).thenReturn(URI.create("http://localhost/api/foo" + queryParams));
+		Mockito.when(container.getRequestContextBase().getPath()).thenReturn("/api/foo");
+		Mockito.when(container.getRequestContextBase().getRequestParameters()).thenReturn(ImmutableMap.<String, Set<String>>builder()
+				.put("someParam", new HashSet<>(Arrays.asList("someValue")))
+				.put("someOtherParam", new HashSet<>(Arrays.asList("someOtherValue")))
+				.build());
+
+		// run
+		Document document = mapper.toDocument(toResponse(task), adapter, mappingConfig).get();
+
+		// assert
+		Assert.assertEquals(CoreTestContainer.BASE_URL + "/api/foo" + queryParams, getLinkText(document.getLinks().get("self")));
 	}
 
 	public static class TaskLinks implements LinksInformation {
