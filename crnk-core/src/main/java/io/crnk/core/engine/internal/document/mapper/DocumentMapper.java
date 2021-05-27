@@ -19,6 +19,8 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.StringUtils;
+import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
@@ -136,14 +138,14 @@ public class DocumentMapper {
 				HttpRequestContext requestContext = queryContext.getRequestContext();
 				if (requestContext != null && (linksInformation == null || linksInformation instanceof SelfLinksInformation)) {
 					SelfLinksInformation selfLinksInformation = (SelfLinksInformation) linksInformation;
-					URI requestUri = requestContext.getRequestUri();
-					if ((selfLinksInformation == null || selfLinksInformation.getSelf() == null) && requestUri != null) {
+					String requestUri = queryContext.getRequestUri();
+					if ((selfLinksInformation == null || selfLinksInformation.getSelf() == null) && !StringUtils.isBlank(requestUri)) {
 						if (selfLinksInformation == null) {
 							selfLinksInformation = new DefaultSelfLinksInformation();
 							linksInformation = selfLinksInformation;
 						}
 
-						JsonApiUrlBuilder.UrlParameterBuilder urlBuilder = new JsonApiUrlBuilder.UrlParameterBuilder(requestUri.toString());
+						JsonApiUrlBuilder.UrlParameterBuilder urlBuilder = new JsonApiUrlBuilder.UrlParameterBuilder(requestUri);
 						urlBuilder.addQueryParameters(requestContext.getRequestParameters());
 						selfLinksInformation.setSelf(urlBuilder.toString());
 					}
