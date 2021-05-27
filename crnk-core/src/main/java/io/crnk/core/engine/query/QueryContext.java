@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.resource.annotations.JsonApiVersion;
 
@@ -96,5 +97,12 @@ public class QueryContext {
 		if (getRequestVersion() == -1) {
 			setRequestVersion(resourceRegistry.getLatestVersion());
 		}
+	}
+
+	/**
+	 * @return full URL contains of {@link #getBaseUrl()} and {@link #getRequestPath()}
+	 */
+	public String getRequestUri() {
+		return UrlUtils.concat(getBaseUrl(), getRequestPath());
 	}
 }

@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
@@ -76,9 +77,9 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	public void testSerializeRootSelfLink() {
 		Task task = createTask(2, "sample task");
 		QueryAdapter adapter = createAdapter(Task.class);
-		Mockito.when(container.getRequestContextBase().getRequestUri()).thenReturn(URI.create("http://localhost/api/foo"));
+//		Mockito.when(container.getRequestContextBase().getRequestUri()).thenReturn(URI.create("http://localhost/api/foo"));
 		Document document = mapper.toDocument(toResponse(task), adapter, mappingConfig).get();
-		Assert.assertEquals("http://localhost/api/foo", getLinkText(document.getLinks().get("self")));
+		Assert.assertEquals("http://127.0.0.1", getLinkText(document.getLinks().get("self")));
 	}
 
 	public static class TaskLinks implements LinksInformation {
@@ -301,6 +302,8 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		queryAdapter.setCompactMode(false);
 		Document standardDocument = mapper.toDocument(new JsonApiResponse(), queryAdapter, mappingConfig).get();
 
+		// The only difference standard document only has is a self link
+		standardDocument.setLinks(null);
 		Assert.assertEquals(standardDocument, compactDocument);
 	}
 

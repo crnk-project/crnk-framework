@@ -41,8 +41,10 @@ public class UrlUtils {
 		StringBuilder builder = new StringBuilder();
 		builder.append(removeTrailingSlash(baseUrl));
 		for (String path : paths) {
-			builder.append('/');
-			builder.append(removeLeadingSlash(path));
+			if (path != null) {
+				builder.append('/');
+				builder.append(removeLeadingSlash(path));
+			}
 		}
 		return builder.toString();
 	}
