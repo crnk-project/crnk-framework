@@ -9,6 +9,8 @@ import io.crnk.gen.openapi.OutputFormat;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +24,9 @@ public class OASGeneratorTest {
     String templatePath = Objects.requireNonNull(
         getClass().getClassLoader().getResource("openapi-template.yml")
     ).getPath();
-    templatePath = templatePath.replace("/C:/", "C:/"); // windows fix
+    if(SystemUtils.IS_OS_WINDOWS) {
+      templatePath = StringUtils.removeStart(templatePath, "/");
+    }
     openApi = new OpenAPIV3Parser().read(templatePath);
   }
 
