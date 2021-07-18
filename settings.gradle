@@ -48,6 +48,7 @@ include ':crnk-integration-examples:spring-boot-example'
 include ':crnk-integration-examples:spring-boot-minimal-example'
 include ':crnk-integration-examples:spring-boot-microservice-example'
 include ':crnk-integration-examples:dagger-vertx-example'
+include ':crnk-integration-examples:openliberty-microprofile-example'
 
 gradle.beforeProject { Project project ->
     project.with {
@@ -80,4 +81,5 @@ gradle.beforeProject { Project project ->
         group = rootProject.group
     }
 }
+
 
