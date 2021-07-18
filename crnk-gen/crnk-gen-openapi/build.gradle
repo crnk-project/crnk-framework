@@ -15,6 +15,9 @@ dependencies {
     testCompile project(':crnk-meta')
     testCompile project(':crnk-test')
     testCompile project(':crnk-format:crnk-format-plain-json')
+
+	testCompileOnly 'org.projectlombok:lombok:1.18.20'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
 }
 
 test {
