@@ -29,6 +29,7 @@ dependencies {
 	compileOnly 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
 	compileOnly 'org.springframework.boot:spring-boot-starter-actuator'
+    compileOnly 'org.springframework.boot:spring-boot-starter-validation'
 	compileOnly 'org.springframework.security:spring-security-core'
 
 	compileOnly 'org.springframework:spring-orm'
@@ -49,6 +50,7 @@ dependencies {
 	testCompile 'org.springframework.boot:spring-boot-starter-web'
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
 	testCompile 'org.springframework.boot:spring-boot-starter-actuator'
+	testCompile 'org.springframework.boot:spring-boot-starter-validation'
 
 	testCompile 'org.hibernate:hibernate-core'
 	testCompile 'org.hibernate:hibernate-entitymanager'
