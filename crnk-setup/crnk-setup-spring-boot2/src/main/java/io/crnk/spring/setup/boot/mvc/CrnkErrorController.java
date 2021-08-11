@@ -37,7 +37,7 @@ public class CrnkErrorController extends BasicErrorController {
 	@ResponseBody
 	public ResponseEntity<Document> errorToJsonApi(HttpServletRequest request) {
 		Map<String, Object> body = getErrorAttributes(request,
-				isIncludeStackTrace(request, MediaType.ALL));
+				getErrorAttributeOptions(request, MediaType.ALL));
 		HttpStatus status = getStatus(request);
 
 		ErrorDataBuilder errorDataBuilder = ErrorData.builder();
