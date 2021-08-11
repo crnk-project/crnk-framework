@@ -3,7 +3,7 @@ apply plugin: 'java'
 apply plugin: 'io.spring.dependency-management'
 dependencyManagement {
 	imports {
-		mavenBom 'org.springframework.boot:spring-boot-dependencies:2.0.3.RELEASE'
+		mavenBom 'org.springframework.boot:spring-boot-dependencies:2.3.12.RELEASE'
 	}
 }
 
