@@ -186,7 +186,7 @@ public class ResourceMapper {
 
 	protected boolean isDefaultNodeValue(JsonNode node) {
 		return isNullNodeValue(node) || (node.isObject() || node.isArray()) && node.size() == 0
-				|| node.asText().isEmpty() || node.isNumber() && node.asDouble() == 0d;
+				|| node.isValueNode() && node.asText().isEmpty() || node.isNumber() && node.asDouble() == 0d;
 	}
 
 	protected boolean isNullNodeValue(JsonNode node) {
