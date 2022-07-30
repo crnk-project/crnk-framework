@@ -1,21 +1,10 @@
 # crnk.io - Crank up the development of RESTful applications!
 
-<!--
-currently broken: https://github.com/badges/shields/issues/658
-https://img.shields.io/bintray/v/crnk-project/maven/crnk-core.svg
-
-[![Maven Central](https://img.shields.io/maven-central/v/io.crnk/crnk-core.svg)](http://mvnrepository.com/artifact/io.crnk/crnk-core)
-
--->
-
 [![Build Status](https://github.com/crnk-project/crnk-framework/workflows/build/badge.svg)](https://github.com/crnk-project/crnk-framework/actions)
 [![Gitter](https://img.shields.io/gitter/room/crkn-io/lobby.svg)](https://gitter.im/crnk-io/Lobby)
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://github.com/crnk-project/crnk-framework/blob/master/LICENSE.txt)
 [![Coverage Status](https://coveralls.io/repos/github/crnk-project/crnk-framework/badge.svg?branch=master)](https://coveralls.io/github/crnk-project/crnk-framework?branch=master)
-
-[![Bintray](https://img.shields.io/bintray/v/crnk-project/maven/crnk-core.svg)](https://bintray.com/crnk-project/maven/crnk-core) release on jcenter\
-[![Bintray](https://img.shields.io/bintray/v/crnk-project/mavenLatest/crnk-core.svg)](https://bintray.com/crnk-project/mavenLatest/crnk-core) latest in private repository
-
+[![maven-central](https://img.shields.io/maven-central/v/io.crnk/crnk-core)](https://search.maven.org/artifact/io.crnk/crnk-core)
 
 ## What is Crnk?
 
