@@ -9,15 +9,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Ubuntu AdoptOpenJDK 8
+    name: Ubuntu Temurin Java 8
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Setup JDK
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         java-version: '8'
-        distribution: 'adopt'
+        distribution: 'temurin'
     - name: Set Gradle Wrapper Permissions
       run: chmod +x gradlew
     - name: Build
