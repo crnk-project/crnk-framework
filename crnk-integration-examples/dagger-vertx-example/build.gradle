@@ -19,7 +19,7 @@ buildscript {
         classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
 
         classpath 'net.sf.proguard:proguard-gradle:6.0.3'
-    }
+	}
 }
 
 sourceSets {
@@ -110,7 +110,7 @@ if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
 
     mainClassName = 'io.crnk.example.vertx.AppMain'
 
-    dockerDistTar {
+	dockerCreateDockerfile {
         environmentVariable('JAVA_HOME', '/opt/java/openjdk/jdk-10.0.1+10')
     }
 
@@ -119,7 +119,7 @@ if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
             baseImage = 'adoptopenjdk/openjdk10-openj9:nightly'
             maintainer = '"remo@adnovum.ch"'
             ports = [8080]
-            tag = "crnk/example-dagger-vertx:$project.version"
+            images = ["crnk/example-dagger-vertx:$project.version"]
         }
 
         registryCredentials {
@@ -132,7 +132,7 @@ if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
     task dockerCreateContainer(type: DockerCreateContainer) {
         dependsOn dockerBuildImage
         targetImageId { dockerBuildImage.getImageId() }
-        portBindings = ['8080:8080']
+		hostConfig.portBindings = ['8080:8080']
     }
 
     task dockerStartContainer(type: DockerStartContainer) {

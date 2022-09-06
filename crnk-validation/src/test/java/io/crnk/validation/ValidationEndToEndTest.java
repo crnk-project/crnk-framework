@@ -18,10 +18,15 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Set;
 
 // TODO remo: root/leaf bean not yet available, Crnk extensions required
 public class ValidationEndToEndTest extends AbstractValidationTest {
+
+	static {
+		Locale.setDefault(Locale.US);
+	}
 
 	@Test
 	public void testPropertyNotNull() {
