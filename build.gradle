@@ -26,7 +26,7 @@ import com.vanniktech.maven.publish.JavadocJar
 
 
 wrapper {
-	gradleVersion = '6.8.3'
+	gradleVersion = '6.9.2'
 }
 
 apply plugin: 'jdk-bootstrap'
@@ -62,7 +62,7 @@ gradle.beforeProject { Project project ->
 	project.with {
 		apply plugin: "eclipse"
 
-		apply plugin: 'maven'
+		apply plugin: 'maven-publish'
 
 		def docs = project.name == 'crnk-documentation'
 		def ui = project.name == 'crnk-ui'
