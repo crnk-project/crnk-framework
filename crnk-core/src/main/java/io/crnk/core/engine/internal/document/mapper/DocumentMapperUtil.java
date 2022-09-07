@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
@@ -63,12 +64,23 @@ public class DocumentMapperUtil {
 	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
 			List<ResourceField> fields, boolean relation) {
 		Map<String, Set<PathSpec>> includedFieldsSet = queryAdapter != null ? queryAdapter.getIncludedFields() : null;
-		Set<PathSpec> includedFields = includedFieldsSet != null ? includedFieldsSet.get(resourceInformation.getResourceType()) : null;
+		final Set<PathSpec> includedFields = new HashSet<>();
+
+		if (includedFieldsSet != null) {
+			addIfNotNull(includedFields, includedFieldsSet.get(resourceInformation.getResourceType()));
+			addIfNotNull(includedFields, includedFieldsSet.get(resourceInformation.getSuperResourceType()));
+		}
 		if (noResourceIncludedFieldsSpecified(includedFields)) {
 			return fields;
 		}
 		else {
 			return computeRequestedFields(includedFields, relation, queryAdapter, resourceInformation, fields);
+		}
+	}
+
+	private static <T> void addIfNotNull(Set<T> set, Collection<T> collection) {
+		if (collection != null) {
+			set.addAll(collection);
 		}
 	}
 

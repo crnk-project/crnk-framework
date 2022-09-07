@@ -1,6 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +16,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
@@ -27,6 +25,8 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.LazyTask;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
+import io.crnk.core.mock.models.SpecialTask;
+import io.crnk.core.mock.models.SuperTask;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -649,6 +649,29 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
+	public void testSupertypeAttributesSelection() {
+		SpecialTask task = createSpecialTask(2, "sample task");
+		task.setEnd("next month");
+		JsonApiResponse response = new JsonApiResponse();
+		response.setEntity(task);
+
+		QuerySpec querySpec = new QuerySpec(SpecialTask.class);
+		querySpec.includeField(PathSpec.of("end"));
+		final QuerySpec superQuerySpec = new QuerySpec(SuperTask.class);
+		superQuerySpec.includeField(PathSpec.of("name"));
+		querySpec.setNestedSpecs(Collections.singletonList(superQuerySpec));
+
+		Document document = mapper.toDocument(response, toAdapter(querySpec), mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+		Assert.assertEquals("specialTask", resource.getType());
+		Assert.assertNull(resource.getAttributes().get("category"));
+		Assert.assertNull(resource.getAttributes().get("recurring"));
+		Assert.assertEquals("sample task", resource.getAttributes().get("name").asText());
+		Assert.assertEquals("next month", resource.getAttributes().get("end").asText());
+	}
+
+	@Test
 	public void testAttributesOrdering() {
 		Task task = createTask(3, "sample task");
 		task.setCategory("sample category");
@@ -687,6 +710,13 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	private LazyTask createLazyTask(long id) {
 		LazyTask task = new LazyTask();
 		task.setId(id);
+		return task;
+	}
+
+	private SpecialTask createSpecialTask(long id, String name) {
+		SpecialTask task = new SpecialTask();
+		task.setId(id);
+		task.setName(name);
 		return task;
 	}
 
