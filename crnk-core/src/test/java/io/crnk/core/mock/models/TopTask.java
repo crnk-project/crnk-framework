@@ -3,8 +3,8 @@ package io.crnk.core.mock.models;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "superTasks", subTypes = SpecialTask.class)
-public abstract class SuperTask {
+@JsonApiResource(type = "topTask", subTypes = MiddleTask.class, resourcePath = "treeTasks")
+public abstract class TopTask {
 
 	@JsonApiId
 	private Long id;
@@ -17,7 +17,7 @@ public abstract class SuperTask {
 		return id;
 	}
 
-	public SuperTask setId(Long id) {
+	public TopTask setId(Long id) {
 		this.id = id;
 		return this;
 	}

@@ -61,14 +61,15 @@ public class DocumentMapperUtil {
 		serializerUtil = new SerializerUtil(serializeLinksAsObjects);
 	}
 
-	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
+	protected List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
 			List<ResourceField> fields, boolean relation) {
 		Map<String, Set<PathSpec>> includedFieldsSet = queryAdapter != null ? queryAdapter.getIncludedFields() : null;
 		final Set<PathSpec> includedFields = new HashSet<>();
 
-		if (includedFieldsSet != null) {
-			addIfNotNull(includedFields, includedFieldsSet.get(resourceInformation.getResourceType()));
-			addIfNotNull(includedFields, includedFieldsSet.get(resourceInformation.getSuperResourceType()));
+		RegistryEntry entry = resourceRegistry.getEntry(resourceInformation.getResourceType());
+		while(entry != null){
+			addIfNotNull(includedFields, includedFieldsSet.get(entry.getResourceInformation().getResourceType()));
+			entry = entry.getParentRegistryEntry();
 		}
 		if (noResourceIncludedFieldsSpecified(includedFields)) {
 			return fields;

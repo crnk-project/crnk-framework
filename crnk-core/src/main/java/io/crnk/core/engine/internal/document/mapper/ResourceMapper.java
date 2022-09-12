@@ -115,8 +115,7 @@ public class ResourceMapper {
 	protected void setAttributes(Resource resource, Object entity, ResourceInformation resourceInformation,
 			QueryAdapter queryAdapter, ResourceMappingConfig mappingConfig) {
 		// fields legacy may further limit the number of fields
-		List<ResourceField> fields = DocumentMapperUtil
-				.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields(), false);
+		List<ResourceField> fields = util.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields(), false);
 		// serialize the individual attributes
 		QueryContext queryContext = queryAdapter.getQueryContext();
 		for (ResourceField field : fields) {
@@ -201,8 +200,7 @@ public class ResourceMapper {
 
 	protected void setRelationships(Resource resource, Object entity, ResourceInformation resourceInformation,
 			QueryAdapter queryAdapter, ResourceMappingConfig mappingConfig) {
-		List<ResourceField> fields = DocumentMapperUtil
-				.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getRelationshipFields(), true);
+		List<ResourceField> fields = util.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getRelationshipFields(), true);
 		QueryContext queryContext = queryAdapter.getQueryContext();
 		for (ResourceField field : fields) {
 			if (!isIgnored(field, queryContext)) {

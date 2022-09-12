@@ -2,8 +2,8 @@ package io.crnk.core.mock.models;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "specialTask", resourcePath = "superTasks")
-public class SpecialTask extends SuperTask {
+@JsonApiResource(type = "bottomTask", resourcePath = "treeTasks")
+public class BottomTask extends MiddleTask {
 
 	private boolean recurring;
 
