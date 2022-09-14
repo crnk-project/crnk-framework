@@ -148,6 +148,7 @@ public class QuerySpec {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((resourceType == null) ? 0 : resourceType.hashCode());
         result = prime * result + ((filters == null) ? 0 : filters.hashCode());
         result = prime * result + ((includedFields == null) ? 0 : includedFields.hashCode());
         result = prime * result + ((includedRelations == null) ? 0 : includedRelations.hashCode());
@@ -167,16 +168,17 @@ public class QuerySpec {
             return false;
         }
         QuerySpec other = (QuerySpec) obj;
-        return CompareUtils.isEquals(filters, other.filters) // NOSONAR
+        return CompareUtils.isEquals(resourceType, other.resourceType)
+		        && CompareUtils.isEquals(filters, other.filters) // NOSONAR
                 && CompareUtils.isEquals(includedFields, other.includedFields)
                 && CompareUtils.isEquals(includedRelations, other.includedRelations)
                 && CompareUtils.isEquals(pagingSpec, other.pagingSpec)
                 && CompareUtils.isEquals(typeRelatedSpecs, other.typeRelatedSpecs)
 				&& CompareUtils.isEquals(classRelatedSpecs, other.classRelatedSpecs)
-                && CompareUtils.isEquals(sort, other.sort);
-    }
+				&& CompareUtils.isEquals(sort, other.sort);
+	}
 
-    public Long getLimit() {
+	public Long getLimit() {
         OffsetLimitPagingSpec offsetLimitPagingSpec = getPaging(OffsetLimitPagingSpec.class);
         return offsetLimitPagingSpec.getLimit();
     }
@@ -278,7 +280,7 @@ public class QuerySpec {
         for (QuerySpec spec : specs) {
 	    if (spec.getResourceType() != null) {
                 typeRelatedSpecs.put(spec.getResourceType(), spec);
-            } 
+            }
         if (spec.getResourceClass() != null) {
                 classRelatedSpecs.put(spec.getResourceClass(), spec);
             }
