@@ -129,9 +129,26 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
             }
             QueryContext queryContext = requestContext.getQueryContext();
             return processAsync(jsonPath, method, parameters, requestDocument, queryContext)
-                    .map(this::toHttpResponse);
+                    .map(this::toHttpResponse)
+                    .map(httpResp -> transferHeaders(httpResp, requestContext));
         }
         return resultFactory.just(buildMethodNotAllowedResponse(method));
+    }
+
+    private HttpResponse transferHeaders(final HttpResponse targetResponse, final HttpRequestContext requestContext) {
+        final HttpResponse srcResponse = requestContext.getResponse();
+        if (srcResponse == null) {
+            return targetResponse;
+        }
+
+        // transfer only header that are not set already
+        srcResponse.getHeaders().forEach((k, srcValue) -> {
+            final String targetValue = targetResponse.getHeader(k);
+            if (targetValue == null && srcValue != null) {
+                targetResponse.setHeader(k, srcValue);
+            }
+        });
+        return targetResponse;
     }
 
     private Result<HttpResponse> checkMethod(HttpRequestContext requestContext) {
