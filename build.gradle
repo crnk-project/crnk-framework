@@ -9,8 +9,8 @@ buildscript {
 		classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.9.2'
 		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
 		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
-		classpath 'org.ajoberstar:gradle-git-publish:3.0.0'
-		classpath 'org.ajoberstar.grgit:grgit-gradle:3.0.0'
+		classpath 'org.ajoberstar.git-publish:gradle-git-publish:3.0.1'
+		classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
 
 		// classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
 		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
