@@ -125,7 +125,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 		Assert.assertEquals(2L, dto.getId().longValue());
 		Assert.assertEquals("test", dto.getStringValue());
 		Assert.assertEquals("TEST", dto.getComputedUpperStringValue());
-		Mockito.verify(dtoMapper, Mockito.times(1)).unmapQuerySpec(Mockito.eq(querySpec));
+		Mockito.verify(dtoMapper, Mockito.times(1)).unmapQuerySpec(Mockito.refEq(querySpec, "resourceClass", "resourceType"));
 
 		// update the mapped dto
 		dto.setStringValue("newValue");

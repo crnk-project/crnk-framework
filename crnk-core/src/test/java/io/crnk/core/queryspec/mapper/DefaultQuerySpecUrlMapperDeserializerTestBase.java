@@ -248,7 +248,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
     @Test
     public void testFollowNestedObjectWithinResource() {
         // follow ProjectData.data
-        QuerySpec expectedSpec = new QuerySpec(Task.class);
+        QuerySpec expectedSpec = new QuerySpec(Project.class);
         expectedSpec.addSort(new SortSpec(Arrays.asList("data", "data"), Direction.ASC));
 
         ResourceInformation projectInformation = resourceRegistry.getEntry(Project.class).getResourceInformation();
@@ -731,7 +731,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
     @Test
     public void testHyphenIsAllowedInResourceName() {
 
-        QuerySpec expectedSpec = new QuerySpec(Task.class);
+        QuerySpec expectedSpec = new QuerySpec(TaskWithLookup.class);
         expectedSpec.addSort(new SortSpec(Arrays.asList("id"), Direction.ASC));
 
         Map<String, Set<String>> params = new HashMap<>();
