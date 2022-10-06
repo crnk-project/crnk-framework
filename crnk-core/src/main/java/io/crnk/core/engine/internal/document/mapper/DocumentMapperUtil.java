@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
@@ -60,15 +61,27 @@ public class DocumentMapperUtil {
 		serializerUtil = new SerializerUtil(serializeLinksAsObjects);
 	}
 
-	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
+	protected List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
 			List<ResourceField> fields, boolean relation) {
 		Map<String, Set<PathSpec>> includedFieldsSet = queryAdapter != null ? queryAdapter.getIncludedFields() : null;
-		Set<PathSpec> includedFields = includedFieldsSet != null ? includedFieldsSet.get(resourceInformation.getResourceType()) : null;
+		final Set<PathSpec> includedFields = new HashSet<>();
+
+		RegistryEntry entry = resourceRegistry.getEntry(resourceInformation.getResourceType());
+		while(entry != null){
+			addIfNotNull(includedFields, includedFieldsSet.get(entry.getResourceInformation().getResourceType()));
+			entry = entry.getParentRegistryEntry();
+		}
 		if (noResourceIncludedFieldsSpecified(includedFields)) {
 			return fields;
 		}
 		else {
 			return computeRequestedFields(includedFields, relation, queryAdapter, resourceInformation, fields);
+		}
+	}
+
+	private static <T> void addIfNotNull(Set<T> set, Collection<T> collection) {
+		if (collection != null) {
+			set.addAll(collection);
 		}
 	}
 

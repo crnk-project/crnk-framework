@@ -1,6 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,17 +16,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.mock.models.BottomTask;
 import io.crnk.core.mock.models.LazyTask;
+import io.crnk.core.mock.models.MiddleTask;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.models.TopTask;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
@@ -42,6 +44,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 
 public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
@@ -649,6 +652,41 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
+	public void testSupertypeAttributesSelection() {
+		BottomTask task = createTreeTask(2, "sample task");
+		task.setEnd("next month");
+		task.setRecurring(true);
+		task.setPublicComment("public");
+		task.setPrivateComment("private");
+
+		JsonApiResponse response = new JsonApiResponse();
+		response.setEntity(task);
+
+		QuerySpec bottomQuerySpec = new QuerySpec(BottomTask.class);
+		bottomQuerySpec.includeField(PathSpec.of("end"));
+		QuerySpec middleQuerySpec = new QuerySpec(MiddleTask.class);
+		middleQuerySpec.includeField(PathSpec.of("publicComment"));
+		final QuerySpec topQuerySpec = new QuerySpec(TopTask.class);
+		topQuerySpec.includeField(PathSpec.of("name"));
+
+		bottomQuerySpec.setNestedSpecs(Arrays.asList(topQuerySpec, middleQuerySpec));
+
+		Document document = mapper.toDocument(response, toAdapter(bottomQuerySpec), mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+		Assert.assertEquals("bottomTask", resource.getType());
+		Assert.assertNull(resource.getAttributes().get("category"));
+		Assert.assertNull(resource.getAttributes().get("recurring"));
+		Assert.assertNull(resource.getAttributes().get("privateComment"));
+		Assert.assertNotNull(resource.getAttributes().get("name"));
+		Assert.assertNotNull(resource.getAttributes().get("end"));
+		Assert.assertNotNull(resource.getAttributes().get("publicComment"));
+		Assert.assertEquals("sample task", resource.getAttributes().get("name").asText());
+		Assert.assertEquals("next month", resource.getAttributes().get("end").asText());
+		Assert.assertEquals("public", resource.getAttributes().get("publicComment").asText());
+	}
+
+	@Test
 	public void testAttributesOrdering() {
 		Task task = createTask(3, "sample task");
 		task.setCategory("sample category");
@@ -687,6 +725,13 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	private LazyTask createLazyTask(long id) {
 		LazyTask task = new LazyTask();
 		task.setId(id);
+		return task;
+	}
+
+	private BottomTask createTreeTask(long id, String name) {
+		BottomTask task = new BottomTask();
+		task.setId(id);
+		task.setName(name);
 		return task;
 	}
 
