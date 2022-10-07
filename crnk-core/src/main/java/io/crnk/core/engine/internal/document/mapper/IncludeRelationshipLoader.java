@@ -15,6 +15,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -26,6 +27,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +129,7 @@ public class IncludeRelationshipLoader {
 		Set<Resource> related = new HashSet<>();
 
 		Set<Object> relatedIdsToLoad = new HashSet<>();
+		Map<Object, List<ResourceIdentifier>> mapRelatedIdsToLoadToResourceIdentifier = new HashMap<>();
 		for (Resource sourceResource : sourceResources) {
 			Relationship relationship = sourceResource.getRelationships().get(relationshipField.getJsonName());
 			PreconditionUtil.verify(relationship.getData().isPresent(), "expected relationship data to be loaded for @JsonApiResourceId annotated field, sourceType=%d sourceId=%d, relationshipName=%s", sourceResource.getType(), sourceResource.getId(), relationshipField.getJsonName());
@@ -138,6 +141,9 @@ public class IncludeRelationshipLoader {
 						related.add(request.getResource(id));
 					} else {
 						relatedIdsToLoad.add(oppositeResourceInformation.parseIdString(id.getId()));
+						// ResourceIdentifier may have the wrong type, e.g. when resource is a subtype of declared type in source resource,
+						// so we store the resource identifier to be able to set the correct type later
+						mapRelatedIdsToLoadToResourceIdentifier.computeIfAbsent(id.getId(), k -> new ArrayList<>()).add(id);
 					}
 				}
 			}
@@ -153,6 +159,17 @@ public class IncludeRelationshipLoader {
 				Collection responseList = (Collection) response.getEntity();
 				for (Object responseEntity : responseList) {
 					Resource relatedResource = request.merge(responseEntity);
+					// ResourceIdentifier may have the wrong type, e.g. when resource is a subtype of declared type in source resource,
+					// so we set the correct type here
+					List<ResourceIdentifier> resourceIdentifiers = mapRelatedIdsToLoadToResourceIdentifier.get(relatedResource.getId());
+					if (resourceIdentifiers != null) {
+						for(ResourceIdentifier resourceIdentifier : resourceIdentifiers) {
+							resourceIdentifier.setType(relatedResource.getType());
+						}
+					} else {
+						throw new InvalidResourceException("type=" + relationshipField.getOppositeResourceType() + ", "
+								+ "id=" + relatedResource.getId() + " : There must be an issue with serializing this id.");
+					}
 					related.add(relatedResource);
 					Object responseEntityId = oppositeResourceInformation.getId(responseEntity);
 					relatedIdsToLoad.remove(responseEntityId);

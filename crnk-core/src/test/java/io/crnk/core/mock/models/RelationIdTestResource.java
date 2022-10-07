@@ -38,7 +38,6 @@ public class RelationIdTestResource {
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Schedule testLookupWhenNull;
 
-
 	@JsonApiRelationId
 	private List<Long> testMultipleValueIds = new ArrayList<>();
 
@@ -80,6 +79,15 @@ public class RelationIdTestResource {
 
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Schedule testResourceIdRef;
+
+	@JsonApiRelationId
+	private Long testSubTypedResourceId;
+
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
+	private TopTask testSubTypedResource;
+
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
+	private List<TopTaskWrapper> topTaskWrappers = new ArrayList<>();
 
 	public Long getId() {
 		return id;
@@ -272,5 +280,31 @@ public class RelationIdTestResource {
 		this.testResourceIdRef = testResourceIdRef;
 		this.testResourceIdRefId = testResourceIdRef != null ?
 				new ResourceIdentifier(testResourceIdRef.getId().toString(), "schedules") : null;
+	}
+
+	public Long getTestSubTypedResourceId() {
+		return testSubTypedResourceId;
+	}
+
+	public void setTestSubTypedResourceId(final Long testSubTypedResourceId) {
+		this.testSubTypedResourceId = testSubTypedResourceId;
+		this.testSubTypedResource = null;
+	}
+
+	public TopTask getTestSubTypedResource() {
+		return testSubTypedResource;
+	}
+
+	public void setTestSubTypedResource(final TopTask testSubTypedResource) {
+		this.testSubTypedResource = testSubTypedResource;
+		this.testSubTypedResourceId = testSubTypedResource != null ? testSubTypedResource.getId() : null;
+	}
+
+	public List<TopTaskWrapper> getTopTaskWrappers() {
+		return topTaskWrappers;
+	}
+
+	public void setTopTaskWrappers(final List<TopTaskWrapper> topTaskWrappers) {
+		this.topTaskWrappers = topTaskWrappers;
 	}
 }
