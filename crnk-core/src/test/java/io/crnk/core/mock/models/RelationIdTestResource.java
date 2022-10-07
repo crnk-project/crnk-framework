@@ -86,6 +86,9 @@ public class RelationIdTestResource {
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private TopTask testSubTypedResource;
 
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
+	private List<TopTaskWrapper> topTaskWrappers = new ArrayList<>();
+
 	public Long getId() {
 		return id;
 	}
@@ -297,4 +300,11 @@ public class RelationIdTestResource {
 		this.testSubTypedResourceId = testSubTypedResource != null ? testSubTypedResource.getId() : null;
 	}
 
+	public List<TopTaskWrapper> getTopTaskWrappers() {
+		return topTaskWrappers;
+	}
+
+	public void setTopTaskWrappers(final List<TopTaskWrapper> topTaskWrappers) {
+		this.topTaskWrappers = topTaskWrappers;
+	}
 }

@@ -129,7 +129,7 @@ public class IncludeRelationshipLoader {
 		Set<Resource> related = new HashSet<>();
 
 		Set<Object> relatedIdsToLoad = new HashSet<>();
-		Map<Object, ResourceIdentifier> mapRelatedIdsToLoadToResourceIdentifier = new HashMap<>();
+		Map<Object, List<ResourceIdentifier>> mapRelatedIdsToLoadToResourceIdentifier = new HashMap<>();
 		for (Resource sourceResource : sourceResources) {
 			Relationship relationship = sourceResource.getRelationships().get(relationshipField.getJsonName());
 			PreconditionUtil.verify(relationship.getData().isPresent(), "expected relationship data to be loaded for @JsonApiResourceId annotated field, sourceType=%d sourceId=%d, relationshipName=%s", sourceResource.getType(), sourceResource.getId(), relationshipField.getJsonName());
@@ -143,7 +143,7 @@ public class IncludeRelationshipLoader {
 						relatedIdsToLoad.add(oppositeResourceInformation.parseIdString(id.getId()));
 						// ResourceIdentifier may have the wrong type, e.g. when resource is a subtype of declared type in source resource,
 						// so we store the resource identifier to be able to set the correct type later
-						mapRelatedIdsToLoadToResourceIdentifier.put(id.getId(), id);
+						mapRelatedIdsToLoadToResourceIdentifier.computeIfAbsent(id.getId(), k -> new ArrayList<>()).add(id);
 					}
 				}
 			}
@@ -161,9 +161,9 @@ public class IncludeRelationshipLoader {
 					Resource relatedResource = request.merge(responseEntity);
 					// ResourceIdentifier may have the wrong type, e.g. when resource is a subtype of declared type in source resource,
 					// so we set the correct type here
-					ResourceIdentifier resourceIdentifier = mapRelatedIdsToLoadToResourceIdentifier.get(relatedResource.getId());
-					if (resourceIdentifier != null) {
-						if (resourceIdentifier.getType() != relatedResource.getType()) {
+					List<ResourceIdentifier> resourceIdentifiers = mapRelatedIdsToLoadToResourceIdentifier.get(relatedResource.getId());
+					if (resourceIdentifiers != null) {
+						for(ResourceIdentifier resourceIdentifier : resourceIdentifiers) {
 							resourceIdentifier.setType(relatedResource.getType());
 						}
 					} else {

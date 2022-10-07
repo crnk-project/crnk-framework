@@ -20,6 +20,7 @@ import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.mock.repository.TaskWithLookupRepository;
 import io.crnk.core.mock.repository.TaskWithLookupToProjectRepository;
 import io.crnk.core.mock.repository.ThingRepository;
+import io.crnk.core.mock.repository.TopTaskWrapperRepository;
 import io.crnk.core.mock.repository.UserRepository;
 import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.mock.repository.UserToTaskRepository;
@@ -45,6 +46,7 @@ public class CoreTestModule implements Module {
         context.addRepository(new TaskWithLookupRepository());
         context.addRepository(new TaskWithLookupToProjectRepository());
 	    context.addRepository(new TopTaskRepository());
+	    context.addRepository(new TopTaskWrapperRepository());
         context.addRepository(new UserRepository());
         context.addRepository(new UserToProjectRepository());
         context.addRepository(new UserToTaskRepository());
