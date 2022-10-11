@@ -33,7 +33,7 @@
 		"angular-2-local-storage": "1.0.1"
 	},
 	"devDependencies": {
-		"@angular/cli": "1.2.6",
+		"@angular/cli": "1.7.4",
 		"@angular/compiler-cli": "^4.3.2",
 		"@angular/language-service": "^4.3.2",
 		"@ngrx/store-devtools": "^3.2.4",
@@ -42,7 +42,7 @@
 		"@types/node": "~6.0.66",
 		"codelyzer": "~3.0.1",
 		"jasmine-core": "~2.6.2",
-		"jasmine-reporters": "^2.2.1",
+		"jasmine-reporters": "^2.5.0",
 		"jasmine-spec-reporter": "~4.1.0",
 		"karma": "~1.7.0",
 		"karma-chrome-launcher": "~2.1.1",
