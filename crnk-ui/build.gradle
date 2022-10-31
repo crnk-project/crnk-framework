@@ -1,6 +1,6 @@
-// import com.moowork.gradle.node.npm.NpmTask
-
-//apply plugin: 'com.moowork.node'
+plugins {
+  id "com.github.node-gradle.node" version "3.0.1"
+}
 
 apply plugin: 'java'
 
@@ -13,7 +13,6 @@ dependencies {
     testCompile project(':crnk-home')
 }
 
-/*
 sourceSets {
     main {
         resources {
@@ -49,5 +48,4 @@ tasks.processResources.dependsOn 'npmRunBuild'
 clean {
     delete 'build/npm'
 }
- */
 
