@@ -22,7 +22,8 @@ public class ExceptionMapperHelper {
 		builder = builder.addMetaField(ExceptionMapperHelper.META_TYPE_KEY, metaTypeValue);
 		builder = builder.setStatus(String.valueOf(statusCode));
 		builder = builder.setCode(exception.getMessage());
-		builder = builder.setTitle(exception.getLocalizedMessage());
+		builder = builder.setDetail(exception.getLocalizedMessage());
+		builder = builder.setTitle(exception.getCause().getClass().getSimpleName());
 
 		ErrorData error = builder.build();
 		errors.add(error);
