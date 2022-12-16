@@ -196,7 +196,13 @@ public class JsonApiUrlBuilder implements UrlBuilder {
 			else {
 				builder.append("&");
 			}
-			builder.append(key);
+			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
+				@Override
+				public Object call() throws Exception {
+					builder.append(URLEncoder.encode(key, encoding));
+					return null;
+				}
+			});
 			builder.append("=");
 			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 				@Override
