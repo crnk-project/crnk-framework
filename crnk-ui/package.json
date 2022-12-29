@@ -33,7 +33,7 @@
 		"angular-2-local-storage": "1.0.1"
 	},
 	"devDependencies": {
-		"@angular/cli": "1.2.6",
+		"@angular/cli": "15.0.4",
 		"@angular/compiler-cli": "^4.3.2",
 		"@angular/language-service": "^4.3.2",
 		"@ngrx/store-devtools": "^3.2.4",
