@@ -6,6 +6,6 @@ dependencies {
     testCompile project(':crnk-meta')
     testCompile project(':crnk-test')
     testCompile 'com.google.testing.compile:compile-testing:0.15'
-    testCompile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+    testCompile 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
 
 }

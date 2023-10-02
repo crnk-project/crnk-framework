@@ -1,6 +1,6 @@
 package io.crnk.security.model;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class ProjectData {
 

@@ -16,8 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.validation.ElementKind;
-import javax.validation.Path;
+import jakarta.validation.ElementKind;
+import jakarta.validation.Path;
 import java.util.Iterator;
 
 public class ConstraintViolationImplTest {

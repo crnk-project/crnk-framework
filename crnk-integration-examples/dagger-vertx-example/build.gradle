@@ -43,7 +43,7 @@ dependencies {
     compile 'org.hibernate:hibernate-validator:5.2.1.Final'
     compile 'org.hibernate:hibernate-core:5.2.10.Final'
     compile 'org.hibernate:hibernate-entitymanager:5.2.10.Final'
-    compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+    compile 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
     compile 'com.h2database:h2:1.4.187'
 
     compile 'io.vertx:vertx-auth-common:3.7.1'
@@ -55,7 +55,7 @@ dependencies {
     // compile project(':crnk-validation')
 
     compile 'ch.qos.logback:logback-classic:1.2.3'
-    compile 'javax.inject:javax.inject:1'
+    compile 'jakarta.inject:jakarta.inject-api:2.0.1'
     compile 'com.google.dagger:dagger:2.16'
 
     annotationProcessor 'com.google.dagger:dagger-compiler:2.16'

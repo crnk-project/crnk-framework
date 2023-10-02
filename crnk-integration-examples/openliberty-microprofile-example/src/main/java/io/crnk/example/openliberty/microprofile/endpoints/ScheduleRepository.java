@@ -6,8 +6,8 @@ import io.crnk.data.jpa.JpaEntityRepositoryBase;
 import io.crnk.example.openliberty.microprofile.dao.ScheduleDao;
 import io.crnk.example.openliberty.microprofile.model.ScheduleEntity;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import java.util.Collection;
 
 public class ScheduleRepository extends JpaEntityRepositoryBase<ScheduleEntity, Long> {

@@ -1,9 +1,9 @@
 package io.crnk.client;
 
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.PreMatching;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.PreMatching;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 
 /**
@@ -26,7 +26,7 @@ public class TestRequestFilter implements ContainerRequestFilter {
 
 	/*
 	 * (non-Javadoc)
-	 * @see javax.ws.rs.container.ContainerRequestFilter#filter(javax.ws.rs.container.ContainerRequestContext)
+	 * @see jakarta.ws.rs.container.ContainerRequestFilter#filter(jakarta.ws.rs.container.ContainerRequestContext)
 	 */
 	@Override
 	public void filter(ContainerRequestContext requestContext) {

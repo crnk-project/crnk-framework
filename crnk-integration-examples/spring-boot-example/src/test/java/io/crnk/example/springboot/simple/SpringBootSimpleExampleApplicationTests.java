@@ -7,7 +7,7 @@ import static org.springframework.http.HttpStatus.OK;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
-import javax.security.auth.message.config.AuthConfigFactory;
+import jakarta.security.auth.message.config.AuthConfigFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.RestAssured;

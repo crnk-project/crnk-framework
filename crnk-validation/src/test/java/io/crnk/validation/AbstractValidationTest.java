@@ -15,8 +15,8 @@ import io.crnk.validation.mock.repository.TaskRepository;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Before;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractValidationTest extends JerseyTestBase {

@@ -6,7 +6,7 @@ import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaFilterBase;
 import io.crnk.meta.provider.MetaProviderBase;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -15,7 +15,7 @@ import java.util.Collection;
  * <p>
  * <ul>
  * <li>
- * disable nullability for attributes annotated with {@link javax.validation.constraints.NotNull}.
+ * disable nullability for attributes annotated with {@link jakarta.validation.constraints.NotNull}.
  * <li>
  * </ul>
  * <p>

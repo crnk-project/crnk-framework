@@ -11,8 +11,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.TransactionalException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.TransactionalException;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;

@@ -2,8 +2,8 @@ package io.crnk.client;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.core.boot.CrnkProperties;

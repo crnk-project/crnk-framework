@@ -2,7 +2,7 @@ package io.crnk.data.jpa.query;
 
 import io.crnk.meta.provider.MetaPartition;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public interface JpaQueryFactoryContext {
 

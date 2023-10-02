@@ -1,6 +1,6 @@
 package io.crnk.servlet;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpHeaders;

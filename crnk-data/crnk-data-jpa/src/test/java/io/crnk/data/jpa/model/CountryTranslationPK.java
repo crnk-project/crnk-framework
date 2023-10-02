@@ -2,9 +2,9 @@ package io.crnk.data.jpa.model;
 
 import com.google.common.base.Objects;
 
-import javax.persistence.Embeddable;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
 
 @Embeddable

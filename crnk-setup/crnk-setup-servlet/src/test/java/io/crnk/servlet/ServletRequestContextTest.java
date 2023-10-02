@@ -3,7 +3,7 @@ package io.crnk.servlet;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpResponse;

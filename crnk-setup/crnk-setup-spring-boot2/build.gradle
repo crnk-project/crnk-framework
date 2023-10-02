@@ -25,7 +25,7 @@ dependencies {
 
 	compileOnly 'io.opentracing:opentracing-api:0.31.0'
 
-	compileOnly 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+	compileOnly 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
 	compileOnly 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
 	compileOnly 'org.springframework.boot:spring-boot-starter-actuator'

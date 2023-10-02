@@ -2,7 +2,7 @@ package io.crnk.servlet.internal;
 
 import io.crnk.core.engine.properties.PropertiesProvider;
 
-import javax.servlet.ServletConfig;
+import jakarta.servlet.ServletConfig;
 
 public class ServletPropertiesProvider implements PropertiesProvider {
 

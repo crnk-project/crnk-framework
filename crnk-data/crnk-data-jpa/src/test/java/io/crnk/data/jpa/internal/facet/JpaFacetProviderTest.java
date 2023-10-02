@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class JpaFacetProviderTest extends AbstractJpaJerseyTest {
 

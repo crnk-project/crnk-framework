@@ -6,7 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class AppServer {
 

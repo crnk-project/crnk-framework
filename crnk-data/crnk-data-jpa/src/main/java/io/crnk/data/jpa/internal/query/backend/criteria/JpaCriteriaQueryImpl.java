@@ -5,8 +5,8 @@ import io.crnk.data.jpa.internal.query.ComputedAttributeRegistryImpl;
 import io.crnk.data.jpa.query.criteria.JpaCriteriaQuery;
 import io.crnk.meta.provider.MetaPartition;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaQuery;
 import java.util.List;
 import java.util.Map;
 

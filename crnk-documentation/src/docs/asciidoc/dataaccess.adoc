@@ -107,7 +107,7 @@ include::../../../../crnk-integration-examples/spring-boot-example/src/main/java
 - Not supported are relationships within embeddables.
 
 
-It is possible to add additional JSON:API related fields to entities by annotating them with `@javax.persistence.Transient` (or the other way around by marking
+It is possible to add additional JSON:API related fields to entities by annotating them with `@jakarta.persistence.Transient` (or the other way around by marking
 it with `@JsonIgnore`).
 
 [source,java]
@@ -323,8 +323,8 @@ anchor:validation_module[]
 ## JSR 303 Validation Module
 
 A `ValidationModule` provided by `io.crnk:crnk-validation` implements
-resource validation and provides exception mappers for `javax.validation.ValidationException` and `javax.validation.ConstraintViolationException`.
-Among others, it properly translates 'javax.validation.ConstraintViolation' instances to JSON:API errors.
+resource validation and provides exception mappers for `jakarta.validation.ValidationException` and `jakarta.validation.ConstraintViolationException`.
+Among others, it properly translates 'jakarta.validation.ConstraintViolation' instances to JSON:API errors.
 A JSON:API error can, among others, contain a source pointer. This source pointer allows a clients/UI to
 display the validation errors next to the corresponding input fields.
 
@@ -336,7 +336,7 @@ A translated exception can look like:
 	"errors": [
 		{
 			"status": "422",
-			"code": "javax.validation.constraints.NotNull",
+			"code": "jakarta.validation.constraints.NotNull",
 			"title": "may not be null",
 			"source": {
 				"pointer": "data/attributes/name"
@@ -344,7 +344,7 @@ A translated exception can look like:
 			"meta": {
 				"resourceId": "1",
 				"type": "ConstraintViolation",
-				"messageTemplate": "{javax.validation.constraints.NotNull.message}",
+				"messageTemplate": "{jakarta.validation.constraints.NotNull.message}",
 				"resourceType": "projects"
 			}
 		}

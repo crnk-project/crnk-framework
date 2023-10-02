@@ -182,12 +182,12 @@ ch.qos.logback.classic.gaffer.GafferUtil -> ch.qos.logback.classic.gaffer.Gaffer
 ch.qos.logback.classic.jmx.JMXConfigurator -> ch.qos.logback.classic.jmx.JMXConfigurator:
     java.lang.String EMPTY -> EMPTY
     ch.qos.logback.classic.LoggerContext loggerContext -> loggerContext
-    javax.management.MBeanServer mbs -> mbs
-    javax.management.ObjectName objectName -> objectName
+    jakarta.management.MBeanServer mbs -> mbs
+    jakarta.management.ObjectName objectName -> objectName
     java.lang.String objectNameAsString -> objectNameAsString
     boolean debug -> debug
     boolean started -> started
-    65:82:void <init>(ch.qos.logback.classic.LoggerContext,javax.management.MBeanServer,javax.management.ObjectName) -> <init>
+    65:82:void <init>(ch.qos.logback.classic.LoggerContext,jakarta.management.MBeanServer,jakarta.management.ObjectName) -> <init>
     85:94:boolean previouslyRegisteredListenerWithSameObjectName() -> previouslyRegisteredListenerWithSameObjectName
     237:255:void onStop(ch.qos.logback.classic.LoggerContext) -> onStop
     259:259:void onLevelChange(ch.qos.logback.classic.Logger,ch.qos.logback.classic.Level) -> onLevelChange
@@ -200,8 +200,8 @@ ch.qos.logback.classic.jmx.JMXConfigurator -> ch.qos.logback.classic.jmx.JMXConf
     56:56:void <clinit>() -> <clinit>
 ch.qos.logback.classic.jmx.MBeanUtil -> ch.qos.logback.classic.jmx.MBeanUtil:
     31:31:java.lang.String getObjectNameFor(java.lang.String,java.lang.Class) -> getObjectNameFor
-    35:45:javax.management.ObjectName string2ObjectName(ch.qos.logback.core.Context,java.lang.Object,java.lang.String) -> string2ObjectName
-    50:50:boolean isRegistered(javax.management.MBeanServer,javax.management.ObjectName) -> isRegistered
+    35:45:jakarta.management.ObjectName string2ObjectName(ch.qos.logback.core.Context,java.lang.Object,java.lang.String) -> string2ObjectName
+    50:50:boolean isRegistered(jakarta.management.MBeanServer,jakarta.management.ObjectName) -> isRegistered
 ch.qos.logback.classic.joran.JoranConfigurator -> ch.qos.logback.classic.joran.JoranConfigurator:
     37:37:void <init>() -> <init>
     42:81:void addInstanceRules(ch.qos.logback.core.joran.spi.RuleStore) -> addInstanceRules
@@ -474,7 +474,7 @@ ch.qos.logback.classic.selector.ContextJNDISelector -> ch.qos.logback.classic.se
     59:62:void <init>(ch.qos.logback.classic.LoggerContext) -> <init>
     73:116:ch.qos.logback.classic.LoggerContext getLoggerContext() -> getLoggerContext
     121:121:java.lang.String conventionalConfigFileName(java.lang.String) -> conventionalConfigFileName
-    125:140:java.net.URL findConfigFileURL(javax.naming.Context,ch.qos.logback.classic.LoggerContext) -> findConfigFileURL
+    125:140:java.net.URL findConfigFileURL(jakarta.naming.Context,ch.qos.logback.classic.LoggerContext) -> findConfigFileURL
     145:150:java.net.URL urlByResourceName(ch.qos.logback.core.status.StatusManager,java.lang.String) -> urlByResourceName
     155:162:void configureLoggerContextByURL(ch.qos.logback.classic.LoggerContext,java.net.URL) -> configureLoggerContextByURL
     57:57:void <clinit>() -> <clinit>
@@ -762,8 +762,8 @@ ch.qos.logback.classic.util.EnvUtil -> ch.qos.logback.classic.util.EnvUtil:
     48:52:java.lang.Object loadFromServiceLoader(java.lang.Class) -> loadFromServiceLoader
     31:31:void <clinit>() -> <clinit>
 ch.qos.logback.classic.util.JNDIUtil -> ch.qos.logback.classic.util.JNDIUtil:
-    30:30:javax.naming.Context getInitialContext() -> getInitialContext
-    34:41:java.lang.String lookup(javax.naming.Context,java.lang.String) -> lookup
+    30:30:jakarta.naming.Context getInitialContext() -> getInitialContext
+    34:41:java.lang.String lookup(jakarta.naming.Context,java.lang.String) -> lookup
 ch.qos.logback.classic.util.LogbackMDCAdapter -> ch.qos.logback.classic.util.LogbackMDCAdapter:
     java.lang.ThreadLocal copyOnThreadLocal -> copyOnThreadLocal
     java.lang.ThreadLocal lastOperation -> lastOperation
@@ -1316,7 +1316,7 @@ ch.qos.logback.core.joran.event.SaxEventRecorder -> ch.qos.logback.core.joran.ev
     53:54:void recordEvents(java.io.InputStream) -> recordEvents
     57:69:java.util.List recordEvents(org.xml.sax.InputSource) -> recordEvents
     73:74:void handleError(java.lang.String,java.lang.Throwable) -> handleError
-    79:86:javax.xml.parsers.SAXParser buildSaxParser() -> buildSaxParser
+    79:86:jakarta.xml.parsers.SAXParser buildSaxParser() -> buildSaxParser
     91:91:void startDocument() -> startDocument
     94:94:org.xml.sax.Locator getLocator() -> getLocator
     98:99:void setDocumentLocator(org.xml.sax.Locator) -> setDocumentLocator
@@ -1615,7 +1615,7 @@ ch.qos.logback.core.net.AbstractSocketAppender -> ch.qos.logback.core.net.Abstra
     241:245:void tryReAddingEventToFrontOfQueue(java.lang.Object) -> tryReAddingEventToFrontOfQueue
     251:258:void connectionFailed(ch.qos.logback.core.net.SocketConnector,java.lang.Exception) -> connectionFailed
     274:274:ch.qos.logback.core.net.SocketConnector newConnector(java.net.InetAddress,int,long,long) -> newConnector
-    283:283:javax.net.SocketFactory getSocketFactory() -> getSocketFactory
+    283:283:jakarta.net.SocketFactory getSocketFactory() -> getSocketFactory
     void postProcessEvent(java.lang.Object) -> postProcessEvent
     ch.qos.logback.core.spi.PreSerializationTransformer getPST() -> getPST
     305:306:void setRemoteHost(java.lang.String) -> setRemoteHost
@@ -1637,14 +1637,14 @@ ch.qos.logback.core.net.DefaultSocketConnector -> ch.qos.logback.core.net.Defaul
     int port -> port
     ch.qos.logback.core.util.DelayStrategy delayStrategy -> delayStrategy
     ch.qos.logback.core.net.SocketConnector$ExceptionHandler exceptionHandler -> exceptionHandler
-    javax.net.SocketFactory socketFactory -> socketFactory
+    jakarta.net.SocketFactory socketFactory -> socketFactory
     49:50:void <init>(java.net.InetAddress,int,long,long) -> <init>
     60:64:void <init>(java.net.InetAddress,int,ch.qos.logback.core.util.DelayStrategy) -> <init>
     70:76:java.net.Socket call() -> call
     80:86:java.net.Socket createSocket() -> createSocket
     90:96:void useDefaultsForMissingFields() -> useDefaultsForMissingFields
     102:103:void setExceptionHandler(ch.qos.logback.core.net.SocketConnector$ExceptionHandler) -> setExceptionHandler
-    109:110:void setSocketFactory(javax.net.SocketFactory) -> setSocketFactory
+    109:110:void setSocketFactory(jakarta.net.SocketFactory) -> setSocketFactory
     31:31:java.lang.Object call() -> call
 ch.qos.logback.core.net.DefaultSocketConnector$1 -> ch.qos.logback.core.net.DefaultSocketConnector$1:
 ch.qos.logback.core.net.DefaultSocketConnector$ConsoleExceptionHandler -> ch.qos.logback.core.net.DefaultSocketConnector$ConsoleExceptionHandler:
@@ -1662,7 +1662,7 @@ ch.qos.logback.core.net.QueueFactory -> ch.qos.logback.core.net.QueueFactory:
 ch.qos.logback.core.net.SocketConnector -> ch.qos.logback.core.net.SocketConnector:
     java.net.Socket call() -> call
     void setExceptionHandler(ch.qos.logback.core.net.SocketConnector$ExceptionHandler) -> setExceptionHandler
-    void setSocketFactory(javax.net.SocketFactory) -> setSocketFactory
+    void setSocketFactory(jakarta.net.SocketFactory) -> setSocketFactory
 ch.qos.logback.core.net.SocketConnector$ExceptionHandler -> ch.qos.logback.core.net.SocketConnector$ExceptionHandler:
     void connectionFailed(ch.qos.logback.core.net.SocketConnector,java.lang.Exception) -> connectionFailed
 ch.qos.logback.core.net.ssl.KeyManagerFactoryFactoryBean -> ch.qos.logback.core.net.ssl.KeyManagerFactoryFactoryBean:
@@ -12093,13 +12093,13 @@ com.fasterxml.jackson.databind.util.ViewMatcher$Single -> com.fasterxml.jackson.
     43:43:boolean isVisibleForView(java.lang.Class) -> isVisibleForView
 dagger.internal.DoubleCheck -> dagger.internal.DoubleCheck:
     java.lang.Object UNINITIALIZED -> UNINITIALIZED
-    javax.inject.Provider provider -> provider
+    jakarta.inject.Provider provider -> provider
     java.lang.Object instance -> instance
     boolean $assertionsDisabled -> $assertionsDisabled
-    32:37:void <init>(javax.inject.Provider) -> <init>
+    32:37:void <init>(jakarta.inject.Provider) -> <init>
     42:55:java.lang.Object get() -> get
     64:73:java.lang.Object reentrantCheck(java.lang.Object,java.lang.Object) -> reentrantCheck
-    80:86:javax.inject.Provider provider(javax.inject.Provider) -> provider
+    80:86:jakarta.inject.Provider provider(jakarta.inject.Provider) -> provider
     28:29:void <clinit>() -> <clinit>
 dagger.internal.Factory -> dagger.internal.Factory:
 dagger.internal.MemoizedSentinel -> dagger.internal.MemoizedSentinel:
@@ -15678,7 +15678,7 @@ io.crnk.example.vertx.CrnkVerticle -> io.crnk.example.vertx.CrnkVerticle:
     35:35:void lambda$start$0(io.crnk.core.module.SimpleModule,io.crnk.core.repository.ResourceRepositoryV2) -> lambda$start$0
     17:17:void <clinit>() -> <clinit>
 io.crnk.example.vertx.DaggerAppComponent -> io.crnk.example.vertx.DaggerAppComponent:
-    javax.inject.Provider projectRepositoryProvider -> projectRepositoryProvider
+    jakarta.inject.Provider projectRepositoryProvider -> projectRepositoryProvider
     18:20:void <init>(io.crnk.example.vertx.DaggerAppComponent$Builder) -> <init>
     23:23:io.crnk.example.vertx.DaggerAppComponent$Builder builder() -> builder
     31:31:java.util.Set getSetOfResourceRepositoryV2() -> getSetOfResourceRepositoryV2
@@ -28801,19 +28801,19 @@ io.netty.handler.ssl.ClientAuth -> io.netty.handler.ssl.ClientAuth:
 io.netty.handler.ssl.Conscrypt -> io.netty.handler.ssl.Conscrypt:
     java.lang.Class ENGINES_CLASS -> ENGINES_CLASS
     35:35:boolean isAvailable() -> isAvailable
-    39:39:boolean isEngineSupported(javax.net.ssl.SSLEngine) -> isEngineSupported
+    39:39:boolean isEngineSupported(jakarta.net.ssl.SSLEngine) -> isEngineSupported
     45:52:java.lang.Class getEnginesClass() -> getEnginesClass
-    58:61:boolean isConscryptEngine(javax.net.ssl.SSLEngine,java.lang.Class) -> isConscryptEngine
+    58:61:boolean isConscryptEngine(jakarta.net.ssl.SSLEngine,java.lang.Class) -> isConscryptEngine
     66:66:java.lang.reflect.Method getIsConscryptMethod(java.lang.Class) -> getIsConscryptMethod
     29:29:void <clinit>() -> <clinit>
 io.netty.handler.ssl.ConscryptAlpnSslEngine -> io.netty.handler.ssl.ConscryptAlpnSslEngine:
     boolean USE_BUFFER_ALLOCATOR -> USE_BUFFER_ALLOCATOR
-    49:49:io.netty.handler.ssl.ConscryptAlpnSslEngine newClientEngine(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> newClientEngine
-    54:54:io.netty.handler.ssl.ConscryptAlpnSslEngine newServerEngine(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> newServerEngine
-    58:75:void <init>(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,java.util.List) -> <init>
+    49:49:io.netty.handler.ssl.ConscryptAlpnSslEngine newClientEngine(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> newClientEngine
+    54:54:io.netty.handler.ssl.ConscryptAlpnSslEngine newServerEngine(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> newServerEngine
+    58:75:void <init>(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,java.util.List) -> <init>
     87:89:int calculateOutNetBufSize(int,int) -> calculateOutNetBufSize
-    93:93:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer[],java.nio.ByteBuffer[]) -> unwrap
-    43:43:void <init>(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,java.util.List,io.netty.handler.ssl.ConscryptAlpnSslEngine$1) -> <init>
+    93:93:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer[],java.nio.ByteBuffer[]) -> unwrap
+    43:43:void <init>(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,java.util.List,io.netty.handler.ssl.ConscryptAlpnSslEngine$1) -> <init>
     44:44:void <clinit>() -> <clinit>
 io.netty.handler.ssl.ConscryptAlpnSslEngine$1 -> io.netty.handler.ssl.ConscryptAlpnSslEngine$1:
 io.netty.handler.ssl.ConscryptAlpnSslEngine$BufferAllocatorAdapter -> io.netty.handler.ssl.ConscryptAlpnSslEngine$BufferAllocatorAdapter:
@@ -28821,13 +28821,13 @@ io.netty.handler.ssl.ConscryptAlpnSslEngine$BufferAllocatorAdapter -> io.netty.h
     160:162:void <init>(io.netty.buffer.ByteBufAllocator) -> <init>
 io.netty.handler.ssl.ConscryptAlpnSslEngine$ClientEngine -> io.netty.handler.ssl.ConscryptAlpnSslEngine$ClientEngine:
     io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener protocolListener -> protocolListener
-    101:113:void <init>(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> <init>
+    101:113:void <init>(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> <init>
 io.netty.handler.ssl.ConscryptAlpnSslEngine$ClientEngine$1 -> io.netty.handler.ssl.ConscryptAlpnSslEngine$ClientEngine$1:
     io.netty.handler.ssl.ConscryptAlpnSslEngine$ClientEngine this$0 -> this$0
     103:103:void <init>(io.netty.handler.ssl.ConscryptAlpnSslEngine$ClientEngine) -> <init>
 io.netty.handler.ssl.ConscryptAlpnSslEngine$ServerEngine -> io.netty.handler.ssl.ConscryptAlpnSslEngine$ServerEngine:
     io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector protocolSelector -> protocolSelector
-    130:144:void <init>(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> <init>
+    130:144:void <init>(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> <init>
 io.netty.handler.ssl.ConscryptAlpnSslEngine$ServerEngine$1 -> io.netty.handler.ssl.ConscryptAlpnSslEngine$ServerEngine$1:
     io.netty.handler.ssl.ConscryptAlpnSslEngine$ServerEngine this$0 -> this$0
     133:133:void <init>(io.netty.handler.ssl.ConscryptAlpnSslEngine$ServerEngine) -> <init>
@@ -28837,25 +28837,25 @@ io.netty.handler.ssl.IdentityCipherSuiteFilter -> io.netty.handler.ssl.IdentityC
     33:43:java.lang.String[] filterCipherSuites(java.lang.Iterable,java.util.List,java.util.Set) -> filterCipherSuites
     26:26:void <clinit>() -> <clinit>
 io.netty.handler.ssl.Java7SslParametersUtils -> io.netty.handler.ssl.Java7SslParametersUtils:
-    33:34:void setAlgorithmConstraints(javax.net.ssl.SSLParameters,java.lang.Object) -> setAlgorithmConstraints
+    33:34:void setAlgorithmConstraints(jakarta.net.ssl.SSLParameters,java.lang.Object) -> setAlgorithmConstraints
 io.netty.handler.ssl.Java8SslUtils -> io.netty.handler.ssl.Java8SslUtils:
-    33:47:java.util.List getSniHostNames(javax.net.ssl.SSLParameters) -> getSniHostNames
-    51:56:void setSniHostNames(javax.net.ssl.SSLParameters,java.util.List) -> setSniHostNames
-    59:59:boolean getUseCipherSuitesOrder(javax.net.ssl.SSLParameters) -> getUseCipherSuitesOrder
-    63:64:void setUseCipherSuitesOrder(javax.net.ssl.SSLParameters,boolean) -> setUseCipherSuitesOrder
-    68:69:void setSNIMatchers(javax.net.ssl.SSLParameters,java.util.Collection) -> setSNIMatchers
+    33:47:java.util.List getSniHostNames(jakarta.net.ssl.SSLParameters) -> getSniHostNames
+    51:56:void setSniHostNames(jakarta.net.ssl.SSLParameters,java.util.List) -> setSniHostNames
+    59:59:boolean getUseCipherSuitesOrder(jakarta.net.ssl.SSLParameters) -> getUseCipherSuitesOrder
+    63:64:void setUseCipherSuitesOrder(jakarta.net.ssl.SSLParameters,boolean) -> setUseCipherSuitesOrder
+    68:69:void setSNIMatchers(jakarta.net.ssl.SSLParameters,java.util.Collection) -> setSNIMatchers
 io.netty.handler.ssl.Java9SslEngine -> io.netty.handler.ssl.Java9SslEngine:
     io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener selectionListener -> selectionListener
     io.netty.handler.ssl.Java9SslEngine$AlpnSelector alpnSelector -> alpnSelector
     boolean $assertionsDisabled -> $assertionsDisabled
-    81:93:void <init>(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> <init>
-    96:119:javax.net.ssl.SSLEngineResult verifyProtocolSelection(javax.net.ssl.SSLEngineResult) -> verifyProtocolSelection
-    124:124:javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> wrap
-    129:129:javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],java.nio.ByteBuffer) -> wrap
-    134:134:javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],int,int,java.nio.ByteBuffer) -> wrap
-    139:139:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> unwrap
-    144:144:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[]) -> unwrap
-    149:149:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[],int,int) -> unwrap
+    81:93:void <init>(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> <init>
+    96:119:jakarta.net.ssl.SSLEngineResult verifyProtocolSelection(jakarta.net.ssl.SSLEngineResult) -> verifyProtocolSelection
+    124:124:jakarta.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> wrap
+    129:129:jakarta.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],java.nio.ByteBuffer) -> wrap
+    134:134:jakarta.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],int,int,java.nio.ByteBuffer) -> wrap
+    139:139:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> unwrap
+    144:144:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[]) -> unwrap
+    149:149:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[],int,int) -> unwrap
     155:155:void setNegotiatedApplicationProtocol(java.lang.String) -> setNegotiatedApplicationProtocol
     159:163:java.lang.String getNegotiatedApplicationProtocol() -> getNegotiatedApplicationProtocol
     169:169:java.lang.String getApplicationProtocol() -> getApplicationProtocol
@@ -28869,7 +28869,7 @@ io.netty.handler.ssl.Java9SslEngine$AlpnSelector -> io.netty.handler.ssl.Java9Ss
     boolean $assertionsDisabled -> $assertionsDisabled
     io.netty.handler.ssl.Java9SslEngine this$0 -> this$0
     41:43:void <init>(io.netty.handler.ssl.Java9SslEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector) -> <init>
-    47:58:java.lang.String apply(javax.net.ssl.SSLEngine,java.util.List) -> apply
+    47:58:java.lang.String apply(jakarta.net.ssl.SSLEngine,java.util.List) -> apply
     63:77:void checkUnsupported() -> checkUnsupported
     37:37:java.lang.Object apply(java.lang.Object,java.lang.Object) -> apply
     37:37:void <clinit>() -> <clinit>
@@ -28882,11 +28882,11 @@ io.netty.handler.ssl.Java9SslUtils -> io.netty.handler.ssl.Java9SslUtils:
     java.lang.reflect.Method GET_HANDSHAKE_APPLICATION_PROTOCOL_SELECTOR -> GET_HANDSHAKE_APPLICATION_PROTOCOL_SELECTOR
     113:114:void <init>() -> <init>
     117:117:boolean supportsAlpn() -> supportsAlpn
-    122:126:java.lang.String getApplicationProtocol(javax.net.ssl.SSLEngine) -> getApplicationProtocol
-    132:136:java.lang.String getHandshakeApplicationProtocol(javax.net.ssl.SSLEngine) -> getHandshakeApplicationProtocol
-    141:152:void setApplicationProtocols(javax.net.ssl.SSLEngine,java.util.List) -> setApplicationProtocols
-    157:163:void setHandshakeApplicationProtocolSelector(javax.net.ssl.SSLEngine,java.util.function.BiFunction) -> setHandshakeApplicationProtocolSelector
-    167:172:java.util.function.BiFunction getHandshakeApplicationProtocolSelector(javax.net.ssl.SSLEngine) -> getHandshakeApplicationProtocolSelector
+    122:126:java.lang.String getApplicationProtocol(jakarta.net.ssl.SSLEngine) -> getApplicationProtocol
+    132:136:java.lang.String getHandshakeApplicationProtocol(jakarta.net.ssl.SSLEngine) -> getHandshakeApplicationProtocol
+    141:152:void setApplicationProtocols(jakarta.net.ssl.SSLEngine,java.util.List) -> setApplicationProtocols
+    157:163:void setHandshakeApplicationProtocolSelector(jakarta.net.ssl.SSLEngine,java.util.function.BiFunction) -> setHandshakeApplicationProtocolSelector
+    167:172:java.util.function.BiFunction getHandshakeApplicationProtocolSelector(jakarta.net.ssl.SSLEngine) -> getHandshakeApplicationProtocolSelector
     34:111:void <clinit>() -> <clinit>
 io.netty.handler.ssl.Java9SslUtils$1 -> io.netty.handler.ssl.Java9SslUtils$1:
     52:52:void <init>() -> <init>
@@ -28906,7 +28906,7 @@ io.netty.handler.ssl.Java9SslUtils$4 -> io.netty.handler.ssl.Java9SslUtils$4:
     76:76:java.lang.Object run() -> run
 io.netty.handler.ssl.Java9SslUtils$5 -> io.netty.handler.ssl.Java9SslUtils$5:
     82:82:void <init>() -> <init>
-    85:85:java.lang.String apply(javax.net.ssl.SSLEngine,java.util.List) -> apply
+    85:85:java.lang.String apply(jakarta.net.ssl.SSLEngine,java.util.List) -> apply
     82:82:java.lang.Object apply(java.lang.Object,java.lang.Object) -> apply
 io.netty.handler.ssl.Java9SslUtils$6 -> io.netty.handler.ssl.Java9SslUtils$6:
     90:90:void <init>() -> <init>
@@ -28927,11 +28927,11 @@ io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator -> io.netty.handler.ss
 io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator$1 -> io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator$1:
 io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator$AlpnWrapper -> io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator$AlpnWrapper:
     129:129:void <init>() -> <init>
-    133:144:javax.net.ssl.SSLEngine wrapSslEngine(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
+    133:144:jakarta.net.ssl.SSLEngine wrapSslEngine(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
     129:129:void <init>(io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator$1) -> <init>
 io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator$FailureWrapper -> io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator$FailureWrapper:
     118:118:void <init>() -> <init>
-    122:122:javax.net.ssl.SSLEngine wrapSslEngine(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
+    122:122:jakarta.net.ssl.SSLEngine wrapSslEngine(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
     118:118:void <init>(io.netty.handler.ssl.JdkAlpnApplicationProtocolNegotiator$1) -> <init>
 io.netty.handler.ssl.JdkApplicationProtocolNegotiator -> io.netty.handler.ssl.JdkApplicationProtocolNegotiator:
     io.netty.handler.ssl.JdkApplicationProtocolNegotiator$SslEngineWrapperFactory wrapperFactory() -> wrapperFactory
@@ -28939,20 +28939,20 @@ io.netty.handler.ssl.JdkApplicationProtocolNegotiator -> io.netty.handler.ssl.Jd
     io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListenerFactory protocolListenerFactory() -> protocolListenerFactory
 io.netty.handler.ssl.JdkApplicationProtocolNegotiator$AllocatorAwareSslEngineWrapperFactory -> io.netty.handler.ssl.JdkApplicationProtocolNegotiator$AllocatorAwareSslEngineWrapperFactory:
     49:49:void <init>() -> <init>
-    54:54:javax.net.ssl.SSLEngine wrapSslEngine(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
-    javax.net.ssl.SSLEngine wrapSslEngine(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
+    54:54:jakarta.net.ssl.SSLEngine wrapSslEngine(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
+    jakarta.net.ssl.SSLEngine wrapSslEngine(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
 io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener -> io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener:
     void unsupported() -> unsupported
     void selected(java.lang.String) -> selected
 io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListenerFactory -> io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListenerFactory:
-    io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener newListener(javax.net.ssl.SSLEngine,java.util.List) -> newListener
+    io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener newListener(jakarta.net.ssl.SSLEngine,java.util.List) -> newListener
 io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector -> io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector:
     void unsupported() -> unsupported
     java.lang.String select(java.util.List) -> select
 io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectorFactory -> io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectorFactory:
-    io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector newSelector(javax.net.ssl.SSLEngine,java.util.Set) -> newSelector
+    io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector newSelector(jakarta.net.ssl.SSLEngine,java.util.Set) -> newSelector
 io.netty.handler.ssl.JdkApplicationProtocolNegotiator$SslEngineWrapperFactory -> io.netty.handler.ssl.JdkApplicationProtocolNegotiator$SslEngineWrapperFactory:
-    javax.net.ssl.SSLEngine wrapSslEngine(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
+    jakarta.net.ssl.SSLEngine wrapSslEngine(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
 io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator -> io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator:
     java.util.List protocols -> protocols
     io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectorFactory selectorFactory -> selectorFactory
@@ -28971,16 +28971,16 @@ io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator -> io.netty.handler.ss
     99:121:void <clinit>() -> <clinit>
 io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$1 -> io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$1:
     99:99:void <init>() -> <init>
-    102:102:io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector newSelector(javax.net.ssl.SSLEngine,java.util.Set) -> newSelector
+    102:102:io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector newSelector(jakarta.net.ssl.SSLEngine,java.util.Set) -> newSelector
 io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$2 -> io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$2:
     106:106:void <init>() -> <init>
-    109:109:io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector newSelector(javax.net.ssl.SSLEngine,java.util.Set) -> newSelector
+    109:109:io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelector newSelector(jakarta.net.ssl.SSLEngine,java.util.Set) -> newSelector
 io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$3 -> io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$3:
     114:114:void <init>() -> <init>
-    117:117:io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener newListener(javax.net.ssl.SSLEngine,java.util.List) -> newListener
+    117:117:io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener newListener(jakarta.net.ssl.SSLEngine,java.util.List) -> newListener
 io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$4 -> io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$4:
     122:122:void <init>() -> <init>
-    125:125:io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener newListener(javax.net.ssl.SSLEngine,java.util.List) -> newListener
+    125:125:io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener newListener(jakarta.net.ssl.SSLEngine,java.util.List) -> newListener
 io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$FailProtocolSelectionListener -> io.netty.handler.ssl.JdkBaseApplicationProtocolNegotiator$FailProtocolSelectionListener:
     201:202:void <init>(io.netty.handler.ssl.JdkSslEngine,java.util.List) -> <init>
     206:206:void noSelectedMatchFound(java.lang.String) -> noSelectedMatchFound
@@ -29012,7 +29012,7 @@ io.netty.handler.ssl.JdkDefaultApplicationProtocolNegotiator -> io.netty.handler
     28:30:void <clinit>() -> <clinit>
 io.netty.handler.ssl.JdkDefaultApplicationProtocolNegotiator$1 -> io.netty.handler.ssl.JdkDefaultApplicationProtocolNegotiator$1:
     30:30:void <init>() -> <init>
-    34:34:javax.net.ssl.SSLEngine wrapSslEngine(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
+    34:34:jakarta.net.ssl.SSLEngine wrapSslEngine(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
 io.netty.handler.ssl.JdkNpnApplicationProtocolNegotiator -> io.netty.handler.ssl.JdkNpnApplicationProtocolNegotiator:
     io.netty.handler.ssl.JdkApplicationProtocolNegotiator$SslEngineWrapperFactory NPN_WRAPPER -> NPN_WRAPPER
     64:65:void <init>(boolean,java.lang.Iterable) -> <init>
@@ -29025,14 +29025,14 @@ io.netty.handler.ssl.JdkNpnApplicationProtocolNegotiator -> io.netty.handler.ssl
     27:27:void <clinit>() -> <clinit>
 io.netty.handler.ssl.JdkNpnApplicationProtocolNegotiator$1 -> io.netty.handler.ssl.JdkNpnApplicationProtocolNegotiator$1:
     27:33:void <init>() -> <init>
-    38:38:javax.net.ssl.SSLEngine wrapSslEngine(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
+    38:38:jakarta.net.ssl.SSLEngine wrapSslEngine(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> wrapSslEngine
 io.netty.handler.ssl.JdkSslClientContext -> io.netty.handler.ssl.JdkSslClientContext:
     47:48:void <init>() -> <init>
-    87:89:void <init>(java.io.File,javax.net.ssl.TrustManagerFactory) -> <init>
-    168:169:void <init>(java.io.File,javax.net.ssl.TrustManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,long,long) -> <init>
-    175:179:void <init>(java.security.Provider,java.io.File,javax.net.ssl.TrustManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,long,long) -> <init>
-    270:273:void <init>(java.security.Provider,java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,java.lang.String[],long,long) -> <init>
-    281:305:javax.net.ssl.SSLContext newSSLContext(java.security.Provider,java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,long,long) -> newSSLContext
+    87:89:void <init>(java.io.File,jakarta.net.ssl.TrustManagerFactory) -> <init>
+    168:169:void <init>(java.io.File,jakarta.net.ssl.TrustManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,long,long) -> <init>
+    175:179:void <init>(java.security.Provider,java.io.File,jakarta.net.ssl.TrustManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,long,long) -> <init>
+    270:273:void <init>(java.security.Provider,java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,java.lang.String[],long,long) -> <init>
+    281:305:jakarta.net.ssl.SSLContext newSSLContext(java.security.Provider,java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,long,long) -> newSSLContext
 io.netty.handler.ssl.JdkSslContext -> io.netty.handler.ssl.JdkSslContext:
     io.netty.util.internal.logging.InternalLogger logger -> logger
     java.lang.String[] DEFAULT_PROTOCOLS -> DEFAULT_PROTOCOLS
@@ -29043,15 +29043,15 @@ io.netty.handler.ssl.JdkSslContext -> io.netty.handler.ssl.JdkSslContext:
     java.util.List unmodifiableCipherSuites -> unmodifiableCipherSuites
     io.netty.handler.ssl.JdkApplicationProtocolNegotiator apn -> apn
     io.netty.handler.ssl.ClientAuth clientAuth -> clientAuth
-    javax.net.ssl.SSLContext sslContext -> sslContext
+    jakarta.net.ssl.SSLContext sslContext -> sslContext
     boolean isClient -> isClient
-    163:172:void <init>(javax.net.ssl.SSLContext,boolean,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean) -> <init>
-    178:178:javax.net.ssl.SSLContext context() -> context
+    163:172:void <init>(jakarta.net.ssl.SSLContext,boolean,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean) -> <init>
+    178:178:jakarta.net.ssl.SSLContext context() -> context
     183:183:boolean isClient() -> isClient
-    191:194:javax.net.ssl.SSLSessionContext sessionContext() -> sessionContext
-    215:215:javax.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator) -> newEngine
-    220:220:javax.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator,java.lang.String,int) -> newEngine
-    225:247:javax.net.ssl.SSLEngine configureAndWrapEngine(javax.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator) -> configureAndWrapEngine
+    191:194:jakarta.net.ssl.SSLSessionContext sessionContext() -> sessionContext
+    215:215:jakarta.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator) -> newEngine
+    220:220:jakarta.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator,java.lang.String,int) -> newEngine
+    225:247:jakarta.net.ssl.SSLEngine configureAndWrapEngine(jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBufAllocator) -> configureAndWrapEngine
     263:316:io.netty.handler.ssl.JdkApplicationProtocolNegotiator toNegotiator(io.netty.handler.ssl.ApplicationProtocolConfig,boolean) -> toNegotiator
     56:120:void <clinit>() -> <clinit>
 io.netty.handler.ssl.JdkSslContext$1 -> io.netty.handler.ssl.JdkSslContext$1:
@@ -29061,23 +29061,23 @@ io.netty.handler.ssl.JdkSslContext$1 -> io.netty.handler.ssl.JdkSslContext$1:
     int[] $SwitchMap$io$netty$handler$ssl$ApplicationProtocolConfig$Protocol -> $SwitchMap$io$netty$handler$ssl$ApplicationProtocolConfig$Protocol
     229:282:void <clinit>() -> <clinit>
 io.netty.handler.ssl.JdkSslEngine -> io.netty.handler.ssl.JdkSslEngine:
-    javax.net.ssl.SSLEngine engine -> engine
+    jakarta.net.ssl.SSLEngine engine -> engine
     java.lang.String applicationProtocol -> applicationProtocol
-    31:33:void <init>(javax.net.ssl.SSLEngine) -> <init>
+    31:33:void <init>(jakarta.net.ssl.SSLEngine) -> <init>
     37:37:java.lang.String getNegotiatedApplicationProtocol() -> getNegotiatedApplicationProtocol
     41:42:void setNegotiatedApplicationProtocol(java.lang.String) -> setNegotiatedApplicationProtocol
-    46:46:javax.net.ssl.SSLSession getSession() -> getSession
-    50:50:javax.net.ssl.SSLEngine getWrappedEngine() -> getWrappedEngine
+    46:46:jakarta.net.ssl.SSLSession getSession() -> getSession
+    50:50:jakarta.net.ssl.SSLEngine getWrappedEngine() -> getWrappedEngine
     55:56:void closeInbound() -> closeInbound
     60:61:void closeOutbound() -> closeOutbound
     65:65:java.lang.String getPeerHost() -> getPeerHost
     70:70:int getPeerPort() -> getPeerPort
-    75:75:javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> wrap
-    80:80:javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],java.nio.ByteBuffer) -> wrap
-    85:85:javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],int,int,java.nio.ByteBuffer) -> wrap
-    90:90:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> unwrap
-    95:95:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[]) -> unwrap
-    100:100:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[],int,int) -> unwrap
+    75:75:jakarta.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> wrap
+    80:80:jakarta.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],java.nio.ByteBuffer) -> wrap
+    85:85:jakarta.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],int,int,java.nio.ByteBuffer) -> wrap
+    90:90:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> unwrap
+    95:95:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[]) -> unwrap
+    100:100:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[],int,int) -> unwrap
     105:105:java.lang.Runnable getDelegatedTask() -> getDelegatedTask
     110:110:boolean isInboundDone() -> isInboundDone
     115:115:boolean isOutboundDone() -> isOutboundDone
@@ -29087,9 +29087,9 @@ io.netty.handler.ssl.JdkSslEngine -> io.netty.handler.ssl.JdkSslEngine:
     135:135:java.lang.String[] getSupportedProtocols() -> getSupportedProtocols
     140:140:java.lang.String[] getEnabledProtocols() -> getEnabledProtocols
     145:146:void setEnabledProtocols(java.lang.String[]) -> setEnabledProtocols
-    150:150:javax.net.ssl.SSLSession getHandshakeSession() -> getHandshakeSession
+    150:150:jakarta.net.ssl.SSLSession getHandshakeSession() -> getHandshakeSession
     155:156:void beginHandshake() -> beginHandshake
-    160:160:javax.net.ssl.SSLEngineResult$HandshakeStatus getHandshakeStatus() -> getHandshakeStatus
+    160:160:jakarta.net.ssl.SSLEngineResult$HandshakeStatus getHandshakeStatus() -> getHandshakeStatus
     165:166:void setUseClientMode(boolean) -> setUseClientMode
     170:170:boolean getUseClientMode() -> getUseClientMode
     175:176:void setNeedClientAuth(boolean) -> setNeedClientAuth
@@ -29098,23 +29098,23 @@ io.netty.handler.ssl.JdkSslEngine -> io.netty.handler.ssl.JdkSslEngine:
     190:190:boolean getWantClientAuth() -> getWantClientAuth
     195:196:void setEnableSessionCreation(boolean) -> setEnableSessionCreation
     200:200:boolean getEnableSessionCreation() -> getEnableSessionCreation
-    205:205:javax.net.ssl.SSLParameters getSSLParameters() -> getSSLParameters
-    210:211:void setSSLParameters(javax.net.ssl.SSLParameters) -> setSSLParameters
+    205:205:jakarta.net.ssl.SSLParameters getSSLParameters() -> getSSLParameters
+    210:211:void setSSLParameters(jakarta.net.ssl.SSLParameters) -> setSSLParameters
 io.netty.handler.ssl.JdkSslServerContext -> io.netty.handler.ssl.JdkSslServerContext:
-    237:240:void <init>(java.security.Provider,java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean) -> <init>
-    247:278:javax.net.ssl.SSLContext newSSLContext(java.security.Provider,java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,long,long) -> newSSLContext
+    237:240:void <init>(java.security.Provider,java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean) -> <init>
+    247:278:jakarta.net.ssl.SSLContext newSSLContext(java.security.Provider,java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,long,long) -> newSSLContext
 io.netty.handler.ssl.JettyAlpnSslEngine -> io.netty.handler.ssl.JettyAlpnSslEngine:
     boolean available -> available
     37:37:boolean isAvailable() -> isAvailable
     41:50:boolean initAvailable() -> initAvailable
-    55:55:io.netty.handler.ssl.JettyAlpnSslEngine newClientEngine(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> newClientEngine
-    60:60:io.netty.handler.ssl.JettyAlpnSslEngine newServerEngine(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> newServerEngine
-    64:65:void <init>(javax.net.ssl.SSLEngine) -> <init>
-    33:33:void <init>(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JettyAlpnSslEngine$1) -> <init>
+    55:55:io.netty.handler.ssl.JettyAlpnSslEngine newClientEngine(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> newClientEngine
+    60:60:io.netty.handler.ssl.JettyAlpnSslEngine newServerEngine(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> newServerEngine
+    64:65:void <init>(jakarta.net.ssl.SSLEngine) -> <init>
+    33:33:void <init>(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JettyAlpnSslEngine$1) -> <init>
     34:34:void <clinit>() -> <clinit>
 io.netty.handler.ssl.JettyAlpnSslEngine$1 -> io.netty.handler.ssl.JettyAlpnSslEngine$1:
 io.netty.handler.ssl.JettyAlpnSslEngine$ClientEngine -> io.netty.handler.ssl.JettyAlpnSslEngine$ClientEngine:
-    69:94:void <init>(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> <init>
+    69:94:void <init>(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> <init>
     99:103:void closeInbound() -> closeInbound
     108:112:void closeOutbound() -> closeOutbound
 io.netty.handler.ssl.JettyAlpnSslEngine$ClientEngine$1 -> io.netty.handler.ssl.JettyAlpnSslEngine$ClientEngine$1:
@@ -29123,7 +29123,7 @@ io.netty.handler.ssl.JettyAlpnSslEngine$ClientEngine$1 -> io.netty.handler.ssl.J
     io.netty.handler.ssl.JettyAlpnSslEngine$ClientEngine this$0 -> this$0
     74:74:void <init>(io.netty.handler.ssl.JettyAlpnSslEngine$ClientEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,io.netty.handler.ssl.JdkApplicationProtocolNegotiator$ProtocolSelectionListener) -> <init>
 io.netty.handler.ssl.JettyAlpnSslEngine$ServerEngine -> io.netty.handler.ssl.JettyAlpnSslEngine$ServerEngine:
-    117:137:void <init>(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> <init>
+    117:137:void <init>(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator) -> <init>
     142:146:void closeInbound() -> closeInbound
     151:155:void closeOutbound() -> closeOutbound
 io.netty.handler.ssl.JettyAlpnSslEngine$ServerEngine$1 -> io.netty.handler.ssl.JettyAlpnSslEngine$ServerEngine$1:
@@ -29134,7 +29134,7 @@ io.netty.handler.ssl.JettyNpnSslEngine -> io.netty.handler.ssl.JettyNpnSslEngine
     boolean available -> available
     38:39:boolean isAvailable() -> isAvailable
     43:53:void updateAvailability() -> updateAvailability
-    56:109:void <init>(javax.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> <init>
+    56:109:void <init>(jakarta.net.ssl.SSLEngine,io.netty.handler.ssl.JdkApplicationProtocolNegotiator,boolean) -> <init>
     113:115:void closeInbound() -> closeInbound
     119:121:void closeOutbound() -> closeOutbound
 io.netty.handler.ssl.JettyNpnSslEngine$1 -> io.netty.handler.ssl.JettyNpnSslEngine$1:
@@ -29191,15 +29191,15 @@ io.netty.handler.ssl.OpenSslApplicationProtocolNegotiator -> io.netty.handler.ss
 io.netty.handler.ssl.OpenSslClientContext -> io.netty.handler.ssl.OpenSslClientContext:
     io.netty.handler.ssl.OpenSslSessionContext sessionContext -> sessionContext
     45:46:void <init>() -> <init>
-    176:180:void <init>(java.io.File,javax.net.ssl.TrustManagerFactory,java.io.File,java.io.File,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long) -> <init>
-    188:200:void <init>(java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,java.lang.String[],long,long,boolean) -> <init>
+    176:180:void <init>(java.io.File,jakarta.net.ssl.TrustManagerFactory,java.io.File,java.io.File,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long) -> <init>
+    188:200:void <init>(java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,java.lang.String[],long,long,boolean) -> <init>
     204:204:io.netty.handler.ssl.OpenSslSessionContext sessionContext() -> sessionContext
     209:209:io.netty.handler.ssl.OpenSslKeyMaterialManager keyMaterialManager() -> keyMaterialManager
-    36:36:javax.net.ssl.SSLSessionContext sessionContext() -> sessionContext
+    36:36:jakarta.net.ssl.SSLSessionContext sessionContext() -> sessionContext
 io.netty.handler.ssl.OpenSslContext -> io.netty.handler.ssl.OpenSslContext:
     34:36:void <init>(java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,int,java.security.cert.Certificate[],io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
     43:45:void <init>(java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.OpenSslApplicationProtocolNegotiator,long,long,int,java.security.cert.Certificate[],io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
-    49:49:javax.net.ssl.SSLEngine newEngine0(io.netty.buffer.ByteBufAllocator,java.lang.String,int,boolean) -> newEngine0
+    49:49:jakarta.net.ssl.SSLEngine newEngine0(io.netty.buffer.ByteBufAllocator,java.lang.String,int,boolean) -> newEngine0
     55:57:void finalize() -> finalize
 io.netty.handler.ssl.OpenSslDefaultApplicationProtocolNegotiator -> io.netty.handler.ssl.OpenSslDefaultApplicationProtocolNegotiator:
     io.netty.handler.ssl.ApplicationProtocolConfig config -> config
@@ -29215,12 +29215,12 @@ io.netty.handler.ssl.OpenSslEngineMap -> io.netty.handler.ssl.OpenSslEngineMap:
     io.netty.handler.ssl.ReferenceCountedOpenSslEngine remove(long) -> remove
     void add(io.netty.handler.ssl.ReferenceCountedOpenSslEngine) -> add
 io.netty.handler.ssl.OpenSslExtendedKeyMaterialManager -> io.netty.handler.ssl.OpenSslExtendedKeyMaterialManager:
-    javax.net.ssl.X509ExtendedKeyManager keyManager -> keyManager
-    26:28:void <init>(javax.net.ssl.X509ExtendedKeyManager,java.lang.String) -> <init>
+    jakarta.net.ssl.X509ExtendedKeyManager keyManager -> keyManager
+    26:28:void <init>(jakarta.net.ssl.X509ExtendedKeyManager,java.lang.String) -> <init>
     38:38:java.lang.String chooseServerAlias(io.netty.handler.ssl.ReferenceCountedOpenSslEngine,java.lang.String) -> chooseServerAlias
 io.netty.handler.ssl.OpenSslJavaxX509Certificate -> io.netty.handler.ssl.OpenSslJavaxX509Certificate:
     byte[] bytes -> bytes
-    javax.security.cert.X509Certificate wrapped -> wrapped
+    jakarta.security.cert.X509Certificate wrapped -> wrapped
     35:37:void <init>(byte[]) -> <init>
     41:42:void checkValidity() -> checkValidity
     46:47:void checkValidity(java.util.Date) -> checkValidity
@@ -29238,12 +29238,12 @@ io.netty.handler.ssl.OpenSslJavaxX509Certificate -> io.netty.handler.ssl.OpenSsl
     110:111:void verify(java.security.PublicKey,java.lang.String) -> verify
     115:115:java.lang.String toString() -> toString
     120:120:java.security.PublicKey getPublicKey() -> getPublicKey
-    124:132:javax.security.cert.X509Certificate unwrap() -> unwrap
+    124:132:jakarta.security.cert.X509Certificate unwrap() -> unwrap
 io.netty.handler.ssl.OpenSslKeyMaterialManager -> io.netty.handler.ssl.OpenSslKeyMaterialManager:
     java.util.Map KEY_TYPES -> KEY_TYPES
-    javax.net.ssl.X509KeyManager keyManager -> keyManager
+    jakarta.net.ssl.X509KeyManager keyManager -> keyManager
     java.lang.String password -> password
-    68:71:void <init>(javax.net.ssl.X509KeyManager,java.lang.String) -> <init>
+    68:71:void <init>(jakarta.net.ssl.X509KeyManager,java.lang.String) -> <init>
     74:86:void setKeyMaterial(io.netty.handler.ssl.ReferenceCountedOpenSslEngine) -> setKeyMaterial
     131:169:void setKeyMaterial(long,java.lang.String) -> setKeyMaterial
     177:177:java.lang.String chooseServerAlias(io.netty.handler.ssl.ReferenceCountedOpenSslEngine,java.lang.String) -> chooseServerAlias
@@ -29251,12 +29251,12 @@ io.netty.handler.ssl.OpenSslKeyMaterialManager -> io.netty.handler.ssl.OpenSslKe
 io.netty.handler.ssl.OpenSslServerContext -> io.netty.handler.ssl.OpenSslServerContext:
     io.netty.handler.ssl.OpenSslServerSessionContext sessionContext -> sessionContext
     io.netty.handler.ssl.OpenSslKeyMaterialManager keyMaterialManager -> keyMaterialManager
-    335:338:void <init>(java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
-    347:362:void <init>(java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.OpenSslApplicationProtocolNegotiator,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
+    335:338:void <init>(java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
+    347:362:void <init>(java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.OpenSslApplicationProtocolNegotiator,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
     366:366:io.netty.handler.ssl.OpenSslServerSessionContext sessionContext() -> sessionContext
     371:371:io.netty.handler.ssl.OpenSslKeyMaterialManager keyMaterialManager() -> keyMaterialManager
     38:38:io.netty.handler.ssl.OpenSslSessionContext sessionContext() -> sessionContext
-    38:38:javax.net.ssl.SSLSessionContext sessionContext() -> sessionContext
+    38:38:jakarta.net.ssl.SSLSessionContext sessionContext() -> sessionContext
 io.netty.handler.ssl.OpenSslServerSessionContext -> io.netty.handler.ssl.OpenSslServerSessionContext:
     29:30:void <init>(io.netty.handler.ssl.ReferenceCountedOpenSslContext) -> <init>
     34:44:void setSessionTimeout(int) -> setSessionTimeout
@@ -29270,7 +29270,7 @@ io.netty.handler.ssl.OpenSslSessionContext -> io.netty.handler.ssl.OpenSslSessio
     io.netty.handler.ssl.OpenSslSessionStats stats -> stats
     io.netty.handler.ssl.ReferenceCountedOpenSslContext context -> context
     43:46:void <init>(io.netty.handler.ssl.ReferenceCountedOpenSslContext) -> <init>
-    50:53:javax.net.ssl.SSLSession getSession(byte[]) -> getSession
+    50:53:jakarta.net.ssl.SSLSession getSession(byte[]) -> getSession
     58:58:java.util.Enumeration getIds() -> getIds
     34:34:void <clinit>() -> <clinit>
 io.netty.handler.ssl.OpenSslSessionContext$1 -> io.netty.handler.ssl.OpenSslSessionContext$1:
@@ -29423,15 +29423,15 @@ io.netty.handler.ssl.PemX509Certificate -> io.netty.handler.ssl.PemX509Certifica
 io.netty.handler.ssl.ReferenceCountedOpenSslClientContext -> io.netty.handler.ssl.ReferenceCountedOpenSslClientContext:
     io.netty.util.internal.logging.InternalLogger logger -> logger
     io.netty.handler.ssl.OpenSslSessionContext sessionContext -> sessionContext
-    59:71:void <init>(java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,java.lang.String[],long,long,boolean) -> <init>
+    59:71:void <init>(java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,java.lang.String[],long,long,boolean) -> <init>
     75:75:io.netty.handler.ssl.OpenSslKeyMaterialManager keyMaterialManager() -> keyMaterialManager
     80:80:io.netty.handler.ssl.OpenSslSessionContext sessionContext() -> sessionContext
-    89:151:io.netty.handler.ssl.OpenSslSessionContext newSessionContext(io.netty.handler.ssl.ReferenceCountedOpenSslContext,long,io.netty.handler.ssl.OpenSslEngineMap,java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory) -> newSessionContext
-    48:48:javax.net.ssl.SSLSessionContext sessionContext() -> sessionContext
+    89:151:io.netty.handler.ssl.OpenSslSessionContext newSessionContext(io.netty.handler.ssl.ReferenceCountedOpenSslContext,long,io.netty.handler.ssl.OpenSslEngineMap,java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory) -> newSessionContext
+    48:48:jakarta.net.ssl.SSLSessionContext sessionContext() -> sessionContext
     49:50:void <clinit>() -> <clinit>
 io.netty.handler.ssl.ReferenceCountedOpenSslClientContext$ExtendedTrustManagerVerifyCallback -> io.netty.handler.ssl.ReferenceCountedOpenSslClientContext$ExtendedTrustManagerVerifyCallback:
-    javax.net.ssl.X509ExtendedTrustManager manager -> manager
-    214:216:void <init>(io.netty.handler.ssl.OpenSslEngineMap,javax.net.ssl.X509ExtendedTrustManager) -> <init>
+    jakarta.net.ssl.X509ExtendedTrustManager manager -> manager
+    214:216:void <init>(io.netty.handler.ssl.OpenSslEngineMap,jakarta.net.ssl.X509ExtendedTrustManager) -> <init>
 io.netty.handler.ssl.ReferenceCountedOpenSslClientContext$OpenSslCertificateRequestedCallback -> io.netty.handler.ssl.ReferenceCountedOpenSslClientContext$OpenSslCertificateRequestedCallback:
     io.netty.handler.ssl.OpenSslEngineMap engineMap -> engineMap
     io.netty.handler.ssl.OpenSslKeyMaterialManager keyManagerHolder -> keyManagerHolder
@@ -29443,8 +29443,8 @@ io.netty.handler.ssl.ReferenceCountedOpenSslClientContext$OpenSslClientSessionCo
     174:177:void setSessionCacheSize(int) -> setSessionCacheSize
     181:181:int getSessionCacheSize() -> getSessionCacheSize
 io.netty.handler.ssl.ReferenceCountedOpenSslClientContext$TrustManagerVerifyCallback -> io.netty.handler.ssl.ReferenceCountedOpenSslClientContext$TrustManagerVerifyCallback:
-    javax.net.ssl.X509TrustManager manager -> manager
-    199:201:void <init>(io.netty.handler.ssl.OpenSslEngineMap,javax.net.ssl.X509TrustManager) -> <init>
+    jakarta.net.ssl.X509TrustManager manager -> manager
+    199:201:void <init>(io.netty.handler.ssl.OpenSslEngineMap,jakarta.net.ssl.X509TrustManager) -> <init>
 io.netty.handler.ssl.ReferenceCountedOpenSslContext -> io.netty.handler.ssl.ReferenceCountedOpenSslContext:
     io.netty.util.internal.logging.InternalLogger logger -> logger
     boolean JDK_REJECT_CLIENT_INITIATED_RENEGOTIATION -> JDK_REJECT_CLIENT_INITIATED_RENEGOTIATION
@@ -29473,20 +29473,20 @@ io.netty.handler.ssl.ReferenceCountedOpenSslContext -> io.netty.handler.ssl.Refe
     341:347:int opensslSelectorFailureBehavior(io.netty.handler.ssl.ApplicationProtocolConfig$SelectorFailureBehavior) -> opensslSelectorFailureBehavior
     368:368:io.netty.handler.ssl.ApplicationProtocolNegotiator applicationProtocolNegotiator() -> applicationProtocolNegotiator
     373:373:boolean isClient() -> isClient
-    378:378:javax.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator,java.lang.String,int) -> newEngine
+    378:378:jakarta.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator,java.lang.String,int) -> newEngine
     383:383:io.netty.handler.ssl.SslHandler newHandler(io.netty.buffer.ByteBufAllocator,boolean) -> newHandler
-    392:392:javax.net.ssl.SSLEngine newEngine0(io.netty.buffer.ByteBufAllocator,java.lang.String,int,boolean) -> newEngine0
+    392:392:jakarta.net.ssl.SSLEngine newEngine0(io.netty.buffer.ByteBufAllocator,java.lang.String,int,boolean) -> newEngine0
     io.netty.handler.ssl.OpenSslKeyMaterialManager keyMaterialManager() -> keyMaterialManager
-    402:402:javax.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator) -> newEngine
+    402:402:jakarta.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator) -> newEngine
     445:445:boolean getRejectRemoteInitiatedRenegotiation() -> getRejectRemoteInitiatedRenegotiation
     461:461:int getBioNonApplicationBufferSize() -> getBioNonApplicationBufferSize
     io.netty.handler.ssl.OpenSslSessionContext sessionContext() -> sessionContext
     499:513:void destroy() -> destroy
-    524:529:javax.net.ssl.X509TrustManager chooseTrustManager(javax.net.ssl.TrustManager[]) -> chooseTrustManager
-    533:538:javax.net.ssl.X509KeyManager chooseX509KeyManager(javax.net.ssl.KeyManager[]) -> chooseX509KeyManager
+    524:529:jakarta.net.ssl.X509TrustManager chooseTrustManager(jakarta.net.ssl.TrustManager[]) -> chooseTrustManager
+    533:538:jakarta.net.ssl.X509KeyManager chooseX509KeyManager(jakarta.net.ssl.KeyManager[]) -> chooseX509KeyManager
     550:581:io.netty.handler.ssl.OpenSslApplicationProtocolNegotiator toNegotiator(io.netty.handler.ssl.ApplicationProtocolConfig) -> toNegotiator
-    586:586:boolean useExtendedTrustManager(javax.net.ssl.X509TrustManager) -> useExtendedTrustManager
-    590:590:boolean useExtendedKeyManager(javax.net.ssl.X509KeyManager) -> useExtendedKeyManager
+    586:586:boolean useExtendedTrustManager(jakarta.net.ssl.X509TrustManager) -> useExtendedTrustManager
+    590:590:boolean useExtendedKeyManager(jakarta.net.ssl.X509KeyManager) -> useExtendedKeyManager
     595:595:int refCnt() -> refCnt
     600:601:io.netty.util.ReferenceCounted retain() -> retain
     606:607:io.netty.util.ReferenceCounted retain(int) -> retain
@@ -29500,7 +29500,7 @@ io.netty.handler.ssl.ReferenceCountedOpenSslContext -> io.netty.handler.ssl.Refe
     784:797:long toBIO(java.security.cert.X509Certificate[]) -> toBIO
     805:827:long toBIO(io.netty.buffer.ByteBufAllocator,io.netty.handler.ssl.PemEncoded) -> toBIO
     833:841:long newBIO(io.netty.buffer.ByteBuf) -> newBIO
-    75:75:javax.net.ssl.SSLSessionContext sessionContext() -> sessionContext
+    75:75:jakarta.net.ssl.SSLSessionContext sessionContext() -> sessionContext
     75:75:io.netty.util.ResourceLeakTracker access$000(io.netty.handler.ssl.ReferenceCountedOpenSslContext) -> access$000
     75:75:void access$100(io.netty.handler.ssl.ReferenceCountedOpenSslContext) -> access$100
     76:201:void <clinit>() -> <clinit>
@@ -29545,19 +29545,19 @@ io.netty.handler.ssl.ReferenceCountedOpenSslContext$DefaultOpenSslEngineMap -> i
     700:700:void <init>(io.netty.handler.ssl.ReferenceCountedOpenSslContext$1) -> <init>
 io.netty.handler.ssl.ReferenceCountedOpenSslEngine -> io.netty.handler.ssl.ReferenceCountedOpenSslEngine:
     io.netty.util.internal.logging.InternalLogger logger -> logger
-    javax.net.ssl.SSLException BEGIN_HANDSHAKE_ENGINE_CLOSED -> BEGIN_HANDSHAKE_ENGINE_CLOSED
-    javax.net.ssl.SSLException HANDSHAKE_ENGINE_CLOSED -> HANDSHAKE_ENGINE_CLOSED
-    javax.net.ssl.SSLException RENEGOTIATION_UNSUPPORTED -> RENEGOTIATION_UNSUPPORTED
+    jakarta.net.ssl.SSLException BEGIN_HANDSHAKE_ENGINE_CLOSED -> BEGIN_HANDSHAKE_ENGINE_CLOSED
+    jakarta.net.ssl.SSLException HANDSHAKE_ENGINE_CLOSED -> HANDSHAKE_ENGINE_CLOSED
+    jakarta.net.ssl.SSLException RENEGOTIATION_UNSUPPORTED -> RENEGOTIATION_UNSUPPORTED
     io.netty.util.ResourceLeakDetector leakDetector -> leakDetector
     int[] OPENSSL_OP_NO_PROTOCOLS -> OPENSSL_OP_NO_PROTOCOLS
     int MAX_PLAINTEXT_LENGTH -> MAX_PLAINTEXT_LENGTH
     int MAX_RECORD_SIZE -> MAX_RECORD_SIZE
     java.util.concurrent.atomic.AtomicIntegerFieldUpdater DESTROYED_UPDATER -> DESTROYED_UPDATER
-    javax.net.ssl.SSLEngineResult NEED_UNWRAP_OK -> NEED_UNWRAP_OK
-    javax.net.ssl.SSLEngineResult NEED_UNWRAP_CLOSED -> NEED_UNWRAP_CLOSED
-    javax.net.ssl.SSLEngineResult NEED_WRAP_OK -> NEED_WRAP_OK
-    javax.net.ssl.SSLEngineResult NEED_WRAP_CLOSED -> NEED_WRAP_CLOSED
-    javax.net.ssl.SSLEngineResult CLOSED_NOT_HANDSHAKING -> CLOSED_NOT_HANDSHAKING
+    jakarta.net.ssl.SSLEngineResult NEED_UNWRAP_OK -> NEED_UNWRAP_OK
+    jakarta.net.ssl.SSLEngineResult NEED_UNWRAP_CLOSED -> NEED_UNWRAP_CLOSED
+    jakarta.net.ssl.SSLEngineResult NEED_WRAP_OK -> NEED_WRAP_OK
+    jakarta.net.ssl.SSLEngineResult NEED_WRAP_CLOSED -> NEED_WRAP_CLOSED
+    jakarta.net.ssl.SSLEngineResult CLOSED_NOT_HANDSHAKING -> CLOSED_NOT_HANDSHAKING
     long ssl -> ssl
     long networkBIO -> networkBIO
     boolean certificateSet -> certificateSet
@@ -29590,7 +29590,7 @@ io.netty.handler.ssl.ReferenceCountedOpenSslEngine -> io.netty.handler.ssl.Refer
     boolean enableOcsp -> enableOcsp
     int maxWrapOverhead -> maxWrapOverhead
     int maxWrapBufferSize -> maxWrapBufferSize
-    javax.net.ssl.SSLHandshakeException handshakeException -> handshakeException
+    jakarta.net.ssl.SSLHandshakeException handshakeException -> handshakeException
     boolean $assertionsDisabled -> $assertionsDisabled
     165:302:void <init>(io.netty.handler.ssl.ReferenceCountedOpenSslContext,io.netty.buffer.ByteBufAllocator,java.lang.String,int,boolean,boolean) -> <init>
     342:342:int refCnt() -> refCnt
@@ -29600,7 +29600,7 @@ io.netty.handler.ssl.ReferenceCountedOpenSslEngine -> io.netty.handler.ssl.Refer
     365:366:io.netty.util.ReferenceCounted touch(java.lang.Object) -> touch
     371:371:boolean release() -> release
     376:376:boolean release(int) -> release
-    385:390:javax.net.ssl.SSLSession getHandshakeSession() -> getHandshakeSession
+    385:390:jakarta.net.ssl.SSLSession getHandshakeSession() -> getHandshakeSession
     400:400:long sslPointer() -> sslPointer
     407:417:void shutdown() -> shutdown
     425:452:int writePlaintextData(java.nio.ByteBuffer,int) -> writePlaintextData
@@ -29613,26 +29613,26 @@ io.netty.handler.ssl.ReferenceCountedOpenSslEngine -> io.netty.handler.ssl.Refer
     551:557:void calculateMaxWrapOverhead() -> calculateMaxWrapOverhead
     564:564:int sslPending0() -> sslPending0
     568:568:boolean isBytesAvailableEnoughForWrap(int,int,int) -> isBytesAvailableEnoughForWrap
-    575:820:javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],int,int,java.nio.ByteBuffer) -> wrap
-    824:824:javax.net.ssl.SSLEngineResult newResult(javax.net.ssl.SSLEngineResult$HandshakeStatus,int,int) -> newResult
-    832:842:javax.net.ssl.SSLEngineResult newResult(javax.net.ssl.SSLEngineResult$Status,javax.net.ssl.SSLEngineResult$HandshakeStatus,int,int) -> newResult
-    847:847:javax.net.ssl.SSLEngineResult newResultMayFinishHandshake(javax.net.ssl.SSLEngineResult$HandshakeStatus,int,int) -> newResultMayFinishHandshake
-    854:854:javax.net.ssl.SSLEngineResult newResultMayFinishHandshake(javax.net.ssl.SSLEngineResult$Status,javax.net.ssl.SSLEngineResult$HandshakeStatus,int,int) -> newResultMayFinishHandshake
-    862:863:javax.net.ssl.SSLException shutdownWithError(java.lang.String) -> shutdownWithError
-    867:876:javax.net.ssl.SSLException shutdownWithError(java.lang.String,java.lang.String) -> shutdownWithError
-    884:1106:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer[],int,int,java.nio.ByteBuffer[],int,int) -> unwrap
-    1110:1124:javax.net.ssl.SSLEngineResult sslReadErrorResult(int,int,int) -> sslReadErrorResult
+    575:820:jakarta.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer[],int,int,java.nio.ByteBuffer) -> wrap
+    824:824:jakarta.net.ssl.SSLEngineResult newResult(jakarta.net.ssl.SSLEngineResult$HandshakeStatus,int,int) -> newResult
+    832:842:jakarta.net.ssl.SSLEngineResult newResult(jakarta.net.ssl.SSLEngineResult$Status,jakarta.net.ssl.SSLEngineResult$HandshakeStatus,int,int) -> newResult
+    847:847:jakarta.net.ssl.SSLEngineResult newResultMayFinishHandshake(jakarta.net.ssl.SSLEngineResult$HandshakeStatus,int,int) -> newResultMayFinishHandshake
+    854:854:jakarta.net.ssl.SSLEngineResult newResultMayFinishHandshake(jakarta.net.ssl.SSLEngineResult$Status,jakarta.net.ssl.SSLEngineResult$HandshakeStatus,int,int) -> newResultMayFinishHandshake
+    862:863:jakarta.net.ssl.SSLException shutdownWithError(java.lang.String) -> shutdownWithError
+    867:876:jakarta.net.ssl.SSLException shutdownWithError(java.lang.String,java.lang.String) -> shutdownWithError
+    884:1106:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer[],int,int,java.nio.ByteBuffer[],int,int) -> unwrap
+    1110:1124:jakarta.net.ssl.SSLEngineResult sslReadErrorResult(int,int,int) -> sslReadErrorResult
     1128:1131:void closeAll() -> closeAll
     1137:1143:void rejectRemoteInitiatedRenegotiation() -> rejectRemoteInitiatedRenegotiation
-    1146:1146:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer[],java.nio.ByteBuffer[]) -> unwrap
+    1146:1146:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer[],java.nio.ByteBuffer[]) -> unwrap
     1150:1151:java.nio.ByteBuffer[] singleSrcBuffer(java.nio.ByteBuffer) -> singleSrcBuffer
     1155:1156:void resetSingleSrcBuffer() -> resetSingleSrcBuffer
     1159:1160:java.nio.ByteBuffer[] singleDstBuffer(java.nio.ByteBuffer) -> singleDstBuffer
     1164:1165:void resetSingleDstBuffer() -> resetSingleDstBuffer
-    1171:1173:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[],int,int) -> unwrap
-    1180:1182:javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> wrap
-    1189:1192:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> unwrap
-    1199:1201:javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[]) -> unwrap
+    1171:1173:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[],int,int) -> unwrap
+    1180:1182:jakarta.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> wrap
+    1189:1192:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer) -> unwrap
+    1199:1201:jakarta.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer[]) -> unwrap
     1209:1209:java.lang.Runnable getDelegatedTask() -> getDelegatedTask
     1214:1230:void closeInbound() -> closeInbound
     1234:1234:boolean isInboundDone() -> isInboundDone
@@ -29646,16 +29646,16 @@ io.netty.handler.ssl.ReferenceCountedOpenSslEngine -> io.netty.handler.ssl.Refer
     1371:1398:java.lang.String[] getEnabledProtocols() -> getEnabledProtocols
     1404:1404:boolean isProtocolEnabled(int,int,java.lang.String) -> isProtocolEnabled
     1418:1486:void setEnabledProtocols(java.lang.String[]) -> setEnabledProtocols
-    1490:1490:javax.net.ssl.SSLSession getSession() -> getSession
+    1490:1490:jakarta.net.ssl.SSLSession getSession() -> getSession
     1495:1558:void beginHandshake() -> beginHandshake
-    1561:1564:void checkEngineClosed(javax.net.ssl.SSLException) -> checkEngineClosed
-    1568:1568:javax.net.ssl.SSLEngineResult$HandshakeStatus pendingStatus(int) -> pendingStatus
+    1561:1564:void checkEngineClosed(jakarta.net.ssl.SSLException) -> checkEngineClosed
+    1568:1568:jakarta.net.ssl.SSLEngineResult$HandshakeStatus pendingStatus(int) -> pendingStatus
     1572:1572:boolean isEmpty(java.lang.Object[]) -> isEmpty
     1576:1576:boolean isEmpty(byte[]) -> isEmpty
-    1580:1635:javax.net.ssl.SSLEngineResult$HandshakeStatus handshake() -> handshake
-    1640:1645:javax.net.ssl.SSLEngineResult$HandshakeStatus mayFinishHandshake(javax.net.ssl.SSLEngineResult$HandshakeStatus) -> mayFinishHandshake
-    1651:1651:javax.net.ssl.SSLEngineResult$HandshakeStatus getHandshakeStatus() -> getHandshakeStatus
-    1656:1656:javax.net.ssl.SSLEngineResult$HandshakeStatus getHandshakeStatus(int) -> getHandshakeStatus
+    1580:1635:jakarta.net.ssl.SSLEngineResult$HandshakeStatus handshake() -> handshake
+    1640:1645:jakarta.net.ssl.SSLEngineResult$HandshakeStatus mayFinishHandshake(jakarta.net.ssl.SSLEngineResult$HandshakeStatus) -> mayFinishHandshake
+    1651:1651:jakarta.net.ssl.SSLEngineResult$HandshakeStatus getHandshakeStatus() -> getHandshakeStatus
+    1656:1656:jakarta.net.ssl.SSLEngineResult$HandshakeStatus getHandshakeStatus(int) -> getHandshakeStatus
     1660:1661:boolean needPendingStatus() -> needPendingStatus
     1668:1673:java.lang.String toJavaCipherSuite(java.lang.String) -> toJavaCipherSuite
     1681:1693:java.lang.String toJavaCipherSuitePrefix(java.lang.String) -> toJavaCipherSuitePrefix
@@ -29668,8 +29668,8 @@ io.netty.handler.ssl.ReferenceCountedOpenSslEngine -> io.netty.handler.ssl.Refer
     1739:1762:void setClientAuth(io.netty.handler.ssl.ClientAuth) -> setClientAuth
     1766:1769:void setEnableSessionCreation(boolean) -> setEnableSessionCreation
     1773:1773:boolean getEnableSessionCreation() -> getEnableSessionCreation
-    1778:1796:javax.net.ssl.SSLParameters getSSLParameters() -> getSSLParameters
-    1801:1840:void setSSLParameters(javax.net.ssl.SSLParameters) -> setSSLParameters
+    1778:1796:jakarta.net.ssl.SSLParameters getSSLParameters() -> getSSLParameters
+    1801:1840:void setSSLParameters(jakarta.net.ssl.SSLParameters) -> setSSLParameters
     1843:1843:boolean isDestroyed() -> isDestroyed
     1852:1852:java.lang.String getNegotiatedApplicationProtocol() -> getNegotiatedApplicationProtocol
     93:93:io.netty.util.ResourceLeakTracker access$000(io.netty.handler.ssl.ReferenceCountedOpenSslEngine) -> access$000
@@ -29711,7 +29711,7 @@ io.netty.handler.ssl.ReferenceCountedOpenSslEngine$HandshakeState -> io.netty.ha
     146:162:void <clinit>() -> <clinit>
 io.netty.handler.ssl.ReferenceCountedOpenSslEngine$OpenSslSession -> io.netty.handler.ssl.ReferenceCountedOpenSslEngine$OpenSslSession:
     io.netty.handler.ssl.OpenSslSessionContext sessionContext -> sessionContext
-    javax.security.cert.X509Certificate[] x509PeerCerts -> x509PeerCerts
+    jakarta.security.cert.X509Certificate[] x509PeerCerts -> x509PeerCerts
     java.security.cert.Certificate[] peerCerts -> peerCerts
     java.lang.String protocol -> protocol
     java.lang.String cipher -> cipher
@@ -29723,7 +29723,7 @@ io.netty.handler.ssl.ReferenceCountedOpenSslEngine$OpenSslSession -> io.netty.ha
     io.netty.handler.ssl.ReferenceCountedOpenSslEngine this$0 -> this$0
     1866:1873:void <init>(io.netty.handler.ssl.ReferenceCountedOpenSslEngine,io.netty.handler.ssl.OpenSslSessionContext) -> <init>
     1877:1882:byte[] getId() -> getId
-    1887:1887:javax.net.ssl.SSLSessionContext getSessionContext() -> getSessionContext
+    1887:1887:jakarta.net.ssl.SSLSessionContext getSessionContext() -> getSessionContext
     1892:1897:long getCreationTime() -> getCreationTime
     1902:1904:long getLastAccessedTime() -> getLastAccessedTime
     1909:1914:void invalidate() -> invalidate
@@ -29740,7 +29740,7 @@ io.netty.handler.ssl.ReferenceCountedOpenSslEngine$OpenSslSession -> io.netty.ha
     2100:2111:java.lang.String selectApplicationProtocol(java.util.List,io.netty.handler.ssl.ApplicationProtocolConfig$SelectedListenerFailureBehavior,java.lang.String) -> selectApplicationProtocol
     2119:2124:java.security.cert.Certificate[] getPeerCertificates() -> getPeerCertificates
     2129:2132:java.security.cert.Certificate[] getLocalCertificates() -> getLocalCertificates
-    2137:2142:javax.security.cert.X509Certificate[] getPeerCertificateChain() -> getPeerCertificateChain
+    2137:2142:jakarta.security.cert.X509Certificate[] getPeerCertificateChain() -> getPeerCertificateChain
     2147:2150:java.security.Principal getPeerPrincipal() -> getPeerPrincipal
     2155:2159:java.security.Principal getLocalPrincipal() -> getLocalPrincipal
     2164:2169:java.lang.String getCipherSuite() -> getCipherSuite
@@ -29756,17 +29756,17 @@ io.netty.handler.ssl.ReferenceCountedOpenSslServerContext -> io.netty.handler.ss
     byte[] ID -> ID
     io.netty.handler.ssl.OpenSslServerSessionContext sessionContext -> sessionContext
     io.netty.handler.ssl.OpenSslKeyMaterialManager keyMaterialManager -> keyMaterialManager
-    59:62:void <init>(java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
-    70:85:void <init>(java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.OpenSslApplicationProtocolNegotiator,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
+    59:62:void <init>(java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
+    70:85:void <init>(java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.OpenSslApplicationProtocolNegotiator,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> <init>
     89:89:io.netty.handler.ssl.OpenSslServerSessionContext sessionContext() -> sessionContext
     94:94:io.netty.handler.ssl.OpenSslKeyMaterialManager keyMaterialManager() -> keyMaterialManager
-    108:189:io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$ServerContext newSessionContext(io.netty.handler.ssl.ReferenceCountedOpenSslContext,long,io.netty.handler.ssl.OpenSslEngineMap,java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory) -> newSessionContext
+    108:189:io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$ServerContext newSessionContext(io.netty.handler.ssl.ReferenceCountedOpenSslContext,long,io.netty.handler.ssl.OpenSslEngineMap,java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory) -> newSessionContext
     46:46:io.netty.handler.ssl.OpenSslSessionContext sessionContext() -> sessionContext
-    46:46:javax.net.ssl.SSLSessionContext sessionContext() -> sessionContext
+    46:46:jakarta.net.ssl.SSLSessionContext sessionContext() -> sessionContext
     47:49:void <clinit>() -> <clinit>
 io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$ExtendedTrustManagerVerifyCallback -> io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$ExtendedTrustManagerVerifyCallback:
-    javax.net.ssl.X509ExtendedTrustManager manager -> manager
-    211:213:void <init>(io.netty.handler.ssl.OpenSslEngineMap,javax.net.ssl.X509ExtendedTrustManager) -> <init>
+    jakarta.net.ssl.X509ExtendedTrustManager manager -> manager
+    211:213:void <init>(io.netty.handler.ssl.OpenSslEngineMap,jakarta.net.ssl.X509ExtendedTrustManager) -> <init>
 io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$OpenSslSniHostnameMatcher -> io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$OpenSslSniHostnameMatcher:
     io.netty.handler.ssl.OpenSslEngineMap engineMap -> engineMap
     225:227:void <init>(io.netty.handler.ssl.OpenSslEngineMap) -> <init>
@@ -29775,8 +29775,8 @@ io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$ServerContext -> io.ne
     io.netty.handler.ssl.OpenSslKeyMaterialManager keyMaterialManager -> keyMaterialManager
     97:97:void <init>() -> <init>
 io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$TrustManagerVerifyCallback -> io.netty.handler.ssl.ReferenceCountedOpenSslServerContext$TrustManagerVerifyCallback:
-    javax.net.ssl.X509TrustManager manager -> manager
-    196:198:void <init>(io.netty.handler.ssl.OpenSslEngineMap,javax.net.ssl.X509TrustManager) -> <init>
+    jakarta.net.ssl.X509TrustManager manager -> manager
+    196:198:void <init>(io.netty.handler.ssl.OpenSslEngineMap,jakarta.net.ssl.X509TrustManager) -> <init>
 io.netty.handler.ssl.SniCompletionEvent -> io.netty.handler.ssl.SniCompletionEvent:
     java.lang.String hostname -> hostname
     28:30:void <init>(java.lang.String) -> <init>
@@ -29821,16 +29821,16 @@ io.netty.handler.ssl.SslContext -> io.netty.handler.ssl.SslContext:
     105:105:io.netty.handler.ssl.SslProvider defaultServerProvider() -> defaultServerProvider
     114:114:io.netty.handler.ssl.SslProvider defaultClientProvider() -> defaultClientProvider
     118:121:io.netty.handler.ssl.SslProvider defaultProvider() -> defaultProvider
-    406:432:io.netty.handler.ssl.SslContext newServerContextInternal(io.netty.handler.ssl.SslProvider,java.security.Provider,java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> newServerContextInternal
+    406:432:io.netty.handler.ssl.SslContext newServerContextInternal(io.netty.handler.ssl.SslProvider,java.security.Provider,java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,long,long,io.netty.handler.ssl.ClientAuth,java.lang.String[],boolean,boolean) -> newServerContextInternal
     437:440:void verifyNullSslContextProvider(io.netty.handler.ssl.SslProvider,java.security.Provider) -> verifyNullSslContextProvider
-    762:786:io.netty.handler.ssl.SslContext newClientContextInternal(io.netty.handler.ssl.SslProvider,java.security.Provider,java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,java.lang.String[],long,long,boolean) -> newClientContextInternal
+    762:786:io.netty.handler.ssl.SslContext newClientContextInternal(io.netty.handler.ssl.SslProvider,java.security.Provider,java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory,java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory,java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter,io.netty.handler.ssl.ApplicationProtocolConfig,java.lang.String[],long,long,boolean) -> newClientContextInternal
     806:807:void <init>() -> <init>
     812:814:void <init>(boolean) -> <init>
     820:820:boolean isServer() -> isServer
     boolean isClient() -> isClient
-    javax.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator) -> newEngine
-    javax.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator,java.lang.String,int) -> newEngine
-    javax.net.ssl.SSLSessionContext sessionContext() -> sessionContext
+    jakarta.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator) -> newEngine
+    jakarta.net.ssl.SSLEngine newEngine(io.netty.buffer.ByteBufAllocator,java.lang.String,int) -> newEngine
+    jakarta.net.ssl.SSLSessionContext sessionContext() -> sessionContext
     905:905:io.netty.handler.ssl.SslHandler newHandler(io.netty.buffer.ByteBufAllocator) -> newHandler
     913:913:io.netty.handler.ssl.SslHandler newHandler(io.netty.buffer.ByteBufAllocator,boolean) -> newHandler
     974:986:java.security.spec.PKCS8EncodedKeySpec generateKeySpec(char[],byte[]) -> generateKeySpec
@@ -29839,11 +29839,11 @@ io.netty.handler.ssl.SslContext -> io.netty.handler.ssl.SslContext:
     1031:1045:java.security.PrivateKey getPrivateKeyFromByteBuffer(io.netty.buffer.ByteBuf,java.lang.String) -> getPrivateKeyFromByteBuffer
     1067:1070:java.security.cert.X509Certificate[] toX509Certificates(java.io.File) -> toX509Certificates
     1081:1104:java.security.cert.X509Certificate[] getCertificatesFromBuffers(io.netty.buffer.ByteBuf[]) -> getCertificatesFromBuffers
-    1110:1126:javax.net.ssl.TrustManagerFactory buildTrustManagerFactory(java.security.cert.X509Certificate[],javax.net.ssl.TrustManagerFactory) -> buildTrustManagerFactory
+    1110:1126:jakarta.net.ssl.TrustManagerFactory buildTrustManagerFactory(java.security.cert.X509Certificate[],jakarta.net.ssl.TrustManagerFactory) -> buildTrustManagerFactory
     1131:1133:java.security.PrivateKey toPrivateKeyInternal(java.io.File,java.lang.String) -> toPrivateKeyInternal
     1139:1141:java.security.cert.X509Certificate[] toX509CertificatesInternal(java.io.File) -> toX509CertificatesInternal
-    1149:1153:javax.net.ssl.KeyManagerFactory buildKeyManagerFactory(java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory) -> buildKeyManagerFactory
-    1161:1169:javax.net.ssl.KeyManagerFactory buildKeyManagerFactory(java.security.cert.X509Certificate[],java.lang.String,java.security.PrivateKey,java.lang.String,javax.net.ssl.KeyManagerFactory) -> buildKeyManagerFactory
+    1149:1153:jakarta.net.ssl.KeyManagerFactory buildKeyManagerFactory(java.security.cert.X509Certificate[],java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory) -> buildKeyManagerFactory
+    1161:1169:jakarta.net.ssl.KeyManagerFactory buildKeyManagerFactory(java.security.cert.X509Certificate[],java.lang.String,java.security.PrivateKey,java.lang.String,jakarta.net.ssl.KeyManagerFactory) -> buildKeyManagerFactory
     91:95:void <clinit>() -> <clinit>
 io.netty.handler.ssl.SslContext$1 -> io.netty.handler.ssl.SslContext$1:
     int[] $SwitchMap$io$netty$handler$ssl$SslProvider -> $SwitchMap$io$netty$handler$ssl$SslProvider
@@ -29853,11 +29853,11 @@ io.netty.handler.ssl.SslContextBuilder -> io.netty.handler.ssl.SslContextBuilder
     io.netty.handler.ssl.SslProvider provider -> provider
     java.security.Provider sslContextProvider -> sslContextProvider
     java.security.cert.X509Certificate[] trustCertCollection -> trustCertCollection
-    javax.net.ssl.TrustManagerFactory trustManagerFactory -> trustManagerFactory
+    jakarta.net.ssl.TrustManagerFactory trustManagerFactory -> trustManagerFactory
     java.security.cert.X509Certificate[] keyCertChain -> keyCertChain
     java.security.PrivateKey key -> key
     java.lang.String keyPassword -> keyPassword
-    javax.net.ssl.KeyManagerFactory keyManagerFactory -> keyManagerFactory
+    jakarta.net.ssl.KeyManagerFactory keyManagerFactory -> keyManagerFactory
     java.lang.Iterable ciphers -> ciphers
     io.netty.handler.ssl.CipherSuiteFilter cipherFilter -> cipherFilter
     io.netty.handler.ssl.ApplicationProtocolConfig apn -> apn
@@ -29869,12 +29869,12 @@ io.netty.handler.ssl.SslContextBuilder -> io.netty.handler.ssl.SslContextBuilder
     boolean enableOcsp -> enableOcsp
     43:43:io.netty.handler.ssl.SslContextBuilder forClient() -> forClient
     118:118:io.netty.handler.ssl.SslContextBuilder forServer(java.security.PrivateKey,java.lang.String,java.security.cert.X509Certificate[]) -> forServer
-    128:128:io.netty.handler.ssl.SslContextBuilder forServer(javax.net.ssl.KeyManagerFactory) -> forServer
+    128:128:io.netty.handler.ssl.SslContextBuilder forServer(jakarta.net.ssl.KeyManagerFactory) -> forServer
     141:152:void <init>(boolean) -> <init>
     158:159:io.netty.handler.ssl.SslContextBuilder sslProvider(io.netty.handler.ssl.SslProvider) -> sslProvider
-    209:211:io.netty.handler.ssl.SslContextBuilder trustManager(javax.net.ssl.TrustManagerFactory) -> trustManager
+    209:211:io.netty.handler.ssl.SslContextBuilder trustManager(jakarta.net.ssl.TrustManagerFactory) -> trustManager
     308:328:io.netty.handler.ssl.SslContextBuilder keyManager(java.security.PrivateKey,java.lang.String,java.security.cert.X509Certificate[]) -> keyManager
-    340:347:io.netty.handler.ssl.SslContextBuilder keyManager(javax.net.ssl.KeyManagerFactory) -> keyManager
+    340:347:io.netty.handler.ssl.SslContextBuilder keyManager(jakarta.net.ssl.KeyManagerFactory) -> keyManager
     355:355:io.netty.handler.ssl.SslContextBuilder ciphers(java.lang.Iterable) -> ciphers
     364:367:io.netty.handler.ssl.SslContextBuilder ciphers(java.lang.Iterable,io.netty.handler.ssl.CipherSuiteFilter) -> ciphers
     374:375:io.netty.handler.ssl.SslContextBuilder applicationProtocolConfig(io.netty.handler.ssl.ApplicationProtocolConfig) -> applicationProtocolConfig
@@ -29883,11 +29883,11 @@ io.netty.handler.ssl.SslHandler -> io.netty.handler.ssl.SslHandler:
     io.netty.util.internal.logging.InternalLogger logger -> logger
     java.util.regex.Pattern IGNORABLE_CLASS_IN_STACK -> IGNORABLE_CLASS_IN_STACK
     java.util.regex.Pattern IGNORABLE_ERROR_MESSAGE -> IGNORABLE_ERROR_MESSAGE
-    javax.net.ssl.SSLException SSLENGINE_CLOSED -> SSLENGINE_CLOSED
-    javax.net.ssl.SSLException HANDSHAKE_TIMED_OUT -> HANDSHAKE_TIMED_OUT
+    jakarta.net.ssl.SSLException SSLENGINE_CLOSED -> SSLENGINE_CLOSED
+    jakarta.net.ssl.SSLException HANDSHAKE_TIMED_OUT -> HANDSHAKE_TIMED_OUT
     java.nio.channels.ClosedChannelException CHANNEL_CLOSED -> CHANNEL_CLOSED
     io.netty.channel.ChannelHandlerContext ctx -> ctx
-    javax.net.ssl.SSLEngine engine -> engine
+    jakarta.net.ssl.SSLEngine engine -> engine
     io.netty.handler.ssl.SslHandler$SslEngineType engineType -> engineType
     java.util.concurrent.Executor delegatedTaskExecutor -> delegatedTaskExecutor
     boolean jdkCompatibilityMode -> jdkCompatibilityMode
@@ -29909,10 +29909,10 @@ io.netty.handler.ssl.SslHandler -> io.netty.handler.ssl.SslHandler:
     long closeNotifyReadTimeoutMillis -> closeNotifyReadTimeoutMillis
     int wrapDataSize -> wrapDataSize
     boolean $assertionsDisabled -> $assertionsDisabled
-    406:407:void <init>(javax.net.ssl.SSLEngine) -> <init>
-    418:419:void <init>(javax.net.ssl.SSLEngine,boolean) -> <init>
-    368:446:void <init>(javax.net.ssl.SSLEngine,boolean,java.util.concurrent.Executor) -> <init>
-    579:579:javax.net.ssl.SSLEngine engine() -> engine
+    406:407:void <init>(jakarta.net.ssl.SSLEngine) -> <init>
+    418:419:void <init>(jakarta.net.ssl.SSLEngine,boolean) -> <init>
+    368:446:void <init>(jakarta.net.ssl.SSLEngine,boolean,java.util.concurrent.Executor) -> <init>
+    579:579:jakarta.net.ssl.SSLEngine engine() -> engine
     588:593:java.lang.String applicationProtocol() -> applicationProtocol
     603:603:io.netty.util.concurrent.Future handshakeFuture() -> handshakeFuture
     656:665:void handlerRemoved0(io.netty.channel.ChannelHandlerContext) -> handlerRemoved0
@@ -29929,7 +29929,7 @@ io.netty.handler.ssl.SslHandler -> io.netty.handler.ssl.SslHandler:
     763:838:void wrap(io.netty.channel.ChannelHandlerContext,boolean) -> wrap
     842:864:void finishWrap(io.netty.channel.ChannelHandlerContext,io.netty.buffer.ByteBuf,io.netty.channel.ChannelPromise,boolean,boolean) -> finishWrap
     873:941:boolean wrapNonAppData(io.netty.channel.ChannelHandlerContext,boolean) -> wrapNonAppData
-    946:996:javax.net.ssl.SSLEngineResult wrap(io.netty.buffer.ByteBufAllocator,javax.net.ssl.SSLEngine,io.netty.buffer.ByteBuf,io.netty.buffer.ByteBuf) -> wrap
+    946:996:jakarta.net.ssl.SSLEngineResult wrap(io.netty.buffer.ByteBufAllocator,jakarta.net.ssl.SSLEngine,io.netty.buffer.ByteBuf,io.netty.buffer.ByteBuf) -> wrap
     1005:1011:void channelInactive(io.netty.channel.ChannelHandlerContext) -> channelInactive
     1015:1032:void exceptionCaught(io.netty.channel.ChannelHandlerContext,java.lang.Throwable) -> exceptionCaught
     1044:1098:boolean ignoreException(java.lang.Throwable) -> ignoreException
@@ -29964,14 +29964,14 @@ io.netty.handler.ssl.SslHandler -> io.netty.handler.ssl.SslHandler:
     1847:1851:io.netty.buffer.ByteBuf allocate(io.netty.channel.ChannelHandlerContext,int) -> allocate
     1860:1860:io.netty.buffer.ByteBuf allocateOutNetBuf(io.netty.channel.ChannelHandlerContext,int,int) -> allocateOutNetBuf
     1913:1926:boolean attemptCopyToCumulation(io.netty.buffer.ByteBuf,io.netty.buffer.ByteBuf,int) -> attemptCopyToCumulation
-    165:165:javax.net.ssl.SSLEngine access$100(io.netty.handler.ssl.SslHandler) -> access$100
+    165:165:jakarta.net.ssl.SSLEngine access$100(io.netty.handler.ssl.SslHandler) -> access$100
     165:165:java.nio.ByteBuffer[] access$200(io.netty.handler.ssl.SslHandler) -> access$200
     165:165:java.nio.ByteBuffer access$300(io.netty.buffer.ByteBuf,int,int) -> access$300
     165:165:boolean access$502(io.netty.handler.ssl.SslHandler,boolean) -> access$502
     165:165:void access$600(io.netty.handler.ssl.SslHandler,io.netty.channel.ChannelHandlerContext,io.netty.channel.ChannelPromise) -> access$600
     165:165:io.netty.util.internal.logging.InternalLogger access$700() -> access$700
     165:165:io.netty.channel.ChannelHandlerContext access$800(io.netty.handler.ssl.SslHandler) -> access$800
-    165:165:javax.net.ssl.SSLException access$1000() -> access$1000
+    165:165:jakarta.net.ssl.SSLException access$1000() -> access$1000
     165:165:void access$1100(io.netty.handler.ssl.SslHandler,java.lang.Throwable,boolean) -> access$1100
     165:165:void access$1200(io.netty.handler.ssl.SslHandler,java.lang.Throwable) -> access$1200
     165:165:void access$1300(io.netty.channel.ChannelFuture,io.netty.channel.ChannelPromise) -> access$1300
@@ -30049,32 +30049,32 @@ io.netty.handler.ssl.SslHandler$SslEngineType -> io.netty.handler.ssl.SslHandler
     io.netty.handler.ssl.SslHandler$SslEngineType[] $VALUES -> $VALUES
     193:193:io.netty.handler.ssl.SslHandler$SslEngineType[] values() -> values
     193:193:io.netty.handler.ssl.SslHandler$SslEngineType valueOf(java.lang.String) -> valueOf
-    315:315:io.netty.handler.ssl.SslHandler$SslEngineType forEngine(javax.net.ssl.SSLEngine) -> forEngine
+    315:315:io.netty.handler.ssl.SslHandler$SslEngineType forEngine(jakarta.net.ssl.SSLEngine) -> forEngine
     319:322:void <init>(java.lang.String,int,boolean,io.netty.handler.codec.ByteToMessageDecoder$Cumulator) -> <init>
-    javax.net.ssl.SSLEngineResult unwrap(io.netty.handler.ssl.SslHandler,io.netty.buffer.ByteBuf,int,int,io.netty.buffer.ByteBuf) -> unwrap
+    jakarta.net.ssl.SSLEngineResult unwrap(io.netty.handler.ssl.SslHandler,io.netty.buffer.ByteBuf,int,int,io.netty.buffer.ByteBuf) -> unwrap
     int calculateWrapBufferCapacity(io.netty.handler.ssl.SslHandler,int,int) -> calculateWrapBufferCapacity
     int calculatePendingData(io.netty.handler.ssl.SslHandler,int) -> calculatePendingData
-    boolean jdkCompatibilityMode(javax.net.ssl.SSLEngine) -> jdkCompatibilityMode
+    boolean jdkCompatibilityMode(jakarta.net.ssl.SSLEngine) -> jdkCompatibilityMode
     193:193:void <init>(java.lang.String,int,boolean,io.netty.handler.codec.ByteToMessageDecoder$Cumulator,io.netty.handler.ssl.SslHandler$1) -> <init>
     193:287:void <clinit>() -> <clinit>
 io.netty.handler.ssl.SslHandler$SslEngineType$1 -> io.netty.handler.ssl.SslHandler$SslEngineType$1:
     194:194:void <init>(java.lang.String,int,boolean,io.netty.handler.codec.ByteToMessageDecoder$Cumulator) -> <init>
-    198:220:javax.net.ssl.SSLEngineResult unwrap(io.netty.handler.ssl.SslHandler,io.netty.buffer.ByteBuf,int,int,io.netty.buffer.ByteBuf) -> unwrap
+    198:220:jakarta.net.ssl.SSLEngineResult unwrap(io.netty.handler.ssl.SslHandler,io.netty.buffer.ByteBuf,int,int,io.netty.buffer.ByteBuf) -> unwrap
     230:230:int calculateWrapBufferCapacity(io.netty.handler.ssl.SslHandler,int,int) -> calculateWrapBufferCapacity
     236:237:int calculatePendingData(io.netty.handler.ssl.SslHandler,int) -> calculatePendingData
-    242:242:boolean jdkCompatibilityMode(javax.net.ssl.SSLEngine) -> jdkCompatibilityMode
+    242:242:boolean jdkCompatibilityMode(jakarta.net.ssl.SSLEngine) -> jdkCompatibilityMode
 io.netty.handler.ssl.SslHandler$SslEngineType$2 -> io.netty.handler.ssl.SslHandler$SslEngineType$2:
     245:245:void <init>(java.lang.String,int,boolean,io.netty.handler.codec.ByteToMessageDecoder$Cumulator) -> <init>
-    249:269:javax.net.ssl.SSLEngineResult unwrap(io.netty.handler.ssl.SslHandler,io.netty.buffer.ByteBuf,int,int,io.netty.buffer.ByteBuf) -> unwrap
+    249:269:jakarta.net.ssl.SSLEngineResult unwrap(io.netty.handler.ssl.SslHandler,io.netty.buffer.ByteBuf,int,int,io.netty.buffer.ByteBuf) -> unwrap
     274:274:int calculateWrapBufferCapacity(io.netty.handler.ssl.SslHandler,int,int) -> calculateWrapBufferCapacity
     279:279:int calculatePendingData(io.netty.handler.ssl.SslHandler,int) -> calculatePendingData
-    284:284:boolean jdkCompatibilityMode(javax.net.ssl.SSLEngine) -> jdkCompatibilityMode
+    284:284:boolean jdkCompatibilityMode(jakarta.net.ssl.SSLEngine) -> jdkCompatibilityMode
 io.netty.handler.ssl.SslHandler$SslEngineType$3 -> io.netty.handler.ssl.SslHandler$SslEngineType$3:
     287:287:void <init>(java.lang.String,int,boolean,io.netty.handler.codec.ByteToMessageDecoder$Cumulator) -> <init>
-    291:295:javax.net.ssl.SSLEngineResult unwrap(io.netty.handler.ssl.SslHandler,io.netty.buffer.ByteBuf,int,int,io.netty.buffer.ByteBuf) -> unwrap
+    291:295:jakarta.net.ssl.SSLEngineResult unwrap(io.netty.handler.ssl.SslHandler,io.netty.buffer.ByteBuf,int,int,io.netty.buffer.ByteBuf) -> unwrap
     300:300:int calculateWrapBufferCapacity(io.netty.handler.ssl.SslHandler,int,int) -> calculateWrapBufferCapacity
     305:305:int calculatePendingData(io.netty.handler.ssl.SslHandler,int) -> calculatePendingData
-    310:310:boolean jdkCompatibilityMode(javax.net.ssl.SSLEngine) -> jdkCompatibilityMode
+    310:310:boolean jdkCompatibilityMode(jakarta.net.ssl.SSLEngine) -> jdkCompatibilityMode
 io.netty.handler.ssl.SslHandler$SslHandlerCoalescingBufferQueue -> io.netty.handler.ssl.SslHandler$SslHandlerCoalescingBufferQueue:
     io.netty.handler.ssl.SslHandler this$0 -> this$0
     1870:1872:void <init>(io.netty.handler.ssl.SslHandler,io.netty.channel.Channel,int) -> <init>
@@ -30100,7 +30100,7 @@ io.netty.handler.ssl.SslUtils -> io.netty.handler.ssl.SslUtils:
     106:111:void addIfSupported(java.util.Set,java.util.List,java.lang.String[]) -> addIfSupported
     114:122:void useFallbackCiphersIfDefaultIsEmpty(java.util.List,java.lang.Iterable) -> useFallbackCiphersIfDefaultIsEmpty
     125:126:void useFallbackCiphersIfDefaultIsEmpty(java.util.List,java.lang.String[]) -> useFallbackCiphersIfDefaultIsEmpty
-    132:136:javax.net.ssl.SSLHandshakeException toSSLHandshakeException(java.lang.Throwable) -> toSSLHandshakeException
+    132:136:jakarta.net.ssl.SSLHandshakeException toSSLHandshakeException(java.lang.Throwable) -> toSSLHandshakeException
     157:205:int getEncryptedPacketLength(io.netty.buffer.ByteBuf,int) -> getEncryptedPacketLength
     211:212:int unsignedShortBE(io.netty.buffer.ByteBuf,int) -> unsignedShortBE
     218:219:short shortBE(io.netty.buffer.ByteBuf,int) -> shortBE
@@ -32765,7 +32765,7 @@ io.netty.util.internal.EmptyArrays -> io.netty.util.internal.EmptyArrays:
     java.nio.ByteBuffer[] EMPTY_BYTE_BUFFERS -> EMPTY_BYTE_BUFFERS
     java.security.cert.Certificate[] EMPTY_CERTIFICATES -> EMPTY_CERTIFICATES
     java.security.cert.X509Certificate[] EMPTY_X509_CERTIFICATES -> EMPTY_X509_CERTIFICATES
-    javax.security.cert.X509Certificate[] EMPTY_JAVAX_X509_CERTIFICATES -> EMPTY_JAVAX_X509_CERTIFICATES
+    jakarta.security.cert.X509Certificate[] EMPTY_JAVAX_X509_CERTIFICATES -> EMPTY_JAVAX_X509_CERTIFICATES
     27:38:void <clinit>() -> <clinit>
 io.netty.util.internal.EmptyPriorityQueue -> io.netty.util.internal.EmptyPriorityQueue:
     io.netty.util.internal.PriorityQueue INSTANCE -> INSTANCE
@@ -37166,8 +37166,8 @@ io.vertx.core.http.impl.Http2ServerRequestImpl -> io.vertx.core.http.impl.Http2S
     360:360:java.lang.String getParam(java.lang.String) -> getParam
     365:365:io.vertx.core.net.SocketAddress remoteAddress() -> remoteAddress
     370:370:io.vertx.core.net.SocketAddress localAddress() -> localAddress
-    375:375:javax.net.ssl.SSLSession sslSession() -> sslSession
-    380:380:javax.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
+    375:375:jakarta.net.ssl.SSLSession sslSession() -> sslSession
+    380:380:jakarta.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
     385:397:java.lang.String absoluteURI() -> absoluteURI
     402:409:io.vertx.core.net.NetSocket netSocket() -> netSocket
     414:441:io.vertx.core.http.HttpServerRequest setExpectMultipart(boolean) -> setExpectMultipart
@@ -38161,8 +38161,8 @@ io.vertx.core.http.impl.HttpServerRequestImpl -> io.vertx.core.http.impl.HttpSer
     256:256:boolean isSSL() -> isSSL
     261:261:io.vertx.core.net.SocketAddress remoteAddress() -> remoteAddress
     266:273:java.lang.String absoluteURI() -> absoluteURI
-    278:278:javax.net.ssl.SSLSession sslSession() -> sslSession
-    283:283:javax.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
+    278:278:jakarta.net.ssl.SSLSession sslSession() -> sslSession
+    283:283:jakarta.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
     288:291:io.vertx.core.net.NetSocket netSocket() -> netSocket
     296:302:io.vertx.core.http.HttpServerRequest uploadHandler(io.vertx.core.Handler) -> uploadHandler
     307:307:io.vertx.core.MultiMap formAttributes() -> formAttributes
@@ -38434,8 +38434,8 @@ io.vertx.core.http.impl.ServerWebSocketImpl -> io.vertx.core.http.impl.ServerWeb
     92:93:void reject() -> reject
     97:98:void reject(int) -> reject
     101:112:void reject(io.netty.handler.codec.http.HttpResponseStatus) -> reject
-    116:116:javax.net.ssl.SSLSession sslSession() -> sslSession
-    121:121:javax.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
+    116:116:jakarta.net.ssl.SSLSession sslSession() -> sslSession
+    121:121:jakarta.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
     126:133:void close() -> close
     137:142:io.vertx.core.http.ServerWebSocket writeFrame(io.vertx.core.http.WebSocketFrame) -> writeFrame
     146:154:boolean checkAccept() -> checkAccept
@@ -38613,8 +38613,8 @@ io.vertx.core.http.impl.VertxHttp2NetSocket -> io.vertx.core.http.impl.VertxHttp
     281:281:io.vertx.core.net.NetSocket upgradeToSsl(io.vertx.core.Handler) -> upgradeToSsl
     286:286:io.vertx.core.net.NetSocket upgradeToSsl(java.lang.String,io.vertx.core.Handler) -> upgradeToSsl
     291:291:boolean isSsl() -> isSsl
-    296:296:javax.net.ssl.SSLSession sslSession() -> sslSession
-    301:301:javax.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
+    296:296:jakarta.net.ssl.SSLSession sslSession() -> sslSession
+    301:301:jakarta.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
     306:306:java.lang.String indicatedServerName() -> indicatedServerName
     41:41:io.vertx.core.streams.ReadStream endHandler(io.vertx.core.Handler) -> endHandler
     41:41:io.vertx.core.streams.ReadStream resume() -> resume
@@ -38728,8 +38728,8 @@ io.vertx.core.http.impl.WebSocketImplBase -> io.vertx.core.http.impl.WebSocketIm
     100:101:void close(short) -> close
     104:109:void close(short,java.lang.String) -> close
     113:113:boolean isSsl() -> isSsl
-    118:118:javax.net.ssl.SSLSession sslSession() -> sslSession
-    123:123:javax.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
+    118:118:jakarta.net.ssl.SSLSession sslSession() -> sslSession
+    123:123:jakarta.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
     128:128:io.vertx.core.net.SocketAddress localAddress() -> localAddress
     133:133:io.vertx.core.net.SocketAddress remoteAddress() -> remoteAddress
     138:138:io.vertx.core.http.WebSocketBase writeFinalTextFrame(java.lang.String) -> writeFinalTextFrame
@@ -39626,13 +39626,13 @@ io.vertx.core.impl.verticle.CompilingClassLoader -> io.vertx.core.impl.verticle.
     41:60:void <clinit>() -> <clinit>
 io.vertx.core.impl.verticle.CustomJavaFileObject -> io.vertx.core.impl.verticle.CustomJavaFileObject:
     java.lang.String binaryName -> binaryName
-    javax.tools.JavaFileObject$Kind kind -> kind
+    jakarta.tools.JavaFileObject$Kind kind -> kind
     java.net.URI uri -> uri
-    34:38:void <init>(java.net.URI,javax.tools.JavaFileObject$Kind,java.lang.String) -> <init>
+    34:38:void <init>(java.net.URI,jakarta.tools.JavaFileObject$Kind,java.lang.String) -> <init>
     41:41:java.lang.String binaryName() -> binaryName
     46:46:java.io.InputStream openInputStream() -> openInputStream
-    50:50:javax.tools.JavaFileObject$Kind getKind() -> getKind
-    54:54:javax.lang.model.element.NestingKind getNestingKind() -> getNestingKind
+    50:50:jakarta.tools.JavaFileObject$Kind getKind() -> getKind
+    54:54:jakarta.lang.model.element.NestingKind getNestingKind() -> getNestingKind
     59:59:java.net.URI toUri() -> toUri
     63:63:java.lang.String getName() -> getName
     67:67:java.io.OutputStream openOutputStream() -> openOutputStream
@@ -39641,8 +39641,8 @@ io.vertx.core.impl.verticle.CustomJavaFileObject -> io.vertx.core.impl.verticle.
     79:79:java.io.Writer openWriter() -> openWriter
     83:83:long getLastModified() -> getLastModified
     87:87:boolean delete() -> delete
-    91:92:boolean isNameCompatible(java.lang.String,javax.tools.JavaFileObject$Kind) -> isNameCompatible
-    96:96:javax.lang.model.element.Modifier getAccessLevel() -> getAccessLevel
+    91:92:boolean isNameCompatible(java.lang.String,jakarta.tools.JavaFileObject$Kind) -> isNameCompatible
+    96:96:jakarta.lang.model.element.Modifier getAccessLevel() -> getAccessLevel
     101:101:java.lang.String toString() -> toString
 io.vertx.core.impl.verticle.JavaSourceContext -> io.vertx.core.impl.verticle.JavaSourceContext:
     java.lang.String className -> className
@@ -39654,16 +39654,16 @@ io.vertx.core.impl.verticle.JavaSourceContext -> io.vertx.core.impl.verticle.Jav
 io.vertx.core.impl.verticle.MemoryFileManager -> io.vertx.core.impl.verticle.MemoryFileManager:
     java.util.Map compiledClasses -> compiledClasses
     io.vertx.core.impl.verticle.PackageHelper helper -> helper
-    36:42:void <init>(java.lang.ClassLoader,javax.tools.JavaFileManager) -> <init>
-    48:56:javax.tools.JavaFileObject getJavaFileForOutput(javax.tools.JavaFileManager$Location,java.lang.String,javax.tools.JavaFileObject$Kind,javax.tools.FileObject) -> getJavaFileForOutput
+    36:42:void <init>(java.lang.ClassLoader,jakarta.tools.JavaFileManager) -> <init>
+    48:56:jakarta.tools.JavaFileObject getJavaFileForOutput(jakarta.tools.JavaFileManager$Location,java.lang.String,jakarta.tools.JavaFileObject$Kind,jakarta.tools.FileObject) -> getJavaFileForOutput
     61:65:byte[] getCompiledClass(java.lang.String) -> getCompiledClass
-    70:73:java.lang.String inferBinaryName(javax.tools.JavaFileManager$Location,javax.tools.JavaFileObject) -> inferBinaryName
-    80:83:java.lang.Iterable list(javax.tools.JavaFileManager$Location,java.lang.String,java.util.Set,boolean) -> list
+    70:73:java.lang.String inferBinaryName(jakarta.tools.JavaFileManager$Location,jakarta.tools.JavaFileObject) -> inferBinaryName
+    80:83:java.lang.Iterable list(jakarta.tools.JavaFileManager$Location,java.lang.String,java.util.Set,boolean) -> list
     35:35:java.util.Map access$000(io.vertx.core.impl.verticle.MemoryFileManager) -> access$000
 io.vertx.core.impl.verticle.MemoryFileManager$1 -> io.vertx.core.impl.verticle.MemoryFileManager$1:
     java.lang.String val$className -> val$className
     io.vertx.core.impl.verticle.MemoryFileManager this$0 -> this$0
-    48:48:void <init>(io.vertx.core.impl.verticle.MemoryFileManager,java.net.URI,javax.tools.JavaFileObject$Kind,java.lang.String) -> <init>
+    48:48:void <init>(io.vertx.core.impl.verticle.MemoryFileManager,java.net.URI,jakarta.tools.JavaFileObject$Kind,java.lang.String) -> <init>
     50:52:java.io.OutputStream openOutputStream() -> openOutputStream
 io.vertx.core.impl.verticle.PackageHelper -> io.vertx.core.impl.verticle.PackageHelper:
     java.lang.ClassLoader classLoader -> classLoader
@@ -39952,7 +39952,7 @@ io.vertx.core.net.JksOptionsConverter -> io.vertx.core.net.JksOptionsConverter:
     42:51:void toJson(io.vertx.core.net.JksOptions,io.vertx.core.json.JsonObject) -> toJson
 io.vertx.core.net.KeyCertOptions -> io.vertx.core.net.KeyCertOptions:
     io.vertx.core.net.KeyCertOptions clone() -> clone
-    43:43:javax.net.ssl.KeyManagerFactory getKeyManagerFactory(io.vertx.core.Vertx) -> getKeyManagerFactory
+    43:43:jakarta.net.ssl.KeyManagerFactory getKeyManagerFactory(io.vertx.core.Vertx) -> getKeyManagerFactory
     65:66:java.util.function.Function keyManagerMapper(io.vertx.core.Vertx) -> keyManagerMapper
 io.vertx.core.net.NetClient -> io.vertx.core.net.NetClient:
     io.vertx.core.net.NetClient connect(int,java.lang.String,io.vertx.core.Handler) -> connect
@@ -40459,7 +40459,7 @@ io.vertx.core.net.TCPSSLOptionsConverter -> io.vertx.core.net.TCPSSLOptionsConve
     32:34:void lambda$fromJson$0(io.vertx.core.net.TCPSSLOptions,java.lang.Object) -> lambda$fromJson$0
 io.vertx.core.net.TrustOptions -> io.vertx.core.net.TrustOptions:
     io.vertx.core.net.TrustOptions clone() -> clone
-    43:43:javax.net.ssl.TrustManagerFactory getTrustManagerFactory(io.vertx.core.Vertx) -> getTrustManagerFactory
+    43:43:jakarta.net.ssl.TrustManagerFactory getTrustManagerFactory(io.vertx.core.Vertx) -> getTrustManagerFactory
     59:60:java.util.function.Function trustManagerMapper(io.vertx.core.Vertx) -> trustManagerMapper
 io.vertx.core.net.impl.AsyncResolveConnectHelper -> io.vertx.core.net.impl.AsyncResolveConnectHelper:
     java.util.List handlers -> handlers
@@ -40529,8 +40529,8 @@ io.vertx.core.net.impl.ConnectionBase -> io.vertx.core.net.impl.ConnectionBase:
     253:253:boolean isSSL() -> isSSL
     258:272:io.netty.channel.ChannelFuture sendFile(java.io.RandomAccessFile,long,long) -> sendFile
     276:276:boolean isSsl() -> isSsl
-    280:286:javax.net.ssl.SSLSession sslSession() -> sslSession
-    291:297:javax.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
+    280:286:jakarta.net.ssl.SSLSession sslSession() -> sslSession
+    291:297:jakarta.security.cert.X509Certificate[] peerCertificateChain() -> peerCertificateChain
     302:305:java.lang.String indicatedServerName() -> indicatedServerName
     310:310:io.netty.channel.ChannelPromise channelFuture() -> channelFuture
     314:317:java.lang.String remoteName() -> remoteName
@@ -40580,10 +40580,10 @@ io.vertx.core.net.impl.KeyStoreHelper -> io.vertx.core.net.impl.KeyStoreHelper:
     73:109:io.vertx.core.net.impl.KeyStoreHelper create(io.vertx.core.impl.VertxInternal,io.vertx.core.net.KeyCertOptions) -> create
     114:126:io.vertx.core.net.impl.KeyStoreHelper create(io.vertx.core.impl.VertxInternal,io.vertx.core.net.TrustOptions) -> create
     132:218:void <init>(java.security.KeyStore,java.lang.String) -> <init>
-    221:223:javax.net.ssl.KeyManagerFactory getKeyMgrFactory() -> getKeyMgrFactory
-    227:235:javax.net.ssl.X509KeyManager getKeyMgr(java.lang.String) -> getKeyMgr
-    243:244:javax.net.ssl.TrustManager[] getTrustMgr(java.lang.String) -> getTrustMgr
-    248:250:javax.net.ssl.TrustManagerFactory getTrustMgrFactory(io.vertx.core.impl.VertxInternal) -> getTrustMgrFactory
+    221:223:jakarta.net.ssl.KeyManagerFactory getKeyMgrFactory() -> getKeyMgrFactory
+    227:235:jakarta.net.ssl.X509KeyManager getKeyMgr(java.lang.String) -> getKeyMgr
+    243:244:jakarta.net.ssl.TrustManager[] getTrustMgr(java.lang.String) -> getTrustMgr
+    248:250:jakarta.net.ssl.TrustManagerFactory getTrustMgrFactory(io.vertx.core.impl.VertxInternal) -> getTrustMgrFactory
     265:278:java.security.KeyStore loadJKSOrPKCS12(java.lang.String,java.lang.String,java.util.function.Supplier) -> loadJKSOrPKCS12
     282:297:java.security.KeyStore loadKeyCert(java.util.List,java.util.List) -> loadKeyCert
     301:322:java.security.PrivateKey loadPrivateKey(io.vertx.core.buffer.Buffer) -> loadPrivateKey
@@ -40957,25 +40957,25 @@ io.vertx.core.net.impl.SSLHelper -> io.vertx.core.net.impl.SSLHelper:
     214:214:boolean isSSL() -> isSSL
     222:222:io.vertx.core.http.ClientAuth getClientAuth() -> getClientAuth
     230:231:io.vertx.core.net.impl.SSLHelper setApplicationProtocols(java.util.List) -> setApplicationProtocols
-    245:297:io.netty.handler.ssl.SslContext createContext(io.vertx.core.impl.VertxInternal,javax.net.ssl.X509KeyManager,javax.net.ssl.TrustManagerFactory) -> createContext
-    302:302:javax.net.ssl.KeyManagerFactory getKeyMgrFactory(io.vertx.core.impl.VertxInternal) -> getKeyMgrFactory
-    306:344:javax.net.ssl.TrustManagerFactory getTrustMgrFactory(io.vertx.core.impl.VertxInternal,java.lang.String) -> getTrustMgrFactory
-    352:384:javax.net.ssl.TrustManager[] createUntrustRevokedCertTrustManager(javax.net.ssl.TrustManager[],java.util.ArrayList) -> createUntrustRevokedCertTrustManager
-    389:389:javax.net.ssl.TrustManager createTrustAllTrustManager() -> createTrustAllTrustManager
-    406:442:void configureEngine(javax.net.ssl.SSLEngine,java.lang.String) -> configureEngine
+    245:297:io.netty.handler.ssl.SslContext createContext(io.vertx.core.impl.VertxInternal,jakarta.net.ssl.X509KeyManager,jakarta.net.ssl.TrustManagerFactory) -> createContext
+    302:302:jakarta.net.ssl.KeyManagerFactory getKeyMgrFactory(io.vertx.core.impl.VertxInternal) -> getKeyMgrFactory
+    306:344:jakarta.net.ssl.TrustManagerFactory getTrustMgrFactory(io.vertx.core.impl.VertxInternal,java.lang.String) -> getTrustMgrFactory
+    352:384:jakarta.net.ssl.TrustManager[] createUntrustRevokedCertTrustManager(jakarta.net.ssl.TrustManager[],java.util.ArrayList) -> createUntrustRevokedCertTrustManager
+    389:389:jakarta.net.ssl.TrustManager createTrustAllTrustManager() -> createTrustAllTrustManager
+    406:442:void configureEngine(jakarta.net.ssl.SSLEngine,java.lang.String) -> configureEngine
     449:474:io.netty.handler.ssl.SslContext getContext(io.vertx.core.impl.VertxInternal,java.lang.String) -> getContext
     481:484:void validate(io.vertx.core.impl.VertxInternal) -> validate
-    487:489:javax.net.ssl.SSLEngine createEngine(io.netty.handler.ssl.SslContext) -> createEngine
-    493:501:javax.net.ssl.SSLEngine createEngine(io.vertx.core.impl.VertxInternal,io.vertx.core.net.SocketAddress,java.lang.String) -> createEngine
-    505:507:javax.net.ssl.SSLEngine createEngine(io.vertx.core.impl.VertxInternal,java.lang.String,int,java.lang.String) -> createEngine
-    517:519:javax.net.ssl.SSLEngine createEngine(io.vertx.core.impl.VertxInternal) -> createEngine
-    472:472:io.netty.handler.ssl.SslContext lambda$getContext$1(io.vertx.core.impl.VertxInternal,javax.net.ssl.X509KeyManager,javax.net.ssl.TrustManagerFactory,java.security.cert.Certificate) -> lambda$getContext$1
+    487:489:jakarta.net.ssl.SSLEngine createEngine(io.netty.handler.ssl.SslContext) -> createEngine
+    493:501:jakarta.net.ssl.SSLEngine createEngine(io.vertx.core.impl.VertxInternal,io.vertx.core.net.SocketAddress,java.lang.String) -> createEngine
+    505:507:jakarta.net.ssl.SSLEngine createEngine(io.vertx.core.impl.VertxInternal,java.lang.String,int,java.lang.String) -> createEngine
+    517:519:jakarta.net.ssl.SSLEngine createEngine(io.vertx.core.impl.VertxInternal) -> createEngine
+    472:472:io.netty.handler.ssl.SslContext lambda$getContext$1(io.vertx.core.impl.VertxInternal,jakarta.net.ssl.X509KeyManager,jakarta.net.ssl.TrustManagerFactory,java.security.cert.Certificate) -> lambda$getContext$1
     334:334:java.lang.String lambda$getTrustMgrFactory$0(io.vertx.core.impl.VertxInternal,java.lang.String) -> lambda$getTrustMgrFactory$0
     98:120:void <clinit>() -> <clinit>
 io.vertx.core.net.impl.SSLHelper$1 -> io.vertx.core.net.impl.SSLHelper$1:
-    javax.net.ssl.X509TrustManager val$x509TrustManager -> val$x509TrustManager
+    jakarta.net.ssl.X509TrustManager val$x509TrustManager -> val$x509TrustManager
     java.util.ArrayList val$crls -> val$crls
-    357:357:void <init>(javax.net.ssl.X509TrustManager,java.util.ArrayList) -> <init>
+    357:357:void <init>(jakarta.net.ssl.X509TrustManager,java.util.ArrayList) -> <init>
     360:362:void checkClientTrusted(java.security.cert.X509Certificate[],java.lang.String) -> checkClientTrusted
     365:367:void checkServerTrusted(java.security.cert.X509Certificate[],java.lang.String) -> checkServerTrusted
     369:376:void checkRevoked(java.security.cert.X509Certificate[]) -> checkRevoked
@@ -41108,16 +41108,16 @@ io.vertx.core.net.impl.VertxSniHandler$1 -> io.vertx.core.net.impl.VertxSniHandl
     49:53:io.netty.util.concurrent.EventExecutor executor() -> executor
 io.vertx.core.net.impl.VertxTrustManagerFactory -> io.vertx.core.net.impl.VertxTrustManagerFactory:
     java.security.Provider PROVIDER -> PROVIDER
-    31:45:void <init>(javax.net.ssl.TrustManager[]) -> <init>
+    31:45:void <init>(jakarta.net.ssl.TrustManager[]) -> <init>
     27:27:void <clinit>() -> <clinit>
 io.vertx.core.net.impl.VertxTrustManagerFactory$1 -> io.vertx.core.net.impl.VertxTrustManagerFactory$1:
     27:27:void <init>(java.lang.String,double,java.lang.String) -> <init>
 io.vertx.core.net.impl.VertxTrustManagerFactory$2 -> io.vertx.core.net.impl.VertxTrustManagerFactory$2:
-    javax.net.ssl.TrustManager[] val$tm -> val$tm
-    31:31:void <init>(javax.net.ssl.TrustManager[]) -> <init>
+    jakarta.net.ssl.TrustManager[] val$tm -> val$tm
+    31:31:void <init>(jakarta.net.ssl.TrustManager[]) -> <init>
     34:34:void engineInit(java.security.KeyStore) -> engineInit
-    38:38:void engineInit(javax.net.ssl.ManagerFactoryParameters) -> engineInit
-    42:42:javax.net.ssl.TrustManager[] engineGetTrustManagers() -> engineGetTrustManagers
+    38:38:void engineInit(jakarta.net.ssl.ManagerFactoryParameters) -> engineInit
+    42:42:jakarta.net.ssl.TrustManager[] engineGetTrustManagers() -> engineGetTrustManagers
 io.vertx.core.net.impl.pkcs1.PrivateKeyParser -> io.vertx.core.net.impl.pkcs1.PrivateKeyParser:
     59:79:java.security.spec.RSAPrivateCrtKeySpec getRSAKeySpec(byte[]) -> getRSAKeySpec
 io.vertx.core.net.impl.pkcs1.PrivateKeyParser$Asn1Object -> io.vertx.core.net.impl.pkcs1.PrivateKeyParser$Asn1Object:
@@ -41546,7 +41546,7 @@ io.vertx.reactivex.core.streams.ReadStreamImpl -> io.vertx.reactivex.core.stream
     io.reactivex.Flowable flowable -> flowable
     98:101:void <init>(io.vertx.core.streams.ReadStream,io.vertx.lang.reactivex.TypeArg) -> <init>
     119:123:io.reactivex.Flowable toFlowable() -> toFlowable
-javax.inject.Provider -> javax.inject.Provider:
+jakarta.inject.Provider -> jakarta.inject.Provider:
     java.lang.Object get() -> get
 net.jodah.typetools.TypeResolver -> net.jodah.typetools.TypeResolver:
     java.util.Map TYPE_VARIABLE_CACHE -> TYPE_VARIABLE_CACHE

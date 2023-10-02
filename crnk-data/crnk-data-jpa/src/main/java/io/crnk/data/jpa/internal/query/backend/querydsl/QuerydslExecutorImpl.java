@@ -8,8 +8,8 @@ import io.crnk.data.jpa.query.querydsl.QuerydslExecutor;
 import io.crnk.data.jpa.query.querydsl.QuerydslTuple;
 import io.crnk.meta.model.MetaDataObject;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

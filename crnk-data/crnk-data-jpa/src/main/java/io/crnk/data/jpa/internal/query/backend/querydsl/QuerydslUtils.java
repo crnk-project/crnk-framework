@@ -6,7 +6,7 @@ import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.jpa.impl.JPAQuery;
 
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 import java.lang.reflect.Field;
 import java.util.List;
 

@@ -3,8 +3,8 @@ package io.crnk.validation.mock;
 import io.crnk.validation.mock.models.Project;
 import io.crnk.validation.mock.models.Task;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class ComplexValidator implements ConstraintValidator<ComplexValid, Object> {
 

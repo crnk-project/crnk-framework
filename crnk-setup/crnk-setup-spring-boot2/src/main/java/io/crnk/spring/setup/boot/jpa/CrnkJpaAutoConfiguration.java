@@ -20,16 +20,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 
 /**
  * @link EnableAutoConfiguration Auto-configuration} for Crnk' JPA module.
  * <p>
- * Activates when there is a bean of type {@link javax.persistence.EntityManagerFactory} and
- * {@link javax.persistence.EntityManager} on the classpath and there is no other existing
+ * Activates when there is a bean of type {@link jakarta.persistence.EntityManagerFactory} and
+ * {@link jakarta.persistence.EntityManager} on the classpath and there is no other existing
  * {@link JpaModule} configured.
  * <p>
  * Disable with the property <code>crnk.jpa.enabled = false</code>. By default all entities are exposed.

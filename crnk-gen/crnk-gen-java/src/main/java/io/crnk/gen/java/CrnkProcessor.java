@@ -18,22 +18,22 @@ import io.crnk.core.resource.annotations.JsonApiEmbeddable;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-import javax.annotation.Generated;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
-import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
+import jakarta.annotation.Generated;
+import jakarta.annotation.processing.AbstractProcessor;
+import jakarta.annotation.processing.Messager;
+import jakarta.annotation.processing.ProcessingEnvironment;
+import jakarta.annotation.processing.RoundEnvironment;
+import jakarta.lang.model.SourceVersion;
+import jakarta.lang.model.element.AnnotationMirror;
+import jakarta.lang.model.element.Element;
+import jakarta.lang.model.element.ElementKind;
+import jakarta.lang.model.element.ExecutableElement;
+import jakarta.lang.model.element.Modifier;
+import jakarta.lang.model.element.TypeElement;
+import jakarta.lang.model.type.PrimitiveType;
+import jakarta.lang.model.type.TypeMirror;
+import jakarta.tools.Diagnostic;
+import jakarta.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;
@@ -250,10 +250,10 @@ public class CrnkProcessor extends AbstractProcessor {
     private boolean isRelationship(Element member) {
         for (AnnotationMirror mirror : member.getAnnotationMirrors()) {
             String name = mirror.getAnnotationType().toString();
-            if (name.equals("javax.persistence.OneToMany") ||
-                    name.equals("javax.persistence.ManyToOne") ||
-                    name.equals("javax.persistence.OneToOne") ||
-                    name.equals("javax.persistence.ManyToMany")) {
+            if (name.equals("jakarta.persistence.OneToMany") ||
+                    name.equals("jakarta.persistence.ManyToOne") ||
+                    name.equals("jakarta.persistence.OneToOne") ||
+                    name.equals("jakarta.persistence.ManyToMany")) {
                 return true;
             }
         }

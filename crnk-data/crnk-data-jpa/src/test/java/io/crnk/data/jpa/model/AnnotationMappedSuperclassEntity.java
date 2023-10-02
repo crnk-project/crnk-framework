@@ -2,10 +2,10 @@ package io.crnk.data.jpa.model;
 
 import io.crnk.core.resource.annotations.JsonApiField;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public class AnnotationMappedSuperclassEntity {

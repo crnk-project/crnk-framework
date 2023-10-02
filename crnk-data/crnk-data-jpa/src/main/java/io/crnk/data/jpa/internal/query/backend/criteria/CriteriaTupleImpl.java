@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.internal.query.backend.criteria;
 
-import javax.persistence.Tuple;
-import javax.persistence.TupleElement;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TupleElement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

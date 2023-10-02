@@ -1,8 +1,8 @@
 package io.crnk.data.jpa.model;
 
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class CountryTranslationEntity {

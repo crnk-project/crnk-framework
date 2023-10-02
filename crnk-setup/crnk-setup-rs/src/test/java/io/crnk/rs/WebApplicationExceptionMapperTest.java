@@ -6,7 +6,7 @@ import io.crnk.rs.internal.WebApplicationExceptionMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 import java.util.Iterator;
 
 public class WebApplicationExceptionMapperTest {

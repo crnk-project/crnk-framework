@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.model;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.MappedSuperclass;
 import java.util.List;
 
 @MappedSuperclass

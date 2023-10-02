@@ -6,9 +6,9 @@
 
 	<persistence-unit name="TEST_WILDFLY" transaction-type="RESOURCE_LOCAL">
 		<properties>
-			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
-			<property name="javax.persistence.jdbc.url" value="jdbc:h2:mem"/>
-			<property name="javax.persistence.jdbc.user" value="sa"/>
+			<property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+			<property name="jakarta.persistence.jdbc.url" value="jdbc:h2:mem"/>
+			<property name="jakarta.persistence.jdbc.user" value="sa"/>
 
 			<property name="hibernate.id.new_generator_mappings" value="true"/>
 			<property name="hibernate.dialect" value="H2"/>

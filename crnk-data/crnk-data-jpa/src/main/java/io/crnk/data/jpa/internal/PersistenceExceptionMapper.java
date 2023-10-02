@@ -2,7 +2,7 @@ package io.crnk.data.jpa.internal;
 
 import io.crnk.core.module.Module;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 
 /**
  * PersistenceExceptions can hide the more interesting causes.

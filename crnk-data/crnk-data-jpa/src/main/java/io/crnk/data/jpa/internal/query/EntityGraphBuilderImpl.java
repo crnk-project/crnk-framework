@@ -1,10 +1,10 @@
 package io.crnk.data.jpa.internal.query;
 
 import java.util.Set;
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.Subgraph;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.Subgraph;
 
 import io.crnk.meta.model.MetaAttributePath;
 
@@ -17,7 +17,7 @@ public class EntityGraphBuilderImpl implements EntityGraphBuilder {
 		for (MetaAttributePath fetchPath : fetchPaths) {
 			applyFetchPaths(graph, fetchPath);
 		}
-		criteriaQuery.setHint("javax.persistence.fetchgraph", graph);
+		criteriaQuery.setHint("jakarta.persistence.fetchgraph", graph);
 	}
 
 	private <T> Subgraph<Object> applyFetchPaths(EntityGraph<T> graph, MetaAttributePath fetchPath) {

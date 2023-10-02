@@ -2,9 +2,9 @@ package io.crnk.data.jpa.model;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
 @JsonApiResource(postable = false, patchable = false, deletable = false, type = "readOnlyAnnotated")

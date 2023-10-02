@@ -2,9 +2,9 @@ package io.crnk.data.jpa.meta.internal;
 
 import java.lang.reflect.Type;
 import java.util.Optional;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.data.jpa.meta.MetaJpaDataObject;

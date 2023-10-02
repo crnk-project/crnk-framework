@@ -4,7 +4,7 @@ import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.ExceptionMapperHelper;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 /**
  * Maps all exceptions which are subclasses of WebApplicationException to a JSON API exception response.<br />

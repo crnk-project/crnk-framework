@@ -1,7 +1,7 @@
 package io.crnk.monitor.opentracing;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpHeaders;

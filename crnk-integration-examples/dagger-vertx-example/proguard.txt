@@ -101,7 +101,7 @@
 
 -dontwarn org.jetbrains.**
 -dontwarn kotlin.**
--dontwarn javax.**
+-dontwarn jakarta.**
 -dontwarn java.**
 -dontwarn io.vertx.**
 -dontwarn io.**

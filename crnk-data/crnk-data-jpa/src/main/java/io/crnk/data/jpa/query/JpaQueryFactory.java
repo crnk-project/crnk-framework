@@ -1,6 +1,6 @@
 package io.crnk.data.jpa.query;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 
 public interface JpaQueryFactory {

@@ -3,7 +3,7 @@ package io.crnk.data.jpa.meta.internal;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.data.jpa.meta.MetaEntity;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import java.lang.reflect.Type;
 
 public class EntityMetaProvider extends AbstractEntityMetaFactory<MetaEntity> {

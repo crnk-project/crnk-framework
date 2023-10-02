@@ -4,12 +4,12 @@ import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.query.ComputedAttributeTestBase;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
 
 public class ComputedAttributeCriteriaTest extends ComputedAttributeTestBase {
 

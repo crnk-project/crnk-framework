@@ -17,7 +17,7 @@ import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Module
 public class AppModule {

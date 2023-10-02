@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.JoinType;
 
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.Direction;

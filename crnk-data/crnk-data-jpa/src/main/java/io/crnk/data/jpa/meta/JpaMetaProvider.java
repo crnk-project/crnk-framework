@@ -8,9 +8,9 @@ import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaPartition;
 import io.crnk.meta.provider.MetaProviderBase;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.EmbeddableType;
-import javax.persistence.metamodel.EntityType;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.metamodel.EmbeddableType;
+import jakarta.persistence.metamodel.EntityType;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;

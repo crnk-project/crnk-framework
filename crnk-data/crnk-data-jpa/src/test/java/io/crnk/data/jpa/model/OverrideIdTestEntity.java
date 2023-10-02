@@ -2,8 +2,8 @@ package io.crnk.data.jpa.model;
 
 import io.crnk.core.resource.annotations.JsonApiId;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
 public class OverrideIdTestEntity extends TestMappedSuperclass {

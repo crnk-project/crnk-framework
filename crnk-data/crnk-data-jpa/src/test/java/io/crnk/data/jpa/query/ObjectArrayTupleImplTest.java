@@ -5,7 +5,7 @@ import io.crnk.data.jpa.internal.query.backend.querydsl.QuerydslObjectArrayTuple
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.persistence.TupleElement;
+import jakarta.persistence.TupleElement;
 
 public class ObjectArrayTupleImplTest {
 

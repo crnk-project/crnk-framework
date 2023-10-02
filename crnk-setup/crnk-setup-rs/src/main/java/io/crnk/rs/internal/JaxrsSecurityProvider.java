@@ -3,7 +3,7 @@ package io.crnk.rs.internal;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.security.SecurityProviderContext;
 
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class JaxrsSecurityProvider implements SecurityProvider {
 

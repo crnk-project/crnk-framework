@@ -1,6 +1,6 @@
 package io.crnk.example.springboot.domain.model;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class UserAddress {

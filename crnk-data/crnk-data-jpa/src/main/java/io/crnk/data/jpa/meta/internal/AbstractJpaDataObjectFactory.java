@@ -4,7 +4,7 @@ import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.data.jpa.meta.MetaJpaDataObject;
 import io.crnk.meta.internal.typed.MetaDataObjectProviderBase;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 
 public abstract class AbstractJpaDataObjectFactory<T extends MetaJpaDataObject> extends MetaDataObjectProviderBase<T> {
 

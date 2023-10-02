@@ -3,13 +3,13 @@ apply plugin: 'java'
 dependencies {
 
 	compile project(':crnk-core')
-	compileOnly 'javax.servlet:javax.servlet-api:3.0.1'
-	compileOnly 'javax.annotation:javax.annotation-api:1.2'
-	compileOnly 'javax.ws.rs:javax.ws.rs-api:2.1'
+	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+	compileOnly 'jakarta.annotation:jakarta.annotation-api:1.2'
+	compileOnly 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
 
 	testCompile project(':crnk-test')
 	testCompile project(':crnk-client')
-	testCompile 'javax.servlet:javax.servlet-api:3.0.1'
-	testCompile 'javax.annotation:javax.annotation-api:1.2'
+	testCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+	testCompile 'jakarta.annotation:jakarta.annotation-api:1.2'
 	testCompile 'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
 }

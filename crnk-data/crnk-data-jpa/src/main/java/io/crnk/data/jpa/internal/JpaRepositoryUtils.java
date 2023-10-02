@@ -20,7 +20,7 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaKey;
 
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;

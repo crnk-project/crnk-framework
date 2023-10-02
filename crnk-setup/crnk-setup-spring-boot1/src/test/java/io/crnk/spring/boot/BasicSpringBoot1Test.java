@@ -4,7 +4,7 @@ import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import javax.security.auth.message.config.AuthConfigFactory;
+import jakarta.security.auth.message.config.AuthConfigFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;

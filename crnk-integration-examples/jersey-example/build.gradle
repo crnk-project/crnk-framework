@@ -10,8 +10,8 @@ dependencies {
 
 	compile 'ch.qos.logback:logback-classic:1.2.3'
 
-	compile 'javax.ws.rs:javax.ws.rs-api:2.1'
-	compile 'javax.servlet:javax.servlet-api:3.0.1'
+	compile 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+	compile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
 	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base'

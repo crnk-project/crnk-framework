@@ -3,8 +3,8 @@ package io.crnk.rs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;

@@ -2,9 +2,9 @@ package io.crnk.cdi.internal;
 
 import io.crnk.core.engine.transaction.TransactionRunner;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.TransactionalException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.TransactionalException;
 import java.util.concurrent.Callable;
 
 /**

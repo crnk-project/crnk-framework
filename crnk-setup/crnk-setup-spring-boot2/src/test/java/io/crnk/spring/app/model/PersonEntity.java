@@ -2,8 +2,8 @@ package io.crnk.spring.app.model;
 
 import io.crnk.data.facet.annotation.Facet;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
 public class PersonEntity {

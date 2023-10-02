@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.internal.query.backend;
 
 import java.util.List;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;

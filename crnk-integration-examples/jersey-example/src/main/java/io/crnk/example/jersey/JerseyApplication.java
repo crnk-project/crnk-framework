@@ -7,7 +7,7 @@ import io.crnk.home.HomeModule;
 import io.crnk.rs.CrnkFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.ws.rs.ApplicationPath;
+import jakarta.ws.rs.ApplicationPath;
 
 @ApplicationPath("/")
 public class JerseyApplication extends ResourceConfig {

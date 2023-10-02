@@ -24,7 +24,7 @@ dependencies {
 	compile 'org.slf4j:jcl-over-slf4j:1.7.9'
 	compile 'org.slf4j:jul-to-slf4j:1.7.25'
 
-	compile 'javax.ws.rs:javax.ws.rs-api:2.1'
+	compile 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
 
 	compile 'org.glassfish.jersey.ext:jersey-proxy-client'
 	compile 'org.glassfish.jersey.core:jersey-client'

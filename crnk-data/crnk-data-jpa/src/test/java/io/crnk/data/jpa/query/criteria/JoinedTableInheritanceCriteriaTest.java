@@ -3,7 +3,7 @@ package io.crnk.data.jpa.query.criteria;
 import io.crnk.data.jpa.query.JoinedTableInheritanceQueryTestBase;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class JoinedTableInheritanceCriteriaTest extends JoinedTableInheritanceQueryTestBase {
 

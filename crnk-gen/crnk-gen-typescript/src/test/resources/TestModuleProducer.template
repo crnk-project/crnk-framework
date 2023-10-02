@@ -3,7 +3,7 @@ package io.crnk.gen.typescript;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class TestModuleProducer {

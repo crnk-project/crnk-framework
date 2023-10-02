@@ -3,7 +3,7 @@ package io.crnk.internal.boot.cdi.model;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 
 @ApplicationScoped

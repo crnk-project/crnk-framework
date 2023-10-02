@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.Serializable;
-import javax.security.auth.message.config.AuthConfigFactory;
+import jakarta.security.auth.message.config.AuthConfigFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;

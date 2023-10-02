@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 import java.util.List;
 
 

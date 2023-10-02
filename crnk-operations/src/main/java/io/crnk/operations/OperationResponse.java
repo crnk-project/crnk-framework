@@ -2,7 +2,7 @@ package io.crnk.operations;
 
 import io.crnk.core.engine.document.Document;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class OperationResponse extends Document {

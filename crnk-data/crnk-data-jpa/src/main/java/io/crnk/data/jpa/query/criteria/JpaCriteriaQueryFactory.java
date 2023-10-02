@@ -4,7 +4,7 @@ import io.crnk.data.jpa.internal.JpaQueryFactoryBase;
 import io.crnk.data.jpa.internal.query.backend.criteria.JpaCriteriaQueryImpl;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.lang.reflect.Type;
 import java.util.List;
 

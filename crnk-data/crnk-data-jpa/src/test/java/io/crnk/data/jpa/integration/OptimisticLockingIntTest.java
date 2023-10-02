@@ -9,8 +9,8 @@ import io.crnk.data.jpa.query.criteria.JpaCriteriaQueryFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
 import java.io.Serializable;
 
 public class OptimisticLockingIntTest extends AbstractJpaJerseyTest {

@@ -13,8 +13,8 @@ import io.crnk.example.springboot.domain.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

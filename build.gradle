@@ -83,10 +83,10 @@ gradle.beforeProject { Project project ->
 					testCompile group: 'junit', name: 'junit', version: '4.12'
 					testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
 					testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
-					// https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
-					compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
-					// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
-					compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
+					// https://mvnrepository.com/artifact/jakarta.annotation/jakarta.annotation-api
+					compile group: 'jakarta.annotation', name: 'jakarta.annotation-api', version: '2.1.1'
+					// https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api
+					compile group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: '4.0.1'
 				}
 
 				test {

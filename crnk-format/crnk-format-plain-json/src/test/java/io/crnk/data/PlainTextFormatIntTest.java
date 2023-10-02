@@ -3,8 +3,8 @@ package io.crnk.data;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 import io.crnk.client.CrnkClient;
 import io.crnk.core.engine.http.HttpHeaders;

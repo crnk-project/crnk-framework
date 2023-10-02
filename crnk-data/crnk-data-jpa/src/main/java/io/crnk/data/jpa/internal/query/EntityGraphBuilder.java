@@ -2,8 +2,8 @@ package io.crnk.data.jpa.internal.query;
 
 import io.crnk.meta.model.MetaAttributePath;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import java.util.Set;
 
 public interface EntityGraphBuilder {

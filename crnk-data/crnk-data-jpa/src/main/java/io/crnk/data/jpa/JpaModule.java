@@ -41,8 +41,8 @@ import io.crnk.meta.provider.MetaPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -268,7 +268,7 @@ public class JpaModule implements InitializingModule {
 
     private void addTransactionRollbackExceptionMapper() {
         // may not be available depending on environment
-        if (ClassUtils.existsClass("javax.transaction.RollbackException")) {
+        if (ClassUtils.existsClass("jakarta.transaction.RollbackException")) {
             ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 
                 @Override
