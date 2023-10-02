@@ -6,7 +6,7 @@ plugins {
 dependencies {
 	implementation project(':crnk-core')
 
-	implementation 'io.projectreactor:reactor-core'
+	api 'io.projectreactor:reactor-core'
 
 	testImplementation  'io.projectreactor:reactor-test'
 	testImplementation  'ch.qos.logback:logback-classic:1.2.3'

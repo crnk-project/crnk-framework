@@ -6,13 +6,16 @@ plugins {
 dependencies {
 
 	implementation project(':crnk-core')
-	compileOnlyApi 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-	compileOnlyApi 'jakarta.annotation:jakarta.annotation-api:2.1.1'
-	compileOnlyApi 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+	api 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+	api 'jakarta.annotation:jakarta.annotation-api:2.1.1'
+	api 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+	api 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-xml-provider:2.15.2'
 
 	testImplementation  project(':crnk-test')
 	testImplementation  project(':crnk-client')
 	testImplementation  'jakarta.servlet:jakarta.servlet-api:6.0.0'
 	testImplementation  'jakarta.annotation:jakarta.annotation-api:2.1.1'
 	testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
+	testImplementation 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-xml-provider:2.15.2'
+
 }

@@ -1,7 +1,7 @@
-apply plugin: 'java'
-
-sourceCompatibility = '17'
-targetCompatibility = '17'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
 	implementation project(':crnk-core')
@@ -15,9 +15,10 @@ dependencies {
 	testImplementation  'com.squareup.okhttp3:okhttp:3.4.1'
 	testImplementation  'org.apache.httpcomponents:httpclient:4.5.2'
 	testImplementation  'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	testImplementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
 
 	compileOnly 'org.activiti:activiti-engine:6.0.0'
 	testImplementation  'org.activiti:activiti-engine:6.0.0'
 	testImplementation  'org.springframework:spring-context:3.0.3.RELEASE'
-	testImplementation  'com.google.guava:guava:26.0-jre'
+	testImplementation  'com.google.guava:guava:31.1-jre'
 }

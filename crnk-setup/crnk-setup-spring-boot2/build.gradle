@@ -1,6 +1,8 @@
-apply plugin: 'java'
-
-apply plugin: 'io.spring.dependency-management'
+plugins {
+	id 'java'
+	id 'java-library'
+	id 'io.spring.dependency-management'
+}
 dependencyManagement {
 	imports {
 		mavenBom 'org.springframework.boot:spring-boot-dependencies:2.3.12.RELEASE'

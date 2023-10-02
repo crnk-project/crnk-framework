@@ -12,7 +12,7 @@ dependencies {
     genCompile project(':crnk-meta')
     genCompile project(':crnk-gen-typescript')
 
-    genCompile 'com.google.guava:guava:18.0'
+    genCompile 'com.google.guava:guava:31.1-jre'
 }
 
 ClassLoader getClassLoader(Configuration config) {

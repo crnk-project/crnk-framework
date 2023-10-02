@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'java-library'
 	id 'org.asciidoctor.jvm.convert' version "4.0.0-alpha.1"
 }
 
@@ -10,10 +11,11 @@ dependencies {
 
     implementation 'guru.nidi:graphviz-java:0.12.1'
 
-    testImplementation  'commons-io:commons-io:2.5'
+	testImplementation  'commons-io:commons-io:2.5'
     testImplementation  project(':crnk-meta')
     testImplementation  project(':crnk-test')
     testImplementation  project(':crnk-format:crnk-format-plain-json')
+	testImplementation  'jakarta.enterprise:jakarta.enterprise.cdi-api:4.0.1'
 }
 
 asciidoctor {

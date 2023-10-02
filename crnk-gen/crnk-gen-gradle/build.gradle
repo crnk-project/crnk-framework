@@ -1,6 +1,8 @@
-apply plugin: 'java'
-
-apply plugin: 'java-gradle-plugin'
+plugins {
+	id 'java'
+	id 'java-library'
+	id 'java-gradle-plugin'
+}
 
 gradlePlugin {
     plugins {

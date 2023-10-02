@@ -7,14 +7,14 @@ dependencies {
 
 	implementation project(':crnk-core')
 
-	testImplementation  project(':crnk-test')
-	testImplementation  project(':crnk-meta')
-	testImplementation  group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.9'
-	testImplementation  group: 'net.javacrumbs.json-unit', name: 'json-unit-fluent', version: '1.5.3'
-	testImplementation  group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '1.7.2'
-	testImplementation  group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
+	api  project(':crnk-test')
+	api  project(':crnk-meta')
+	api  group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.9'
+	api  group: 'net.javacrumbs.json-unit', name: 'json-unit-fluent', version: '1.5.3'
+	api  group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '1.7.2'
+	api  group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
 
-	testImplementation  group: 'junit', name: 'junit', version: '4.12'
-	testImplementation  group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
-	testImplementation  group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
+	api  group: 'junit', name: 'junit', version: '4.12'
+	api  group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
+	api  group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
 }

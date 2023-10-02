@@ -1,7 +1,10 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
-	implementation project(':crnk-meta')
+	api project(':crnk-meta')
 
 	testImplementation  project(':crnk-meta')
 	testImplementation  project(':crnk-test')

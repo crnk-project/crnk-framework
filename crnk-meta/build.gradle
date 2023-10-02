@@ -1,8 +1,11 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
-	implementation project(':crnk-core')
-	compileOnly project(':crnk-client')
+	api project(':crnk-core')
+	api project(':crnk-client')
 
 	testImplementation  project(':crnk-client')
 	testImplementation  project(':crnk-setup:crnk-setup-rs')

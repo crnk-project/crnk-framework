@@ -1,19 +1,24 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
 	implementation project(':crnk-core')
-	compileOnly group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
+	implementation group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
+	implementation  group: 'jakarta.enterprise', name: 'jakarta.enterprise.cdi-api', version: '4.0.1'
 
 	testImplementation  "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
 	testImplementation  "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
 	testImplementation  "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
 	testImplementation  "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
 
-	testImplementation  group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-api', version: '1.7.1'
-	testImplementation  group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-impl', version: '1.7.1'
-	testImplementation  group: 'org.apache.deltaspike.cdictrl', name: 'deltaspike-cdictrl-weld', version: '1.7.1'
-	testImplementation  group: 'org.jboss.weld.se', name: 'weld-se-core', version: '2.4.0.Final'
-	testImplementation group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
+	testImplementation  group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-api', version: '1.9.6'
+	testImplementation  group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-impl', version: '1.9.6'
+	testImplementation  group: 'org.apache.deltaspike.cdictrl', name: 'deltaspike-cdictrl-weld', version: '1.9.6'
+	testImplementation  group: 'org.jboss.weld.se', name: 'weld-se-core', version: '5.1.1.SP2'
+	testImplementation  group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
+	testImplementation  group: 'jakarta.enterprise', name: 'jakarta.enterprise.cdi-api', version: '4.0.1'
 }
 
 // e.g. CDI expects those directories to be equal
