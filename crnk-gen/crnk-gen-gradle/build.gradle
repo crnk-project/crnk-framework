@@ -16,27 +16,27 @@ gradlePlugin {
 }
 
 dependencies {
-    compile gradleApi()
+    implementation gradleApi()
 
     // TODO use shade plugin
-    compile project(':crnk-gen:crnk-gen-base')
-    compile project(':crnk-gen:crnk-gen-runtime')
-    compile project(':crnk-meta')
-    compile project(':crnk-data:crnk-data-jpa')
-    compile 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
+    implementation project(':crnk-gen:crnk-gen-base')
+    implementation project(':crnk-gen:crnk-gen-runtime')
+    implementation project(':crnk-meta')
+    implementation project(':crnk-data:crnk-data-jpa')
+    implementation 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
 
-    compile project(':crnk-gen:crnk-gen-typescript')
-    compile project(':crnk-gen:crnk-gen-asciidoc')
-    compile project(':crnk-gen:crnk-gen-openapi')
+    implementation project(':crnk-gen:crnk-gen-typescript')
+    implementation project(':crnk-gen:crnk-gen-asciidoc')
+    implementation project(':crnk-gen:crnk-gen-openapi')
 
-    compile 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     compileOnly 'junit:junit:4.12'
 
-    testCompile gradleTestKit()
-    testCompile project(':crnk-core')
-    testCompile project(':crnk-meta')
-    testCompile project(':crnk-test')
+    testImplementation  gradleTestKit()
+    testImplementation  project(':crnk-core')
+    testImplementation  project(':crnk-meta')
+    testImplementation  project(':crnk-test')
 
 }
 

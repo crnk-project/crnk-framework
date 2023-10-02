@@ -1,16 +1,16 @@
 apply plugin: 'java'
 
 dependencies {
-	compile project(':crnk-core')
-	compile project(':crnk-reactive')
-	compile 'io.vertx:vertx-rx-java2:3.7.1'
+	implementation project(':crnk-core')
+	implementation project(':crnk-reactive')
+	implementation 'io.vertx:vertx-rx-java2:3.7.1'
 
-	compile 'io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE'
+	implementation 'io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE'
 
-	compileOnly 'org.slf4j:slf4j-api:1.7.13'
+	compileOnly 'org.slf4j:slf4j-api:2.0.9'
 
-	testCompile project(':crnk-reactive')
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-client')
-	testCompile project(':crnk-home')
+	testImplementation  project(':crnk-reactive')
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-client')
+	testImplementation  project(':crnk-home')
 }

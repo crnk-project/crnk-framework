@@ -35,13 +35,13 @@ node {
 
 
 dependencies {
-	compile files(('../../crnk-core/build/classes/main'))
-	compile files(('../../crnk-meta/build/classes/main'))
-	compile files(('../../crnk-cdi/build/classes/main'))
-	compile 'javax:javaee-api:7.0'
+	implementation files(('../../crnk-core/build/classes/main'))
+	implementation files(('../../crnk-meta/build/classes/main'))
+	implementation files(('../../crnk-cdi/build/classes/main'))
+	implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
 
-	compile 'org.slf4j:slf4j-api:1.7.13'
-	compile 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
+	implementation 'org.slf4j:slf4j-api:2.0.9'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
 
 	integrationTestCompile 'junit:junit:4.12'
 	integrationTestCompile 'commons-io:commons-io:2.5'

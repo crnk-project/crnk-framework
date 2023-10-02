@@ -64,8 +64,8 @@ The crnk modules can then simply be used without having to specify a version:
 [source]
 ----
 dependencies {
-	compile 'io.crnk:crnk-rs'
-	compile 'io.crnk:crnk-setup-spring-boot2'
+	implementation 'io.crnk:crnk-rs'
+	implementation 'io.crnk:crnk-setup-spring-boot2'
 	...
 }
 ----
@@ -344,8 +344,8 @@ the following dependencies specified:
 
 [source]
 ----
-	compile 'io.crnk:crnk-setup-vertx'
-	compile 'io.vertx:vertx-rx-java2'
+	implementation 'io.crnk:crnk-setup-vertx'
+	implementation 'io.vertx:vertx-rx-java2'
 ----
 
 An example Vert.x vehicle may then look like:

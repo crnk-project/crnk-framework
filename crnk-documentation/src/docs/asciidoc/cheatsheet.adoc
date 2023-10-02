@@ -32,7 +32,7 @@ buildscript {
 }
 
 wrapper {
-	gradleVersion = '4.10'
+	gradleVersion = '8.3'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -48,14 +48,14 @@ apply plugin: 'java'
 mainClassName = "io.crnk.example.service.ExampleApplication"
 
 dependencies {
-	compile "io.crnk:crnk-spring"
-	compile "io.crnk:crnk-home"
+	implementation "io.crnk:crnk-spring"
+	implementation "io.crnk:crnk-home"
 
-	compile 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	testCompile 'org.springframework.boot:spring-boot-starter-test'
-	testCompile "io.crnk:crnk-client"
-	testCompile 'com.squareup.okhttp3:okhttp:3.4.1'
+	testImplementation  'org.springframework.boot:spring-boot-starter-test'
+	testImplementation  "io.crnk:crnk-client"
+	testImplementation  'com.squareup.okhttp3:okhttp:3.4.1'
 }
 ----
 

@@ -20,12 +20,12 @@ dependencies {
 	providedCompile 'jakarta.platform:jakarta.jakartaee-api:8.0.0'
 	providedCompile 'org.eclipse.microprofile:microprofile:4.0.1'
 
-	compile project(':crnk-setup:crnk-setup-rs')
-	compile project(':crnk-setup:crnk-setup-cdi')
-	compile project(':crnk-home')
-	compile project(':crnk-data:crnk-data-jpa')
-	compile 'com.h2database:h2:1.4.200'
-	compile 'org.hibernate:hibernate-entitymanager:5.5.3.Final'
+	implementation project(':crnk-setup:crnk-setup-rs')
+	implementation project(':crnk-setup:crnk-setup-cdi')
+	implementation project(':crnk-home')
+	implementation project(':crnk-data:crnk-data-jpa')
+	implementation 'com.h2database:h2:1.4.200'
+	implementation 'org.hibernate:hibernate-entitymanager:5.5.3.Final'
 }
 
 ext  {

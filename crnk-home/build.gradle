@@ -1,17 +1,20 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
 
-	compile project(':crnk-core')
+	implementation project(':crnk-core')
 
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-meta')
-	testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
-	testCompile group: 'net.javacrumbs.json-unit', name: 'json-unit-fluent', version: '1.5.3'
-	testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '1.7.2'
-	testCompile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-meta')
+	testImplementation  group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.9'
+	testImplementation  group: 'net.javacrumbs.json-unit', name: 'json-unit-fluent', version: '1.5.3'
+	testImplementation  group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '1.7.2'
+	testImplementation  group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
 
-	testCompile group: 'junit', name: 'junit', version: '4.12'
-	testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
-	testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
+	testImplementation  group: 'junit', name: 'junit', version: '4.12'
+	testImplementation  group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
+	testImplementation  group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
 }

@@ -9,8 +9,8 @@ dependencyManagement {
 
 dependencies {
 
-	compile project(':crnk-setup:crnk-setup-servlet')
-	compile project(':crnk-setup:crnk-setup-spring')
+	implementation project(':crnk-setup:crnk-setup-servlet')
+	implementation project(':crnk-setup:crnk-setup-spring')
 	compileOnly project(':crnk-data:crnk-data-jpa')
 	compileOnly project(':crnk-validation')
 	compileOnly project(':crnk-home')
@@ -34,34 +34,34 @@ dependencies {
 
 	compileOnly 'org.springframework:spring-orm'
 
-	testCompile project(':crnk-data:crnk-data-jpa')
-	testCompile project(':crnk-validation')
-	testCompile project(':crnk-home')
-	testCompile project(':crnk-meta')
-	testCompile project(':crnk-operations')
-	testCompile project(':crnk-security')
-	testCompile project(':crnk-ui')
-	testCompile project(':crnk-client')
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-data:crnk-data-facet')
-	testCompile project(':crnk-format:crnk-format-plain-json')
+	testImplementation  project(':crnk-data:crnk-data-jpa')
+	testImplementation  project(':crnk-validation')
+	testImplementation  project(':crnk-home')
+	testImplementation  project(':crnk-meta')
+	testImplementation  project(':crnk-operations')
+	testImplementation  project(':crnk-security')
+	testImplementation  project(':crnk-ui')
+	testImplementation  project(':crnk-client')
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-data:crnk-data-facet')
+	testImplementation  project(':crnk-format:crnk-format-plain-json')
 
-	testCompile 'org.springframework.boot:spring-boot-starter-data-jpa'
-	testCompile 'org.springframework.boot:spring-boot-starter-web'
-	testCompile 'org.springframework.boot:spring-boot-starter-test'
-	testCompile 'org.springframework.boot:spring-boot-starter-actuator'
-	testCompile 'org.springframework.boot:spring-boot-starter-validation'
+	testImplementation  'org.springframework.boot:spring-boot-starter-data-jpa'
+	testImplementation  'org.springframework.boot:spring-boot-starter-web'
+	testImplementation  'org.springframework.boot:spring-boot-starter-test'
+	testImplementation  'org.springframework.boot:spring-boot-starter-actuator'
+	testImplementation  'org.springframework.boot:spring-boot-starter-validation'
 
-	testCompile 'org.hibernate:hibernate-core'
-	testCompile 'org.hibernate:hibernate-entitymanager'
-	testCompile 'com.h2database:h2'
+	testImplementation  'org.hibernate:hibernate-core'
+	testImplementation  'org.hibernate:hibernate-entitymanager'
+	testImplementation  'com.h2database:h2'
 
-	testCompile 'org.springframework.boot:spring-boot-configuration-processor'
-	testCompile 'org.springframework:spring-orm'
-	testCompile 'org.springframework.security:spring-security-core'
-	testCompile 'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
-	testCompile 'org.mockito:mockito-core:2.18.3'
-	testCompile 'pl.pragmatists:JUnitParams:1.1.1'
+	testImplementation  'org.springframework.boot:spring-boot-configuration-processor'
+	testImplementation  'org.springframework:spring-orm'
+	testImplementation  'org.springframework.security:spring-security-core'
+	testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
+	testImplementation  'org.mockito:mockito-core:2.18.3'
+	testImplementation  'pl.pragmatists:JUnitParams:1.1.1'
 }
 
 

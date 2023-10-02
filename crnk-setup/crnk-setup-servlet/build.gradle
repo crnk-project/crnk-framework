@@ -1,18 +1,18 @@
 apply plugin: 'java'
 
 dependencies {
-	compile project(':crnk-core')
+	implementation project(':crnk-core')
 	compileOnly project(':crnk-reactive')
 	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-	compileOnly 'org.slf4j:slf4j-api:1.7.13'
+	compileOnly 'org.slf4j:slf4j-api:2.0.9'
 
-	testCompile project(':crnk-reactive')
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-client')
-	testCompile group: 'org.reflections', name: 'reflections', version: '0.9.9'
-	testCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+	testImplementation  project(':crnk-reactive')
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-client')
+	testImplementation  group: 'org.reflections', name: 'reflections', version: '0.9.9'
+	testImplementation  'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
-	testCompile 'org.springframework.boot:spring-boot-starter-web:1.5.8.RELEASE'
-	testCompile 'org.springframework.boot:spring-boot-starter-test:1.5.8.RELEASE'
-	testCompile 'net.javacrumbs.json-unit:json-unit:1.5.5'
+	testImplementation  'org.springframework.boot:spring-boot-starter-web:1.5.8.RELEASE'
+	testImplementation  'org.springframework.boot:spring-boot-starter-test:1.5.8.RELEASE'
+	testImplementation  'net.javacrumbs.json-unit:json-unit:1.5.5'
 }

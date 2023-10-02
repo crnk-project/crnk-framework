@@ -1,11 +1,11 @@
 apply plugin: 'java'
 
 dependencies {
-	compile project(':crnk-core')
-	compile project(':crnk-client')
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-home')
+	implementation project(':crnk-core')
+	implementation project(':crnk-client')
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-home')
 
-	compile 'org.assertj:assertj-core:3.9.1'
-	compile 'org.apache.httpcomponents:httpclient:4.5.2'
+	implementation 'org.assertj:assertj-core:3.9.1'
+	implementation 'org.apache.httpcomponents:httpclient:4.5.2'
 }

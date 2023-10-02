@@ -1,14 +1,15 @@
-apply plugin: 'org.asciidoctor.convert'
-
-
+plugins {
+	id 'org.asciidoctor.jvm.convert' version "4.0.0-alpha.1"
+}
 
 asciidoctor {
-	backends = ['html5', 'pdf']
+	sourceDir file('docs')
+//	backends = ['html5', 'pdf']
 	attributes 'source-highlighter': 'coderay'
 	sources {
-		include 'index.adoc'
-		include 'cheatsheet.adoc'
+		include 'index.adoc', 'cheatsheet.adoc'
 	}
+	outputDir file('build/docs')
 }
 
 tasks.assemble.dependsOn 'asciidoctor'
