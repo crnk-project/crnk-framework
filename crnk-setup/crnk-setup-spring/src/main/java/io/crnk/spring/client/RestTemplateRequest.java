@@ -5,6 +5,7 @@ import io.crnk.client.http.HttpAdapterRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -60,7 +61,7 @@ public class RestTemplateRequest implements HttpAdapterRequest {
                 java.net.URL url = new java.net.URL(this.url);
                 listeners.stream().forEach(it -> it.onRequest(this));
                 HttpEntity<String> entityReq = new HttpEntity<>(requestBody, headers);
-                ResponseEntity<String> response = template.exchange(url.toURI(), HttpMethod.resolve(method.name()), entityReq, String.class);
+                ResponseEntity<String> response = template.exchange(url.toURI(), HttpMethod.valueOf(method.name()), entityReq, String.class);
                 RestTemplateResponse adapterResponse = new RestTemplateResponse(response);
                 listeners.stream().forEach(it -> it.onResponse(this, adapterResponse));
                 return adapterResponse;
@@ -70,7 +71,7 @@ public class RestTemplateRequest implements HttpAdapterRequest {
                 throw new IllegalStateException(e);
             }
         } catch (HttpClientErrorException e) {
-            return new RestTemplateResponse(e.getRawStatusCode(), e.getStatusCode().getReasonPhrase(), e.getResponseBodyAsString
+            return new RestTemplateResponse(e.getStatusCode().value(), HttpStatus.valueOf(e.getStatusCode().value()).getReasonPhrase(), e.getResponseBodyAsString
                     (), e.getResponseHeaders());
         }
     }

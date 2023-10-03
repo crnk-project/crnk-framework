@@ -73,8 +73,8 @@ gradle.beforeProject { Project project ->
 			apply plugin: 'java'
 			apply plugin: 'java-library'
 
-			sourceCompatibility = 1.8
-			targetCompatibility = 1.8
+			sourceCompatibility = '17'
+			targetCompatibility = '17'
 
 			if (!bom) {
 				dependencies {
@@ -85,6 +85,7 @@ gradle.beforeProject { Project project ->
 					api group: 'jakarta.annotation', name: 'jakarta.annotation-api', version: '2.1.1'
 					// https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api
 					api group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: '4.0.1'
+					api 'org.glassfish.jaxb:jaxb-runtime:4.0.1'
 				}
 
 				test {

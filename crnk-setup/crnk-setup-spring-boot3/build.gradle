@@ -7,30 +7,48 @@ plugins {
 
 dependencies {
 
-	implementation project(':crnk-setup:crnk-setup-servlet')
-	api project(':crnk-client')
+	api project(':crnk-setup:crnk-setup-servlet')
+	api project(':crnk-setup:crnk-setup-spring')
+	compileOnly project(':crnk-data:crnk-data-jpa')
+	compileOnly project(':crnk-validation')
+	compileOnly project(':crnk-home')
+	compileOnly project(':crnk-meta')
+	compileOnly project(':crnk-operations')
+	compileOnly project(':crnk-security')
+	compileOnly project(':crnk-ui')
+	compileOnly project(':crnk-client')
+	compileOnly project(':crnk-data:crnk-data-facet')
+	compileOnly project(':crnk-format:crnk-format-plain-json')
+	compileOnly project(':crnk-monitor:crnk-monitor-opentracing')
 
+	compileOnly 'io.opentracing:opentracing-api:0.31.0'
+
+	compileOnlyApi 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
+	compileOnlyApi 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
 	compileOnlyApi 'org.springframework.boot:spring-boot-starter-web'
 	compileOnlyApi 'org.springframework.boot:spring-boot-configuration-processor'
 	compileOnlyApi 'org.springframework.boot:spring-boot-starter-actuator'
+	compileOnlyApi 'org.springframework.boot:spring-boot-starter-validation'
 	compileOnlyApi 'org.springframework.security:spring-security-core'
-	compileOnlyApi 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
 	compileOnlyApi 'org.springframework:spring-orm'
 
 	testImplementation  project(':crnk-data:crnk-data-jpa')
+	testImplementation  project(':crnk-validation')
 	testImplementation  project(':crnk-home')
+	testImplementation  project(':crnk-meta')
+	testImplementation  project(':crnk-operations')
+	testImplementation  project(':crnk-security')
 	testImplementation  project(':crnk-ui')
 	testImplementation  project(':crnk-client')
 	testImplementation  project(':crnk-test')
-	testImplementation  group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
-	testImplementation  'jakarta.el:jakarta.el-api:5.0.1'
-	testImplementation  'org.glassfish:jakarta.el:5.0.0-M1'
-	testImplementation  'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-xml-provider:2.15.2'
+	testImplementation  project(':crnk-data:crnk-data-facet')
+	testImplementation  project(':crnk-format:crnk-format-plain-json')
 
 	testImplementation  'org.springframework.boot:spring-boot-starter-data-jpa'
 	testImplementation  'org.springframework.boot:spring-boot-starter-web'
 	testImplementation  'org.springframework.boot:spring-boot-starter-test'
 	testImplementation  'org.springframework.boot:spring-boot-starter-actuator'
+	testImplementation  'org.springframework.boot:spring-boot-starter-validation'
 
 	testImplementation  'org.hibernate:hibernate-core'
 	testImplementation  'org.hibernate:hibernate-entitymanager'
@@ -40,6 +58,8 @@ dependencies {
 	testImplementation  'org.springframework:spring-orm'
 	testImplementation  'org.springframework.security:spring-security-core'
 	testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
+	testImplementation  'org.mockito:mockito-core:2.18.3'
+	testImplementation  'pl.pragmatists:JUnitParams:1.1.1'
 }
 
 

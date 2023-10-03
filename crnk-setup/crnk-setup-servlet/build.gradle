@@ -15,7 +15,7 @@ dependencies {
 	testImplementation  group: 'org.reflections', name: 'reflections', version: '0.9.9'
 	testImplementation  'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
-	testImplementation  'org.springframework.boot:spring-boot-starter-web:1.5.8.RELEASE'
-	testImplementation  'org.springframework.boot:spring-boot-starter-test:1.5.8.RELEASE'
+	testImplementation  'org.springframework.boot:spring-boot-starter-web'
+	testImplementation  'org.springframework.boot:spring-boot-starter-test'
 	testImplementation  'net.javacrumbs.json-unit:json-unit:1.5.5'
 }

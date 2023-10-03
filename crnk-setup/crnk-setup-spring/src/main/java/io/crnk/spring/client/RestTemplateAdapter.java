@@ -4,6 +4,10 @@ import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterListener;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.core.engine.http.HttpMethod;
+import org.apache.http.client.HttpClient;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
@@ -78,7 +82,7 @@ public class RestTemplateAdapter implements HttpAdapter {
                 } else if (requestFactory instanceof HttpComponentsClientHttpRequestFactory) {
                     HttpComponentsClientHttpRequestFactory apacheRequestFactory =
                             (HttpComponentsClientHttpRequestFactory) impl.getRequestFactory();
-                    apacheRequestFactory.setReadTimeout(networkTimeout.intValue());
+//                    apacheRequestFactory.setReadTimeout(networkTimeout.intValue());
                 } else if (requestFactory instanceof OkHttp3ClientHttpRequestFactory) {
                     OkHttp3ClientHttpRequestFactory okhttpRequestFactory =
                             (OkHttp3ClientHttpRequestFactory) impl.getRequestFactory();
