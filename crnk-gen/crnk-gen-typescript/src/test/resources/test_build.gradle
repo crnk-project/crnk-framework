@@ -45,11 +45,11 @@ dependencies {
 
 	integrationTestCompile 'junit:junit:4.12'
 	integrationTestCompile 'commons-io:commons-io:2.5'
-	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
-	integrationTestCompile 'org.apache.deltaspike.core:deltaspike-core-impl:1.7.1'
-	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
-	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-impl:1.7.1'
-	integrationTestCompile 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.7.1'
+	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
+	integrationTestCompile 'org.apache.deltaspike.core:deltaspike-core-impl:1.9.6'
+	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
+	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-impl:1.9.6'
+	integrationTestCompile 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.9.6'
 	integrationTestCompile 'org.jboss.weld.se:weld-se-core:2.4.0.Final'
 }
 

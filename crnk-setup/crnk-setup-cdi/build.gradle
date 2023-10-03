@@ -1,6 +1,7 @@
 plugins {
 	id 'java'
 	id 'java-library'
+	id 'idea'
 }
 
 dependencies {
@@ -8,14 +9,16 @@ dependencies {
 	implementation group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
 	implementation  group: 'jakarta.enterprise', name: 'jakarta.enterprise.cdi-api', version: '4.0.1'
 
-	testImplementation  "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-	testImplementation  "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
-	testImplementation  "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
-	testImplementation  "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
+	testImplementation  "org.junit.jupiter:junit-jupiter-api:5.10.0"
+	testImplementation  "org.junit.jupiter:junit-jupiter-params:5.10.0"
+	testImplementation  "org.junit.jupiter:junit-jupiter-engine:5.10.0"
+	testImplementation  "org.junit.vintage:junit-vintage-engine:5.10.0"
 
-	testImplementation  group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-api', version: '1.9.6'
-	testImplementation  group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-impl', version: '1.9.6'
-	testImplementation  group: 'org.apache.deltaspike.cdictrl', name: 'deltaspike-cdictrl-weld', version: '1.9.6'
+	testImplementation  'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
+	testImplementation  'org.apache.deltaspike.core:deltaspike-core-impl:1.9.6'
+	testImplementation  'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
+	testImplementation  'org.apache.deltaspike.modules:deltaspike-test-control-module-impl:1.9.6'
+	testImplementation  'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.9.6'
 	testImplementation  group: 'org.jboss.weld.se', name: 'weld-se-core', version: '5.1.1.SP2'
 	testImplementation  group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
 	testImplementation  group: 'jakarta.enterprise', name: 'jakarta.enterprise.cdi-api', version: '4.0.1'
@@ -33,7 +36,7 @@ sourceSets {
 jar {
 	duplicatesStrategy = 'exclude'
 }
-apply plugin: 'idea'
+
 idea {
 	module {
 		idea.module.inheritOutputDirs = true
