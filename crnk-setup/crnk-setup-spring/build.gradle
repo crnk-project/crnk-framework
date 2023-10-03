@@ -40,6 +40,14 @@ dependencies {
 	testImplementation  'org.springframework:spring-orm'
 	testImplementation  'org.springframework.security:spring-security-core'
 	testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
+
+	bootJar {
+		enabled = false
+	}
+
+	jar {
+		enabled = true
+	}
 }
 
 

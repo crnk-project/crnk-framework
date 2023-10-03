@@ -18,9 +18,9 @@ dependencies {
 	api 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
 	api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	api 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
-
-	api 'org.eclipse.jetty:jetty-server:9.4.9.v20180320'
-	api 'org.eclipse.jetty:jetty-security:9.4.9.v20180320'
+	api 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.2'
+	api 'org.eclipse.jetty:jetty-server:11.0.16'
+	api 'org.eclipse.jetty:jetty-security:11.0.16'
 
 	api 'io.rest-assured:rest-assured:3.0.2'
 	api 'ch.qos.logback:logback-classic:1.2.3'

@@ -9,18 +9,18 @@ dependencies {
     implementation 'org.reflections:reflections'
     implementation project(':crnk-gen:crnk-gen-base')
     implementation project(':crnk-meta')
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations'
 
-    compileOnly 'junit:junit:4.12'
+	compileOnly 'junit:junit:4.12'
     compileOnly 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
     compileOnly 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-api:1.9.6'
     compileOnly 'org.jboss.weld.se:weld-se-core:2.4.0.Final'
-    compileOnly 'org.springframework.boot:spring-boot:2.1.0.RELEASE'
+    compileOnly 'org.springframework.boot:spring-boot:3.1.4'
     compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
 
     testImplementation  project(':crnk-meta')
     testImplementation  project(':crnk-test')
-    testImplementation  project(':crnk-setup:crnk-setup-cdi')
+//    testImplementation  project(':crnk-setup:crnk-setup-cdi')
     testImplementation  project(':crnk-setup:crnk-setup-spring-boot3')
     testImplementation  'commons-io:commons-io:2.5'
     testImplementation  'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
@@ -30,5 +30,5 @@ dependencies {
     testImplementation  'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.9.6'
     testImplementation  'org.jboss.weld.se:weld-se-core:2.4.0.Final'
     testImplementation  'jakarta.platform:jakarta.jakartaee-api:10.0.0'
-    testImplementation  'org.springframework.boot:spring-boot:2.1.0.RELEASE'
+    testImplementation  'org.springframework.boot:spring-boot:3.1.4'
 }

@@ -14,8 +14,8 @@ dependencies {
 	testImplementation  project(':crnk-test')
 	testImplementation  project(':crnk-meta')
 	testImplementation  group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
-	testImplementation  group: 'org.springframework', name: 'spring-orm', version: '4.3.1.RELEASE'
-	testImplementation  group: 'org.springframework', name: 'spring-context', version: '4.3.1.RELEASE'
-	testImplementation  group: 'org.springframework', name: 'spring-test', version: '4.3.1.RELEASE'
+	testImplementation  group: 'org.springframework', name: 'spring-orm', version: '6.0.12'
+	testImplementation  group: 'org.springframework', name: 'spring-context', version: '6.0.12'
+	testImplementation  group: 'org.springframework', name: 'spring-test', version: '6.0.12'
 	testImplementation  group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
 }

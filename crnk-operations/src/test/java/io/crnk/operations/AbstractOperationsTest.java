@@ -148,7 +148,7 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 		clear();
 
 		if (context != null) {
-			context.destroy();
+			context.close();
 		}
 	}
 

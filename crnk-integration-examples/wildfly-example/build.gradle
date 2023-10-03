@@ -7,7 +7,7 @@ war {
 dependencies {
 
 	implementation project(':crnk-setup:crnk-setup-rs')
-	implementation project(':crnk-setup:crnk-setup-cdi')
+	// implementation project(':crnk-setup:crnk-setup-cdi')
 	implementation project(':crnk-home')
 	implementation project(':crnk-data:crnk-data-jpa')
 

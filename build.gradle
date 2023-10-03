@@ -109,13 +109,16 @@ gradle.beforeProject { Project project ->
 						mavenBom 'org.glassfish.jersey:jersey-bom:3.1.3'
 					}
 					dependencies {
-						dependency 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+						// dependency 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 						dependency 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
 						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
 						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.15.2'
 						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.15.2'
-						dependency 'com.fasterxml.jackson.core:jackson-core:2.15.2'
 						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2'
+						dependency 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.2'
+
+						dependency 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
+						dependency 'org.glassfish.jaxb:jaxb-runtime:4.0.1'
 
 						dependency 'org.reflections:reflections:0.9.11'
 					}

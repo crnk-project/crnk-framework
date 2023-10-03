@@ -41,7 +41,7 @@ dependencies {
 	implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
 
 	implementation 'org.slf4j:slf4j-api:2.0.9'
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
+	implementation 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations'
 
 	integrationTestCompile 'junit:junit:4.12'
 	integrationTestCompile 'commons-io:commons-io:2.5'

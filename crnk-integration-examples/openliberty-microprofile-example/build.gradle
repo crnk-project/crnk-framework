@@ -21,7 +21,7 @@ dependencies {
 	providedCompile 'org.eclipse.microprofile:microprofile:4.0.1'
 
 	implementation project(':crnk-setup:crnk-setup-rs')
-	implementation project(':crnk-setup:crnk-setup-cdi')
+	// implementation project(':crnk-setup:crnk-setup-cdi')
 	implementation project(':crnk-home')
 	implementation project(':crnk-data:crnk-data-jpa')
 	implementation 'com.h2database:h2:1.4.200'
