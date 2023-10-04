@@ -31,7 +31,7 @@ public class DecoratorTest {
         Mockito.verify(repository, Mockito.times(1)).findAll(Mockito.any(QuerySpec.class));
 
         decorator.findAll(null, null);
-        Mockito.verify(repository, Mockito.times(1)).findAll(Mockito.anyListOf(Long.class), Mockito.any(QuerySpec.class));
+        Mockito.verify(repository, Mockito.times(1)).findAll(Mockito.anyList(), Mockito.any(QuerySpec.class));
 
         decorator.getResourceClass();
         Mockito.verify(repository, Mockito.times(1)).getResourceClass();
@@ -67,15 +67,15 @@ public class DecoratorTest {
                 Mockito.anyString());
 
         decorator.addRelations(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).addRelations(Mockito.any(Schedule.class), Mockito.anyListOf(Long.class),
+        Mockito.verify(repository, Mockito.times(1)).addRelations(Mockito.any(Schedule.class), Mockito.anyList(),
                 Mockito.anyString());
 
         decorator.setRelations(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).setRelations(Mockito.any(Schedule.class), Mockito.anyListOf(Long.class),
+        Mockito.verify(repository, Mockito.times(1)).setRelations(Mockito.any(Schedule.class), Mockito.anyList(),
                 Mockito.anyString());
 
         decorator.removeRelations(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).removeRelations(Mockito.any(Schedule.class), Mockito.anyListOf(Long.class),
+        Mockito.verify(repository, Mockito.times(1)).removeRelations(Mockito.any(Schedule.class), Mockito.anyList(),
                 Mockito.anyString());
 
         decorator.getTargetResourceClass();
