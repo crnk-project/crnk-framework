@@ -19,6 +19,7 @@ dependencies {
     testImplementation  'nl.jqno.equalsverifier:equalsverifier:1.7.2'
 	testImplementation  'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
 
+	testImplementation  'com.google.guava:guava:31.1-jre'
 
 	testImplementation  "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
     testImplementation  "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"

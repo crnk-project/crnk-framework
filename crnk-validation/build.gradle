@@ -7,7 +7,7 @@ dependencies {
 	implementation project(':crnk-core')
 	compileOnly project(':crnk-meta')
 	compileOnly project(':crnk-client')
-	compileOnly group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
+	compileOnly 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
 
 	testImplementation  project(':crnk-client')
 	testImplementation  project(':crnk-setup:crnk-setup-rs')

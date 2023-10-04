@@ -120,7 +120,7 @@ gradle.beforeProject { Project project ->
 						dependency 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
 						dependency 'org.glassfish.jaxb:jaxb-runtime:4.0.1'
 
-						dependency 'org.reflections:reflections:0.9.11'
+						dependency 'org.reflections:reflections:0.10.2'
 					}
 				}
 			}
