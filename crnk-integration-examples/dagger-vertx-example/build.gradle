@@ -39,11 +39,10 @@ dependencies {
     implementation project(':crnk-format:crnk-format-plain-json')
 
     implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
-    implementation 'org.hibernate:hibernate-validator:5.2.1.Final'
-    implementation 'org.hibernate:hibernate-core:5.2.10.Final'
-    implementation 'org.hibernate:hibernate-entitymanager:5.2.10.Final'
-    implementation 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
-    implementation 'com.h2database:h2:1.4.187'
+	implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
+	implementation 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
+    implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
+    implementation  'com.h2database:h2:2.2.224'
 
     implementation 'io.vertx:vertx-auth-common:4.4.5'
 	implementation 'io.projectreactor.addons:reactor-adapter:3.5.1'

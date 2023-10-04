@@ -24,8 +24,8 @@ dependencies {
 	// implementation project(':crnk-setup:crnk-setup-cdi')
 	implementation project(':crnk-home')
 	implementation project(':crnk-data:crnk-data-jpa')
-	implementation 'com.h2database:h2:1.4.200'
-	implementation 'org.hibernate:hibernate-entitymanager:5.5.3.Final'
+	implementation  'com.h2database:h2:2.2.224'
+	implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
 }
 
 ext  {

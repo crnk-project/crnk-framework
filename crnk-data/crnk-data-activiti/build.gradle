@@ -7,7 +7,7 @@ dependencies {
 	implementation project(':crnk-core')
 	compileOnly group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
 
-	testImplementation  'com.h2database:h2:1.4.195'
+	testImplementation  'com.h2database:h2:2.2.224'
 
 	testImplementation  project(':crnk-setup:crnk-setup-rs')
 	testImplementation  project(':crnk-test')

@@ -50,7 +50,7 @@ dependencies {
 	testImplementation  'org.springframework.boot:spring-boot-starter-actuator'
 	testImplementation  'org.springframework.boot:spring-boot-starter-validation'
 
-	testImplementation  'org.hibernate:hibernate-core'
+	testImplementation	'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
 	testImplementation  'org.hibernate:hibernate-entitymanager'
 	testImplementation  'com.h2database:h2'
 
