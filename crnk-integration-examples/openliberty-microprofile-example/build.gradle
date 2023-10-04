@@ -21,12 +21,15 @@ dependencies {
 	providedCompile 'org.eclipse.microprofile:microprofile:4.0.1'
 
 	implementation project(':crnk-setup:crnk-setup-rs')
-	// implementation project(':crnk-setup:crnk-setup-cdi')
+	implementation project(':crnk-setup:crnk-setup-cdi')
 	implementation project(':crnk-home')
 	implementation project(':crnk-data:crnk-data-jpa')
 	implementation  'com.h2database:h2:2.2.224'
 	implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
 }
+
+compileJava.dependsOn ':crnk-setup:crnk-setup-cdi:processResources'
+
 
 ext  {
 	liberty.server.var.'default.http.port' = '9080'

@@ -7,9 +7,11 @@ war {
 dependencies {
 
 	implementation project(':crnk-setup:crnk-setup-rs')
-	// implementation project(':crnk-setup:crnk-setup-cdi')
+	implementation project(':crnk-setup:crnk-setup-cdi')
 	implementation project(':crnk-home')
 	implementation project(':crnk-data:crnk-data-jpa')
 
 	compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+
+	compileJava.dependsOn ':crnk-setup:crnk-setup-cdi:processResources'
 }
