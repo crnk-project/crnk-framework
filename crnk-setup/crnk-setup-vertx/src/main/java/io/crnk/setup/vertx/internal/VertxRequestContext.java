@@ -10,8 +10,8 @@ import io.crnk.core.engine.http.DefaultHttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.vertx.reactivex.core.MultiMap;
-import io.vertx.reactivex.core.http.HttpServerRequest;
+import io.vertx.rxjava3.core.MultiMap;
+import io.vertx.rxjava3.core.http.HttpServerRequest;
 
 public class VertxRequestContext extends DefaultHttpRequestContextBase {
 
@@ -83,7 +83,7 @@ public class VertxRequestContext extends DefaultHttpRequestContextBase {
 
 	@Override
 	public String getMethod() {
-		return serverRequest.rawMethod();
+		return serverRequest.method().toString();
 	}
 
 	@Override

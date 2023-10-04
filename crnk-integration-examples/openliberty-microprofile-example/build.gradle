@@ -17,7 +17,7 @@ buildscript {
 
 dependencies {
 	// provided dependencies
-	providedCompile 'jakarta.platform:jakarta.jakartaee-api:8.0.0'
+	providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
 	providedCompile 'org.eclipse.microprofile:microprofile:4.0.1'
 
 	implementation project(':crnk-setup:crnk-setup-rs')

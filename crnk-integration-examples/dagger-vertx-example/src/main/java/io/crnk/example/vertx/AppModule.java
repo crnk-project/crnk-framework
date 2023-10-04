@@ -9,11 +9,8 @@ import io.crnk.home.HomeModule;
 import io.crnk.security.ResourcePermission;
 import io.crnk.security.SecurityConfig;
 import io.crnk.security.SecurityModule;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AbstractUser;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 
@@ -55,23 +52,8 @@ public class AppModule {
     @Singleton
     public AuthProvider authProvider() {
         return (authInfo, resultHandler) -> {
-            User user = new AbstractUser() {
-                @Override
-                protected void doIsPermitted(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
-                    resultHandler.handle(Future.succeededFuture(true));
-                }
+            User user = User.create(new JsonObject().put("name", "john doe"));
 
-                @Override
-                public JsonObject principal() {
-                    JsonObject object = new JsonObject();
-                    return object.put("name", "john doe");
-                }
-
-                @Override
-                public void setAuthProvider(AuthProvider authProvider) {
-
-                }
-            };
             resultHandler.handle(Future.succeededFuture(user));
         };
     }

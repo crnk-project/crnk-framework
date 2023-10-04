@@ -4,11 +4,10 @@ plugins {
 }
 
 dependencies {
-	implementation project(':crnk-core')
-	implementation project(':crnk-reactive')
-	implementation 'io.vertx:vertx-rx-java2:3.7.1'
-
-	implementation 'io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE'
+	api project(':crnk-core')
+	api project(':crnk-reactive')
+	api 'io.vertx:vertx-rx-java3:4.4.5'
+	api 'io.projectreactor.addons:reactor-adapter:3.5.1'
 
 	compileOnly 'org.slf4j:slf4j-api:2.0.9'
 

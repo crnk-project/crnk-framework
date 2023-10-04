@@ -16,9 +16,8 @@ configurations {
 
 buildscript {
     dependencies {
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
-
-        classpath 'net.sf.proguard:proguard-gradle:6.0.3'
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.21"
+        classpath 'net.sf.proguard:proguard-gradle:6.2.2'
 	}
 }
 
@@ -46,19 +45,20 @@ dependencies {
     implementation 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
     implementation 'com.h2database:h2:1.4.187'
 
-    implementation 'io.vertx:vertx-auth-common:3.7.1'
+    implementation 'io.vertx:vertx-auth-common:4.4.5'
+	implementation 'io.projectreactor.addons:reactor-adapter:3.5.1'
 
-    // add in the future
+
+	// add in the future
     // implementation project(':crnk-meta')
     // implementation project(':crnk-operations')
     // implementation project(':crnk-ui')
-    // implementation project(':crnk-validation')
 
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
-    implementation 'com.google.dagger:dagger:2.16'
+    implementation 'com.google.dagger:dagger:2.48'
 
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.48'
 }
 
 // https://github.com/immutables/immutables/issues/134 issues with incremental compilation

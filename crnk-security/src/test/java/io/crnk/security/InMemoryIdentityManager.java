@@ -21,11 +21,16 @@ public class InMemoryIdentityManager {
 
 	private HashLoginService loginService;
 
+	private UserStore userStore;
+
 	private String realm = "myrealm";
 
 	public InMemoryIdentityManager() {
+		userStore = new UserStore();
+
 		loginService = new HashLoginService();
 		loginService.setName(realm);
+		loginService.setUserStore(userStore);
 
 		securityHandler = new ConstraintSecurityHandler();
 		securityHandler.setAuthenticator(new BasicAuthenticator());
@@ -45,7 +50,6 @@ public class InMemoryIdentityManager {
 	}
 
 	public void addUser(String userId, String password, String... roles) {
-		UserStore userStore = new UserStore();
 		userStore.addUser(userId, Credential.getCredential(password), roles);
 		loginService.setUserStore(userStore);
 	}
