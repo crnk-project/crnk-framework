@@ -3,6 +3,9 @@ plugins {
 	id 'java-library'
 }
 
+sourceCompatibility = 1.17
+targetCompatibility = 1.17
+
 dependencies {
 	implementation project(':crnk-core')
 	compileOnly group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'

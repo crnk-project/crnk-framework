@@ -73,8 +73,8 @@ gradle.beforeProject { Project project ->
 			apply plugin: 'java'
 			apply plugin: 'java-library'
 
-			sourceCompatibility = '17'
-			targetCompatibility = '17'
+			sourceCompatibility = 1.17
+			targetCompatibility = 1.17
 
 			if (!bom) {
 				dependencies {
