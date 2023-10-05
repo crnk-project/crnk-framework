@@ -31,9 +31,6 @@ dependencies {
     implementation project(':crnk-gen:crnk-gen-asciidoc')
     implementation project(':crnk-gen:crnk-gen-openapi')
 
-	implementation 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations'
-
-
     compileOnly 'junit:junit:4.12'
 
     testImplementation  gradleTestKit()
