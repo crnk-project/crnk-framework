@@ -41,6 +41,6 @@ dependencies {
     testImplementation  project(':crnk-client')
     testImplementation  'io.rest-assured:rest-assured:5.3.2'
     testImplementation  'io.rest-assured:json-schema-validator:5.3.2'
-    testImplementation  'commons-io:commons-io:1.3.2'
+    testImplementation  'commons-io:commons-io:2.14.0'
     testImplementation  'org.springframework.boot:spring-boot-starter-test'
 }

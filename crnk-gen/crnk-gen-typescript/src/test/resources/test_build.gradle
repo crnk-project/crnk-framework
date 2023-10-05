@@ -44,7 +44,7 @@ dependencies {
 	implementation 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations'
 
 	integrationTestCompile 'junit:junit:4.12'
-	integrationTestCompile 'commons-io:commons-io:2.5'
+	integrationTestCompile 'commons-io:commons-io:2.14.0'
 	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
 	integrationTestCompile 'org.apache.deltaspike.core:deltaspike-core-impl:1.9.6'
 	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'

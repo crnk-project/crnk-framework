@@ -11,7 +11,7 @@ dependencies {
 
     implementation 'guru.nidi:graphviz-java:0.12.1'
 
-	testImplementation  'commons-io:commons-io:2.5'
+	testImplementation  'commons-io:commons-io:2.14.0'
     testImplementation  project(':crnk-meta')
     testImplementation  project(':crnk-test')
     testImplementation  project(':crnk-format:crnk-format-plain-json')

@@ -22,7 +22,7 @@ dependencies {
     testImplementation  project(':crnk-test')
     testImplementation  project(':crnk-setup:crnk-setup-cdi')
     testImplementation  project(':crnk-setup:crnk-setup-spring-boot3')
-    testImplementation  'commons-io:commons-io:2.5'
+    testImplementation  'commons-io:commons-io:2.14.0'
     testImplementation  'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
     testImplementation  'org.apache.deltaspike.core:deltaspike-core-impl:1.9.6'
     testImplementation  'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
