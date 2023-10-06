@@ -14,7 +14,7 @@ dependencies {
 	api  group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '1.7.2'
 	api  group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
 
-	api  group: 'junit', name: 'junit', version: '4.12'
+	api  group: 'junit', name: 'junit', version: '4.13.1'
 	api  group: 'org.mockito', name: 'mockito-core', version: '5.5.0'
 	api  group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
 

@@ -11,7 +11,7 @@ dependencies {
     implementation project(':crnk-meta')
 	implementation 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations'
 
-	compileOnly 'junit:junit:4.12'
+	compileOnly 'junit:junit:4.13.1'
     compileOnly 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.9.6'
     compileOnly 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-api:1.9.6'
     compileOnly 'org.jboss.weld.se:weld-se-core:2.4.0.Final'

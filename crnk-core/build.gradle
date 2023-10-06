@@ -14,7 +14,6 @@ dependencies {
 
 	testImplementation  'org.reflections:reflections'
     testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
-	testImplementation  'nl.jqno.equalsverifier:equalsverifier:3.15.2'
     testImplementation  'com.jayway.jsonpath:json-path:2.2.0'
 	testImplementation  'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
 
