@@ -8,15 +8,11 @@ dependencies {
 	api 'org.slf4j:slf4j-api:2.0.9'
 	api 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.2'
 	api 'jakarta.validation:jakarta.validation-api:3.0.2'
-	api 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
-
 	api 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
 
 	testImplementation  'org.reflections:reflections'
     testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
     testImplementation  'com.jayway.jsonpath:json-path:2.2.0'
-	testImplementation  'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
-
 	testImplementation  'com.google.guava:guava:31.1-jre'
 
 	testImplementation  "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
