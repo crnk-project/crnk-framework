@@ -33,7 +33,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	implementation 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
-    implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
     implementation 'com.h2database:h2:2.2.224'
     implementation 'com.squareup.okhttp3:okhttp:3.4.1'
     implementation 'com.google.guava:guava:31.1-jre'

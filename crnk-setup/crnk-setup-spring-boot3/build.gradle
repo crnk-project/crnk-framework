@@ -32,7 +32,6 @@ dependencies {
 	compileOnly 'io.opentracing:opentracing-api:0.31.0'
 
 	compileOnlyApi 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
-	compileOnlyApi 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
 	compileOnlyApi 'org.springframework.boot:spring-boot-starter-web'
 	compileOnlyApi 'org.springframework.boot:spring-boot-configuration-processor'
 	compileOnlyApi 'org.springframework.boot:spring-boot-starter-actuator'
@@ -59,7 +58,6 @@ dependencies {
 	testImplementation  'org.springframework.boot:spring-boot-starter-validation'
 
 	testImplementation	'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
-	testImplementation  'org.hibernate:hibernate-entitymanager'
 	testImplementation  'com.h2database:h2'
 
 	testImplementation  'org.springframework.boot:spring-boot-configuration-processor'

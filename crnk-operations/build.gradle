@@ -27,9 +27,8 @@ dependencies {
 	testImplementation  group: 'org.springframework', name: 'spring-orm', version: '6.0.12'
 	testImplementation  group: 'org.springframework', name: 'spring-context', version: '6.0.12'
 	testImplementation  group: 'org.springframework', name: 'spring-test', version: '6.0.12'
-	testImplementation  group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.6.15.Final'
 	testImplementation  group: 'com.h2database', name: 'h2', version: '1.4.187'
-	testImplementation(group: 'org.hibernate', name: 'hibernate-core-jakarta', version: '5.6.15.Final')
+	testImplementation  group: 'org.hibernate', name: 'hibernate-core-jakarta', version: '5.6.15.Final'
 }
 
 bootJar {

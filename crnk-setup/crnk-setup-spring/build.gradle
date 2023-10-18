@@ -15,7 +15,6 @@ dependencies {
 	compileOnlyApi 'org.springframework.boot:spring-boot-starter-actuator'
 	compileOnlyApi 'org.springframework.security:spring-security-core'
 	compileOnlyApi 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
-	compileOnlyApi 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
 	compileOnlyApi 'org.springframework:spring-orm'
 
 	testImplementation  project(':crnk-data:crnk-data-jpa')
@@ -34,14 +33,11 @@ dependencies {
 	testImplementation  'org.springframework.boot:spring-boot-starter-actuator'
 
 	testImplementation 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
-
-	testImplementation  'org.hibernate:hibernate-entitymanager'
 	testImplementation  'com.h2database:h2'
 
 	testImplementation  'org.springframework.boot:spring-boot-configuration-processor'
 	testImplementation  'org.springframework:spring-orm'
 	testImplementation  'org.springframework.security:spring-security-core'
-	testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
 
 	bootJar {
 		enabled = false

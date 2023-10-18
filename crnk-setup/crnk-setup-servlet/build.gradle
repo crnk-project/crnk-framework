@@ -12,7 +12,6 @@ dependencies {
 	testImplementation  project(':crnk-reactive')
 	testImplementation  project(':crnk-test')
 	testImplementation  project(':crnk-client')
-	testImplementation  group: 'org.reflections', name: 'reflections', version: '0.10.2'
 	testImplementation  'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	testImplementation  'org.springframework.boot:spring-boot-starter-web'

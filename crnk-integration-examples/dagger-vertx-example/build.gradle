@@ -41,7 +41,6 @@ dependencies {
     implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
 	implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
 	implementation 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
-    implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
     implementation  'com.h2database:h2:2.2.224'
 
     implementation 'io.vertx:vertx-auth-common:4.4.5'
