@@ -7,6 +7,14 @@ plugins {
 
 dependencies {
 
+	bootJar {
+		enabled = false
+	}
+
+	jar {
+		enabled = true
+	}
+
 	api project(':crnk-setup:crnk-setup-servlet')
 	api project(':crnk-setup:crnk-setup-spring')
 	compileOnly project(':crnk-data:crnk-data-jpa')
