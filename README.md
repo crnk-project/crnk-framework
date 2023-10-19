@@ -62,7 +62,7 @@ dependencies {
 
     annotationProcessor 'io.crnk:crnk-gen-java'
 
-    implementation "io.crnk:crnk-setup-spring-boot2"
+    implementation "io.crnk:crnk-setup-spring-boot3"
     implementation "io.crnk:crnk-data-jpa"
     implementation "io.crnk:crnk-data-facet"
     implementation "io.crnk:crnk-format-plain-json"

@@ -65,7 +65,7 @@ The crnk modules can then simply be used without having to specify a version:
 ----
 dependencies {
 	implementation 'io.crnk:crnk-rs'
-	implementation 'io.crnk:crnk-setup-spring-boot2'
+	implementation 'io.crnk:crnk-setup-spring-boot3'
 	...
 }
 ----
@@ -267,18 +267,18 @@ A code below shows a sample ``web.xml`` file with properly defined and configure
 Crnk provides with:
 
 - `io.crnk:crnk-setup-spring` support for plain Spring 4 and 5.
-- `io.crnk:crnk-setup-spring-boot1` support for Spring Boot 1.x. This module is considered being deprecated and will be removed in the future.
-- `io.crnk:crnk-setup-spring-boot2` support for Spring Boot 2.x.
+- `io.crnk:crnk-setup-spring-boot3` support for Spring Boot 3.x
+    - Note: Support for Spring Boot 1.x and 2.x was removed with the move to support 3.x.
 
-There is a `CrnkCoreAutoConfiguration` in  `crnk-setup-spring-boot2` that outlines
+There is a `CrnkCoreAutoConfiguration` in  `crnk-setup-spring-boot3` that outlines
 the basic setup that can easily be applied to a Spring-only setup without Spring Boot using `crnk-setup-spring`:
 
 - It uses the `CrnkFilter` servlet filter to process requests.
 - Service discovery is performed with `SpringServiceDiscovery` using the Spring `ApplicationContext`.
 
-`io.crnk:crnk-setup-spring-boot1` and  `io.crnk:crnk-setup-spring-boot2` host Spring Boot auto configurations
-that are enabled if the presence of the particular Crnk module and/or Spring component. Each auto configuration
-can be enabled and disabled and may host further properties to reconfigure it. The following auto configurations are available:
+`io.crnk:crnk-setup-spring-boot3` hosts Spring Boot auto configurations that are enabled if the presence of the
+particular Crnk module and/or Spring component. Each auto configuration can be enabled and disabled and may host
+further properties to reconfigure it. The following auto configurations are available:
 
 - `CrnkHomeAutoConfiguration`
 - `CrnkCoreAutoConfiguration`
@@ -306,7 +306,7 @@ crnk.allow-unknown-attributes=false
 crnk.return404-on-null=true
 ----
 
-See https://github.com/crnk-project/crnk-framework/blob/master/crnk-setup/crnk-setup-spring-boot2/src/main/java/io/crnk/setup/spring/boot/core/CrnkCoreProperties.java[CrnkCoreProperties]
+See https://github.com/crnk-project/crnk-framework/blob/master/crnk-setup/crnk-setup-spring-boot3/src/main/java/io/crnk/setup/spring/boot/core/CrnkCoreProperties.java[CrnkCoreProperties]
 and the various auto configurations for more information. Next to configuration properties there is also the possibility to provide a `Configurer` implementation
 to gain programmatic access to module configurations. The following `Configurer` are available:
 
