@@ -48,6 +48,7 @@ public class ApprovalManagerTest {
 		ActivitiResourceMapper resourceMapper = new ActivitiResourceMapper(new TypeParser(), new DefaultDateTimeMapper());
 
 		ResourceInformation information = Mockito.mock(ResourceInformation.class);
+		Mockito.when(information.parseIdString(Mockito.anyString())).thenReturn(13L);
 		registryEntry = Mockito.mock(RegistryEntry.class);
 		ResourceRegistry resourceRegistry = Mockito.mock(ResourceRegistry.class);
 		Mockito.when(registryEntry.getResourceInformation()).thenReturn(information);
@@ -82,7 +83,7 @@ public class ApprovalManagerTest {
 		ArgumentCaptor<Map> processVariablesCaptor = ArgumentCaptor.forClass(Map.class);
 		Mockito.verify(runtimeService, Mockito.times(1))
 				.startProcessInstanceByKey(Mockito.eq("scheduleChange"), processVariablesCaptor.capture());
-		Map processVariables = processVariablesCaptor.getValue();
+		Map<String, Object> processVariables = processVariablesCaptor.getValue();
 
 		Assert.assertEquals(7, processVariables.size());
 		Assert.assertEquals(mockId.toString(), processVariables.get("resourceId"));
@@ -94,7 +95,7 @@ public class ApprovalManagerTest {
 
 	@Test
 	public void checkApprovedForwardsToRepository() {
-		Map processVariable = new HashMap();
+		Map<String, Object> processVariable = new HashMap<>();
 		processVariable.put("resourceId", mockId.toString());
 		processVariable.put("resourceType", "schedule");
 		processVariable.put("newValues.name", "John");
@@ -102,6 +103,8 @@ public class ApprovalManagerTest {
 		Mockito.when(runtimeService.getVariables(Mockito.anyString())).thenReturn(processVariable);
 
 		Execution execution = Mockito.mock(Execution.class);
+		Mockito.when(execution.getId()).thenReturn("123");
+
 		manager.approved(execution);
 
 		ArgumentCaptor<Object> savedEntityCaptor = ArgumentCaptor.forClass(Object.class);

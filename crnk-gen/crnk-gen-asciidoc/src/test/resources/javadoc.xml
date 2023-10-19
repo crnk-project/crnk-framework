@@ -414,7 +414,7 @@
             <constructor name="TestDataLoader" signature="()" qualified="io.crnk.example.service.TestDataLoader" scope="public" final="false" included="true" native="false" synchronized="false" static="false" varArgs="false"/>
             <method name="setup" signature="()" qualified="io.crnk.example.service.TestDataLoader.setup" scope="public" abstract="false" final="false" included="true" native="false" synchronized="false" static="false" varArgs="false">
                 <return qualified="void"/>
-                <annotation name="PostConstruct" qualified="javax.annotation.PostConstruct"/>
+                <annotation name="PostConstruct" qualified="jakarta.annotation.PostConstruct"/>
             </method>
             <method name="createScreening" signature="(io.crnk.example.service.jpa.MovieEntity)" qualified="io.crnk.example.service.TestDataLoader.createScreening" scope="private" abstract="false" final="false" included="true" native="false" synchronized="false" static="false" varArgs="false">
                 <parameter name="movie">
@@ -424,7 +424,7 @@
             </method>
             <method name="configureJackson" signature="()" qualified="io.crnk.example.service.TestDataLoader.configureJackson" scope="public" abstract="false" final="false" included="true" native="false" synchronized="false" static="false" varArgs="false">
                 <return qualified="void"/>
-                <annotation name="PostConstruct" qualified="javax.annotation.PostConstruct"/>
+                <annotation name="PostConstruct" qualified="jakarta.annotation.PostConstruct"/>
             </method>
             <method name="createMovie" signature="(java.lang.String, int, java.util.List&lt;java.lang.String&gt;)" qualified="io.crnk.example.service.TestDataLoader.createMovie" scope="protected" abstract="false" final="false" included="true" native="false" synchronized="false" static="false" varArgs="false">
                 <parameter name="title">
@@ -457,7 +457,7 @@
                 <type qualified="long"/>
             </field>
             <field name="em" qualified="io.crnk.example.service.TestDataLoader.em" scope="private" volatile="false" transient="false" static="false" final="false">
-                <type qualified="javax.persistence.EntityManager"/>
+                <type qualified="jakarta.persistence.EntityManager"/>
                 <annotation name="Autowired" qualified="org.springframework.beans.factory.annotation.Autowired"/>
             </field>
             <field name="transactionRunner" qualified="io.crnk.example.service.TestDataLoader.transactionRunner" scope="private" volatile="false" transient="false" static="false" final="false">
@@ -580,10 +580,10 @@
                     <value>movie</value>
                 </argument>
             </annotation>
-            <annotation name="Entity" qualified="javax.persistence.Entity"/>
+            <annotation name="Entity" qualified="jakarta.persistence.Entity"/>
             <field name="id" qualified="io.crnk.example.service.jpa.MovieEntity.id" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.util.UUID"/>
-                <annotation name="Id" qualified="javax.persistence.Id"/>
+                <annotation name="Id" qualified="jakarta.persistence.Id"/>
             </field>
             <field name="name" qualified="io.crnk.example.service.jpa.MovieEntity.name" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.String"/>
@@ -597,7 +597,7 @@
                 <type qualified="java.util.List">
                     <generic qualified="io.crnk.example.service.jpa.RoleEntity"/>
                 </type>
-                <annotation name="OneToMany" qualified="javax.persistence.OneToMany">
+                <annotation name="OneToMany" qualified="jakarta.persistence.OneToMany">
                     <argument name="mappedBy" primitive="false" array="false">
                         <type qualified="java.lang.String"/>
                         <value>movie</value>
@@ -606,7 +606,7 @@
             </field>
             <field name="version" qualified="io.crnk.example.service.jpa.MovieEntity.version" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.Integer"/>
-                <annotation name="Version" qualified="javax.persistence.Version"/>
+                <annotation name="Version" qualified="jakarta.persistence.Version"/>
             </field>
         </class>
         <class name="MovieRepository" qualified="io.crnk.example.service.jpa.MovieRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">
@@ -696,10 +696,10 @@
                     <value>person</value>
                 </argument>
             </annotation>
-            <annotation name="Entity" qualified="javax.persistence.Entity"/>
+            <annotation name="Entity" qualified="jakarta.persistence.Entity"/>
             <field name="id" qualified="io.crnk.example.service.jpa.PersonEntity.id" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.util.UUID"/>
-                <annotation name="Id" qualified="javax.persistence.Id"/>
+                <annotation name="Id" qualified="jakarta.persistence.Id"/>
             </field>
             <field name="name" qualified="io.crnk.example.service.jpa.PersonEntity.name" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.String"/>
@@ -712,7 +712,7 @@
                 <type qualified="java.util.List">
                     <generic qualified="io.crnk.example.service.jpa.RoleEntity"/>
                 </type>
-                <annotation name="OneToMany" qualified="javax.persistence.OneToMany">
+                <annotation name="OneToMany" qualified="jakarta.persistence.OneToMany">
                     <argument name="mappedBy" primitive="false" array="false">
                         <type qualified="java.lang.String"/>
                         <value>movie</value>
@@ -721,7 +721,7 @@
             </field>
             <field name="version" qualified="io.crnk.example.service.jpa.PersonEntity.version" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.Integer"/>
-                <annotation name="Version" qualified="javax.persistence.Version"/>
+                <annotation name="Version" qualified="jakarta.persistence.Version"/>
             </field>
         </class>
         <class name="PersonRepository" qualified="io.crnk.example.service.jpa.PersonRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">
@@ -816,10 +816,10 @@
                     <value>role</value>
                 </argument>
             </annotation>
-            <annotation name="Entity" qualified="javax.persistence.Entity"/>
+            <annotation name="Entity" qualified="jakarta.persistence.Entity"/>
             <field name="id" qualified="io.crnk.example.service.jpa.RoleEntity.id" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.Long"/>
-                <annotation name="Id" qualified="javax.persistence.Id"/>
+                <annotation name="Id" qualified="jakarta.persistence.Id"/>
             </field>
             <field name="name" qualified="io.crnk.example.service.jpa.RoleEntity.name" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.String"/>
@@ -832,7 +832,7 @@
             </field>
             <field name="description" qualified="io.crnk.example.service.jpa.RoleEntity.description" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.String"/>
-                <annotation name="Size" qualified="javax.validation.constraints.Size">
+                <annotation name="Size" qualified="jakarta.validation.constraints.Size">
                     <argument name="max" primitive="true" array="false">
                         <type qualified="int"/>
                         <value>20</value>
@@ -849,11 +849,11 @@
             </field>
             <field name="movie" qualified="io.crnk.example.service.jpa.RoleEntity.movie" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="io.crnk.example.service.jpa.MovieEntity"/>
-                <annotation name="ManyToOne" qualified="javax.persistence.ManyToOne"/>
+                <annotation name="ManyToOne" qualified="jakarta.persistence.ManyToOne"/>
             </field>
             <field name="person" qualified="io.crnk.example.service.jpa.RoleEntity.person" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="io.crnk.example.service.jpa.PersonEntity"/>
-                <annotation name="ManyToOne" qualified="javax.persistence.ManyToOne"/>
+                <annotation name="ManyToOne" qualified="jakarta.persistence.ManyToOne"/>
             </field>
         </class>
         <class name="RoleRepository" qualified="io.crnk.example.service.jpa.RoleRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">
@@ -900,17 +900,17 @@
                     <value>schedule</value>
                 </argument>
             </annotation>
-            <annotation name="Entity" qualified="javax.persistence.Entity"/>
+            <annotation name="Entity" qualified="jakarta.persistence.Entity"/>
             <field name="id" qualified="io.crnk.example.service.jpa.ScheduleEntity.id" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.Long"/>
-                <annotation name="Id" qualified="javax.persistence.Id"/>
+                <annotation name="Id" qualified="jakarta.persistence.Id"/>
             </field>
             <field name="name" qualified="io.crnk.example.service.jpa.ScheduleEntity.name" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="java.lang.String"/>
             </field>
             <field name="movie" qualified="io.crnk.example.service.jpa.ScheduleEntity.movie" scope="private" volatile="false" transient="false" static="false" final="false">
                 <type qualified="io.crnk.example.service.jpa.MovieEntity"/>
-                <annotation name="ManyToOne" qualified="javax.persistence.ManyToOne"/>
+                <annotation name="ManyToOne" qualified="jakarta.persistence.ManyToOne"/>
             </field>
         </class>
         <class name="ScheduleRepository" qualified="io.crnk.example.service.jpa.ScheduleRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">

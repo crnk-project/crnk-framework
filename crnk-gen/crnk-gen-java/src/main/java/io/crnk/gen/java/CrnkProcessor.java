@@ -18,7 +18,7 @@ import io.crnk.core.resource.annotations.JsonApiEmbeddable;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-import javax.annotation.Generated;
+import jakarta.annotation.Generated;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -250,10 +250,10 @@ public class CrnkProcessor extends AbstractProcessor {
     private boolean isRelationship(Element member) {
         for (AnnotationMirror mirror : member.getAnnotationMirrors()) {
             String name = mirror.getAnnotationType().toString();
-            if (name.equals("javax.persistence.OneToMany") ||
-                    name.equals("javax.persistence.ManyToOne") ||
-                    name.equals("javax.persistence.OneToOne") ||
-                    name.equals("javax.persistence.ManyToMany")) {
+            if (name.equals("jakarta.persistence.OneToMany") ||
+                    name.equals("jakarta.persistence.ManyToOne") ||
+                    name.equals("jakarta.persistence.OneToOne") ||
+                    name.equals("jakarta.persistence.ManyToMany")) {
                 return true;
             }
         }

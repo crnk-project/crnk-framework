@@ -17,16 +17,19 @@ buildscript {
 
 dependencies {
 	// provided dependencies
-	providedCompile 'jakarta.platform:jakarta.jakartaee-api:8.0.0'
+	providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
 	providedCompile 'org.eclipse.microprofile:microprofile:4.0.1'
 
-	compile project(':crnk-setup:crnk-setup-rs')
-	compile project(':crnk-setup:crnk-setup-cdi')
-	compile project(':crnk-home')
-	compile project(':crnk-data:crnk-data-jpa')
-	compile 'com.h2database:h2:1.4.200'
-	compile 'org.hibernate:hibernate-entitymanager:5.5.3.Final'
+	implementation project(':crnk-setup:crnk-setup-rs')
+	implementation project(':crnk-setup:crnk-setup-cdi')
+	implementation project(':crnk-home')
+	implementation project(':crnk-data:crnk-data-jpa')
+	implementation  'com.h2database:h2:2.2.224'
+	implementation 'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
 }
+
+compileJava.dependsOn ':crnk-setup:crnk-setup-cdi:processResources'
+
 
 ext  {
 	liberty.server.var.'default.http.port' = '9080'

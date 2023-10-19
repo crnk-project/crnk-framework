@@ -3,7 +3,7 @@ package io.crnk.data.jpa.query.querydsl;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 import io.crnk.data.jpa.query.TablePerClassInhertitanceQueryTestBase;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class TablePerClassInheritanceQuerydslTest extends TablePerClassInhertitanceQueryTestBase {
 

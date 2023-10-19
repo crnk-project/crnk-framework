@@ -8,7 +8,7 @@ import io.crnk.data.jpa.query.JpaQueryFactoryContext;
 import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.provider.MetaPartition;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.Collections;
 
 public abstract class JpaQueryFactoryBase implements JpaQueryFactory {

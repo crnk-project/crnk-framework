@@ -2,15 +2,18 @@
 
 //apply plugin: 'com.moowork.node'
 
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
-    compile project(':crnk-core')
-    compile project(':crnk-data:crnk-data-facet')
-    compile project(':crnk-meta')
+    implementation project(':crnk-core')
+    implementation project(':crnk-data:crnk-data-facet')
+    implementation project(':crnk-meta')
     compileOnly project(':crnk-home')
-    testCompile project(':crnk-test')
-    testCompile project(':crnk-home')
+    testImplementation  project(':crnk-test')
+    testImplementation  project(':crnk-home')
 }
 
 /*

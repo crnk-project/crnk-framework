@@ -3,11 +3,11 @@ package io.crnk.rs;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.Arrays;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Configuration;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 
 import io.crnk.core.engine.http.HttpResponse;
 import org.junit.Assert;
@@ -25,7 +25,7 @@ public class JaxrsRequestContextTest {
 
 	private JaxrsRequestContext context;
 
-	private javax.ws.rs.core.UriInfo uriInfo;
+	private jakarta.ws.rs.core.UriInfo uriInfo;
 
 	@Before
 	public void setup() {

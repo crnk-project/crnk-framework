@@ -7,7 +7,7 @@ import io.crnk.data.jpa.model.dto.RelatedDTO;
 import io.crnk.data.jpa.model.dto.TestDTO;
 import io.crnk.data.jpa.query.Tuple;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 /**
  * you may consider the use of MapStructor or similar tooling to

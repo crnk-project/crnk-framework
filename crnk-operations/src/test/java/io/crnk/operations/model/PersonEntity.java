@@ -1,12 +1,12 @@
 package io.crnk.operations.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.Version;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;

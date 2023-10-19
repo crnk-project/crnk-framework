@@ -1,6 +1,6 @@
 package io.crnk.example.dropwizard.simple;
 
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Configuration;
 
 public class DropwizardConfiguration extends Configuration {
 

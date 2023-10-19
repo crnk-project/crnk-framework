@@ -1,7 +1,7 @@
 package io.crnk.operations.internal;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.NameBinding;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.NameBinding;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -23,8 +23,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 public class InteroperabilityTest extends JerseyTestBase {
 
@@ -117,7 +117,7 @@ public class InteroperabilityTest extends JerseyTestBase {
     @Test
     public void testUnknownExceptionsGetMappedToInternalServerException() {
         JsonapiExceptionMapperBridge bridge = new JsonapiExceptionMapperBridge(feature);
-        javax.ws.rs.core.Response response = bridge.toResponse(new CustomException());
+        jakarta.ws.rs.core.Response response = bridge.toResponse(new CustomException());
         Assert.assertEquals(500, response.getStatus());
         Assert.assertTrue(response.getEntity() instanceof Document);
     }

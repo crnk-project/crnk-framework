@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 @Transactional
 public class JpaRepositoryFilterTest extends AbstractJpaTest {

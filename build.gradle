@@ -6,8 +6,6 @@ buildscript {
 		def depMgmtVersion = versions['dependency.management.plugin.version']
 
 		classpath "io.spring.gradle:dependency-management-plugin:${depMgmtVersion}"
-		classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.9.2'
-		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
 		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
 		classpath 'org.ajoberstar.git-publish:gradle-git-publish:3.0.1'
 		classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
@@ -24,9 +22,8 @@ buildscript {
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
 
-
 wrapper {
-	gradleVersion = '6.9.2'
+	gradleVersion = '8.3'
 }
 
 apply plugin: 'jdk-bootstrap'
@@ -74,19 +71,19 @@ gradle.beforeProject { Project project ->
 
 		if (!docs) {
 			apply plugin: 'java'
+			apply plugin: 'java-library'
 
-			sourceCompatibility = 1.8
-			targetCompatibility = 1.8
+			sourceCompatibility = 1.17
+			targetCompatibility = 1.17
 
 			if (!bom) {
 				dependencies {
-					testCompile group: 'junit', name: 'junit', version: '4.12'
-					testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
-					testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
-					// https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
-					compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
-					// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
-					compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
+					testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+					testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.5.0'
+					testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.2'
+					api group: 'jakarta.annotation', name: 'jakarta.annotation-api', version: '2.1.1'
+					api group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: '4.0.1'
+					api group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '4.0.3'
 				}
 
 				test {
@@ -107,178 +104,181 @@ gradle.beforeProject { Project project ->
 				dependencyManagement {
 					imports {
 						mavenBom 'io.projectreactor:reactor-bom:Bismuth-RELEASE'
-						mavenBom 'org.glassfish.jersey:jersey-bom:2.26'
+						mavenBom 'org.glassfish.jersey:jersey-bom:3.1.3'
 					}
 					dependencies {
-						dependency 'com.fasterxml.jackson.core:jackson-databind:2.9.10'
-						dependency 'com.fasterxml.jackson.core:jackson-annotations:2.9.10'
-						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.10'
-						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.10'
-						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.10'
-						dependency 'com.fasterxml.jackson.core:jackson-core:2.9.10'
-						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.9.10'
+						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2'
+						dependency 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.15.3'
+						dependency 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-xml-provider:2.15.3'
+						dependency 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.15.3'
+						dependency 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.2'
 
-						dependency 'org.reflections:reflections:0.9.11'
+						dependency 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
+						dependency 'com.sun.xml.bind:jaxb-impl:4.0.3'
+
+						dependency 'org.reflections:reflections:0.10.2'
 					}
 				}
 			}
 		}
-
-		// TODO gradle publishing to maven central?
-		if (!docs && !examples && !testProject && !legacyBraveProject) {
-			apply plugin: "jacoco"
-			jacoco {
-				toolVersion = "0.8.5"
-			}
-
-			rootProject.tasks.jacocoMerge.executionData tasks.withType(Test)
-			rootProject.tasks.jacocoRootReport.additionalSourceDirs files(sourceSets.main.allSource.srcDirs)
-
-			def sourceDirs = rootProject.tasks.jacocoRootReport.sourceDirectories
-			def classDirs = rootProject.tasks.jacocoRootReport.classDirectories
-
-			def mainOutput = files(files(sourceSets.main.output).collect {
-				fileTree(dir: it, exclude: '**/legacy/**')
-			})
-
-			rootProject.tasks.jacocoRootReport.sourceDirectories.from files(sourceSets.main.allSource.srcDirs)
-			rootProject.tasks.jacocoRootReport.classDirectories.from mainOutput
-
-			rootProject.coveralls.sourceDirs.addAll(sourceSets.main.allSource.srcDirs.flatten())
-
-			jacocoTestReport {
-				reports {
-					xml.enabled = true // coveralls plugin depends on xml format report
-					html.enabled = true
-				}
-			}
-		}
-
-		apply plugin: 'maven-publish'
-
-		if (!docs && !examples) {
-
-			task sourcesJar(type: Jar) {
-				from sourceSets.main.allSource
-				classifier = 'sources'
-			}
-
-			task javadocJar(type: Jar, dependsOn: 'javadoc') {
-				from javadoc.destinationDir
-				classifier = 'javadoc'
-			}
-
-
-			plugins.withId("com.vanniktech.maven.publish.base") {
-				group = GROUP_ID
-
-				mavenPublishing {
-					publishToMavenCentral("DEFAULT")
-
-					// Will only apply to non snapshot builds.
-					// Uses credentials as described above, supports both regular and in memory signing.
-					signAllPublications()
-
-					pom {
-						name = "Crnk"
-						description = "A description of what my library does."
-						inceptionYear = "2020"
-						url = "https ://github.com/crnk-project/crnk-framework/"
-						licenses {
-							license {
-								name = "The Apache License, Version 2.0"
-								url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-								distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-							}
-						}
-						developers {
-							developer {
-								id = "crnk"
-								name = "crnk"
-								url = "https://github.com/crnk-project/"
-							}
-						}
-						scm {
-							url = "https://github.com/crnk-project/crnk-framework"
-							connection = "scm:git:git://github.com/crnk-project/crnk-framework.git"
-							developerConnection = "scm:git:ssh://git@github.com/crnk-project/crnk-framework.git"
-						}
-					}
-				}
-			}
-
-			apply plugin: "com.vanniktech.maven.publish.base"
-
-			mavenPublishing {
-				// available options:
-				//   - JavaLibrary
-				//   - GradlePlugin
-				//   - AndroidLibrary
-				//   - KotlinJvm
-				//   - KotlinJs
-				//   - KotlinMultiplatform
-				// the first parameter configures the javadoc jar, available options:
-				//   - None
-				//   - Empty
-				//   - Javadoc
-				//   - Dokka("dokkaHtml") - the parameter is the name of the Dokka task
-				// second one is for whether to publish sources, optional, defaults to true (not supported for KotlinMultiplatform(
-				// AndroidLibrary has a third parameter for which variant to publish, defaults to "release"
-				configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
-			}
-
-
-			def releaseBuild = project.hasProperty('stable')
-
-
-		}
-
 	}
-}
-
-// coveralls setup
-apply plugin: "jacoco"
-apply plugin: "com.github.kt3k.coveralls"
-
-def publishedProjects = subprojects.findAll {
-	it.name != 'crnk-documentation' && it.name != 'crnk-ui' && it.name != 'crnk-test' && !it.name.contains('example')
-}
-
-task jacocoMerge(type: JacocoMerge) {
-	destinationFile = new File(project.buildDir, 'jacoco/test.exec')
-	doFirst {
-		executionData = files(executionData.findAll { it.exists() })
-	}
-	for (publishedProject in publishedProjects) {
-		dependsOn publishedProject.path + ":check"
-	}
-}
-
-
-task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
-	description = 'Generates an aggregate report from all subprojects'
-
-	dependsOn tasks.jacocoMerge
-
-	executionData tasks.jacocoMerge.destinationFile
-
-	reports {
-		html.enabled = true // human readable
-		xml.enabled = true // required by coveralls
-	}
-
-}
-
-
-coveralls {
-	jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
-}
-
-tasks.coveralls {
-	group = 'Coverage reports'
-	description = 'Uploads the aggregated coverage report to Coveralls'
-
-	dependsOn jacocoRootReport
+//
+//		 // TODO gradle publishing to maven central?
+//		 if (!docs && !examples && !testProject && !legacyBraveProject) {
+//		 	apply plugin: "jacoco"
+//		 	jacoco {
+//		 		toolVersion = "0.8.10"
+//		 	}
+//
+//		 	// rootProject.tasks.jacocoMerge.executionData tasks.withType(Test)
+//		 	rootProject.tasks.jacocoRootReport.additionalSourceDirs files(sourceSets.main.allSource.srcDirs)
+//
+//		 	def sourceDirs = rootProject.tasks.jacocoRootReport.sourceDirectories
+//		 	def classDirs = rootProject.tasks.jacocoRootReport.classDirectories
+//
+//		 	def mainOutput = files(files(sourceSets.main.output).collect {
+//		 		fileTree(dir: it, exclude: '**/legacy/**')
+//		 	})
+//
+//		 	rootProject.tasks.jacocoRootReport.sourceDirectories.from files(sourceSets.main.allSource.srcDirs)
+//		 	rootProject.tasks.jacocoRootReport.classDirectories.from mainOutput
+//
+//		 	rootProject.coveralls.sourceDirs.addAll(sourceSets.main.allSource.srcDirs.flatten())
+//
+//		 	jacocoTestReport {
+//		 		reports {
+//		 			xml.enabled = true // coveralls plugin depends on xml format report
+//		 			html.enabled = true
+//		 		}
+//		 	}
+//		 }
+//
+// 		apply plugin: 'maven-publish'
+//
+// 		if (!docs && !examples) {
+//
+// 			task sourcesJar(type: Jar) {
+// 				from sourceSets.main.allSource
+// 				classifier = 'sources'
+// 			}
+//
+// 			task javadocJar(type: Jar, dependsOn: 'javadoc') {
+// 				from javadoc.destinationDir
+// 				classifier = 'javadoc'
+// 			}
+//
+//
+// 			plugins.withId("com.vanniktech.maven.publish.base") {
+// 				group = GROUP_ID
+//
+// 				mavenPublishing {
+// 					publishToMavenCentral("DEFAULT")
+//
+// 					// Will only apply to non snapshot builds.
+// 					// Uses credentials as described above, supports both regular and in memory signing.
+// 					signAllPublications()
+//
+// 					pom {
+// 						name = "Crnk"
+// 						description = "A description of what my library does."
+// 						inceptionYear = "2020"
+// 						url = "https ://github.com/crnk-project/crnk-framework/"
+// 						licenses {
+// 							license {
+// 								name = "The Apache License, Version 2.0"
+// 								url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+// 								distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+// 							}
+// 						}
+// 						developers {
+// 							developer {
+// 								id = "crnk"
+// 								name = "crnk"
+// 								url = "https://github.com/crnk-project/"
+// 							}
+// 						}
+// 						scm {
+// 							url = "https://github.com/crnk-project/crnk-framework"
+// 							connection = "scm:git:git://github.com/crnk-project/crnk-framework.git"
+// 							developerConnection = "scm:git:ssh://git@github.com/crnk-project/crnk-framework.git"
+// 						}
+// 					}
+// 				}
+// 			}
+//
+// 			apply plugin: "com.vanniktech.maven.publish.base"
+//
+// 			mavenPublishing {
+// 				// available options:
+// 				//   - JavaLibrary
+// 				//   - GradlePlugin
+// 				//   - AndroidLibrary
+// 				//   - KotlinJvm
+// 				//   - KotlinJs
+// 				//   - KotlinMultiplatform
+// 				// the first parameter configures the javadoc jar, available options:
+// 				//   - None
+// 				//   - Empty
+// 				//   - Javadoc
+// 				//   - Dokka("dokkaHtml") - the parameter is the name of the Dokka task
+// 				// second one is for whether to publish sources, optional, defaults to true (not supported for KotlinMultiplatform(
+// 				// AndroidLibrary has a third parameter for which variant to publish, defaults to "release"
+// 				configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
+// 			}
+//
+//
+// 			def releaseBuild = project.hasProperty('stable')
+//
+//
+// 		}
+//
+// 	}
+// }
+//
+// // coveralls setup
+// apply plugin: "jacoco"
+// apply plugin: "com.github.kt3k.coveralls"
+//
+// def publishedProjects = subprojects.findAll {
+// 	it.name != 'crnk-documentation' && it.name != 'crnk-ui' && it.name != 'crnk-test' && !it.name.contains('example')
+// }
+////
+//// task jacocoMerge(type: JacocoMerge) {
+//// 	destinationFile = new File(project.buildDir, 'jacoco/test.exec')
+//// 	doFirst {
+//// 		executionData = files(executionData.findAll { it.exists() })
+//// 	}
+//// 	for (publishedProject in publishedProjects) {
+//// 		dependsOn publishedProject.path + ":check"
+//// 	}
+//// }
+//
+//
+// task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
+// 	description = 'Generates an aggregate report from all subprojects'
+//
+//// 	dependsOn tasks.jacocoMerge
+//
+//// 	executionData tasks.jacocoMerge.destinationFile
+//
+//// 	reports {
+//// 		html.enabled = true // human readable
+//// 		xml.enabled = true // required by coveralls
+//// 	}
+//
+// }
+//
+//
+// coveralls {
+// 	jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
+// }
+//
+// tasks.coveralls {
+// 	group = 'Coverage reports'
+// 	description = 'Uploads the aggregated coverage report to Coveralls'
+//
+// 	dependsOn jacocoRootReport
 }
 
 

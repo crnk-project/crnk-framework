@@ -2,10 +2,10 @@ package io.crnk.example.openliberty.microprofile.dao;
 
 import io.crnk.example.openliberty.microprofile.model.ScheduleEntity;
 
-import javax.ejb.Startup;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
+import jakarta.ejb.Startup;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 @RequestScoped
 @Startup

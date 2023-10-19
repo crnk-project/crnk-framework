@@ -7,7 +7,7 @@ import io.crnk.core.engine.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 public class ValidationExceptionMapper implements ExceptionMapper<ValidationException> {
 

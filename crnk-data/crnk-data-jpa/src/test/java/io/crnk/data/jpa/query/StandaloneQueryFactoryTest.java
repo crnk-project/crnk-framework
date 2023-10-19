@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.query;
 
 import java.util.List;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;

@@ -16,7 +16,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 
 public class JpaExceptionMapperTests {
 
@@ -60,9 +60,9 @@ public class JpaExceptionMapperTests {
 
     @Test
     public void testPersistenceRollbackException() {
-        javax.persistence.RollbackException exception = new javax.persistence.RollbackException(new BadRequestException("test"));
+        jakarta.persistence.RollbackException exception = new jakarta.persistence.RollbackException(new BadRequestException("test"));
         ExceptionMapperRegistry exceptionMapperRegistry = boot.getExceptionMapperRegistry();
-        PersistenceRollbackExceptionMapper mapper = (PersistenceRollbackExceptionMapper) exceptionMapperRegistry.findMapperFor(javax.persistence.RollbackException.class).get();
+        PersistenceRollbackExceptionMapper mapper = (PersistenceRollbackExceptionMapper) exceptionMapperRegistry.findMapperFor(jakarta.persistence.RollbackException.class).get();
         ErrorResponse response = mapper.toErrorResponse(exception);
         ErrorData errorData = response.getErrors().iterator().next();
         Assert.assertEquals(Integer.toString(HttpStatus.BAD_REQUEST_400), errorData.getStatus());
@@ -71,7 +71,7 @@ public class JpaExceptionMapperTests {
 
     @Test
     public void testTransactionRollbackException() {
-        javax.transaction.RollbackException exception = new javax.transaction.RollbackException() {
+        jakarta.transaction.RollbackException exception = new jakarta.transaction.RollbackException() {
             public Throwable getCause() {
                 return new BadRequestException("test");
             }

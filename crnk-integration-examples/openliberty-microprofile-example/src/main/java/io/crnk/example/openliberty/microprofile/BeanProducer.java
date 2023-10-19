@@ -5,11 +5,11 @@ import io.crnk.data.jpa.JpaModule;
 import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.home.HomeModule;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 
 public class BeanProducer {
 

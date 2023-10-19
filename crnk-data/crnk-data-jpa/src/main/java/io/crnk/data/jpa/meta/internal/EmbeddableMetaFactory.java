@@ -9,7 +9,7 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 import java.lang.reflect.Type;
 
 public class EmbeddableMetaFactory extends AbstractJpaDataObjectFactory<MetaEmbeddable> {

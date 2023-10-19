@@ -7,9 +7,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.Configuration;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class CrnkFeatureTest {
 

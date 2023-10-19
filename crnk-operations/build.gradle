@@ -1,27 +1,40 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+	id 'org.springframework.boot' version '3.1.4'
+	id 'io.spring.dependency-management'
+}
 
 dependencies {
-	compile project(':crnk-core')
+	implementation project(':crnk-core')
+	implementation project(':crnk-meta')
 	compileOnly project(':crnk-client')
 	compileOnly project(':crnk-setup:crnk-setup-rs')
-	compileOnly 'javax.ws.rs:javax.ws.rs-api:2.1'
+	compileOnly 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
 
-	testCompile project(':crnk-client')
-	testCompile project(':crnk-setup:crnk-setup-rs')
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-data:crnk-data-jpa')
-	testCompile project(':crnk-setup:crnk-setup-spring')
-	testCompile project(':crnk-validation')
+	testImplementation  project(':crnk-client')
+	testImplementation  project(':crnk-setup:crnk-setup-rs')
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-meta')
+	testImplementation  project(':crnk-data:crnk-data-jpa')
+	testImplementation  project(':crnk-setup:crnk-setup-spring')
+	testImplementation  project(':crnk-validation')
 
-	compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
+	compileOnly group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
 
-	testCompile group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
-	testCompile group: 'javax', name: 'javaee-api', version: '7.0'
-	testCompile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.10.Final'
-	testCompile group: 'org.springframework', name: 'spring-orm', version: '4.3.1.RELEASE'
-	testCompile group: 'org.springframework', name: 'spring-context', version: '4.3.1.RELEASE'
-	testCompile group: 'org.springframework', name: 'spring-test', version: '4.3.1.RELEASE'
-	testCompile group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.2.10.Final'
-	testCompile group: 'com.h2database', name: 'h2', version: '1.4.187'
-	testCompile(group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final')
+	testImplementation  group: 'org.hibernate', name: 'hibernate-validator', version: '8.0.1.Final'
+	testImplementation  group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
+	testImplementation  group: 'org.springframework', name: 'spring-orm', version: '6.0.12'
+	testImplementation  group: 'org.springframework', name: 'spring-context', version: '6.0.12'
+	testImplementation  group: 'org.springframework', name: 'spring-test', version: '6.0.12'
+	testImplementation  group: 'com.h2database', name: 'h2', version: '1.4.187'
+	testImplementation  group: 'org.hibernate', name: 'hibernate-core-jakarta', version: '5.6.15.Final'
+}
+
+bootJar {
+	enabled = false
+}
+
+jar {
+	enabled = true
 }

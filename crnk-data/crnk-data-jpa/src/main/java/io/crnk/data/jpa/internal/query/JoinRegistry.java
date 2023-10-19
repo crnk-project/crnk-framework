@@ -2,7 +2,7 @@ package io.crnk.data.jpa.internal.query;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 import io.crnk.data.jpa.internal.query.backend.JpaQueryBackend;
 import io.crnk.meta.model.MetaAttribute;

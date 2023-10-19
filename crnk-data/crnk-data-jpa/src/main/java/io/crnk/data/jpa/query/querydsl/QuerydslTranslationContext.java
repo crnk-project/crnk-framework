@@ -1,6 +1,6 @@
 package io.crnk.data.jpa.query.querydsl;
 
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;

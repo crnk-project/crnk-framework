@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.internal;
 
 import java.util.List;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.ResourceNotFoundException;

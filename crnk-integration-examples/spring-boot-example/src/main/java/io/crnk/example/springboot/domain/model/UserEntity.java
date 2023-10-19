@@ -2,10 +2,10 @@ package io.crnk.example.springboot.domain.model;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.util.Set;
 
 @JsonApiResource(type = "user")

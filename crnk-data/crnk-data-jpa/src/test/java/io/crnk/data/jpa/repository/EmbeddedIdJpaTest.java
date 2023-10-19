@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 
 @Transactional

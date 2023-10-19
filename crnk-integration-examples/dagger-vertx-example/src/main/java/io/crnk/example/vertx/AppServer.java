@@ -1,12 +1,12 @@
 package io.crnk.example.vertx;
 
-import io.reactivex.subjects.SingleSubject;
+import io.reactivex.rxjava3.subjects.SingleSubject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class AppServer {
 
@@ -35,7 +35,7 @@ public class AppServer {
 
 
 		vertx = Vertx.vertx(options);
-		vertx.deployVerticle(vehicle, completionHandler);
+		vertx.deployVerticle(vehicle);
 		waitSubject.blockingGet();
 	}
 

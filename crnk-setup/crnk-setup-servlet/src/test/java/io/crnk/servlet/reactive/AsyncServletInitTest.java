@@ -5,8 +5,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
 
 public class AsyncServletInitTest {
 

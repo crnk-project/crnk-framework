@@ -5,7 +5,7 @@ import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
 
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

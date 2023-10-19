@@ -4,12 +4,12 @@ import io.crnk.core.module.Module;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.setup.vertx.CrnkVertxHandler;
-import io.vertx.reactivex.core.AbstractVerticle;
-import io.vertx.reactivex.core.http.HttpServer;
+import io.vertx.rxjava3.core.AbstractVerticle;
+import io.vertx.rxjava3.core.http.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Set;
 
 public class CrnkVerticle extends AbstractVerticle {

@@ -3,8 +3,8 @@ package io.crnk.rs;
 import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 import io.crnk.rs.controller.SampleControllerWithPrefix;
 import io.crnk.test.JerseyTestBase;

@@ -1,11 +1,14 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
-    compile project(':crnk-meta')
-    compile 'com.squareup:javapoet:1.11.1'
-    testCompile project(':crnk-meta')
-    testCompile project(':crnk-test')
-    testCompile 'com.google.testing.compile:compile-testing:0.15'
-    testCompile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+    implementation project(':crnk-meta')
+    implementation 'com.squareup:javapoet:1.11.1'
+    testImplementation  project(':crnk-meta')
+    testImplementation  project(':crnk-test')
+    testImplementation  'com.google.testing.compile:compile-testing:0.15'
+    testImplementation  'org.hibernate:hibernate-core-jakarta:5.6.15.Final'
 
 }

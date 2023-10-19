@@ -7,9 +7,9 @@ import io.crnk.data.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.data.jpa.internal.QueryFactoryDiscovery;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.metamodel.ManagedType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;

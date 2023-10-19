@@ -1,8 +1,8 @@
 package io.crnk.operations.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import java.util.Set;
 import java.util.UUID;
 

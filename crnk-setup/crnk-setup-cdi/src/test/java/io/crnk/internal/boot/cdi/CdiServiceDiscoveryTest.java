@@ -16,8 +16,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.BeanManager;
 import java.util.List;
 import java.util.Optional;
 

@@ -3,8 +3,8 @@ package io.crnk.example.dropwizard.simple;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.example.dropwizard.simple.domain.repository.ProjectRepository;
 import io.crnk.rs.CrnkFeature;
-import io.dropwizard.Application;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Environment;
 
 public class DropwizardService extends Application<DropwizardConfiguration> {
 

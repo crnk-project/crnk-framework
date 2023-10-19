@@ -1,15 +1,21 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
 
-	compile project(':crnk-core')
-	compileOnly 'javax.servlet:javax.servlet-api:3.0.1'
-	compileOnly 'javax.annotation:javax.annotation-api:1.2'
-	compileOnly 'javax.ws.rs:javax.ws.rs-api:2.1'
+	implementation project(':crnk-core')
+	api 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+	api 'jakarta.annotation:jakarta.annotation-api:2.1.1'
+	api 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+	api 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-xml-provider:2.15.2'
 
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-client')
-	testCompile 'javax.servlet:javax.servlet-api:3.0.1'
-	testCompile 'javax.annotation:javax.annotation-api:1.2'
-	testCompile 'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-client')
+	testImplementation  'jakarta.servlet:jakarta.servlet-api:6.0.0'
+	testImplementation  'jakarta.annotation:jakarta.annotation-api:2.1.1'
+	testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
+	testImplementation 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-xml-provider:2.15.2'
+
 }

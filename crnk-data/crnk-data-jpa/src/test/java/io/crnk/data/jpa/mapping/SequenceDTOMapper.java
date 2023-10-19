@@ -4,7 +4,7 @@ import io.crnk.data.jpa.model.SequenceEntity;
 import io.crnk.data.jpa.model.dto.SequenceDTO;
 import io.crnk.data.jpa.query.Tuple;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class SequenceDTOMapper implements JpaMapper<SequenceEntity, SequenceDTO> {
 

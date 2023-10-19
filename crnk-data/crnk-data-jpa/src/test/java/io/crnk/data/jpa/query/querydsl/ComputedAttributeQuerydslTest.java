@@ -7,7 +7,7 @@ import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.query.ComputedAttributeTestBase;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class ComputedAttributeQuerydslTest extends ComputedAttributeTestBase {
 

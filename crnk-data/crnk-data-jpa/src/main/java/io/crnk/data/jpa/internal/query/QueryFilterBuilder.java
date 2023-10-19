@@ -11,7 +11,7 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaMapType;
 import io.crnk.meta.model.MetaType;
 
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

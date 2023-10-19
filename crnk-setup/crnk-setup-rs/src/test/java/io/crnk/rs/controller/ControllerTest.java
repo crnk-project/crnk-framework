@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 
 import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;

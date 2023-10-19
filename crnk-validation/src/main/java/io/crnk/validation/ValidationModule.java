@@ -5,8 +5,8 @@ import io.crnk.validation.filter.ValidationRepositoryFilter;
 import io.crnk.validation.internal.ConstraintViolationExceptionMapper;
 import io.crnk.validation.internal.ValidationExceptionMapper;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 
 public class ValidationModule implements Module {
 

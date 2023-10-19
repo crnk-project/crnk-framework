@@ -4,7 +4,7 @@ import io.crnk.data.jpa.model.RelatedEntity;
 import io.crnk.data.jpa.model.dto.RelatedDTO;
 import io.crnk.data.jpa.query.Tuple;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class RelatedDTOMapper implements JpaMapper<RelatedEntity, RelatedDTO> {
 

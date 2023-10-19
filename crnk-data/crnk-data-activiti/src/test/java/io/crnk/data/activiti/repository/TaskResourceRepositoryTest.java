@@ -88,7 +88,7 @@ public class TaskResourceRepositoryTest extends ActivitiTestBase {
         Assert.assertEquals(task.getDescription(), resource.getDescription());
         Assert.assertEquals(task.getTenantId(), resource.getTenantId());
         Assert.assertFalse(resource.isCompleted());
-        Assert.assertEquals(task.getDueDate().toInstant(), resource.getDueDate().toInstant());
+        Assert.assertEquals(task.getDueDate().toInstant().toEpochMilli(), resource.getDueDate().toInstant().toEpochMilli());
     }
 
     @Test
@@ -103,12 +103,12 @@ public class TaskResourceRepositoryTest extends ActivitiTestBase {
         ApproveTask updatedResource = taskRepository.save(resource);
         Assert.assertEquals("updatedName", updatedResource.getName());
         Assert.assertEquals(101, updatedResource.getPriority());
-        Assert.assertEquals(updatedDueDate.toInstant(), updatedResource.getDueDate().toInstant());
+        Assert.assertEquals(updatedDueDate.toInstant().toEpochMilli(), updatedResource.getDueDate().toInstant().toEpochMilli());
 
         updatedResource = taskRepository.findOne(task.getId(), querySpec);
         Assert.assertEquals("updatedName", updatedResource.getName());
         Assert.assertEquals(101, updatedResource.getPriority());
-        Assert.assertEquals(updatedDueDate.toInstant(), updatedResource.getDueDate().toInstant());
+        Assert.assertEquals(updatedDueDate.toInstant().toEpochMilli(), updatedResource.getDueDate().toInstant().toEpochMilli());
     }
 
     @Test

@@ -2,7 +2,7 @@ package io.crnk.servlet.internal;
 
 import io.crnk.core.engine.properties.PropertiesProvider;
 
-import javax.servlet.FilterConfig;
+import jakarta.servlet.FilterConfig;
 
 public class FilterPropertiesProvider implements PropertiesProvider {
 

@@ -1,48 +1,50 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
-	compile project(':crnk-core')
-	compile project(':crnk-meta')
-	compileOnly project(':crnk-client')
-	compileOnly project(':crnk-data:crnk-data-facet')
-	compileOnly group: 'javax', name: 'javaee-api', version: '7.0'
-	compileOnly group: 'com.querydsl', name: 'querydsl-jpa', version: '4.1.3'
+	implementation project(':crnk-core')
+	implementation project(':crnk-meta')
+	compileOnlyApi project(':crnk-client')
+	compileOnlyApi project(':crnk-data:crnk-data-facet')
+	compileOnlyApi group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
+	implementation group: 'com.querydsl', name: 'querydsl-jpa', classifier: 'jakarta', version: '5.0.0'
 
-    testCompileOnly "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final"
-    testCompileOnly "javax.annotation:javax.annotation-api:1.3.2"
-    testCompileOnly 'com.querydsl:querydsl-apt:4.1.3:jpa'
-	testAnnotationProcessor(
-			'com.querydsl:querydsl-apt:4.1.3:jpa',
-			"org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final",
-			"javax.annotation:javax.annotation-api:1.3.2",
-	)
+	implementation  'com.google.guava:guava:31.1-jre'
 
 	// necessary for intellij having a broken annotation processing support
-	compileOnly 'com.querydsl:querydsl-apt:4.1.3:jpa'
-	compileOnly "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final"
-	compileOnly "javax.annotation:javax.annotation-api:1.3.2"
+	compileOnly "org.hibernate:hibernate-core-jakarta:5.6.15.Final"
+	compileOnly "jakarta.annotation:jakarta.annotation-api:2.1.1"
 	annotationProcessor(
-			'com.querydsl:querydsl-apt:4.1.3:jpa',
-			"org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final",
-			"javax.annotation:javax.annotation-api:1.3.2",
+			'jakarta.annotation:jakarta.annotation-api:2.1.1',
+			'com.querydsl:querydsl-apt:5.0.0:jakarta',
+			"org.hibernate:hibernate-core-jakarta:5.6.15.Final",
+			"jakarta.persistence:jakarta.persistence-api"
 	)
 
-	compileOnly group: 'org.hibernate', name: 'hibernate-core', version: '5.2.10.Final'
+	testImplementation  project(':crnk-client')
+	testImplementation  project(':crnk-setup:crnk-setup-rs')
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-client')
+	testImplementation  project(':crnk-data:crnk-data-facet')
+	testImplementation  group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
+	testImplementation  group: 'org.springframework', name: 'spring-orm', version: '6.0.12'
+	testImplementation  group: 'org.springframework', name: 'spring-context', version: '6.0.12'
+	testImplementation  group: 'org.springframework', name: 'spring-test', version: '6.0.12'
+	testImplementation  group: 'com.h2database', name: 'h2', version: '1.4.187'
+	testImplementation  group: 'org.hibernate', name: 'hibernate-core-jakarta', version: '5.6.15.Final'
+	testImplementation  group: 'com.querydsl', name: 'querydsl-apt', classifier: 'jakarta', version: '5.0.0'
+	testImplementation  group: 'com.querydsl', name: 'querydsl-jpa', classifier: 'jakarta', version: '5.0.0'
 
-	testCompile project(':crnk-client')
-	testCompile project(':crnk-setup:crnk-setup-rs')
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-client')
-	testCompile project(':crnk-data:crnk-data-facet')
-	testCompile group: 'javax', name: 'javaee-api', version: '7.0'
-	testCompile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.10.Final'
-	testCompile group: 'org.springframework', name: 'spring-orm', version: '4.3.1.RELEASE'
-	testCompile group: 'org.springframework', name: 'spring-context', version: '4.3.1.RELEASE'
-	testCompile group: 'org.springframework', name: 'spring-test', version: '4.3.1.RELEASE'
-	testCompile group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.2.10.Final'
-	testCompile group: 'com.h2database', name: 'h2', version: '1.4.187'
-	testCompile(group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final')
-	testCompile(group: 'com.querydsl', name: 'querydsl-apt', version: '4.1.3')
-	testCompile group: 'com.querydsl', name: 'querydsl-jpa', version: '4.1.3'
+	testCompileOnly "org.hibernate:hibernate-core-jakarta:5.6.15.Final"
+	testCompileOnly "jakarta.annotation:jakarta.annotation-api:2.1.1"
+
+	testAnnotationProcessor(
+			'jakarta.annotation:jakarta.annotation-api:2.1.1',
+			'com.querydsl:querydsl-apt:5.0.0:jakarta',
+			'org.hibernate:hibernate-core-jakarta:5.6.15.Final',
+			"jakarta.persistence:jakarta.persistence-api"
+	)
 }
 

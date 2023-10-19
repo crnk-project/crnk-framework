@@ -3,7 +3,7 @@ package io.crnk.example.vertx;
 
 import dagger.Component;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 @Component(modules = {AppModule.class})

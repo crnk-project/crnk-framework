@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class JpaModuleTest {
 

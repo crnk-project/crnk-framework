@@ -3,9 +3,9 @@ package io.crnk.client.action;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.WebTarget;
 
 public class JerseyActionStubFactory implements ActionStubFactory {
 

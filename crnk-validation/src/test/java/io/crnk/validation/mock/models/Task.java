@@ -11,7 +11,7 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.validation.mock.ComplexValid;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 

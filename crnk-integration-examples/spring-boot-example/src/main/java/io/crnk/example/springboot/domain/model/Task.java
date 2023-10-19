@@ -9,7 +9,7 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 // tag::doc1[]
 @JsonApiResource(type = "tasks")

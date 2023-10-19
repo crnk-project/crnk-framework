@@ -1,8 +1,8 @@
 package io.crnk.validation.mock.repository;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Path;
-import javax.validation.metadata.ConstraintDescriptor;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Path;
+import jakarta.validation.metadata.ConstraintDescriptor;
 
 public class TestConstraintViolation implements ConstraintViolation<Object> {
 

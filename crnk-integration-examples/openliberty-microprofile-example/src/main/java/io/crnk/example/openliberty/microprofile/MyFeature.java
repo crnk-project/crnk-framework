@@ -2,9 +2,9 @@ package io.crnk.example.openliberty.microprofile;
 
 import io.crnk.rs.CrnkFeature;
 
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Feature;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class MyFeature implements Feature {

@@ -2,7 +2,7 @@ package io.crnk.client;
 
 import io.crnk.rs.CrnkFeature;
 
-import javax.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.core.FeatureContext;
 
 /**
  * Test-specific subclass of the {@link CrnkFeature} used to
@@ -20,7 +20,7 @@ public class CrnkTestFeature extends CrnkFeature {
 
 	/*
 	 * (non-Javadoc)
-	 * @see io.crnk.rs.CrnkFeature#configure(javax.ws.rs.core.FeatureContext)
+	 * @see io.crnk.rs.CrnkFeature#configure(jakarta.ws.rs.core.FeatureContext)
 	 */
 	@Override
 	public boolean configure(FeatureContext context) {

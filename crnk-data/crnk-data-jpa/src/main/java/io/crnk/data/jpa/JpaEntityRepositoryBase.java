@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceField;

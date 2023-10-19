@@ -2,7 +2,7 @@ package io.crnk.data.jpa.internal;
 
 import io.crnk.core.module.Module;
 
-import javax.transaction.RollbackException;
+import jakarta.transaction.RollbackException;
 
 /**
  * RollbackException can hide the more interesting causes.

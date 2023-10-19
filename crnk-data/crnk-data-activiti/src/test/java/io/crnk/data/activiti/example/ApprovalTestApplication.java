@@ -34,8 +34,8 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.inject.Singleton;
-import javax.ws.rs.ApplicationPath;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.ApplicationPath;
 import java.util.Arrays;
 import java.util.List;
 

@@ -3,8 +3,8 @@ package io.crnk.data.jpa.internal.query.backend.querydsl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nullable;
-import javax.persistence.criteria.JoinType;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.criteria.JoinType;
 
 import com.google.common.collect.ImmutableList;
 import com.querydsl.core.support.FetchableSubQueryBase;

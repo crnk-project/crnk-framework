@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 
 @Entity
 public class TestSubclassWithSuperclassPk extends TestMappedSuperclassWithPk {

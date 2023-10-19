@@ -10,12 +10,12 @@ import io.crnk.validation.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -39,7 +39,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
-			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
+			Assert.assertEquals("{jakarta.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("name", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
 			Assert.assertTrue(violation.getMessage().contains("null"));
@@ -62,7 +62,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
-			Assert.assertEquals("{javax.validation.constraints.Size.message}", violation.getMessageTemplate());
+			Assert.assertEquals("{jakarta.validation.constraints.Size.message}", violation.getMessageTemplate());
 			Assert.assertEquals("keywords", violation.getPropertyPath().toString());
 
 			// message depends on local
@@ -89,7 +89,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
-			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
+			Assert.assertEquals("{jakarta.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("data.value", violation.getPropertyPath().toString());
 			Assert.assertEquals("/data/attributes/renamed-data/value", violation.getErrorData().getSourcePointer());
 		}
@@ -111,7 +111,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
-			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
+			Assert.assertEquals("{jakarta.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataList[0].value", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
 			Assert.assertEquals("/data/attributes/data-list/0/value", violation.getErrorData().getSourcePointer());
@@ -138,7 +138,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
-			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
+			Assert.assertEquals("{jakarta.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataMap[someKey].value", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
 			Assert.assertEquals("/data/attributes/data-map/someKey/value", violation.getErrorData().getSourcePointer());
@@ -166,7 +166,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
-			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
+			Assert.assertEquals("{jakarta.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertTrue(violation.getPropertyPath().toString().startsWith("dataSet["));
 			Assert.assertTrue(violation.getPropertyPath().toString().endsWith("].value"));
 
@@ -230,7 +230,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
-			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
+			Assert.assertEquals("{jakarta.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("tasks[0]", violation.getPropertyPath().toString());
 			Assert.assertEquals("/data/relationships/tasks/0", violation.getErrorData().getSourcePointer());
 		}
@@ -256,7 +256,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
-			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
+			Assert.assertEquals("{jakarta.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("project", violation.getPropertyPath().toString());
 			Assert.assertEquals("/data/relationships/project", violation.getErrorData().getSourcePointer());
 		}

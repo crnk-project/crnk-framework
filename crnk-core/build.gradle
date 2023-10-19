@@ -1,28 +1,31 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
-    compile 'net.jodah:typetools:0.6.3'
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    compile 'com.fasterxml.jackson.core:jackson-databind'
-    compile 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'net.jodah:typetools:0.6.3'
+	api 'org.slf4j:slf4j-api:2.0.9'
+	api 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.2'
+	api 'jakarta.validation:jakarta.validation-api:3.0.2'
+	api 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
 
-    testCompile 'org.reflections:reflections'
-    testCompile 'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
-    testCompile 'nl.jqno.equalsverifier:equalsverifier:1.7.2'
-    testCompile 'com.jayway.jsonpath:json-path:2.2.0'
-    testCompile 'nl.jqno.equalsverifier:equalsverifier:1.7.2'
+	testImplementation  'org.reflections:reflections'
+    testImplementation  'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
+    testImplementation  'com.jayway.jsonpath:json-path:2.2.0'
+	testImplementation  'com.google.guava:guava:31.1-jre'
 
-    testCompile "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
-    testCompile "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
-    testCompile "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
-    testCompile "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
+	testImplementation  "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+    testImplementation  "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
+    testImplementation  "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+    testImplementation  "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
 
-    testCompile 'ch.qos.logback:logback-classic:1.2.3'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'org.assertj:assertj-core:2.2.0'
-    testCompile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-	testCompile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+	testImplementation  'ch.qos.logback:logback-classic:1.4.11'
+    testImplementation  'org.mockito:mockito-core:5.5.0'
+    testImplementation  'org.assertj:assertj-core:2.2.0'
+    testImplementation  'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	testImplementation  'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+	testImplementation  'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.2'
 
-
-
+	testImplementation  'nl.jqno.equalsverifier:equalsverifier:3.15.2'
 }

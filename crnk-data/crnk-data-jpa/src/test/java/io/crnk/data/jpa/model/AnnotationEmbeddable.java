@@ -1,6 +1,6 @@
 package io.crnk.data.jpa.model;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class AnnotationEmbeddable {

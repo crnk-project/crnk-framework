@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;

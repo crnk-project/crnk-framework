@@ -8,11 +8,11 @@ import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
 import org.junit.Test;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

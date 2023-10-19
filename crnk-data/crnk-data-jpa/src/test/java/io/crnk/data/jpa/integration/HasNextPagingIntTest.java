@@ -14,7 +14,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.io.Serializable;
 import java.util.Arrays;
 

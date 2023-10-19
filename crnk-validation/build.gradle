@@ -1,18 +1,21 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
 dependencies {
-	compile project(':crnk-core')
+	implementation project(':crnk-core')
 	compileOnly project(':crnk-meta')
 	compileOnly project(':crnk-client')
-	compileOnly group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
+	compileOnly 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
 
-	testCompile project(':crnk-client')
-	testCompile project(':crnk-setup:crnk-setup-rs')
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-meta')
-	testCompile group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
-	testCompile group: 'org.springframework', name: 'spring-orm', version: '4.3.1.RELEASE'
-	testCompile group: 'org.springframework', name: 'spring-context', version: '4.3.1.RELEASE'
-	testCompile group: 'org.springframework', name: 'spring-test', version: '4.3.1.RELEASE'
-	testCompile(group: 'javax', name: 'javaee-api', version: '7.0')
+	testImplementation  project(':crnk-client')
+	testImplementation  project(':crnk-setup:crnk-setup-rs')
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-meta')
+	testImplementation  group: 'org.hibernate', name: 'hibernate-validator', version: '8.0.1.Final'
+	testImplementation  group: 'org.springframework', name: 'spring-orm', version: '6.0.12'
+	testImplementation  group: 'org.springframework', name: 'spring-context', version: '6.0.12'
+	testImplementation  group: 'org.springframework', name: 'spring-test', version: '6.0.12'
+	testImplementation  group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
 }

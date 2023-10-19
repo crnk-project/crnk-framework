@@ -3,11 +3,11 @@ package io.crnk.data.jpa.meta.internal;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;

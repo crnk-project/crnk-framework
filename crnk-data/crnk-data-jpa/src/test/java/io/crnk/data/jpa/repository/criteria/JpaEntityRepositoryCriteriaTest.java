@@ -4,7 +4,7 @@ import io.crnk.data.jpa.query.JpaQueryFactory;
 import io.crnk.data.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.data.jpa.JpaEntityRepositoryTestBase;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class JpaEntityRepositoryCriteriaTest extends JpaEntityRepositoryTestBase {
 

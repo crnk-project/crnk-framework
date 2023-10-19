@@ -1,23 +1,28 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'java-library'
+}
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.17
+targetCompatibility = 1.17
 
 dependencies {
-	compile project(':crnk-core')
-	compileOnly(group: 'javax', name: 'javaee-api', version: '7.0')
+	implementation project(':crnk-core')
+	compileOnly group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
 
-	testCompile 'com.h2database:h2:1.4.195'
+	testImplementation  'com.h2database:h2:2.2.224'
 
-	testCompile project(':crnk-setup:crnk-setup-rs')
-	testCompile project(':crnk-test')
-	testCompile project(':crnk-client')
-	testCompile 'com.squareup.okhttp3:okhttp:3.4.1'
-	testCompile 'org.apache.httpcomponents:httpclient:4.5.2'
-	testCompile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	testImplementation  project(':crnk-setup:crnk-setup-rs')
+	testImplementation  project(':crnk-test')
+	testImplementation  project(':crnk-client')
+	testImplementation  'com.squareup.okhttp3:okhttp:3.4.1'
+	testImplementation  'org.apache.httpcomponents:httpclient:4.5.2'
+	testImplementation  'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	testImplementation  'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
+	testImplementation  'com.sun.xml.bind:jaxb-impl:4.0.3'
 
 	compileOnly 'org.activiti:activiti-engine:6.0.0'
-	testCompile 'org.activiti:activiti-engine:6.0.0'
-	testCompile 'org.springframework:spring-context:3.0.3.RELEASE'
-	testCompile 'com.google.guava:guava:26.0-jre'
+	testImplementation  'org.activiti:activiti-engine:6.0.0'
+	testImplementation  'org.springframework:spring-context:3.0.3.RELEASE'
+	testImplementation  'com.google.guava:guava:31.1-jre'
 }

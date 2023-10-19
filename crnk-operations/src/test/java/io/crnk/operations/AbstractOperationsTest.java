@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.metamodel.ManagedType;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 import io.crnk.client.CrnkClient;
 import io.crnk.client.action.JerseyActionStubFactory;
@@ -148,7 +148,7 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 		clear();
 
 		if (context != null) {
-			context.destroy();
+			context.close();
 		}
 	}
 

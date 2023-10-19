@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.util;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 public class EntityManagerProducer {
 

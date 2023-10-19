@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.PathSpec;
