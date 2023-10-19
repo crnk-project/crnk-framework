@@ -13,5 +13,4 @@ io.crnk.spring.setup.boot.mvc.CrnkErrorControllerAutoConfiguration
 io.crnk.spring.setup.boot.data.facet.CrnkFacetAutoConfiguration
 io.crnk.spring.setup.boot.format.PlainJsonFormatAutoConfiguration
 io.crnk.spring.setup.boot.validation.CrnkValidationAutoConfiguration
-io.crnk.spring.setup.boot.monitor.CrnkSpringActuatorMetricsAutoConfiguration
 io.crnk.spring.setup.boot.monitor.CrnkMvcObservationAutoConfiguration
