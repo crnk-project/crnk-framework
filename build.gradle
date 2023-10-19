@@ -81,11 +81,9 @@ gradle.beforeProject { Project project ->
 					testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 					testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.5.0'
 					testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.2'
-					// https://mvnrepository.com/artifact/jakarta.annotation/jakarta.annotation-api
 					api group: 'jakarta.annotation', name: 'jakarta.annotation-api', version: '2.1.1'
-					// https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api
 					api group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: '4.0.1'
-					api 'org.glassfish.jaxb:jaxb-runtime:4.0.1'
+					api group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '4.0.3'
 				}
 
 				test {
@@ -109,16 +107,15 @@ gradle.beforeProject { Project project ->
 						mavenBom 'org.glassfish.jersey:jersey-bom:3.1.3'
 					}
 					dependencies {
-						// dependency 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
-						dependency 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
 						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
-						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.15.2'
-						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.15.2'
 						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2'
+						dependency 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.15.3'
+						dependency 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-xml-provider:2.15.3'
+						dependency 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.15.3'
 						dependency 'com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.2'
 
 						dependency 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
-						dependency 'org.glassfish.jaxb:jaxb-runtime:4.0.1'
+						dependency 'com.sun.xml.bind:jaxb-impl:4.0.3'
 
 						dependency 'org.reflections:reflections:0.10.2'
 					}
