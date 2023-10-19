@@ -97,7 +97,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
         });
 
         if (context != null) {
-            context.destroy();
+            context.stop();
         }
     }
 
