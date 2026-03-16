@@ -35,7 +35,7 @@ public class FieldOrderedComparatorTest {
 		fields.add(fieldB);
 
 		// THEN
-		assertThat(fields).containsSequence(fieldB, fieldA);
+		assertThat(fields).extracting(ResourceField::getJsonName).containsExactly("b", "a");
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class FieldOrderedComparatorTest {
 		fields.add(fieldB);
 
 		// THEN
-		assertThat(fields).containsSequence(fieldB, fieldA);
+		assertThat(fields).extracting(ResourceField::getJsonName).containsExactly("b", "a");
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class FieldOrderedComparatorTest {
 		fields.add(fieldA);
 
 		// THEN
-		assertThat(fields).containsSequence(fieldB, fieldA);
+		assertThat(fields).extracting(ResourceField::getJsonName).containsExactly("b", "a");
 	}
 
 	@Test
@@ -76,6 +76,6 @@ public class FieldOrderedComparatorTest {
 		fields.add(fieldA);
 
 		// THEN
-		assertThat(fields).containsSequence(fieldA, fieldB);
+		assertThat(fields).extracting(ResourceField::getJsonName).containsExactly("a", "b");
 	}
 }
