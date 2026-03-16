@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 dependencies {
 
-    compile project(':crnk-core')
+    api project(':crnk-core')
 
     compileOnly 'org.apache.httpcomponents:httpclient:4.5.2'
     compileOnly 'org.glassfish.jersey.ext:jersey-proxy-client'
@@ -11,7 +11,7 @@ dependencies {
     compileOnly 'com.squareup.okhttp3:okhttp:3.4.1'
     compileOnly 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
 
-    testCompile project(':crnk-setup:crnk-setup-rs')
-    testCompile project(':crnk-test')
+    testImplementation project(':crnk-setup:crnk-setup-rs')
+    testImplementation project(':crnk-test')
 
 }

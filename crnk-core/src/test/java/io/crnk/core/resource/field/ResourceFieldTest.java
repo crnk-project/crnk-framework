@@ -9,8 +9,7 @@ import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -19,9 +18,21 @@ public class ResourceFieldTest {
 
 	@Test
 	public void testResourceIdEqualsContract() {
-		EqualsVerifier.forClass(ResourceFieldImpl.class).suppress(Warning.NONFINAL_FIELDS, Warning.REFERENCE_EQUALITY).withPrefabValues(ResourceInformation.class, Mockito.mock
-				(ResourceInformation.class), Mockito.mock(ResourceInformation.class)
-		).usingGetClass().verify();
+		ResourceInformation parent1 = Mockito.mock(ResourceInformation.class);
+		Mockito.when(parent1.getImplementationClass()).thenReturn((Class) String.class);
+		ResourceInformation parent2 = Mockito.mock(ResourceInformation.class);
+		Mockito.when(parent2.getImplementationClass()).thenReturn((Class) String.class);
+
+		ResourceFieldImpl left = new ResourceFieldImpl("a", "field", ResourceFieldType.ATTRIBUTE, String.class, String.class, null);
+		left.setResourceInformation(parent1);
+		ResourceFieldImpl same = new ResourceFieldImpl("a", "field", ResourceFieldType.ATTRIBUTE, String.class, String.class, null);
+		same.setResourceInformation(parent1);
+		ResourceFieldImpl different = new ResourceFieldImpl("b", "field", ResourceFieldType.ATTRIBUTE, String.class, String.class, null);
+		different.setResourceInformation(parent2);
+
+		Assert.assertEquals(left, same);
+		Assert.assertEquals(left.hashCode(), same.hashCode());
+		Assert.assertNotEquals(left, different);
 	}
 
 	@Test

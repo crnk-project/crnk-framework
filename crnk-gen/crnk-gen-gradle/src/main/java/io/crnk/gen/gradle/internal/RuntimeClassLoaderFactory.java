@@ -130,8 +130,23 @@ public class RuntimeClassLoaderFactory {
 		List<URL> urls = new ArrayList<>();
 
 		// add this plugin itself to the runtime classpath to make integration available
-		URLClassLoader classLoader = (URLClassLoader) getClass().getClassLoader();
-		for (URL gradleClassUrl : classLoader.getURLs()) {
+		List<URL> availableUrls = new ArrayList<>();
+		ClassLoader classLoader = getClass().getClassLoader();
+		if (classLoader instanceof URLClassLoader) {
+			availableUrls.addAll(Arrays.asList(((URLClassLoader) classLoader).getURLs()));
+		} else {
+			String classPath = System.getProperty("java.class.path", "");
+			for (String entry : classPath.split(File.pathSeparator)) {
+				if (!entry.isEmpty()) {
+					try {
+						availableUrls.add(new File(entry).toURI().toURL());
+					} catch (MalformedURLException e) {
+						throw new IllegalStateException(e);
+					}
+				}
+			}
+		}
+		for (URL gradleClassUrl : availableUrls) {
 			String file = gradleClassUrl.getFile();
 
             /*
@@ -186,12 +201,19 @@ public class RuntimeClassLoaderFactory {
 		GeneratorConfig generatorConfiguration = project.getExtensions().getByType(GeneratorExtension.class);
 		String configurationName = generatorConfiguration.getRuntime().getConfiguration();
 
-		ConfigurationContainer configurations = project.getConfigurations();
-		Configuration runtimeConfiguration = configurations.findByName(configurationName + "Runtime");
-		if (runtimeConfiguration == null) {
-			runtimeConfiguration = configurations.getByName(configurationName);
+		if (sourceSets != null && sourceSets.findByName(configurationName) != null) {
+			classpath.addAll(sourceSets.getByName(configurationName).getRuntimeClasspath().getFiles());
+		} else {
+			ConfigurationContainer configurations = project.getConfigurations();
+			Configuration runtimeConfiguration = configurations.findByName(configurationName + "RuntimeClasspath");
+			if (runtimeConfiguration == null) {
+				runtimeConfiguration = configurations.findByName(configurationName + "Runtime");
+			}
+			if (runtimeConfiguration == null) {
+				runtimeConfiguration = configurations.getByName(configurationName);
+			}
+			classpath.addAll(runtimeConfiguration.getFiles());
 		}
-		classpath.addAll(runtimeConfiguration.getFiles());
 
 		for (File file : classpath) {
 			LOGGER.debug("classpath entry: {}", file);

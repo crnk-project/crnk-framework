@@ -1,16 +1,20 @@
 apply plugin: 'war'
 
 war {
-	archiveName = "example.war"
+	archiveFileName.set("example.war")
 }
 
 dependencies {
 
-	compile project(':crnk-setup:crnk-setup-rs')
-	compile project(':crnk-setup:crnk-setup-cdi')
-	compile project(':crnk-home')
-	compile project(':crnk-data:crnk-data-jpa')
+	api project(':crnk-setup:crnk-setup-rs')
+	api project(':crnk-setup:crnk-setup-cdi')
+	api project(':crnk-home')
+	api project(':crnk-data:crnk-data-jpa')
 
 	compileOnly 'javax:javaee-api:7.0'
 
+}
+
+tasks.named('compileJava') {
+	dependsOn ':crnk-setup:crnk-setup-cdi:processResources'
 }

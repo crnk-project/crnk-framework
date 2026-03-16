@@ -6,6 +6,7 @@ include ':crnk-testkit'
 include ':crnk-client'
 include ':crnk-meta'
 include ':crnk-validation'
+include ':crnk-validation-jakarta'
 
 include ':crnk-monitor:crnk-monitor-brave4'
 include ':crnk-monitor:crnk-monitor-opentracing'
@@ -16,14 +17,17 @@ include ':crnk-ui'
 include ':crnk-setup:crnk-setup-spring'
 include ':crnk-setup:crnk-setup-spring-boot1'
 include ':crnk-setup:crnk-setup-spring-boot2'
+include ':crnk-setup:crnk-setup-spring-boot3'
 include ':crnk-setup:crnk-setup-vertx'
 include ':crnk-setup:crnk-setup-servlet'
+include ':crnk-setup:crnk-setup-servlet-jakarta'
 include ':crnk-setup:crnk-setup-cdi'
 include ':crnk-setup:crnk-setup-guice'
 include ':crnk-setup:crnk-setup-rs'
 
 include ':crnk-data:crnk-data-facet'
 include ':crnk-data:crnk-data-jpa'
+include ':crnk-data:crnk-data-jpa-jakarta'
 include ':crnk-data:crnk-data-activiti'
 
 include ':crnk-format:crnk-format-plain-json'
@@ -81,5 +85,3 @@ gradle.beforeProject { Project project ->
         group = rootProject.group
     }
 }
-
-

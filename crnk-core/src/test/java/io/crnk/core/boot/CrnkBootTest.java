@@ -41,7 +41,7 @@ import org.mockito.Mockito;
 import java.util.Arrays;
 import java.util.Properties;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
 public class CrnkBootTest {

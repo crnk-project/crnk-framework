@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
 public class TaskResourceRepositoryTest extends ActivitiTestBase {
@@ -103,12 +104,12 @@ public class TaskResourceRepositoryTest extends ActivitiTestBase {
         ApproveTask updatedResource = taskRepository.save(resource);
         Assert.assertEquals("updatedName", updatedResource.getName());
         Assert.assertEquals(101, updatedResource.getPriority());
-        Assert.assertEquals(updatedDueDate.toInstant(), updatedResource.getDueDate().toInstant());
+        Assert.assertEquals(updatedDueDate.toInstant().truncatedTo(ChronoUnit.MILLIS), updatedResource.getDueDate().toInstant());
 
         updatedResource = taskRepository.findOne(task.getId(), querySpec);
         Assert.assertEquals("updatedName", updatedResource.getName());
         Assert.assertEquals(101, updatedResource.getPriority());
-        Assert.assertEquals(updatedDueDate.toInstant(), updatedResource.getDueDate().toInstant());
+        Assert.assertEquals(updatedDueDate.toInstant().truncatedTo(ChronoUnit.MILLIS), updatedResource.getDueDate().toInstant());
     }
 
     @Test

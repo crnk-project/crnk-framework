@@ -2,6 +2,10 @@ apply plugin: 'java'
 
 apply plugin: 'java-gradle-plugin'
 
+configurations.configureEach {
+    exclude group: 'org.apache.groovy'
+}
+
 gradlePlugin {
     plugins {
         'crnk-gen' {
@@ -16,31 +20,31 @@ gradlePlugin {
 }
 
 dependencies {
-    compile gradleApi()
+    api gradleApi()
 
     // TODO use shade plugin
-    compile project(':crnk-gen:crnk-gen-base')
-    compile project(':crnk-gen:crnk-gen-runtime')
-    compile project(':crnk-meta')
-    compile project(':crnk-data:crnk-data-jpa')
-    compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+    api project(':crnk-gen:crnk-gen-base')
+    api project(':crnk-gen:crnk-gen-runtime')
+    api project(':crnk-meta')
+    api project(':crnk-data:crnk-data-jpa')
+    api 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
 
-    compile project(':crnk-gen:crnk-gen-typescript')
-    compile project(':crnk-gen:crnk-gen-asciidoc')
-    compile project(':crnk-gen:crnk-gen-openapi')
+    api project(':crnk-gen:crnk-gen-typescript')
+    api(project(':crnk-gen:crnk-gen-asciidoc')) {
+        exclude group: 'org.apache.groovy'
+    }
+    api project(':crnk-gen:crnk-gen-openapi')
 
-    compile 'com.fasterxml.jackson.core:jackson-databind'
+    api 'com.fasterxml.jackson.core:jackson-databind'
 
     compileOnly 'junit:junit:4.12'
 
-    testCompile gradleTestKit()
-    testCompile project(':crnk-core')
-    testCompile project(':crnk-meta')
-    testCompile project(':crnk-test')
+    testImplementation gradleTestKit()
+    testImplementation project(':crnk-core')
+    testImplementation project(':crnk-meta')
+    testImplementation project(':crnk-test')
 
 }
-
-
 
 
 

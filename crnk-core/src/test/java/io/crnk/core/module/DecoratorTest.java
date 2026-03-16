@@ -12,6 +12,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.isNull;
+
 public class DecoratorTest {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -22,16 +24,16 @@ public class DecoratorTest {
         Assert.assertSame(repository, decorator.getWrappedObject());
 
         decorator.create(null);
-        Mockito.verify(repository, Mockito.times(1)).create(Mockito.any(Schedule.class));
+        Mockito.verify(repository, Mockito.times(1)).create(isNull());
 
         decorator.delete(null);
-        Mockito.verify(repository, Mockito.times(1)).delete(Mockito.anyLong());
+        Mockito.verify(repository, Mockito.times(1)).delete(isNull());
 
         decorator.findAll(null);
-        Mockito.verify(repository, Mockito.times(1)).findAll(Mockito.any(QuerySpec.class));
+        Mockito.verify(repository, Mockito.times(1)).findAll(isNull());
 
         decorator.findAll(null, null);
-        Mockito.verify(repository, Mockito.times(1)).findAll(Mockito.anyListOf(Long.class), Mockito.any(QuerySpec.class));
+        Mockito.verify(repository, Mockito.times(1)).findAll(isNull(), isNull());
 
         decorator.getResourceClass();
         Mockito.verify(repository, Mockito.times(1)).getResourceClass();
@@ -41,7 +43,7 @@ public class DecoratorTest {
         Mockito.verify(repository, Mockito.times(1)).save(Mockito.eq(schedule));
 
         decorator.findOne(null, null);
-        Mockito.verify(repository, Mockito.times(1)).findOne(Mockito.anyLong(), Mockito.any(QuerySpec.class));
+        Mockito.verify(repository, Mockito.times(1)).findOne(isNull(), isNull());
     }
 
     interface RegistryAwareResourceRepository extends ScheduleRepository, ResourceRegistryAware {
@@ -55,28 +57,22 @@ public class DecoratorTest {
         WrappedRelationshipRepository<Schedule, Long, Task, Long> decorator = new WrappedRelationshipRepository(repository);
 
         decorator.findManyTargets(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).findManyTargets(Mockito.anyLong(), Mockito.anyString(),
-                Mockito.any(QuerySpec.class));
+        Mockito.verify(repository, Mockito.times(1)).findManyTargets(isNull(), isNull(), isNull());
 
         decorator.findOneTarget(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).findOneTarget(Mockito.anyLong(), Mockito.anyString(),
-                Mockito.any(QuerySpec.class));
+        Mockito.verify(repository, Mockito.times(1)).findOneTarget(isNull(), isNull(), isNull());
 
         decorator.setRelation(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).setRelation(Mockito.any(Schedule.class), Mockito.anyLong(),
-                Mockito.anyString());
+        Mockito.verify(repository, Mockito.times(1)).setRelation(isNull(), isNull(), isNull());
 
         decorator.addRelations(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).addRelations(Mockito.any(Schedule.class), Mockito.anyListOf(Long.class),
-                Mockito.anyString());
+        Mockito.verify(repository, Mockito.times(1)).addRelations(isNull(), isNull(), isNull());
 
         decorator.setRelations(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).setRelations(Mockito.any(Schedule.class), Mockito.anyListOf(Long.class),
-                Mockito.anyString());
+        Mockito.verify(repository, Mockito.times(1)).setRelations(isNull(), isNull(), isNull());
 
         decorator.removeRelations(null, null, null);
-        Mockito.verify(repository, Mockito.times(1)).removeRelations(Mockito.any(Schedule.class), Mockito.anyListOf(Long.class),
-                Mockito.anyString());
+        Mockito.verify(repository, Mockito.times(1)).removeRelations(isNull(), isNull(), isNull());
 
         decorator.getTargetResourceClass();
         Mockito.verify(repository, Mockito.times(1)).getTargetResourceClass();
