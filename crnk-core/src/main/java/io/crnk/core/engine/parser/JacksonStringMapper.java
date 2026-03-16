@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.io.IOException;
+import java.time.temporal.TemporalAccessor;
 
 public class JacksonStringMapper<T> implements StringMapper<T> {
 
@@ -38,6 +39,9 @@ public class JacksonStringMapper<T> implements StringMapper<T> {
 			return jsonNode.textValue();
 		}
 		if (jsonNode instanceof NumericNode) {
+			if (input instanceof TemporalAccessor) {
+				return input.toString();
+			}
 			return jsonNode.asText();
 		}
 

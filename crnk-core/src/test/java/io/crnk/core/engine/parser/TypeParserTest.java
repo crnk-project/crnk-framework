@@ -47,6 +47,18 @@ public class TypeParserTest {
 		assertThat(sut.getMapper(OffsetDateTime.class)).isInstanceOf(JacksonStringMapper.class);
 	}
 
+	@Test
+	public void checkOffsetDateTimeWithTimestampEnabledMapper() {
+		TypeParser typeParser = new TypeParser();
+		ObjectMapper timestampMapper = new ObjectMapper();
+		timestampMapper.registerModule(new JavaTimeModule());
+		typeParser.setObjectMapper(timestampMapper);
+
+		String text = "2018-09-23T16:12:43.154Z";
+		OffsetDateTime value = typeParser.parse(text, OffsetDateTime.class);
+		assertThat(typeParser.toString(value)).isEqualTo(text);
+	}
+
 
 	@Test
 	public void onStringShouldReturnString() {

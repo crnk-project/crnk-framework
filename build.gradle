@@ -179,31 +179,31 @@ gradle.beforeProject { Project project ->
 					// Uses credentials as described above, supports both regular and in memory signing.
 					signAllPublications()
 
-					pom {
-						name = "Crnk"
-						description = "A description of what my library does."
-						inceptionYear = "2020"
-						url = "https ://github.com/crnk-project/crnk-framework/"
-						licenses {
-							license {
-								name = "The Apache License, Version 2.0"
-								url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-								distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+						pom {
+							name = "Crnk Framework (ixshel fork)"
+							description = "ixshel-maintained fork of Crnk with Java 21, Gradle 8.5, and Spring Boot 3 / Jakarta support."
+							inceptionYear = "2020"
+							url = "https://github.com/ixshel/crnk-framework/"
+							licenses {
+								license {
+									name = "The Apache License, Version 2.0"
+									url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+									distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+								}
+							}
+							developers {
+								developer {
+									id = "ixshel"
+									name = "ixshel"
+									url = "https://github.com/ixshel/"
+								}
+							}
+							scm {
+								url = "https://github.com/ixshel/crnk-framework"
+								connection = "scm:git:git://github.com/ixshel/crnk-framework.git"
+								developerConnection = "scm:git:ssh://git@github.com/ixshel/crnk-framework.git"
 							}
 						}
-						developers {
-							developer {
-								id = "crnk"
-								name = "crnk"
-								url = "https://github.com/crnk-project/"
-							}
-						}
-						scm {
-							url = "https://github.com/crnk-project/crnk-framework"
-							connection = "scm:git:git://github.com/crnk-project/crnk-framework.git"
-							developerConnection = "scm:git:ssh://git@github.com/crnk-project/crnk-framework.git"
-						}
-					}
 				}
 			}
 
