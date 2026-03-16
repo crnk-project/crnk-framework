@@ -1,10 +1,7 @@
-# crnk.io - Crank up the development of RESTful applications!
+# crnk-framework (ixshel fork)
 
-[![Build Status](https://github.com/crnk-project/crnk-framework/workflows/build/badge.svg)](https://github.com/crnk-project/crnk-framework/actions)
-[![Gitter](https://img.shields.io/gitter/room/crkn-io/lobby.svg)](https://gitter.im/crnk-io/Lobby)
-[![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://github.com/crnk-project/crnk-framework/blob/master/LICENSE.txt)
-[![Coverage Status](https://coveralls.io/repos/github/crnk-project/crnk-framework/badge.svg?branch=master)](https://coveralls.io/github/crnk-project/crnk-framework?branch=master)
-[![maven-central](https://img.shields.io/maven-central/v/io.crnk/crnk-core)](https://search.maven.org/artifact/io.crnk/crnk-core)
+[![Build Status](https://github.com/ixshel/crnk-framework/actions/workflows/build.yml/badge.svg)](https://github.com/ixshel/crnk-framework/actions/workflows/build.yml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](LICENSE.txt)
 
 ## What is Crnk?
 
@@ -17,22 +14,24 @@ and more ensure that JSON API plays well together with the Java ecosystem. Have 
 [www.crnk.io](http://www.crnk.io) and the  [documentation](http://www.crnk.io/releases/stable/documentation/) for more detailed
 information.
 
-Release notes can be found in http://www.crnk.io/releases/.
+This repository is an `ixshel`-maintained fork of the original Crnk project. The fork keeps the original framework and
+module layout, while updating the supported baseline to Java 21, Gradle 8.5, and Spring Boot 3 / Jakarta compatibility.
 
 ## Repository
 
-Crnk Maven artifacts are available from jcenter/bintray: <a href="https://bintray.com/crnk-project">https://bintray.com/crnk-project</a>.
+Fork repository: https://github.com/ixshel/crnk-framework
 
-Note that due to reliability issues of MavenCentral we only rarely publish there.
+Historical Crnk references to Bintray/JCenter are obsolete and do not apply to this fork. Build the project locally
+or publish artifacts from your own release pipeline if you need fork-specific binaries.
 
 
 ## Requirements
 
-Crnk requires Java 1.8 or later and an SLF4J setup for logging.
+This fork requires Java 21 for build and test execution and an SLF4J setup for logging.
 
 ## Example
 
-See https://github.com/crnk-project/crnk-example/
+See the original example project: https://github.com/crnk-project/crnk-example/
 
 Gradle `settings.gradle` can look like:
 
@@ -41,13 +40,11 @@ gradle.beforeProject { Project project ->
     project.with {
         buildscript {
             repositories {
-                jcenter()
-                // maven { url 'https://dl.bintray.com/crnk-project/mavenLatest/' }
+                mavenCentral()
             }
         }
         repositories {
-            jcenter()
-            // maven { url 'https://dl.bintray.com/crnk-project/mavenLatest/' }
+            mavenCentral()
         }
     }
 }
@@ -62,11 +59,11 @@ dependencies {
 
     annotationProcessor 'io.crnk:crnk-gen-java'
 
-    implementation "io.crnk:crnk-setup-spring-boot2"
-    implementation "io.crnk:crnk-data-jpa"
+    implementation "io.crnk:crnk-setup-spring-boot3"
+    implementation "io.crnk:crnk-data-jpa-jakarta"
     implementation "io.crnk:crnk-data-facet"
     implementation "io.crnk:crnk-format-plain-json"
-    implementation "io.crnk:crnk-validation"
+    implementation "io.crnk:crnk-validation-jakarta"
     implementation "io.crnk:crnk-home"
     implementation "io.crnk:crnk-ui"
     implementation "io.crnk:crnk-operations"
@@ -162,10 +159,9 @@ public class PersonRepository extends JpaEntityRepositoryBase<PersonEntity, UUID
 }
 ```
 
-Crnk integrates well with many frameworks. Have a look
-at the  [documentation](http://www.crnk.io/releases/stable/documentation/)
-and carefully choose what you need. Don't hesitate to ask for help and suggest
-improvements!
+Crnk integrates well with many frameworks. The upstream documentation at
+[crnk.io](http://www.crnk.io/releases/stable/documentation/) is still a useful reference, but check this fork first for
+Java 21, Gradle 8.5, and Spring Boot 3 / Jakarta-specific behavior.
 
 ## Licensing
 
@@ -175,21 +171,22 @@ You can grab a copy of the license at http://www.apache.org/licenses/LICENSE-2.0
 
 ## Building from Source
 
-Crnk make use of Gradle for its build. To build the complete project run
+This fork uses Gradle for its build. To build the complete project run
 
-    gradlew clean build
+    ./gradlew clean build
 
-Note as part of the build a local Node installation is downloaded to build the frontend parts (crnk-ui) of the project.
+Use Java 21 when building or running the test suite.
+
+Note as part of the build a local Node installation is downloaded to build the frontend parts (`crnk-ui`) of the project.
 
 
 ## Links
 
-* [Homepage](http://www.crnk.io)
-* [Documentation](http://www.crnk.io/releases/stable/documentation/)
-* [Source code](https://github.com/crnk-project/crnk-framework/)
-* [Issue tracker](https://github.com/crnk-project/crnk-framework/issues)
-* [Forum](https://gitter.im/crnk-io/Lobby)
-* [Build](https://github.com/crnk-project/crnk-framework/actions)
+* [Fork repository](https://github.com/ixshel/crnk-framework/)
+* [Fork issue tracker](https://github.com/ixshel/crnk-framework/issues)
+* [Fork build](https://github.com/ixshel/crnk-framework/actions)
+* [Original Crnk homepage](http://www.crnk.io)
+* [Original Crnk documentation](http://www.crnk.io/releases/stable/documentation/)
 
 
 ## Endorsements
