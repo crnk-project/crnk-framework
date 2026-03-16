@@ -10,7 +10,7 @@ There are three main, orthogonal aspects of Crnk that need configuration:
 1. The integration into a web framework like JAXRS or the Servlet API to be able to process requests.
 2. The discovery of repositories, modules, exception mappers, etc. Usually by a dependency injection framework. But can also
    happen manually.
-3. The selection of third-party modules to reuse. For a list of modules provided by Crnk see the <modules> chapter.
+3. The selection of third-party modules to reuse. For a list of modules provided by Crnk see the <<modules>> chapter.
 
 The subsequent sections explain various possibilities resp. how to implement a custom one.
 The <<reactive>> chapter further outlines how to setup Crnk in an asynchronous/reactive setting.
@@ -441,7 +441,7 @@ Crnk. Every integration will provide access to it:
 auto configurations and properties. Some possibilities:
 
 - `getObjectMapper` allows access to the used Jackson instance.
-- `addModule` allows to add a module. See <modules> and <moduledev,module development> chapters for more information.
+- `addModule` allows to add a module. See <<modules>> and <<moduledev,module development>> chapters for more information.
 - `setServiceDiscovery` sets a custom service discovery mechanism.
 - `setPropertiesProvider` allows to set how properties are resolved.
 - `getQuerySpecDeserializer` and `setQuerySpecDeserializer` allows to reconfigure how parameters are parsed.
@@ -611,5 +611,4 @@ This module is currently in incubation. Please provide feedback.
 An example from the Spring Boot example application looks like:
 
 image:images/crnk_ui.png[]
-
 

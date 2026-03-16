@@ -14,12 +14,10 @@ buildscript {
 		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
 
 		classpath 'com.bmuschko:gradle-docker-plugin:6.7.0'
-		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.15.1'
+		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.34.0'
 	}
 }
 
-import com.vanniktech.maven.publish.JavaLibrary
-import com.vanniktech.maven.publish.JavadocJar
 import org.gradle.testing.jacoco.tasks.JacocoReport
 
 
@@ -139,7 +137,6 @@ gradle.beforeProject { Project project ->
 			}
 		}
 
-		// TODO gradle publishing to maven central?
 		if (!docs && !examples && !testProject && !legacyBraveProject) {
 			apply plugin: "jacoco"
 			jacoco {
@@ -173,7 +170,8 @@ gradle.beforeProject { Project project ->
 				group = GROUP_ID
 
 				mavenPublishing {
-					publishToMavenCentral("DEFAULT")
+					configureBasedOnAppliedPlugins()
+					publishToMavenCentral()
 
 					// Will only apply to non snapshot builds.
 					// Uses credentials as described above, supports both regular and in memory signing.
@@ -208,25 +206,6 @@ gradle.beforeProject { Project project ->
 			}
 
 			apply plugin: "com.vanniktech.maven.publish.base"
-
-			mavenPublishing {
-				// available options:
-				//   - JavaLibrary
-				//   - GradlePlugin
-				//   - AndroidLibrary
-				//   - KotlinJvm
-				//   - KotlinJs
-				//   - KotlinMultiplatform
-				// the first parameter configures the javadoc jar, available options:
-				//   - None
-				//   - Empty
-				//   - Javadoc
-				//   - Dokka("dokkaHtml") - the parameter is the name of the Dokka task
-				// second one is for whether to publish sources, optional, defaults to true (not supported for KotlinMultiplatform(
-				// AndroidLibrary has a third parameter for which variant to publish, defaults to "release"
-				configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
-			}
-
 
 			def releaseBuild = project.hasProperty('stable')
 

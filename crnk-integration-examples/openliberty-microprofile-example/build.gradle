@@ -2,7 +2,7 @@ apply plugin: 'war'
 apply plugin: 'liberty'
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 // configure liberty-gradle-plugin
@@ -11,7 +11,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'io.openliberty.tools:liberty-gradle-plugin:3.2'
+		classpath 'io.openliberty.tools:liberty-gradle-plugin:3.10.0'
 	}
 }
 

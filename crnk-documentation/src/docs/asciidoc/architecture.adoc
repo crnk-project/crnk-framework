@@ -1,5 +1,6 @@
 
 anchor:architecture[]
+anchor:architectures[]
 
 # Architecture
 
@@ -93,7 +94,6 @@ included into the application. Crnk comes with a number of modules on its own:
 Such modules can make use of filters, decorators, decoupled resources and relationships and various other features.
 Everything together fosters the use of the *composite pattern* where larger applications can be assembled from smaller
 parts, some from third-party modules and others from manually implemented ones.
-
 
 
 
