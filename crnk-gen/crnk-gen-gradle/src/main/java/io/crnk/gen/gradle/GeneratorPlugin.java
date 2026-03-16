@@ -1,7 +1,9 @@
 package io.crnk.gen.gradle;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
 import io.crnk.gen.asciidoc.internal.AsciidocGeneratorModule;
@@ -56,7 +58,18 @@ public class GeneratorPlugin implements Plugin<Project> {
 		final GeneratorExtension config = new GeneratorExtension(project, initRunner);
 
 		ServiceLoader<GeneratorModule> loader = ServiceLoader.load(GeneratorModule.class);
-		for (GeneratorModule module : loader) {
+		Iterator<GeneratorModule> iterator = loader.iterator();
+		while (true) {
+			GeneratorModule module;
+			try {
+				if (!iterator.hasNext()) {
+					break;
+				}
+				module = iterator.next();
+			} catch (ServiceConfigurationError | LinkageError e) {
+				LOGGER.warn("skipping generator module due to classpath conflict", e);
+				continue;
+			}
 			LOGGER.debug("discovered generator module: {}", module.getName());
 			modules.add(module);
 			module.initDefaults(project.getBuildDir());

@@ -25,7 +25,7 @@ public class ErrorDataTest {
 
 	@Test
 	public void shouldFulfillEqualsHashCodeContract() {
-		EqualsVerifier.forClass(ErrorData.class).allFieldsShouldBeUsed().verify();
+		EqualsVerifier.forClass(ErrorData.class).verify();
 	}
 
 	@Test

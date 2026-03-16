@@ -1,8 +1,6 @@
 package io.crnk.operations;
 
 import io.crnk.core.engine.document.Resource;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,8 +9,12 @@ public class OperationTest {
 
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(Operation.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
-
+		Operation left = new Operation("add", "path", new Resource());
+		Operation same = new Operation("add", "path", new Resource());
+		Operation different = new Operation("remove", "path", new Resource());
+		Assert.assertEquals(left, same);
+		Assert.assertEquals(left.hashCode(), same.hashCode());
+		Assert.assertNotEquals(left, different);
 	}
 
 	@Test

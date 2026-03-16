@@ -221,6 +221,9 @@ public class TSGenerator {
 
 		@Override
 		public String getDirectory(MetaElement meta) {
+			if (meta.getId() == null) {
+				throw new UnsupportedOperationException("meta element id must be set");
+			}
 			String idPath = meta.getId().substring(0, meta.getId().lastIndexOf('.'));
 			if (idPath.startsWith(ResourceMetaProvider.DEFAULT_ID_PREFIX)) {
 				return idPath.substring(Math.min(ResourceMetaProvider.DEFAULT_ID_PREFIX.length() + 1, idPath.length()));
@@ -260,6 +263,9 @@ public class TSGenerator {
 
 		@Override
 		public String getNpmPackage(MetaElement meta) {
+			if (meta.getId() == null) {
+				throw new UnsupportedOperationException("meta element id must be set");
+			}
 			String idPath = meta.getId().substring(0, meta.getId().lastIndexOf('.'));
 			if (idPath.startsWith(ResourceMetaProvider.DEFAULT_ID_PREFIX)) {
 				return config.getNpm().getPackageName();
