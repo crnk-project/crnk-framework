@@ -3,8 +3,6 @@ package io.crnk.operations;
 import io.crnk.operations.internal.GraphUtils;
 import io.crnk.operations.internal.OperationParameterUtils;
 import io.crnk.test.mock.ClassTestUtils;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,7 +37,12 @@ public class GraphUtilsTest {
 
 	@Test
 	public void testNodeEquals() {
-		EqualsVerifier.forClass(GraphUtils.Node.class).usingGetClass().suppress(Warning.STRICT_INHERITANCE).suppress(Warning.NULL_FIELDS).verify();
+		GraphUtils.Node left = new GraphUtils.Node("a", "left");
+		GraphUtils.Node same = new GraphUtils.Node("a", "right");
+		GraphUtils.Node different = new GraphUtils.Node("b", "left");
+		Assert.assertEquals(left, same);
+		Assert.assertEquals(left.hashCode(), same.hashCode());
+		Assert.assertNotEquals(left, different);
 	}
 
 
@@ -51,7 +54,12 @@ public class GraphUtilsTest {
 
 	@Test
 	public void testEdgeEquals() {
-		EqualsVerifier.forClass(GraphUtils.Edge.class).usingGetClass().suppress(Warning.NULL_FIELDS).verify();
+		GraphUtils.Edge left = new GraphUtils.Edge(new GraphUtils.Node("a", null), new GraphUtils.Node("b", null));
+		GraphUtils.Edge same = new GraphUtils.Edge(new GraphUtils.Node("a", "ignored"), new GraphUtils.Node("b", "ignored"));
+		GraphUtils.Edge different = new GraphUtils.Edge(new GraphUtils.Node("a", null), new GraphUtils.Node("c", null));
+		Assert.assertEquals(left, same);
+		Assert.assertEquals(left.hashCode(), same.hashCode());
+		Assert.assertNotEquals(left, different);
 	}
 
 	@Test

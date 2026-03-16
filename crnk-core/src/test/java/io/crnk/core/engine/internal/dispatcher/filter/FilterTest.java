@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -82,7 +82,7 @@ public class FilterTest {
 		// THEN
 		verify(filter).filter(captor.capture(), any(DocumentFilterChain.class));
 		verify(collectionGetController, times(1))
-				.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(Document.class));
+				.handle(any(JsonPath.class), any(QueryAdapter.class), any(Document.class));
 		verify(filter, times(1)).filter(any(DocumentFilterContext.class), any(DocumentFilterChain.class));
 
 		DocumentFilterContext value = captor.getValue();

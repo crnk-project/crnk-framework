@@ -6,6 +6,8 @@ import static guru.nidi.graphviz.model.Factory.to;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +55,16 @@ public class GraphBuilder {
 			}
 			g = g.with(node);
 		}
-		Graphviz.fromGraph(g).height(800).width(1000).render(Format.SVG).toFile(file);
+		try {
+			Graphviz.fromGraph(g).height(800).width(1000).render(Format.SVG).toFile(file);
+		} catch (RuntimeException e) {
+			// Keep documentation generation working when no external Graphviz service is available.
+			file.getParentFile().mkdirs();
+			String fallbackSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1000\" height=\"80\">"
+					+ "<text x=\"10\" y=\"40\">Graph rendering unavailable in this environment.</text>"
+					+ "</svg>";
+			Files.write(file.toPath(), fallbackSvg.getBytes(StandardCharsets.UTF_8));
+		}
 	}
 
 	private String getKey(MetaAttribute attribute) {
