@@ -100,7 +100,7 @@ public class Document implements MetaContainer, LinksContainer {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(data, errors, included, links, meta);
+		return Objects.hash(data, errors, included, links, meta, jsonapi);
 	}
 
 	@Override
@@ -110,8 +110,8 @@ public class Document implements MetaContainer, LinksContainer {
 		}
 		Document other = (Document) obj;
 		return Objects.equals(data, other.data) && Objects.equals(errors, other.errors) // NOSONAR
-				&& Objects.equals(included, other.included) && Objects.equals(meta, other.meta) && Objects
-				.equals(links, other.links);
+				&& Objects.equals(included, other.included) && Objects.equals(meta, other.meta)
+				&& Objects.equals(links, other.links) && Objects.equals(jsonapi, other.jsonapi);
 	}
 
 	@JsonIgnore

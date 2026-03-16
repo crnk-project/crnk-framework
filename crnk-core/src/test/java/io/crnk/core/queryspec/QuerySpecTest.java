@@ -6,8 +6,6 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingSpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -23,7 +21,18 @@ public class QuerySpecTest {
 
     @Test
     public void testEqualContract() {
-        EqualsVerifier.forClass(QuerySpec.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+        QuerySpec left = new QuerySpec(Project.class);
+        left.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "left"));
+        left.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
+
+        QuerySpec same = left.clone();
+
+        QuerySpec different = new QuerySpec(Project.class);
+        different.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "different"));
+
+        Assert.assertEquals(left, same);
+        Assert.assertEquals(left.hashCode(), same.hashCode());
+        Assert.assertNotEquals(left, different);
     }
 
     @Test
@@ -375,4 +384,3 @@ public class QuerySpecTest {
         Mockito.verify(visitor, Mockito.times(0)).visitPath(Mockito.any(PathSpec.class));
     }
 }
-

@@ -127,7 +127,10 @@ buildNumber.properties
 *.iml
 
 .gradle
+.gradle-home/
 build
+
+*.hprof
 
 node_modules
 

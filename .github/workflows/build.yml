@@ -9,14 +9,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Ubuntu Temurin Java 8
+    name: Ubuntu Temurin Java 21
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Setup JDK
       uses: actions/setup-java@v3
       with:
-        java-version: '8'
+        java-version: '21'
         distribution: 'temurin'
     - name: Set Gradle Wrapper Permissions
       run: chmod +x gradlew

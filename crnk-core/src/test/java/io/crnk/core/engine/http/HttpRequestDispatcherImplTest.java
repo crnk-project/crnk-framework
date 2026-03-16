@@ -48,9 +48,10 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -169,7 +170,7 @@ public class HttpRequestDispatcherImplTest {
         sut.process(requestContext);
 
         verify(controller, times(1))
-                .handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(Document.class));
+                .handle(any(JsonPath.class), any(QueryAdapter.class), isNull());
     }
 
     @Test
@@ -195,7 +196,7 @@ public class HttpRequestDispatcherImplTest {
 
         // THEN
         verify(controller, times(1))
-                .handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(Document.class));
+                .handle(any(JsonPath.class), any(QueryAdapter.class), isNull());
     }
 
     @Test
@@ -221,7 +222,7 @@ public class HttpRequestDispatcherImplTest {
 
         // THEN
         verify(controller, times(1))
-                .handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(Document.class));
+                .handle(any(JsonPath.class), any(QueryAdapter.class), isNull());
     }
 
     @Ignore // FIXME reasonable action contributions

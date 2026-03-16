@@ -13,14 +13,15 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
+import org.mockito.Mockito;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,12 +38,16 @@ public class PagingSpecUrlBuilderTest {
 
     @Before
     public void setUp() {
+        ResourceInformation resourceInformation = mock(ResourceInformation.class);
+        RegistryEntry registryEntry = mock(RegistryEntry.class);
+        Mockito.when(resourceInformation.getImplementationClass()).thenReturn((Class) Task.class);
+        when(registryEntry.getResourceInformation()).thenReturn(resourceInformation);
         when(resourceRegistry.getResourceUrl(any(QueryContext.class), any(ResourceInformation.class), any())).thenReturn("tasks");
-        when(resourceRegistry.getEntry(any(Class.class))).thenReturn(mock(RegistryEntry.class));
+        when(resourceRegistry.getEntry(any(Class.class))).thenReturn(registryEntry);
         when(repositoryRequestSpec.getId()).thenReturn(1);
-        when(repositoryRequestSpec.getRelationshipField()).thenReturn(
-                new ResourceFieldImpl("any", "any", ResourceFieldType.ATTRIBUTE, String.class, String.class, null)
-        );
+        ResourceFieldImpl relationshipField = new ResourceFieldImpl("any", "any", ResourceFieldType.ATTRIBUTE, String.class, String.class, null);
+        relationshipField.setResourceInformation(resourceInformation);
+        when(repositoryRequestSpec.getRelationshipField()).thenReturn(relationshipField);
 
         moduleRegistry = new ModuleRegistry();
         moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());

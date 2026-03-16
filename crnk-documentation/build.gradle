@@ -1,9 +1,11 @@
-apply plugin: 'org.asciidoctor.convert'
-
-
+plugins {
+	id 'org.asciidoctor.jvm.convert' version '4.0.2'
+	id 'org.asciidoctor.jvm.pdf' version '4.0.2'
+}
 
 asciidoctor {
-	backends = ['html5', 'pdf']
+	outputDir = file("${project.buildDir}/asciidoc/html5")
+	baseDirFollowsSourceDir()
 	attributes 'source-highlighter': 'coderay'
 	sources {
 		include 'index.adoc'
@@ -11,7 +13,18 @@ asciidoctor {
 	}
 }
 
-tasks.assemble.dependsOn 'asciidoctor'
+asciidoctorPdf {
+	outputDir = file("${project.buildDir}/asciidoc/pdf")
+	baseDirFollowsSourceDir()
+	attributes 'source-highlighter': 'coderay'
+	sources {
+		include 'index.adoc'
+		include 'cheatsheet.adoc'
+	}
+}
+
+tasks.assemble.dependsOn tasks.asciidoctor
+tasks.assemble.dependsOn tasks.asciidoctorPdf
 tasks.assemble.dependsOn ':crnk-integration-examples:spring-boot-example:assemble'
 
 apply plugin: 'org.ajoberstar.git-publish'

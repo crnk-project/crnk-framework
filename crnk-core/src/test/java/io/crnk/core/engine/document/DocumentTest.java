@@ -1,8 +1,10 @@
 package io.crnk.core.engine.document;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.utils.Nullable;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -18,7 +20,14 @@ public class DocumentTest {
 
 	@Test
 	public void testDocumentEqualsContract() {
-		EqualsVerifier.forClass(Document.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		ObjectNode redNode = JsonNodeFactory.instance.objectNode().put("color", "red");
+		ObjectNode blueNode = JsonNodeFactory.instance.objectNode().put("color", "blue");
+		EqualsVerifier.forClass(Document.class)
+				.usingGetClass()
+				.suppress(Warning.NONFINAL_FIELDS)
+				.withPrefabValues(ObjectNode.class, redNode, blueNode)
+				.withPrefabValues(JsonNode.class, redNode, blueNode)
+				.verify();
 	}
 
 	@Test
