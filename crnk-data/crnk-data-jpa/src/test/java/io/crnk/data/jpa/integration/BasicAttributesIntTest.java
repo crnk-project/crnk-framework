@@ -165,7 +165,7 @@ public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 		ResourceRepository<BasicAttributesTestEntity, Serializable> repo =
 				client.getRepositoryForType(BasicAttributesTestEntity.class);
 
-		OffsetDateTime now = OffsetDateTime.now();
+		OffsetDateTime now = OffsetDateTime.parse("2024-01-15T10:15:30+00:00");
 
 		BasicAttributesTestEntity test1 = new BasicAttributesTestEntity();
 		test1.setId(1L);
