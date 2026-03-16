@@ -95,6 +95,7 @@ Have a look at, for example, the QuerySpecClientTest to see more examples of how
 Crnk client and server share the URL handling. `QuerySpecUrlMapper` performs the mapping of HTTP request parameters to QuerySpec.
 For more information see <<urlmapper,url mapping>>.
 
+anchor:modules[]
 ## Modules
 
 `CrnkClient` can be extended by modules:
@@ -222,4 +223,3 @@ include::../../../../crnk-client/src/test/java/io/crnk/client/action/JsonApiActi
 WARNING: Due to limited configurability of the Jersey Proxies it is currently not possible to reuse the same HTTP connections
 for both types of calls. We attempt to address that in the future. Be aware of this when you, for example, add further
 request headers (like security), as it has to be done in two places (unfortunately).
-

@@ -1,5 +1,6 @@
 
 anchor:operations[]
+anchor:operations_module[]
 
 # Bulk Updates with Operations Module
 
@@ -176,5 +177,4 @@ The limitations are expected to be addressed at some point as well, contribution
 
 There is experimental support for <<resource_bulk_repository,BulkResourceRepository>>. If multiple changes to the
 same repository are detected, it can make use of the appropriate bulk methods.
-
 

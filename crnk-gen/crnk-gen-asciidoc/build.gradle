@@ -19,6 +19,7 @@ dependencies {
 
 asciidoctor {
     sourceDir = file('build/tmp/asciidoc/generated/sources/asciidoc')
+    baseDirFollowsSourceDir()
     outputDir = file("${project.buildDir}/asciidoc/html5")
     attributes 'source-highlighter': 'coderay'
     sources {

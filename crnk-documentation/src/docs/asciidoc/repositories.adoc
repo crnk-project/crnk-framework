@@ -25,7 +25,7 @@ anchor:resource_repository[]
 The interface takes two generic arguments:
 
 1. The type of a resource. Typically this is a plain Java Bean making use of the JSON:API annotations. But may also be something
-  entirely different (see <<architectures> and <<modules>>). One other example is the
+  entirely different (see <<architectures>> and <<modules>>). One other example is the
   `io.crnk.core.engine.document.Resource` class used to setup dynamically types repositories.
 2. The type of the resource’s identifier. Typically a primitive type like `String`, `long` or `UUID`. But if necessary
   can also be a more complex type that serializes to a URL-friendly String.
@@ -1011,4 +1011,3 @@ externally on the JSON:API endpoint. There are different use cases for this:
 
 - Have a look at the https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-microservice-example[micro-service example application] to see how remote repositories can be linked to local ones.
 - <<nested_resources,nested resources>> can be made accessible only through their parent, such as `http://example.com/posts/1/comments/2` and no longer `http://example.com/comments`
-
