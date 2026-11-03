@@ -32,9 +32,9 @@ task preparePages {
 	doLast {
 		def pagesDir = file("${project.buildDir}/pages")
 		delete pagesDir
-		copy { from("${project.buildDir}/asciidoc/html5"); into("${pagesDir}/releases/latest/documentation") }
+		copy { from("${project.buildDir}/docs/asciidoc"); into("${pagesDir}/releases/latest/documentation") }
 		copy { from("${project.projectDir}/src/docs/asciidoc/images"); into("${pagesDir}/releases/latest/documentation/images") }
-		copy { from("${project.buildDir}/asciidoc/pdf") { include '*.pdf' }; into("${pagesDir}/releases/latest") }
+		copy { from("${project.buildDir}/docs/asciidocPdf") { include '*.pdf'; rename { name -> name == 'index.pdf' ? 'crnk.pdf' : name } }; into("${pagesDir}/releases/latest") }
 		copy { from("${project.projectDir}/src/docs/releases") { include '**/info.html', '**/*.png' }; into("${pagesDir}/releases") }
 		copy { from(rootProject.file('crnk-web')) { include 'index.html', 'features/**', 'examples/**', 'related/**', 'releases/index.html', 'releases/v*/**', 'images/**', 'crnk.css', 'crnk.js', 'prettify.js', 'CNAME' }; into pagesDir }
 		// GitHub Pages project sites are served below /<repository>, unlike the old custom domain.
@@ -65,13 +65,13 @@ gitPublish {
 	repoDir = file("$buildDir/website/")
 
 	contents {
-		from("${project.buildDir}/asciidoc/html5") {
+		from("${project.buildDir}/docs/asciidoc") {
 			into('releases/latest/documentation')
 		}
 		from("${project.projectDir}/src/docs/asciidoc/images") {
 			into('releases/latest/documentation/images')
 		}
-		from("${project.buildDir}/asciidoc/pdf") {
+		from("${project.buildDir}/docs/asciidocPdf") {
 			into('releases/latest')
 			include "**.pdf"
 
