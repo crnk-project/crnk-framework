@@ -5,6 +5,7 @@ apply plugin: 'org.asciidoctor.convert'
 asciidoctor {
 	backends = ['html5', 'pdf']
 	attributes 'source-highlighter': 'coderay'
+	attributes 'toc': 'left', 'toclevels': '3', 'sectanchors': '', 'icons': 'font'
 	sources {
 		include 'index.adoc'
 		include 'cheatsheet.adoc'
@@ -13,6 +14,30 @@ asciidoctor {
 
 tasks.assemble.dependsOn 'asciidoctor'
 tasks.assemble.dependsOn ':crnk-integration-examples:spring-boot-example:assemble'
+
+// Assemble a standalone Pages site while retaining the historical release URLs.
+task preparePages {
+	dependsOn 'asciidoctor'
+	doLast {
+		def pagesDir = file("${project.buildDir}/pages")
+		delete pagesDir
+		copy { from("${project.buildDir}/asciidoc/html5"); into("${pagesDir}/releases/latest/documentation") }
+		copy { from("${project.projectDir}/src/docs/asciidoc/images"); into("${pagesDir}/releases/latest/documentation/images") }
+		copy { from("${project.buildDir}/asciidoc/pdf") { include '*.pdf' }; into("${pagesDir}/releases/latest") }
+		copy { from("${project.projectDir}/src/docs/releases") { include '**/info.html', '**/*.png' }; into("${pagesDir}/releases") }
+		copy { from(rootProject.file('crnk-web')) { include 'index.html', 'features/**', 'examples/**', 'related/**', 'images/**', 'crnk.css', 'crnk.js', 'prettify.js', 'CNAME' }; into pagesDir }
+		def latestIndex = file("${pagesDir}/releases/latest/index.html")
+		if (!latestIndex.exists()) {
+			def template = file("${projectDir}/src/docs/template/release.html").text
+			latestIndex.parentFile.mkdirs()
+			latestIndex.text = template.replace('${content}', '<div class="section"><div class="section-content"><h3>Latest</h3><p>Version: ' + project.version + '</p><p><a href="documentation/">Documentation</a> (<a href="crnk.pdf">PDF</a>)</p></div></div>')
+		}
+		def stableDir = file("${pagesDir}/releases/stable")
+		if (!file("${stableDir}/index.html").exists()) {
+			copy { from latestIndex.parentFile; into stableDir }
+		}
+	}
+}
 
 apply plugin: 'org.ajoberstar.git-publish'
 // see https://github.com/ajoberstar/gradle-git-publish
@@ -26,10 +51,16 @@ gitPublish {
 		from("${project.buildDir}/asciidoc/html5") {
 			into('releases/latest/documentation')
 		}
+		from("${project.projectDir}/src/docs/asciidoc/images") {
+			into('releases/latest/documentation/images')
+		}
 		from("${project.buildDir}/asciidoc/pdf") {
 			into('releases/latest')
 			include "**.pdf"
 
+		}
+		from("${project.projectDir}/src/docs/asciidoc/images") {
+			into('releases/latest/documentation/images')
 		}
 		rename { String fileName ->
 			fileName.replace("index.pdf", "crnk.pdf")
