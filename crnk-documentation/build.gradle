@@ -1,9 +1,20 @@
-apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'org.asciidoctor.jvm.convert'
+apply plugin: 'org.asciidoctor.jvm.pdf'
 
 
 
 asciidoctor {
-	backends = ['html5', 'pdf']
+	baseDir = file('src/docs/asciidoc')
+	attributes 'source-highlighter': 'coderay'
+	attributes 'toc': 'left', 'toclevels': '3', 'sectanchors': '', 'icons': 'font'
+	sources {
+		include 'index.adoc'
+		include 'cheatsheet.adoc'
+	}
+}
+
+asciidoctorPdf {
+	baseDir = file('src/docs/asciidoc')
 	attributes 'source-highlighter': 'coderay'
 	attributes 'toc': 'left', 'toclevels': '3', 'sectanchors': '', 'icons': 'font'
 	sources {
@@ -17,7 +28,7 @@ tasks.assemble.dependsOn ':crnk-integration-examples:spring-boot-example:assembl
 
 // Assemble a standalone Pages site while retaining the historical release URLs.
 task preparePages {
-	dependsOn 'asciidoctor'
+	dependsOn 'asciidoctor', 'asciidoctorPdf'
 	doLast {
 		def pagesDir = file("${project.buildDir}/pages")
 		delete pagesDir

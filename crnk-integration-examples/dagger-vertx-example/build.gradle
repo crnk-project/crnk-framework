@@ -10,7 +10,7 @@ sourceSets {
 }
 
 configurations {
-    shrinked.extendsFrom compile
+    shrinked.extendsFrom implementation
     shrinked.extendsFrom runtime
 }
 
@@ -31,32 +31,32 @@ sourceSets {
 }
 
 dependencies {
-    compile project(':crnk-setup:crnk-setup-vertx')
-    compile project(':crnk-home')
-    compile project(':crnk-security')
-    compile project(':crnk-data:crnk-data-facet')
-    compile project(':crnk-data:crnk-data-jpa')
-    compile project(':crnk-validation')
-    compile project(':crnk-format:crnk-format-plain-json')
+    api project(':crnk-setup:crnk-setup-vertx')
+    api project(':crnk-home')
+    api project(':crnk-security')
+    api project(':crnk-data:crnk-data-facet')
+    api project(':crnk-data:crnk-data-jpa')
+    api project(':crnk-validation')
+    api project(':crnk-format:crnk-format-plain-json')
 
-    compile 'javax:javaee-api:7.0'
-    compile 'org.hibernate:hibernate-validator:5.2.1.Final'
-    compile 'org.hibernate:hibernate-core:5.2.10.Final'
-    compile 'org.hibernate:hibernate-entitymanager:5.2.10.Final'
-    compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
-    compile 'com.h2database:h2:1.4.187'
+    api 'javax:javaee-api:7.0'
+    api 'org.hibernate:hibernate-validator:5.2.1.Final'
+    api 'org.hibernate:hibernate-core:5.2.10.Final'
+    api 'org.hibernate:hibernate-entitymanager:5.2.10.Final'
+    api 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+    api 'com.h2database:h2:1.4.187'
 
-    compile 'io.vertx:vertx-auth-common:3.7.1'
+    api 'io.vertx:vertx-auth-common:3.7.1'
 
     // add in the future
-    // compile project(':crnk-meta')
-    // compile project(':crnk-operations')
-    // compile project(':crnk-ui')
-    // compile project(':crnk-validation')
+    // api project(':crnk-meta')
+    // api project(':crnk-operations')
+    // api project(':crnk-ui')
+    // api project(':crnk-validation')
 
-    compile 'ch.qos.logback:logback-classic:1.2.3'
-    compile 'javax.inject:javax.inject:1'
-    compile 'com.google.dagger:dagger:2.16'
+    api 'ch.qos.logback:logback-classic:1.2.3'
+    api 'javax.inject:javax.inject:1'
+    api 'com.google.dagger:dagger:2.16'
 
     annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
 }
@@ -79,7 +79,7 @@ if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
         configuration 'proguard.txt'
 
         injars "$buildDir/libs/dagger-vertx-example-${version}.jar"
-        injars configurations.compile.files
+        injars configurations.compileClasspath.files
         outjars "$buildDir/libs/dagger-vertx-example-min-${version}.jar"
     }
 

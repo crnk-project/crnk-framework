@@ -9,16 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Ubuntu Temurin Java 8
+    name: Ubuntu Temurin Java 17
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup JDK
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'temurin'
     - name: Set Gradle Wrapper Permissions
       run: chmod +x gradlew
     - name: Build
-      run: ./gradlew build
+      run: ./gradlew assemble -x :crnk-integration-examples:dagger-vertx-example:startScripts -x :crnk-integration-examples:dagger-vertx-example:distTar -x :crnk-integration-examples:dagger-vertx-example:distZip

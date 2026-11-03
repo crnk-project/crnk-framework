@@ -6,8 +6,8 @@ buildscript {
 		def depMgmtVersion = versions['dependency.management.plugin.version']
 
 		classpath "io.spring.gradle:dependency-management-plugin:${depMgmtVersion}"
-		classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.9.2'
-		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
+		classpath 'org.asciidoctor:asciidoctor-gradle-jvm:4.0.2'
+		classpath 'org.asciidoctor:asciidoctor-gradle-jvm-pdf:4.0.2'
 		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
 		classpath 'org.ajoberstar.git-publish:gradle-git-publish:3.0.1'
 		classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
@@ -15,7 +15,6 @@ buildscript {
 		// classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
 		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
 
-		classpath "com.github.rmee:jdk-bootstrap:${RMEE_GRADLE_VERSION}"
 		classpath 'com.bmuschko:gradle-docker-plugin:6.7.0'
 		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.15.1'
 	}
@@ -26,12 +25,7 @@ import com.vanniktech.maven.publish.JavadocJar
 
 
 wrapper {
-	gradleVersion = '6.9.2'
-}
-
-apply plugin: 'jdk-bootstrap'
-jdk {
-	useAdoptOpenJdk8(JDK_VERSION)
+	gradleVersion = '7.6.4'
 }
 
 // note that a production build creates javadoc, sources jars and signatures undesired during development
@@ -73,20 +67,20 @@ gradle.beforeProject { Project project ->
 		def genGradleProject = project.name.contains('crnk-gen-gradle')
 
 		if (!docs) {
-			apply plugin: 'java'
+			apply plugin: 'java-library'
 
-			sourceCompatibility = 1.8
-			targetCompatibility = 1.8
+			sourceCompatibility = 17
+			targetCompatibility = 17
 
 			if (!bom) {
 				dependencies {
-					testCompile group: 'junit', name: 'junit', version: '4.12'
-					testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
-					testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
+					testImplementation group: 'junit', name: 'junit', version: '4.12'
+					testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.11.0'
+					testImplementation group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
 					// https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
-					compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
+					api group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
 					// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
-					compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
+					api group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
 				}
 
 				test {
@@ -128,7 +122,7 @@ gradle.beforeProject { Project project ->
 		if (!docs && !examples && !testProject && !legacyBraveProject) {
 			apply plugin: "jacoco"
 			jacoco {
-				toolVersion = "0.8.5"
+				toolVersion = "0.8.12"
 			}
 
 			rootProject.tasks.jacocoMerge.executionData tasks.withType(Test)
